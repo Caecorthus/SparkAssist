@@ -1,6 +1,12 @@
 {
   "screen.sparkassist.event_sound_options": "事件音量",
-  "option.sparkassist.event_sound_volume.value": "事件音量：%s%%",
+  "option.sparkassist.event_sound_volume.value": "%s：%s%%",
+  "option.sparkassist.event_sound_volume.psycho_mode": "疯魔模式",
+  "option.sparkassist.event_sound_volume.corrupt_cop_moment": "黑警时刻",
+  "option.sparkassist.event_sound_volume.jester_moment": "小丑时刻",
+  "option.sparkassist.event_sound_volume.train_outside": "列车户外声",
+  "option.sparkassist.event_sound_volume.train_horn": "列车呼啸声",
+  "option.sparkassist.event_sound_volume.pig_chase": "皮革追杀",
   "option.sparkassist.instinct_key_mode": "本能键",
   "option.sparkassist.instinct_key_mode.hold": "按住",
   "option.sparkassist.instinct_key_mode.toggle": "切换",

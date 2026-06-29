@@ -4,27 +4,45 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.JsonObject;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
+import dev.caecorthus.sparkassist.sound.EventSoundGroup;
 import org.junit.jupiter.api.Test;
 
 class SparkAssistConfigTest {
     @Test
-    void defaultsUseHoldInstinctAndFullEventVolume() {
+    void defaultsUseHoldInstinctAndFullPerEventVolumes() {
         SparkAssistConfig config = SparkAssistConfig.defaults();
 
         assertEquals(InstinctKeyMode.HOLD, config.instinctKeyMode());
-        assertEquals(1.0D, config.eventSoundVolume());
+        for (EventSoundGroup group : EventSoundGroup.values()) {
+            assertEquals(1.0D, config.eventSoundVolume(group));
+        }
     }
 
     @Test
     void jsonRoundTripKeepsSupportedOptions() {
         SparkAssistConfig config = SparkAssistConfig.defaults();
         config.setInstinctKeyMode(InstinctKeyMode.TOGGLE);
-        config.setEventSoundVolume(0.35D);
+        config.setEventSoundVolume(EventSoundGroup.PIG_CHASE, 0.35D);
+        config.setEventSoundVolume(EventSoundGroup.TRAIN_HORN, 0.6D);
 
         SparkAssistConfig roundTrip = SparkAssistConfig.fromJson(config.toJson());
 
         assertEquals(InstinctKeyMode.TOGGLE, roundTrip.instinctKeyMode());
-        assertEquals(0.35D, roundTrip.eventSoundVolume());
+        assertEquals(0.35D, roundTrip.eventSoundVolume(EventSoundGroup.PIG_CHASE));
+        assertEquals(0.6D, roundTrip.eventSoundVolume(EventSoundGroup.TRAIN_HORN));
+        assertEquals(1.0D, roundTrip.eventSoundVolume(EventSoundGroup.PSYCHO_MODE));
+    }
+
+    @Test
+    void legacyGlobalEventVolumeMigratesToAllEventGroups() {
+        JsonObject json = new JsonObject();
+        json.addProperty("eventSoundVolume", 0.25D);
+
+        SparkAssistConfig config = SparkAssistConfig.fromJson(json);
+
+        for (EventSoundGroup group : EventSoundGroup.values()) {
+            assertEquals(0.25D, config.eventSoundVolume(group));
+        }
     }
 
     @Test
@@ -36,6 +54,8 @@ class SparkAssistConfigTest {
         SparkAssistConfig config = SparkAssistConfig.fromJson(json);
 
         assertEquals(InstinctKeyMode.HOLD, config.instinctKeyMode());
-        assertEquals(1.0D, config.eventSoundVolume());
+        for (EventSoundGroup group : EventSoundGroup.values()) {
+            assertEquals(1.0D, config.eventSoundVolume(group));
+        }
     }
 }

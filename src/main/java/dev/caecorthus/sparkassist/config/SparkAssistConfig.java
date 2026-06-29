@@ -1,6 +1,9 @@
 package dev.caecorthus.sparkassist.config;
 
 import com.google.gson.JsonObject;
+import dev.caecorthus.sparkassist.sound.EventSoundGroup;
+import java.util.EnumMap;
+import net.minecraft.util.TranslatableOption;
 
 /**
  * Small client config model for SparkAssist.
@@ -9,9 +12,14 @@ import com.google.gson.JsonObject;
 public final class SparkAssistConfig {
     private static final String INSTINCT_KEY_MODE = "instinctKeyMode";
     private static final String EVENT_SOUND_VOLUME = "eventSoundVolume";
+    private static final String EVENT_SOUND_VOLUMES = "eventSoundVolumes";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
-    private double eventSoundVolume = 1.0D;
+    private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
+
+    private SparkAssistConfig() {
+        setAllEventSoundVolumes(1.0D);
+    }
 
     public static SparkAssistConfig defaults() {
         return new SparkAssistConfig();
@@ -26,7 +34,16 @@ public final class SparkAssistConfig {
             config.setInstinctKeyMode(InstinctKeyMode.fromSerialized(json.get(INSTINCT_KEY_MODE).getAsString()));
         }
         if (json.has(EVENT_SOUND_VOLUME)) {
-            config.setEventSoundVolume(json.get(EVENT_SOUND_VOLUME).getAsDouble());
+            config.setAllEventSoundVolumes(json.get(EVENT_SOUND_VOLUME).getAsDouble());
+        }
+        if (json.has(EVENT_SOUND_VOLUMES) && json.get(EVENT_SOUND_VOLUMES).isJsonObject()) {
+            JsonObject eventVolumes = json.getAsJsonObject(EVENT_SOUND_VOLUMES);
+            for (String key : eventVolumes.keySet()) {
+                EventSoundGroup group = EventSoundGroup.fromSerialized(key);
+                if (group != null) {
+                    config.setEventSoundVolume(group, eventVolumes.get(key).getAsDouble());
+                }
+            }
         }
         return config;
     }
@@ -34,7 +51,11 @@ public final class SparkAssistConfig {
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty(INSTINCT_KEY_MODE, this.instinctKeyMode.serializedName());
-        json.addProperty(EVENT_SOUND_VOLUME, this.eventSoundVolume);
+        JsonObject eventVolumes = new JsonObject();
+        for (EventSoundGroup group : EventSoundGroup.values()) {
+            eventVolumes.addProperty(group.serializedName(), eventSoundVolume(group));
+        }
+        json.add(EVENT_SOUND_VOLUMES, eventVolumes);
         return json;
     }
 
@@ -46,12 +67,25 @@ public final class SparkAssistConfig {
         this.instinctKeyMode = instinctKeyMode == null ? InstinctKeyMode.HOLD : instinctKeyMode;
     }
 
-    public double eventSoundVolume() {
-        return eventSoundVolume;
+    public double eventSoundVolume(EventSoundGroup group) {
+        if (group == null) {
+            return 1.0D;
+        }
+        return eventSoundVolumes.getOrDefault(group, 1.0D);
     }
 
-    public void setEventSoundVolume(double eventSoundVolume) {
-        this.eventSoundVolume = clampVolume(eventSoundVolume);
+    public void setEventSoundVolume(EventSoundGroup group, double eventSoundVolume) {
+        if (group == null) {
+            return;
+        }
+        eventSoundVolumes.put(group, clampVolume(eventSoundVolume));
+    }
+
+    private void setAllEventSoundVolumes(double eventSoundVolume) {
+        double clampedVolume = clampVolume(eventSoundVolume);
+        for (EventSoundGroup group : EventSoundGroup.values()) {
+            eventSoundVolumes.put(group, clampedVolume);
+        }
     }
 
     public static double clampVolume(double value) {
@@ -61,14 +95,16 @@ public final class SparkAssistConfig {
         return Math.max(0.0D, Math.min(1.0D, value));
     }
 
-    public enum InstinctKeyMode {
-        HOLD("hold", "option.sparkassist.instinct_key_mode.hold"),
-        TOGGLE("toggle", "option.sparkassist.instinct_key_mode.toggle");
+    public enum InstinctKeyMode implements TranslatableOption {
+        HOLD(0, "hold", "option.sparkassist.instinct_key_mode.hold"),
+        TOGGLE(1, "toggle", "option.sparkassist.instinct_key_mode.toggle");
 
+        private final int id;
         private final String serializedName;
         private final String translationKey;
 
-        InstinctKeyMode(String serializedName, String translationKey) {
+        InstinctKeyMode(int id, String serializedName, String translationKey) {
+            this.id = id;
             this.serializedName = serializedName;
             this.translationKey = translationKey;
         }
@@ -91,6 +127,16 @@ public final class SparkAssistConfig {
         }
 
         public String translationKey() {
+            return translationKey;
+        }
+
+        @Override
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String getTranslationKey() {
             return translationKey;
         }
     }

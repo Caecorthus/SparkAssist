@@ -1,6 +1,12 @@
 {
   "screen.sparkassist.event_sound_options": "Event Sound Volume",
-  "option.sparkassist.event_sound_volume.value": "Event Sound Volume: %s%%",
+  "option.sparkassist.event_sound_volume.value": "%s: %s%%",
+  "option.sparkassist.event_sound_volume.psycho_mode": "Psycho Mode",
+  "option.sparkassist.event_sound_volume.corrupt_cop_moment": "Corrupt Cop Moment",
+  "option.sparkassist.event_sound_volume.jester_moment": "Jester Moment",
+  "option.sparkassist.event_sound_volume.train_outside": "Train Outside",
+  "option.sparkassist.event_sound_volume.train_horn": "Train Horn",
+  "option.sparkassist.event_sound_volume.pig_chase": "Pig Chase",
   "option.sparkassist.instinct_key_mode": "Instinct Key",
   "option.sparkassist.instinct_key_mode.hold": "Hold",
   "option.sparkassist.instinct_key_mode.toggle": "Toggle",
