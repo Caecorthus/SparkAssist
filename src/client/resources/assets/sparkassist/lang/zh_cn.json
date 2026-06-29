@@ -1,0 +1,8 @@
+{
+  "screen.sparkassist.event_sound_options": "事件音量",
+  "option.sparkassist.event_sound_volume.value": "事件音量：%s%%",
+  "option.sparkassist.instinct_key_mode": "本能键",
+  "option.sparkassist.instinct_key_mode.hold": "按住",
+  "option.sparkassist.instinct_key_mode.toggle": "切换",
+  "button.sparkassist.event_sound_options": "事件音量..."
+}

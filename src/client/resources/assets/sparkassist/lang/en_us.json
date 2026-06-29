@@ -1,0 +1,8 @@
+{
+  "screen.sparkassist.event_sound_options": "Event Sound Volume",
+  "option.sparkassist.event_sound_volume.value": "Event Sound Volume: %s%%",
+  "option.sparkassist.instinct_key_mode": "Instinct Key",
+  "option.sparkassist.instinct_key_mode.hold": "Hold",
+  "option.sparkassist.instinct_key_mode.toggle": "Toggle",
+  "button.sparkassist.event_sound_options": "Event Volume..."
+}
