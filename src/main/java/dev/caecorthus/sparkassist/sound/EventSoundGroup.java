@@ -10,7 +10,8 @@ public enum EventSoundGroup {
     JESTER_MOMENT("jester_moment", "option.sparkassist.event_sound_volume.jester_moment"),
     TRAIN_OUTSIDE("train_outside", "option.sparkassist.event_sound_volume.train_outside"),
     TRAIN_HORN("train_horn", "option.sparkassist.event_sound_volume.train_horn"),
-    PIG_CHASE("pig_chase", "option.sparkassist.event_sound_volume.pig_chase");
+    PIG_CHASE("pig_chase", "option.sparkassist.event_sound_volume.pig_chase"),
+    ARROGANT_ASF_MUSIC("arrogant_asf_music", "option.sparkassist.event_sound_volume.arrogant_asf_music");
 
     private final String serializedName;
     private final String translationKey;

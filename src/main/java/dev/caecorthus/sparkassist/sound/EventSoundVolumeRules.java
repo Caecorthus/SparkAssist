@@ -82,6 +82,10 @@ public final class EventSoundVolumeRules {
                 Identifier.of("sparkwitch", "skill.pig_chase"),
                 Identifier.of("sparkwitch", "skill/pig_chase")
         ));
+        ids.put(EventSoundGroup.ARROGANT_ASF_MUSIC, Set.of(
+                Identifier.of("sparktraits", "music.takediskrush"),
+                Identifier.of("sparktraits", "music/takediskrush")
+        ));
         return Map.copyOf(ids);
     }
 

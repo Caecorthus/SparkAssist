@@ -31,6 +31,7 @@ class SparkAssistConfigTest {
         assertEquals(0.35D, roundTrip.eventSoundVolume(EventSoundGroup.PIG_CHASE));
         assertEquals(0.6D, roundTrip.eventSoundVolume(EventSoundGroup.TRAIN_HORN));
         assertEquals(1.0D, roundTrip.eventSoundVolume(EventSoundGroup.PSYCHO_MODE));
+        assertEquals(1.0D, roundTrip.eventSoundVolume(EventSoundGroup.ARROGANT_ASF_MUSIC));
     }
 
     @Test
@@ -43,6 +44,19 @@ class SparkAssistConfigTest {
         for (EventSoundGroup group : EventSoundGroup.values()) {
             assertEquals(0.25D, config.eventSoundVolume(group));
         }
+    }
+
+    @Test
+    void missingNewEventVolumeFallsBackToFullVolume() {
+        JsonObject eventVolumes = new JsonObject();
+        eventVolumes.addProperty(EventSoundGroup.PIG_CHASE.serializedName(), 0.35D);
+        JsonObject json = new JsonObject();
+        json.add("eventSoundVolumes", eventVolumes);
+
+        SparkAssistConfig config = SparkAssistConfig.fromJson(json);
+
+        assertEquals(0.35D, config.eventSoundVolume(EventSoundGroup.PIG_CHASE));
+        assertEquals(1.0D, config.eventSoundVolume(EventSoundGroup.ARROGANT_ASF_MUSIC));
     }
 
     @Test

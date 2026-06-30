@@ -42,9 +42,14 @@ public final class EventSoundVolumeController {
         if (client == null || client.getSoundManager() == null || client.options == null) {
             return;
         }
+        refreshSoundCategory(client, SoundCategory.MUSIC);
+        refreshSoundCategory(client, SoundCategory.PLAYERS);
+    }
+
+    private static void refreshSoundCategory(MinecraftClient client, SoundCategory category) {
         client.getSoundManager().updateSoundVolume(
-                SoundCategory.PLAYERS,
-                client.options.getSoundVolume(SoundCategory.PLAYERS)
+                category,
+                client.options.getSoundVolume(category)
         );
     }
 }

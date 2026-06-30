@@ -31,9 +31,14 @@ class EventSoundVolumeRulesTest {
                 EventSoundVolumeRules.groupFor(Identifier.of("sparkwitch", "skill.pig_chase"), null));
         assertEquals(EventSoundGroup.PIG_CHASE,
                 EventSoundVolumeRules.groupFor(null, Identifier.of("sparkwitch", "skill/pig_chase")));
+        assertEquals(EventSoundGroup.ARROGANT_ASF_MUSIC,
+                EventSoundVolumeRules.groupFor(Identifier.of("sparktraits", "music.takediskrush"), null));
+        assertEquals(EventSoundGroup.ARROGANT_ASF_MUSIC,
+                EventSoundVolumeRules.groupFor(null, Identifier.of("sparktraits", "music/takediskrush")));
 
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("minecraft", "entity.player.levelup")));
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("wathe", "item.revolver.shoot")));
+        assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "item.flashlight.toggle")));
     }
 
     @Test
@@ -42,6 +47,8 @@ class EventSoundVolumeRulesTest {
                 Identifier.of("wathe", "ambient.train.horn"), null, 10.0F, 0.2D));
         assertEquals(5.0F, EventSoundVolumeRules.scaledVolume(
                 null, Identifier.of("sparkwitch", "skill/pig_chase"), 10.0F, 0.5D));
+        assertEquals(3.0F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("sparktraits", "music.takediskrush"), null, 10.0F, 0.3D));
         assertEquals(10.0F, EventSoundVolumeRules.scaledVolume(
                 Identifier.of("wathe", "item.revolver.shoot"), null, 10.0F, 0.2D));
     }
