@@ -86,6 +86,26 @@ public final class EventSoundVolumeRules {
                 Identifier.of("sparktraits", "music.takediskrush"),
                 Identifier.of("sparktraits", "music/takediskrush")
         ));
+        ids.put(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, Set.of(
+                Identifier.of("sparktraits", "depression.melee_kill_1"),
+                Identifier.of("sparktraits", "depression/melee_kill_1"),
+                Identifier.of("sparktraits", "depression.melee_kill_2"),
+                Identifier.of("sparktraits", "depression/melee_kill_2"),
+                Identifier.of("sparktraits", "depression.rage_to_docile"),
+                Identifier.of("sparktraits", "depression/rage_to_docile"),
+                Identifier.of("sparktraits", "depression.shyguy_killed"),
+                Identifier.of("sparktraits", "depression/shyguy_killed")
+        ));
+        ids.put(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC, Set.of(
+                Identifier.of("sparktraits", "depression.blind_rage_enrage"),
+                Identifier.of("sparktraits", "depression/blind_rage_enrage"),
+                Identifier.of("sparktraits", "depression.blind_rage_chase"),
+                Identifier.of("sparktraits", "depression/blind_rage_chase")
+        ));
+        ids.put(EventSoundGroup.DEPRESSION_PSYCHO_ALERT, Set.of(
+                Identifier.of("sparktraits", "depression.player_was_seen"),
+                Identifier.of("sparktraits", "depression/player_was_seen")
+        ));
         return Map.copyOf(ids);
     }
 

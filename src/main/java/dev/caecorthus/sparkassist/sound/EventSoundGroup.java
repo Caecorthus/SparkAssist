@@ -11,7 +11,10 @@ public enum EventSoundGroup {
     TRAIN_OUTSIDE("train_outside", "option.sparkassist.event_sound_volume.train_outside"),
     TRAIN_HORN("train_horn", "option.sparkassist.event_sound_volume.train_horn"),
     PIG_CHASE("pig_chase", "option.sparkassist.event_sound_volume.pig_chase"),
-    ARROGANT_ASF_MUSIC("arrogant_asf_music", "option.sparkassist.event_sound_volume.arrogant_asf_music");
+    ARROGANT_ASF_MUSIC("arrogant_asf_music", "option.sparkassist.event_sound_volume.arrogant_asf_music"),
+    DEPRESSION_PSYCHO_RANGE("depression_psycho_range", "option.sparkassist.event_sound_volume.depression_psycho_range"),
+    DEPRESSION_PSYCHO_MUSIC("depression_psycho_music", "option.sparkassist.event_sound_volume.depression_psycho_music"),
+    DEPRESSION_PSYCHO_ALERT("depression_psycho_alert", "option.sparkassist.event_sound_volume.depression_psycho_alert");
 
     private final String serializedName;
     private final String translationKey;
