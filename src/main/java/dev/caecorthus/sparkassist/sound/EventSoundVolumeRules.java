@@ -87,6 +87,10 @@ public final class EventSoundVolumeRules {
                 Identifier.of("sparktraits", "music/takediskrush")
         ));
         ids.put(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, Set.of(
+                Identifier.of("sparktraits", "depression.docile_to_rage"),
+                Identifier.of("sparktraits", "depression/docile_to_rage"),
+                Identifier.of("sparktraits", "depression.rage_loop"),
+                Identifier.of("sparktraits", "depression/rage_loop"),
                 Identifier.of("sparktraits", "depression.melee_kill_1"),
                 Identifier.of("sparktraits", "depression/melee_kill_1"),
                 Identifier.of("sparktraits", "depression.melee_kill_2"),

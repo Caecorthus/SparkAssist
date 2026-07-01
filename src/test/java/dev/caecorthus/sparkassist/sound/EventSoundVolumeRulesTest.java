@@ -41,6 +41,8 @@ class EventSoundVolumeRulesTest {
                 EventSoundVolumeRules.groupFor(null, Identifier.of("sparktraits", "music/takediskrush")));
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.melee_kill_1", "depression/melee_kill_1");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.melee_kill_2", "depression/melee_kill_2");
+        assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.docile_to_rage", "depression/docile_to_rage");
+        assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.rage_loop", "depression/rage_loop");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.rage_to_docile", "depression/rage_to_docile");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.shyguy_killed", "depression/shyguy_killed");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC, "depression.blind_rage_enrage", "depression/blind_rage_enrage");
@@ -50,8 +52,8 @@ class EventSoundVolumeRulesTest {
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("minecraft", "entity.player.levelup")));
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("wathe", "item.revolver.shoot")));
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "item.flashlight.toggle")));
-        assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression.docile_to_rage")));
-        assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression/rage_loop")));
+        assertTrue(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression.docile_to_rage")));
+        assertTrue(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression/rage_loop")));
     }
 
     @Test
@@ -68,10 +70,10 @@ class EventSoundVolumeRulesTest {
                 Identifier.of("sparktraits", "depression.player_was_seen"), null, 10.0F, 0.4D));
         assertEquals(7.5F, EventSoundVolumeRules.scaledVolume(
                 null, Identifier.of("sparktraits", "depression/melee_kill_2"), 10.0F, 0.75D));
+        assertEquals(2.0F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("sparktraits", "depression.rage_loop"), null, 10.0F, 0.2D));
         assertEquals(10.0F, EventSoundVolumeRules.scaledVolume(
                 Identifier.of("wathe", "item.revolver.shoot"), null, 10.0F, 0.2D));
-        assertEquals(10.0F, EventSoundVolumeRules.scaledVolume(
-                Identifier.of("sparktraits", "depression.rage_loop"), null, 10.0F, 0.2D));
     }
 
     @Test
