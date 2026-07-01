@@ -42,6 +42,7 @@ public final class EventSoundVolumeController {
         if (client == null || client.getSoundManager() == null || client.options == null) {
             return;
         }
+        refreshSoundCategory(client, SoundCategory.AMBIENT);
         refreshSoundCategory(client, SoundCategory.MUSIC);
         refreshSoundCategory(client, SoundCategory.PLAYERS);
     }
