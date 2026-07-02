@@ -86,6 +86,10 @@ public final class EventSoundVolumeRules {
                 Identifier.of("sparktraits", "music.takediskrush"),
                 Identifier.of("sparktraits", "music/takediskrush")
         ));
+        ids.put(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM, Set.of(
+                Identifier.of("sparkwitch", "ambient.grand_witch_ceremonial_sword_bgm"),
+                Identifier.of("sparkwitch", "ambient/grand_witch_ceremonial_sword_bgm")
+        ));
         ids.put(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, Set.of(
                 Identifier.of("sparktraits", "depression.docile_to_rage"),
                 Identifier.of("sparktraits", "depression/docile_to_rage"),

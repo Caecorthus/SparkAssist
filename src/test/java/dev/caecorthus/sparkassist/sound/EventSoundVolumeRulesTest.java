@@ -39,6 +39,16 @@ class EventSoundVolumeRulesTest {
                 EventSoundVolumeRules.groupFor(Identifier.of("sparktraits", "music.takediskrush"), null));
         assertEquals(EventSoundGroup.ARROGANT_ASF_MUSIC,
                 EventSoundVolumeRules.groupFor(null, Identifier.of("sparktraits", "music/takediskrush")));
+        assertEquals(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM,
+                EventSoundVolumeRules.groupFor(
+                        Identifier.of("sparkwitch", "ambient.grand_witch_ceremonial_sword_bgm"),
+                        null
+                ));
+        assertEquals(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM,
+                EventSoundVolumeRules.groupFor(
+                        null,
+                        Identifier.of("sparkwitch", "ambient/grand_witch_ceremonial_sword_bgm")
+                ));
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.melee_kill_1", "depression/melee_kill_1");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.melee_kill_2", "depression/melee_kill_2");
         assertMatches(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, "depression.docile_to_rage", "depression/docile_to_rage");
@@ -52,8 +62,12 @@ class EventSoundVolumeRulesTest {
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("minecraft", "entity.player.levelup")));
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("wathe", "item.revolver.shoot")));
         assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "item.flashlight.toggle")));
+        assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("sparkwitch", "ambient.random_witch_sound")));
         assertTrue(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression.docile_to_rage")));
         assertTrue(EventSoundVolumeRules.isEventSound(Identifier.of("sparktraits", "depression/rage_loop")));
+        assertTrue(EventSoundVolumeRules.isEventSound(
+                Identifier.of("sparkwitch", "ambient.grand_witch_ceremonial_sword_bgm")
+        ));
     }
 
     @Test
@@ -64,6 +78,8 @@ class EventSoundVolumeRulesTest {
                 null, Identifier.of("sparkwitch", "skill/pig_chase"), 10.0F, 0.5D));
         assertEquals(3.0F, EventSoundVolumeRules.scaledVolume(
                 Identifier.of("sparktraits", "music.takediskrush"), null, 10.0F, 0.3D));
+        assertEquals(6.5F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("sparkwitch", "ambient.grand_witch_ceremonial_sword_bgm"), null, 10.0F, 0.65D));
         assertEquals(1.5F, EventSoundVolumeRules.scaledVolume(
                 Identifier.of("sparktraits", "depression.blind_rage_chase"), null, 10.0F, 0.15D));
         assertEquals(4.0F, EventSoundVolumeRules.scaledVolume(

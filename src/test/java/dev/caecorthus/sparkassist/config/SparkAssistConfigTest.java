@@ -27,6 +27,7 @@ class SparkAssistConfigTest {
         config.setEventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, 0.21D);
         config.setEventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC, 0.42D);
         config.setEventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_ALERT, 0.63D);
+        config.setEventSoundVolume(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM, 0.72D);
 
         SparkAssistConfig roundTrip = SparkAssistConfig.fromJson(config.toJson());
 
@@ -36,6 +37,7 @@ class SparkAssistConfigTest {
         assertEquals(0.21D, roundTrip.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_RANGE));
         assertEquals(0.42D, roundTrip.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC));
         assertEquals(0.63D, roundTrip.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_ALERT));
+        assertEquals(0.72D, roundTrip.eventSoundVolume(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM));
         assertEquals(1.0D, roundTrip.eventSoundVolume(EventSoundGroup.PSYCHO_MODE));
         assertEquals(1.0D, roundTrip.eventSoundVolume(EventSoundGroup.ARROGANT_ASF_MUSIC));
     }
@@ -66,6 +68,7 @@ class SparkAssistConfigTest {
         assertEquals(1.0D, config.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_RANGE));
         assertEquals(1.0D, config.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC));
         assertEquals(1.0D, config.eventSoundVolume(EventSoundGroup.DEPRESSION_PSYCHO_ALERT));
+        assertEquals(1.0D, config.eventSoundVolume(EventSoundGroup.GRAND_WITCH_CEREMONIAL_SWORD_BGM));
     }
 
     @Test
