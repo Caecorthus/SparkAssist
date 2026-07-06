@@ -2,11 +2,9 @@ package dev.caecorthus.sparkassist.sound;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import net.minecraft.util.Identifier;
 import org.junit.jupiter.api.Test;
 
@@ -71,6 +69,28 @@ class EventSoundVolumeRulesTest {
     }
 
     @Test
+    void groupForPrefersEventIdBeforeSelectedSoundIdFallback() {
+        assertEquals(EventSoundGroup.TRAIN_HORN, EventSoundVolumeRules.groupFor(
+                Identifier.of("wathe", "ambient.train.horn"),
+                Identifier.of("sparkwitch", "skill/pig_chase")
+        ));
+        assertEquals(EventSoundGroup.PIG_CHASE, EventSoundVolumeRules.groupFor(
+                Identifier.of("minecraft", "unknown.sound"),
+                Identifier.of("sparkwitch", "skill/pig_chase")
+        ));
+    }
+
+    @Test
+    void unknownIdsReturnNullAndStayOutOfEventSoundCatalog() {
+        assertNull(EventSoundVolumeRules.groupFor(null, null));
+        assertNull(EventSoundVolumeRules.groupFor(Identifier.of("minecraft", "entity.player.levelup"), null));
+        assertNull(EventSoundVolumeRules.groupFor(null, Identifier.of("sparkwitch", "ambient/random_witch_sound")));
+
+        assertFalse(EventSoundVolumeRules.isEventSound(null));
+        assertFalse(EventSoundVolumeRules.isEventSound(Identifier.of("minecraft", "entity.player.levelup")));
+    }
+
+    @Test
     void scalesGroupedSoundOnly() {
         assertEquals(2.0F, EventSoundVolumeRules.scaledVolume(
                 Identifier.of("wathe", "ambient.train.horn"), null, 10.0F, 0.2D));
@@ -93,14 +113,13 @@ class EventSoundVolumeRulesTest {
     }
 
     @Test
-    void refreshesAllCategoriesUsedByEventSounds() throws IOException {
-        String source = Files.readString(Path.of(
-                "src/client/java/dev/caecorthus/sparkassist/client/sound/EventSoundVolumeController.java"
-        ));
-
-        assertTrue(source.contains("refreshSoundCategory(client, SoundCategory.AMBIENT);"));
-        assertTrue(source.contains("refreshSoundCategory(client, SoundCategory.MUSIC);"));
-        assertTrue(source.contains("refreshSoundCategory(client, SoundCategory.PLAYERS);"));
+    void clampsGroupedSoundVolumeMultiplier() {
+        assertEquals(0.0F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("wathe", "ambient.train.horn"), null, 10.0F, -1.0D));
+        assertEquals(10.0F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("wathe", "ambient.train.horn"), null, 10.0F, 2.0D));
+        assertEquals(10.0F, EventSoundVolumeRules.scaledVolume(
+                Identifier.of("wathe", "ambient.train.horn"), null, 10.0F, Double.NaN));
     }
 
     private static void assertMatches(EventSoundGroup group, String eventPath, String resourcePath) {

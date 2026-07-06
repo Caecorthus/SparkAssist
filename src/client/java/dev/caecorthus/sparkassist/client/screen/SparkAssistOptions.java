@@ -1,8 +1,7 @@
 package dev.caecorthus.sparkassist.client.screen;
 
 import com.mojang.serialization.Codec;
-import dev.caecorthus.sparkassist.client.SparkAssistClient;
-import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
+import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
 import java.util.List;
 import net.minecraft.client.option.SimpleOption;
@@ -29,12 +28,8 @@ public final class SparkAssistOptions {
                         List.of(InstinctKeyMode.values()),
                         INSTINCT_KEY_MODE_CODEC
                 ),
-                SparkAssistClient.configManager().config().instinctKeyMode(),
-                mode -> {
-                    SparkAssistClient.configManager().config().setInstinctKeyMode(mode);
-                    SparkAssistClient.configManager().save();
-                    InstinctKeyController.reset();
-                }
+                SparkAssistClientSettings.instinctKeyMode(),
+                SparkAssistClientSettings::setInstinctKeyMode
         );
     }
 }

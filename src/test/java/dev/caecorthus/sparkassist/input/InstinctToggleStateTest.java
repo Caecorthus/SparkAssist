@@ -29,4 +29,16 @@ class InstinctToggleStateTest {
         assertTrue(state.effectivePressed(InstinctKeyMode.TOGGLE, false));
         assertFalse(state.effectivePressed(InstinctKeyMode.TOGGLE, true));
     }
+
+    @Test
+    void resetClearsToggleAndEdgeState() {
+        InstinctToggleState state = new InstinctToggleState();
+
+        assertTrue(state.effectivePressed(InstinctKeyMode.TOGGLE, true));
+        state.reset();
+
+        assertFalse(state.toggled());
+        assertFalse(state.effectivePressed(InstinctKeyMode.TOGGLE, false));
+        assertTrue(state.effectivePressed(InstinctKeyMode.TOGGLE, true));
+    }
 }

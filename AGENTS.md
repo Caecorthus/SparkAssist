@@ -17,6 +17,10 @@
 
 ### Check
 - Please read the code for all three mods (usually you don't need to read SparkWitch), and you need to consider how to ensure your changes do not affect other characters or talents that are outside the scope of the modifications.
+- Before architecture or Module changes in SparkAssist, read `CONTEXT.md`,
+  `ARCHITECTURE.md`, and `ARCHITECTURE_LOGS.md`; use the approval template there
+  before moving, splitting, renaming, or deleting existing source Modules.
+- Treat `build/` and `bin/` as generated output, not source evidence.
 
 ### Subagents
 - You're the coordinator/leader between the subagents.
