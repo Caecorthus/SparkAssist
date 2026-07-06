@@ -1,8 +1,10 @@
 .gradle/
+.idea/
 build/
 run/
 logs/
 *.class
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
+*.iml
 *.log
