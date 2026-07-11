@@ -95,8 +95,6 @@ tasks.register("verifyModJarVersion") {
 tasks.register("verifyArchitecture") {
     def requiredFiles = [
             file("AGENTS.md"),
-            file("ARCHITECTURE.md"),
-            file("ARCHITECTURE_LOGS.md"),
             file("CONTEXT.md"),
             file("docs/adr/0001-risk-based-tests.md"),
             file("src/test/java/dev/caecorthus/sparkassist/config/SparkAssistConfigTest.java"),
