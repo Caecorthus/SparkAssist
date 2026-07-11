@@ -34,6 +34,13 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.3"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 processResources {
@@ -85,6 +92,42 @@ tasks.register("verifyModJarVersion") {
     }
 }
 
+tasks.register("verifyArchitecture") {
+    def requiredFiles = [
+            file("AGENTS.md"),
+            file("ARCHITECTURE.md"),
+            file("ARCHITECTURE_LOGS.md"),
+            file("CONTEXT.md"),
+            file("docs/adr/0001-risk-based-tests.md"),
+            file("src/test/java/dev/caecorthus/sparkassist/config/SparkAssistConfigTest.java"),
+            file("src/test/java/dev/caecorthus/sparkassist/input/InstinctKeyRulesTest.java"),
+            file("src/test/java/dev/caecorthus/sparkassist/input/InstinctToggleStateTest.java"),
+            file("src/test/java/dev/caecorthus/sparkassist/sound/EventSoundCatalogTest.java"),
+            file("src/test/java/dev/caecorthus/sparkassist/sound/EventSoundRefreshCategoriesTest.java"),
+            file("src/test/java/dev/caecorthus/sparkassist/sound/EventSoundVolumeRulesTest.java")
+    ]
+    inputs.files(requiredFiles)
+    inputs.file("src/main/resources/fabric.mod.json")
+
+    doLast {
+        requiredFiles.each { requiredFile ->
+            if (!requiredFile.isFile()) {
+                throw new GradleException("Missing architecture contract file: ${requiredFile}")
+            }
+        }
+
+        def metadata = new groovy.json.JsonSlurper().parse(file("src/main/resources/fabric.mod.json"))
+        if (metadata.environment != "client" || metadata.entrypoints?.main) {
+            throw new GradleException("SparkAssist must remain client-only")
+        }
+        ["wathe", "noellesroles", "sparkwitch", "sparktraits", "sparkstrength"].each { optionalModId ->
+            if (metadata.suggests?.get(optionalModId) != "*") {
+                throw new GradleException("Catalog provider ${optionalModId} must be declared in fabric.mod.json suggests")
+            }
+        }
+    }
+}
+
 tasks.named("build") {
     dependsOn tasks.named("verifyModJarVersion")
 }
@@ -97,6 +140,8 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named("check") {
     setDependsOn([])
+    dependsOn tasks.named("test")
+    dependsOn tasks.named("verifyArchitecture")
     dependsOn tasks.matching { it.name == "validateAccessWidener" }
 }
 

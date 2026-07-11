@@ -29,6 +29,8 @@
   "suggests": {
     "wathe": "*",
     "noellesroles": "*",
-    "sparkwitch": "*"
+    "sparkwitch": "*",
+    "sparktraits": "*",
+    "sparkstrength": "*"
   }
 }

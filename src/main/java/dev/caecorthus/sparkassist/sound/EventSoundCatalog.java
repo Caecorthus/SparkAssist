@@ -11,8 +11,8 @@ import net.minecraft.util.Identifier;
  * 可选同级 Mod 事件声音的目录实现。
  *
  * Dotted event ids and slash resource ids stay separate here, while
- * EventSoundVolumeRules remains the stable public lookup Interface.
- * 点号事件 id 和斜杠资源 id 在这里分列维护，EventSoundVolumeRules 保持稳定的公开查询接口。
+ * EventSoundVolumeRules remains the stable caller-facing lookup Interface.
+ * 点号事件 id 和斜杠资源 id 在这里分列维护，EventSoundVolumeRules 保持稳定的调用方查询接口。
  */
 final class EventSoundCatalog {
     private final Map<Identifier, EventSoundGroup> eventIdGroups;
@@ -24,6 +24,7 @@ final class EventSoundCatalog {
         for (CatalogGroup group : groups) {
             group.indexInto(eventIdGroups, resourceIdGroups);
         }
+        validateCrossFamilyOwnership(eventIdGroups, resourceIdGroups);
         this.eventIdGroups = Map.copyOf(eventIdGroups);
         this.resourceIdGroups = Map.copyOf(resourceIdGroups);
     }
@@ -88,10 +89,10 @@ final class EventSoundCatalog {
                         )
                 ),
                 group(EventSoundGroup.ARROGANT_ASF_MUSIC,
-                        eventIds("sparktraits",
+                        eventIds("sparkstrength",
                                 "music.takediskrush"
                         ),
-                        resourceIds("sparktraits",
+                        resourceIds("sparkstrength",
                                 "music/takediskrush"
                         )
                 ),
@@ -181,6 +182,39 @@ final class EventSoundCatalog {
         return List.copyOf(ids);
     }
 
+    /**
+     * Keeps every catalog identifier owned by exactly one event group.
+     * 保证目录中的每个标识符只归属于一个事件声音分组。
+     */
+    static void putUnique(
+            Map<Identifier, EventSoundGroup> index,
+            Identifier id,
+            EventSoundGroup group,
+            String identifierKind
+    ) {
+        EventSoundGroup existing = index.putIfAbsent(id, group);
+        if (existing != null) {
+            throw new IllegalArgumentException(
+                    "Duplicate " + identifierKind + " sound identifier " + id
+                            + " is owned by both " + existing + " and " + group
+            );
+        }
+    }
+
+    static void validateCrossFamilyOwnership(
+            Map<Identifier, EventSoundGroup> eventIdGroups,
+            Map<Identifier, EventSoundGroup> resourceIdGroups
+    ) {
+        eventIdGroups.forEach((id, eventGroup) -> {
+            EventSoundGroup resourceGroup = resourceIdGroups.get(id);
+            if (resourceGroup != null && resourceGroup != eventGroup) {
+                throw new IllegalArgumentException(
+                        "Sound identifier " + id + " is owned by both " + eventGroup + " and " + resourceGroup
+                );
+            }
+        });
+    }
+
     private record CatalogGroup(
             EventSoundGroup group,
             List<Identifier> eventIds,
@@ -196,10 +230,10 @@ final class EventSoundCatalog {
                 Map<Identifier, EventSoundGroup> resourceIdGroups
         ) {
             for (Identifier eventId : eventIds) {
-                eventIdGroups.put(eventId, group);
+                putUnique(eventIdGroups, eventId, group, "event");
             }
             for (Identifier resourceId : resourceIds) {
-                resourceIdGroups.put(resourceId, group);
+                putUnique(resourceIdGroups, resourceId, group, "resource");
             }
         }
     }

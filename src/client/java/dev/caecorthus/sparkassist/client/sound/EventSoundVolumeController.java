@@ -31,7 +31,12 @@ public final class EventSoundVolumeController {
             return originalVolume;
         }
         SparkAssistConfig config = SparkAssistClient.configManager().config();
-        return (float) (originalVolume * config.eventSoundVolume(group));
+        return EventSoundVolumeRules.scaledVolume(
+                eventId,
+                selectedSoundId,
+                originalVolume,
+                config.eventSoundVolume(group)
+        );
     }
 
     /**
