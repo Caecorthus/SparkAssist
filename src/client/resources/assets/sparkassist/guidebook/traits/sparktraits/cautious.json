@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:cautious",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.cautious.name",
+      "summaryKey": "trait.sparktraits.cautious.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "静默行动",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "移动、进食和饮用不会发出声音。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#A7C7C7",
+      "order": 710
+    }
+  ]
+}

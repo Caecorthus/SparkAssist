@@ -1,15 +1,11 @@
 package dev.caecorthus.sparkassist.guidebook;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import dev.caecorthus.sparkassist.guidebook.data.GuidebookJsonParser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -35,17 +31,7 @@ public final class GuidebookCatalog {
     }
 
     public static GuidebookCatalog parse(String json) {
-        JsonElement root = JsonParser.parseString(json);
-        if (!root.isJsonObject() || !root.getAsJsonObject().has("entries")) {
-            throw new IllegalArgumentException("Guidebook document must contain an entries array");
-        }
-
-        JsonArray jsonEntries = root.getAsJsonObject().getAsJsonArray("entries");
-        List<GuidebookEntry> entries = new ArrayList<>(jsonEntries.size());
-        for (JsonElement element : jsonEntries) {
-            entries.add(parseEntry(element.getAsJsonObject()));
-        }
-        return new GuidebookCatalog(entries);
+        return new GuidebookCatalog(GuidebookJsonParser.parseEntries(json));
     }
 
     public static GuidebookCatalog of(Collection<GuidebookEntry> entries) {
@@ -60,6 +46,18 @@ public final class GuidebookCatalog {
         return new GuidebookCatalog(entries);
     }
 
+    /**
+     * Keeps authored reference pages browsable while applying mod availability to runtime discoveries.
+     * 保留所有人工编写的参考页面，并只按模组可用性筛选运行时发现的补充条目。
+     */
+    public static GuidebookCatalog mergeAuthoredWithAvailableDiscoveries(
+            GuidebookCatalog authored,
+            GuidebookCatalog discoveries,
+            Set<String> loadedModIds
+    ) {
+        return merge(List.of(authored, discoveries.availableFor(loadedModIds)));
+    }
+
     public GuidebookCatalog availableFor(Set<String> loadedModIds) {
         return new GuidebookCatalog(entries.stream()
                 .filter(entry -> loadedModIds.containsAll(entry.requiredModIds()))
@@ -72,31 +70,5 @@ public final class GuidebookCatalog {
 
     public Optional<GuidebookEntry> find(String id) {
         return Optional.ofNullable(entriesById.get(id));
-    }
-
-    private static GuidebookEntry parseEntry(JsonObject json) {
-        String summaryKey = json.get("summaryKey").getAsString();
-        List<String> pageKeys = json.has("page_keys")
-                ? parseStringList(json.getAsJsonArray("page_keys"))
-                : List.of(summaryKey);
-        return new GuidebookEntry(
-                json.get("id").getAsString(),
-                GuidebookTab.valueOf(json.get("tab").getAsString().toUpperCase(Locale.ROOT)),
-                json.get("sourceModId").getAsString(),
-                json.get("nameKey").getAsString(),
-                summaryKey,
-                pageKeys,
-                parseStringList(json.getAsJsonArray("ownerRoleIds")),
-                parseStringList(json.getAsJsonArray("requiredModIds")),
-                json.get("order").getAsInt()
-        );
-    }
-
-    private static List<String> parseStringList(JsonArray values) {
-        List<String> result = new ArrayList<>(values.size());
-        for (JsonElement value : values) {
-            result.add(value.getAsString());
-        }
-        return result;
     }
 }

@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:task_master",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.task_master.name",
+      "summaryKey": "trait.sparktraits.task_master.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "任务奖励",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "真实理智身份完成任务时，额外恢复普通任务理智奖励的 20%；使用金钱系统的身份额外获得 25 金币。若同时满足，两种奖励都会获得。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#F2C94C",
+      "order": 720
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:detective",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.detective",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你的血迹和作案痕迹出卖了你。"
+            },
+            {
+              "type": "section",
+              "text": "查验",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "查验目标在过去 2 分钟内是否杀过人，并使目标在视野内高亮 5 秒；冷却 90 秒。毒杀、定时炸弹和刺客猜测不计入记录。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "犯罪行为学",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "开局冷却 60 秒。右键尸体后花费 150 金币猜测凶手。"
+            },
+            {
+              "type": "bullet",
+              "text": "猜中后立即透视凶手 5 秒，此后每 30 秒再次透视 5 秒，持续到目标死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "猜错或追踪结束后进入 120 秒冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#6495ED",
+      "order": 220
+    }
+  ]
+}

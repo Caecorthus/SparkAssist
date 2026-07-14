@@ -1,0 +1,80 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:last_stand",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.last_stand.name",
+      "summaryKey": "trait.sparktraits.last_stand.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "隐藏的机会",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "该词条会对主人隐藏，直到成功触发。被非好人阵营玩家击杀时才会尝试触发。"
+            },
+            {
+              "type": "bullet",
+              "text": "死亡后，存活的好人阵营玩家数不超过开局好人阵营玩家数的三分之一时，才满足残局条件。"
+            },
+            {
+              "type": "bullet",
+              "text": "概率参考最近至多 5 次、每分钟一次的理智记录：0 理智为 5%，70 及以上为 100%，中间线性增长；假理智身份固定为 100%。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "假死回归",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "成功后进入 5 秒假死，再以满生命值、满氧气和 50% 理智回归。"
+            },
+            {
+              "type": "bullet",
+              "text": "回归时获得【左轮手枪】，并从杀手本能中隐藏。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "终局时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "最终残局中，仍存活且已触发词条的玩家会转化为亡命徒，并获得固定词条组合与终局装备。"
+            },
+            {
+              "type": "bullet",
+              "text": "装备包括【匕首】、【德林加】、【撬棍】和【左轮手枪】，并获得速度 III 与铁人效果。"
+            },
+            {
+              "type": "bullet",
+              "text": "所有存活玩家获得 1000 金币与 1000 魔力，列车时钟改为 3 分钟。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#FFFFFF",
+      "order": 800
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:fast_hands",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.fast_hands.name",
+      "summaryKey": "trait.sparktraits.fast_hands.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "冷却缩减",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "由你持有并使用的物品冷却缩短 10%；不会影响商店冷却或身份能力计时器。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#FF8A3D",
+      "order": 730
+    }
+  ]
+}

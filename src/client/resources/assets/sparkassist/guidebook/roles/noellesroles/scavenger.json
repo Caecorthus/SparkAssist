@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:scavenger",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.scavenger",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "十步杀一人，千里不留行。"
+            },
+            {
+              "type": "section",
+              "text": "清理现场",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "击杀后会隐藏尸体；仅杀手阵营、中立阵营、观战者和创造模式玩家仍能看见，验尸官也不例外。"
+            },
+            {
+              "type": "bullet",
+              "text": "大嗓门的尸体不会被隐藏。"
+            },
+            {
+              "type": "bullet",
+              "text": "匕首无需蓄力，可直接右键攻击；举刀与刺杀不会发出声音。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "商店限制",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 150 金币可以重置刀刺冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "无法购买枪、手雷、毒药瓶、蝎子和疯魔模式。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#654321",
+      "order": 360
+    }
+  ]
+}

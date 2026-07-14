@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:excellent_physique",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.excellent_physique.name",
+      "summaryKey": "trait.sparktraits.excellent_physique.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "体能强化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "体力上限翻倍，体力自然恢复速度也翻倍。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#7ED957",
+      "order": 770
+    }
+  ]
+}

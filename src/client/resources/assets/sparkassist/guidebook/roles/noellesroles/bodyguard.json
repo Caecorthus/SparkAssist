@@ -1,0 +1,49 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:bodyguard",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.bodyguard",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "保护目标",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "只会与连环杀手同时出现。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以透视连环杀手的目标；位于目标 3 格范围内时，可以替目标抵挡刀刺或饕餮吞噬。"
+            },
+            {
+              "type": "section",
+              "text": "内鬼变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "不再替目标抵挡刀刺。"
+            },
+            {
+              "type": "bullet",
+              "text": "如果目标死亡时你仍然存活，可额外获得 100 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#4682FA",
+      "order": 190
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:assassin",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.assassin",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "喜欢报身份？"
+            },
+            {
+              "type": "section",
+              "text": "刺杀",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "刺杀次数为“开局人数 ÷ 4”向上取整（1 至 4 人为 1 次，5 至 8 人为 2 次）；初始与使用后冷却均为 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "猜中目标身份会直接将其击杀，并播放枪声。"
+            },
+            {
+              "type": "bullet",
+              "text": "猜错身份时，刺客自己会死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "无法刺杀自己和义警。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#8B0000",
+      "order": 350
+    }
+  ]
+}

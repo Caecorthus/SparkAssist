@@ -1,0 +1,65 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:party_animal",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.party_animal",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "派对开始！"
+            },
+            {
+              "type": "section",
+              "text": "氦气嗨",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "对准 3 格内且视线可达的玩家使用技能，可以将其标记 30 秒；标记期间再次使用即可释放变声。"
+            },
+            {
+              "type": "bullet",
+              "text": "变声持续 7 分 30 秒，共 3 级；各级音调倍率依次为 1.35、1.55、1.75。"
+            },
+            {
+              "type": "bullet",
+              "text": "每次释放后冷却 60 秒；不能连续对同一名目标释放，必须先选择其他目标。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "金币奖励",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "首次让同一目标达到 1、2、3 级时，分别获得 50、75、100 金币；每名目标的每个等级每局只奖励一次。"
+            },
+            {
+              "type": "bullet",
+              "text": "对杀手阵营或卧底释放不会获得金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "未锁定有效目标时使用会给自己提升一级；同样进入 60 秒冷却，但不会获得金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#FF5AC8",
+      "order": 384
+    }
+  ]
+}

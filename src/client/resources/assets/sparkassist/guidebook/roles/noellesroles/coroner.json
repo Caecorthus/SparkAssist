@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:coroner",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.coroner",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "活人会说谎，但死人不会。"
+            },
+            {
+              "type": "section",
+              "text": "验尸",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "理智高于 50% 时，可以查看尸体对应玩家的身份、死因和死亡时间。"
+            },
+            {
+              "type": "paragraph",
+              "text": "死亡时间会显示为“死于 X 秒前”。",
+              "tone": "muted"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#7A7A7A",
+      "order": 90
+    }
+  ]
+}

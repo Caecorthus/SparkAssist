@@ -1,0 +1,95 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:pathogen",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.pathogen",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我会将瘟疫传遍这片大地。"
+            },
+            {
+              "type": "section",
+              "text": "感染",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "按技能键感染视野内、距离小于 3 格且离你最近的未感染玩家。感染者会在 10 至 30 秒后首次打喷嚏并察觉异常。"
+            },
+            {
+              "type": "bullet",
+              "text": "被感染玩家打喷嚏时会收到文字提示，并感觉身体不适。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以看到自己感染的玩家，但不能隔墙透视。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "感染冷却",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "技能初始冷却 10 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "11 人及以下：成功感染后冷却 20 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "12 至 17 人：15 秒；18 至 24 人：10 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "25 人及以上：7 秒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "追踪与胜利",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "物品栏上方会显示最近玩家与你的实时距离和大致方向。"
+            },
+            {
+              "type": "bullet",
+              "text": "感染除自己外的所有玩家，或使场上只剩已感染的存活玩家时获胜；杀手也计入目标。"
+            },
+            {
+              "type": "section",
+              "text": "初始物品",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带房间钥匙和【中立万能钥匙】；中立万能钥匙可以打开所有列车门。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#7FFF00",
+      "order": 630
+    }
+  ]
+}

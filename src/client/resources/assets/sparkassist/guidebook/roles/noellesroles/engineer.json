@@ -1,0 +1,65 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:engineer",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.engineer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你对物理和机械工程十分精通。"
+            },
+            {
+              "type": "section",
+              "text": "维修工具",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【维修工具】，开局冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以修复被撬的门，也能将门上锁或解锁。上锁持续 1 分钟，期间只能被撬棍打开；使用冷却 3 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "附近的门被撬开或锁上时，该门会高亮 5 秒，同时向你发送提示。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "捕捉装置：125 金币。可安装在地板或天花板上，半径 5 格；触发后定身非放置者 5 秒，并生成名单报告。120 秒未触发则消失。"
+            },
+            {
+              "type": "bullet",
+              "text": "电力恢复系统：300 金币。立即结束停电，费用由存活杀手平分，并将杀手的停电冷却设置为 90 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#C8A03C",
+      "order": 180
+    }
+  ]
+}

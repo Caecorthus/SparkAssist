@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:the_showman",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.the_showman.name",
+      "summaryKey": "trait.sparktraits.the_showman.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "围观奖励",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "真实击杀时，死者 8 格内每名围观者会提供 8 金币，最多计算 10 人。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#D48B16",
+      "order": 1010
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:demon_hunter",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.demon_hunter",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "魔物都去死吧！"
+            },
+            {
+              "type": "section",
+              "text": "猎魔枪",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "每次疯魔开始时增加 2 发猎魔弹，并透视疯魔者；疯魔者也会看见猎魔人。"
+            },
+            {
+              "type": "bullet",
+              "text": "没有猎魔枪时，只有在未携带其他枪械时才会获得新枪；新枪的初始冷却为 5 秒，后续射击冷却为 10 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "猎魔枪只对疯魔者和小丑有效。命中会先剥除 1 层护盾再结算枪击；命中小丑会返还 1 发弹药。"
+            },
+            {
+              "type": "bullet",
+              "text": "被静语者沉默的疯魔者不会高亮，但仍会触发猎魔枪发放。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "嗅探",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "开局冷却 60 秒，使用后冷却 90 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "嗅探 5.5 格内能够购买疯魔的杀手与小丑。首次发现目标只会将其标记；再次发现同一目标时，可透视该目标 20 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#8C9BB4",
+      "order": 200
+    }
+  ]
+}

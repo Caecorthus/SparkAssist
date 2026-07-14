@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:pig_god",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.pig_god",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "有人欠了你十万美刀，因此你踏上了这趟通往欠债人家的列车。"
+            },
+            {
+              "type": "section",
+              "text": "皮革追杀",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 150 金币，进入持续 17 秒、具有速度 V 且不播放音乐的疯魔状态；结束后冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "追杀期间会高亮其他玩家，但仍受生存大师的隐匿规则限制；冲撞可以破坏列车门和小门。"
+            },
+            {
+              "type": "bullet",
+              "text": "追杀期间杀死有效好人阵营玩家会使自己立即死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "不会获得内鬼词条。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2A4FC",
+      "order": 230
+    }
+  ]
+}

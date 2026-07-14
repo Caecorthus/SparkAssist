@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:introverted",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.introverted.name",
+      "summaryKey": "trait.sparktraits.introverted.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "独处",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "8 格内至多有 1 名其他存活玩家时，理智不会自然流失。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#8C7AE6",
+      "order": 830
+    }
+  ]
+}

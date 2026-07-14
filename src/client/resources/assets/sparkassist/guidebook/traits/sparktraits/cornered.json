@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:cornered",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.cornered.name",
+      "summaryKey": "trait.sparktraits.cornered.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "同伙死亡奖励",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "同伙死亡时获得 75 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "若这次死亡使你成为唯一同伙，本次奖励改为总计 200 金币；该特殊奖励每局只结算一次。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#6F263D",
+      "order": 1080
+    }
+  ]
+}

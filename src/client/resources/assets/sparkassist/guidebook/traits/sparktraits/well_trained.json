@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:well_trained",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.well_trained.name",
+      "summaryKey": "trait.sparktraits.well_trained.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "训练有素",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "低理智不再妨碍能力使用，理智流失速度降低 30%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:veteran"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#4A90E2",
+      "order": 950
+    }
+  ]
+}

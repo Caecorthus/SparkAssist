@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:bloodthirsty",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.bloodthirsty.name",
+      "summaryKey": "trait.sparktraits.bloodthirsty.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "嗜血层数",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "每次真实击杀都会使刀刺冷却缩短 5%。"
+            },
+            {
+              "type": "bullet",
+              "text": "层数上限为“本局开局人数 ÷ 3”向下取整。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#9D1B2B",
+      "order": 1000
+    }
+  ]
+}

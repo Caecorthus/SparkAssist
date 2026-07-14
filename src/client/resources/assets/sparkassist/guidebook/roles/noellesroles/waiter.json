@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:waiter",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.waiter",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "这位乘客，您的餐点到了。"
+            },
+            {
+              "type": "section",
+              "text": "列车服务",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可从餐盘或饮品托盘拿取同类物品的第 2 份，最多同时持有 2 份。"
+            },
+            {
+              "type": "bullet",
+              "text": "手持食物或饮品右键仍有对应需求的存活玩家，可以直接满足其进食或饮酒任务，并消耗 1 份物品。"
+            },
+            {
+              "type": "bullet",
+              "text": "食物或饮品携带的毒素会保留；将其喂给目标时，目标会照常中毒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "金币与商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "每完成一个任务，额外获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "专属商店花费 100 金币，可以随机购买一份食物或饮品。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#FFA550",
+      "order": 222
+    }
+  ]
+}

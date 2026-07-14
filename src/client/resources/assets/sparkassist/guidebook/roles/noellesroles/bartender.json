@@ -1,0 +1,70 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:bartender",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.bartender",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "运用你的调酒技术，为他人来上一杯好酒。"
+            },
+            {
+              "type": "section",
+              "text": "观察能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "喝过饮料的玩家会以绿色边框显示在你的视野中 40 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "调酒",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "在背包中将材料拖至“基酒”进行调制；每杯酒最多加入 3 种材料。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "生效规则",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "饮用后先触发基酒效果，再依次触发所加入材料的效果。"
+            },
+            {
+              "type": "bullet",
+              "text": "除基酒外，其他酒类与冰块只能用于调制，不能直接饮用。"
+            },
+            {
+              "type": "bullet",
+              "text": "所有附加酒类都会额外恢复 20% 理智。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#D9F1F0",
+      "order": 50
+    }
+  ]
+}

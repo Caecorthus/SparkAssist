@@ -1,0 +1,55 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:ceremonial_sword",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.ceremonial_sword.name",
+      "summaryKey": "skill.sparkwitch.ceremonial_sword.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "大魔女专属技能"
+            },
+            {
+              "type": "section",
+              "text": "启动条件",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "完成 2 个任务后解锁；使用时必须持有匕首，并消耗 150 点魔力。"
+            },
+            {
+              "type": "section",
+              "text": "仪礼剑",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "一把匕首会被替换为持续 15 秒的仪礼剑，同时获得速度 II。仪礼剑左键命中玩家会直接将其击杀。"
+            },
+            {
+              "type": "bullet",
+              "text": "持剑右键可向前突进最多 6 格并击杀途中碰到的玩家；每次突进有 5 秒物品冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "效果结束后恢复原匕首，并开始 90 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2DFF7",
+      "order": 100
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:depression",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.depression.name",
+      "summaryKey": "trait.sparktraits.depression.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "低落",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "理智流失速度变为 1.5 倍；体力上限与恢复速度变为 0.8 倍。"
+            },
+            {
+              "type": "bullet",
+              "text": "低理智时每 30 秒判定一次自毁。概率从 55 理智时的 0%，线性增加到 -20 理智时的最高 30%。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "疯魔追猎",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "被其他阵营玩家击杀时，先进入 5 秒假死，再获得速度 II、无限体力，并只能使用球棒追击凶手。"
+            },
+            {
+              "type": "bullet",
+              "text": "追猎持续到自己或凶手死亡；若击杀有效好人阵营目标，自己也会死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "成功活过追猎后，理智恢复至 70%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#6B7280",
+      "order": 860
+    }
+  ]
+}

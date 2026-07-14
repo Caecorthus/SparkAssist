@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:noisemaker",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.noisemaker",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "用你的声音警示众人。"
+            },
+            {
+              "type": "section",
+              "text": "死亡警报",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "死亡后，自己的尸体发光 60 秒，凶手发光 15 秒；所有玩家都能隔墙看见。"
+            },
+            {
+              "type": "bullet",
+              "text": "死亡时会播放全服音效，并向好人和观战玩家发送通知。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "主动技能",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "按下技能键后，所有玩家可以听见你说话 10 秒；冷却 3 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以在背包中选择一名玩家，使其高亮 30 秒；使用后冷却 80 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "选择无效、离线或已死亡目标也会消耗这次技能。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#C8FF00",
+      "order": 70
+    }
+  ]
+}

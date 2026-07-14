@@ -1,0 +1,90 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:morphling",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.morphling",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我会变成任何人……也许会以你的身份杀死你。"
+            },
+            {
+              "type": "section",
+              "text": "变形",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "可以变成任意在线且参与本局的玩家 35 秒，包括已死亡或正在观战的玩家；结束后冷却 20 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "伪装期间击杀额外奖励 30 金币；击杀自己正在模仿的对象额外奖励 60 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "也可以伪装成尸体；尸体模式会施加缓慢 III。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【变形遥控器】，右键可让所有已标记玩家变形。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "善良变化",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "伪装成杀手或内鬼后，会在杀手与内鬼眼中显示为杀手同伙，并获得对应高亮边框。"
+            },
+            {
+              "type": "bullet",
+              "text": "变成尸体后不会被本能透视发现。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "变形试剂：25 金币。试剂可以先采样玩家、尸体或自己，再标记目标。"
+            },
+            {
+              "type": "bullet",
+              "text": "使用遥控器后，目标会伪装 50 秒；伪装覆盖外观、名字、尸体和语音。"
+            },
+            {
+              "type": "bullet",
+              "text": "被标记的其他玩家在伪装期间杀人或死亡时，变形者获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "无法购买毒药瓶或蝎子。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#AA023D",
+      "order": 340
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:clairvoyance",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.clairvoyance.name",
+      "summaryKey": "skill.sparkwitch.clairvoyance.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女随机技能之一"
+            },
+            {
+              "type": "section",
+              "text": "千里眼",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 80 点魔力：其他存活玩家会以白色高亮 10 秒，你自己会以淡蓝色高亮 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒共享初始冷却；效果结束后开始 60 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#7EE8FF",
+      "order": 150
+    }
+  ]
+}

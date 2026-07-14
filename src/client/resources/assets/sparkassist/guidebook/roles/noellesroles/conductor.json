@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:conductor",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.conductor",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "身为列车长，你的首要任务是维持秩序，保障乘客安全。"
+            },
+            {
+              "type": "section",
+              "text": "列车长万能钥匙",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【列车长万能钥匙】，可以打开列车上的任何门。"
+            },
+            {
+              "type": "bullet",
+              "text": "钥匙拿在手中时对其他玩家可见；死亡后会掉落，也能被其他玩家捡起。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#FFCD54",
+      "order": 40
+    }
+  ]
+}

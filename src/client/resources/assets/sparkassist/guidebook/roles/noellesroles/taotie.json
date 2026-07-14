@@ -1,0 +1,120 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:taotie",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.taotie",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "永无止境的饥饿无法得到满足。"
+            },
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "其余存活玩家全部在胃中，或场上只剩自己存活；也可触发饕餮时刻并活到倒计时结束。"
+            },
+            {
+              "type": "section",
+              "text": "吞噬",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "技能可吞下 3 格内且视线可达的一名玩家。开局冷却 1 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "后续冷却：10 人及以下为 50 秒，40 人及以上为 20 秒，中间人数使用“60 - 开局人数”秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【中立万能钥匙】。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "胃中状态",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "被吞玩家不算死亡，会强制观看饕餮视角；他们能彼此交流、与饕餮交流并听见外界，但外界听不见他们。"
+            },
+            {
+              "type": "bullet",
+              "text": "饕餮死亡后，会在原地释放所有被吞玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "被吞玩家死亡时不生成尸体，饕餮会播放打嗝音效。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "吞噬互动",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "铁人药剂或威士忌护盾可抵挡一次吞噬；护盾被消耗，饕餮进入正常的动态冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "目标 3 格内的保镖可以牺牲自己抵挡吞噬；饕餮同样进入正常冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "吞噬炸弹持有者时，所有被吞玩家生还，饕餮被炸死。"
+            },
+            {
+              "type": "bullet",
+              "text": "饕餮或任一被吞玩家感染病原体时，所有人都会被感染。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "饕餮时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "存活人数不超过“开局总人数 ÷ 5”（最少 2 人）时触发。"
+            },
+            {
+              "type": "bullet",
+              "text": "倒计时持续 2 分钟；结束后饕餮获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "饕餮时刻期间，饕餮无法被刺客猜测。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#8B4513",
+      "order": 620
+    }
+  ]
+}

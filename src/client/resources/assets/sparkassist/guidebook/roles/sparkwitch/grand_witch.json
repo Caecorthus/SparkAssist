@@ -1,0 +1,144 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:grand_witch",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.grand_witch",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "人类杀死了我的其他血亲……我会让你们偿还。"
+            },
+            {
+              "type": "paragraph",
+              "text": "本局至少 18 名玩家时才会出现。"
+            },
+            {
+              "type": "section",
+              "text": "仪礼剑",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "完成 2 个任务后解锁。背包中必须有匕首；消耗 150 魔力，将匕首替换为仪礼剑 15 秒，并获得速度 II。"
+            },
+            {
+              "type": "bullet",
+              "text": "仪礼剑左键可直接处决玩家，没有攻击冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "右键向前突进最多 6 格，碰到玩家会直接处决；突进冷却 5 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "仪礼剑结束后恢复匕首，并开始 90 秒冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "魔力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "初始魔力为 0，每秒恢复 1 点，自然恢复上限为 300。"
+            },
+            {
+              "type": "bullet",
+              "text": "普通击杀恢复 50 魔力；击杀魔力身份（大魔女、预备魔女或杀意魔女）恢复 100 魔力。"
+            },
+            {
+              "type": "bullet",
+              "text": "共犯击杀时，所有存活的大魔女获得同等魔力奖励。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "经济与抗性",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局获得【匕首】和与杀手相同的起始金币；没有被动金币，直接击杀获得 100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "大魔女击杀时，每名存活共犯额外获得 25 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "免疫停电与巫毒诅咒。"
+            },
+            {
+              "type": "bullet",
+              "text": "拥有魔女阵营本能，并能看见隐藏的毒药陷阱。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "专属商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "左轮手枪：300 金币；开锁器：50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "毒药瓶：100 金币；蝎子：100 金币。"
+            },
+            {
+              "type": "paragraph",
+              "text": "四种法术也从该商店购买。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "法术",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "障眼：80 魔力。遮蔽非魔女的本能 30 秒；冷却 2 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "失明：80 魔力。持续 20 秒；冷却 3 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "恐惧：50 魔力。持续 10 秒，禁止非魔女使用本能、身份技能与商店，并总计降低 50 理智；冷却 5 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "沉重：60 魔力。施加缓慢 III 10 秒；冷却 3 分钟。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2DFF7",
+      "order": 500
+    }
+  ]
+}

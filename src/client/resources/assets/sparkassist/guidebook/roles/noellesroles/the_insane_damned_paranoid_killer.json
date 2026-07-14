@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:the_insane_damned_paranoid_killer",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.the_insane_damned_paranoid_killer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我能听见死者的悲鸣……"
+            },
+            {
+              "type": "paragraph",
+              "text": "当前默认禁用，正常选角不会出现。",
+              "tone": "muted"
+            },
+            {
+              "type": "section",
+              "text": "亡者之声",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "可以听见死者的语音。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#FF0000",
+      "order": 330
+    }
+  ]
+}

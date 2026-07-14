@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:fast_reload",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.fast_reload.name",
+      "summaryKey": "trait.sparktraits.fast_reload.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "快速装填",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "左轮手枪的冷却时间缩短 30%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:vigilante"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#F4A261",
+      "order": 910
+    }
+  ]
+}

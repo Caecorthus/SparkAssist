@@ -1,0 +1,79 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:bomber",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.bomber",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "天闹黑卡！板载！"
+            },
+            {
+              "type": "section",
+              "text": "定时炸弹",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "可以持续透视持有【定时炸弹】的玩家。炸弹先隐藏 10 秒，再显形并鸣响 15 秒后爆炸；转移给他人后 3 秒内不能再次转移。"
+            },
+            {
+              "type": "bullet",
+              "text": "使用定时炸弹击杀玩家可获得 150 金币。"
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "定时炸弹：100 金币；手雷：300 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "无法购买匕首、左轮手枪、毒药、蝎子和疯魔模式。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "善良变化",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "定时炸弹不再造成致命伤害。爆炸后，持有者获得 5 秒夜视，并高亮 8 格内所有玩家。"
+            },
+            {
+              "type": "section",
+              "text": "炸弹狂模式",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "价格 350 金币，购买冷却 3 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "开启后持续 20 秒：每次投掷后都会恢复同一颗无冷却手雷，不会炸死好人，发射速度变为原来的 1.5 倍。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#323232",
+      "order": 370
+    }
+  ]
+}

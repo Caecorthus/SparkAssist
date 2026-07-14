@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "id": "wathe:civilian",
+      "tab": "ROLE",
+      "sourceModId": "wathe",
+      "nameKey": "announcement.role.civilian",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你只是一名平平无奇的旅客……无论过往如何，活下去才是第一要务。"
+            },
+            {
+              "type": "section",
+              "text": "身份目标",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "没有主动技能。完成任务、寻找线索，并设法帮助更多好人阵营玩家生还。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#36E51B",
+      "order": 10
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "entries": [
+    {
+      "id": "wathe:veteran",
+      "tab": "ROLE",
+      "sourceModId": "wathe",
+      "nameKey": "announcement.role.veteran",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我的刀依旧锋利。"
+            },
+            {
+              "type": "section",
+              "text": "装备与能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "初始获得一把可使用两次的 "
+                },
+                {
+                  "text": "【匕首】",
+                  "bold": true,
+                  "tone": "item"
+                },
+                {
+                  "text": "。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "匕首右键可以直接击杀玩家，并且没有攻击冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀死好人阵营以外的玩家可获得 100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "熄灯期间获得夜视，并持续看见 10 格内有效目标的身份色边框。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "【匕首】："
+                },
+                {
+                  "text": "300 金币",
+                  "bold": true,
+                  "tone": "money"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#4A7023",
+      "order": 30
+    }
+  ]
+}

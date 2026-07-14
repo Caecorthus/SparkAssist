@@ -1,0 +1,86 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:corrupt_cop",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.corrupt_cop",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我会伸张正义……以我的方式。"
+            },
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "杀死除自己以外的所有玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "黑警存活时，即使好人或杀手一方全部死亡，另一方也无法直接获胜。"
+            },
+            {
+              "type": "section",
+              "text": "初始能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【中立万能钥匙】与【左轮手枪】，并拥有透视能力。万能钥匙每 10 秒可开启列车门或带钥匙孔的小门。"
+            },
+            {
+              "type": "bullet",
+              "text": "展示豪度：开启后仅为本人播放专属背景音乐，横向移动速度提高至原来的 1.75 倍。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以花费 150 金币购买【平板电脑】。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "处决时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "开局人数至少 10 人，且存活人数不超过“开局人数 ÷ 5”时触发。"
+            },
+            {
+              "type": "bullet",
+              "text": "播放博弈专属背景音乐，左轮冷却缩短为 2 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "获得【撬棍】，每次击杀播放处决音效。"
+            },
+            {
+              "type": "bullet",
+              "text": "每隔 20 秒获得 10 秒透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "免疫刺客猜测。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#193264",
+      "order": 610
+    }
+  ]
+}

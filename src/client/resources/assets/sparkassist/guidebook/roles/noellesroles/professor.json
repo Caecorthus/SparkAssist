@@ -1,0 +1,86 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:professor",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.professor",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你将自己奉献给科学事业。现在，是测试这些药剂的时候了。"
+            },
+            {
+              "type": "section",
+              "text": "铁人药剂",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【铁人药剂】。开局冷却 180 秒；右键使用后给予他人一层护盾。"
+            },
+            {
+              "type": "bullet",
+              "text": "铁人药剂使用后的冷却为 5 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "护盾无法阻挡误杀好人的枪击、刺客处决或巫毒诅咒。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "投喂",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可以在 1.5 格内直接投喂，也能通过背包远程选择玩家。远程成功冷却 90 秒，失败冷却 40 秒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "药剂商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "镇静试剂：50 金币，45 秒内理智不会自然流失。"
+            },
+            {
+              "type": "bullet",
+              "text": "穿门试剂：75 金币，持续 20 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "隐身试剂：125 金币，持续 15 秒；只有教授能够透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "吐真试剂：125 金币，使目标向全服播报自己的身份。"
+            },
+            {
+              "type": "bullet",
+              "text": "远程投喂冷却刷新：50 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#4682B4",
+      "order": 150
+    }
+  ]
+}

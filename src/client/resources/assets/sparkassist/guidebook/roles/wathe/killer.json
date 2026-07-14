@@ -1,0 +1,44 @@
+{
+  "entries": [
+    {
+      "id": "wathe:killer",
+      "tab": "ROLE",
+      "sourceModId": "wathe",
+      "nameKey": "announcement.role.killer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "这是你们的死期……"
+            },
+            {
+              "type": "section",
+              "text": "杀手能力",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "拥有标准杀手商店和本能透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【对讲机】，可以切换频道与其他对讲机持有者交流。"
+            },
+            {
+              "type": "bullet",
+              "text": "金币低于 200 时，每 10 秒获得 5 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#C13838",
+      "order": 300
+    }
+  ]
+}

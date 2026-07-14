@@ -1,0 +1,70 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:vulture",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.vulture",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "妈妈，我吃饱了！"
+            },
+            {
+              "type": "section",
+              "text": "吞食尸体",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "靠近至 2 格内可以吞食尸体；默认开局冷却 30 秒，每次吞食后冷却 5 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "尸体会消失并产生烟雾与灵魂粒子。"
+            },
+            {
+              "type": "bullet",
+              "text": "吞食后获得 10 秒速度 III，并高亮所有其他存活玩家 10 秒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "需要吞食的尸体数为“开局玩家数 ÷ 2”向下取整。"
+            },
+            {
+              "type": "bullet",
+              "text": "存活时达到所需数量，立即以中立身份获胜。"
+            },
+            {
+              "type": "section",
+              "text": "中立万能钥匙",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【中立万能钥匙】，可开启列车门与带钥匙孔的小门；每次使用后冷却 10 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#B56700",
+      "order": 635
+    }
+  ]
+}

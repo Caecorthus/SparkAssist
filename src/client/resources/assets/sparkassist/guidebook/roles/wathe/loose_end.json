@@ -1,0 +1,76 @@
+{
+  "entries": [
+    {
+      "id": "wathe:loose_end",
+      "tab": "ROLE",
+      "sourceModId": "wathe",
+      "nameKey": "announcement.role.loose_end",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "欢迎登车……亡命徒。"
+            },
+            {
+              "type": "section",
+              "text": "生还模式",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "在 Wathe 的【生还模式】中，所有玩家都会成为亡命徒；该模式至少需要 2 名玩家，默认限时 60 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局会清空每名玩家的物品栏，并发放【撬棍】、【德林加手枪】和【匕首】。"
+            },
+            {
+              "type": "bullet",
+              "text": "德林加手枪和匕首开局均有 60 秒冷却。"
+            },
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "淘汰其他亡命徒，成为最后一名存活玩家即可独自获胜。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "装备规则",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "在生还模式中，德林加手枪只能开火一次；匕首的开局 60 秒冷却结束后，不再进入刀刺冷却。"
+            },
+            {
+              "type": "section",
+              "text": "背水一战",
+              "tone": "good"
+            },
+            {
+              "type": "paragraph",
+              "text": "SparkTraits 的【背水一战】触发终局时，也会将触发者转化为亡命徒；额外装备与终局规则见对应天赋页面。",
+              "tone": "muted"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#9F0000",
+      "order": 605
+    }
+  ]
+}

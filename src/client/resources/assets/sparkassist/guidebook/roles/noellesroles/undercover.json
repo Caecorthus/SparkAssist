@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:undercover",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.undercover",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "隐藏在杀手之中，成为一名双料高级特工。"
+            },
+            {
+              "type": "section",
+              "text": "伪装与情报",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "没有理智值。"
+            },
+            {
+              "type": "bullet",
+              "text": "在杀手和内鬼眼中会被识别为杀手同伙。"
+            },
+            {
+              "type": "bullet",
+              "text": "不会成为连环杀手的目标，也不会获得内鬼词条。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【对讲机】，可以切换频道与其他对讲机持有者交流。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#C0C0C0",
+      "order": 110
+    }
+  ]
+}

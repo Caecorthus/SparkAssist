@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "id": "sparkassist:faction/wathe/neutral",
+      "tab": "FACTION",
+      "sourceModId": "wathe",
+      "nameKey": "guidebook.sparkassist.faction.neutral.name",
+      "summaryKey": "guidebook.sparkassist.faction.pending",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "独立胜利",
+              "tone": "money"
+            },
+            {
+              "type": "paragraph",
+              "text": "中立阵营的各身份不共享统一目标。每个身份都有自己的触发条件、猎杀对象或生存要求。"
+            },
+            {
+              "type": "bullet",
+              "text": "查看具体身份页面，确认该身份会阻止哪些阵营获胜，以及何时能够独立取胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#B567FF",
+      "order": 30
+    }
+  ]
+}

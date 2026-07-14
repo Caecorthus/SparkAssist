@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:plunderer",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.plunderer.name",
+      "summaryKey": "trait.sparktraits.plunderer.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "掠夺",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "真实击杀后，偷取死者三分之一的金币，结果向下取整。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#7F5A2A",
+      "order": 1020
+    }
+  ]
+}

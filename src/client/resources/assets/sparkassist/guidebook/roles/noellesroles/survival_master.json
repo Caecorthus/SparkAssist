@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:survival_master",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.survival_master",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "躲起来，然后急死他们！"
+            },
+            {
+              "type": "section",
+              "text": "隐匿",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "其他玩家开启本能时，只有当你位于对方视野内，才会显示高亮边框。"
+            },
+            {
+              "type": "bullet",
+              "text": "不会成为连环杀手的目标，也不会获得内鬼词条。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "生存时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "当场上不再有存活的黑警或饕餮，且存活并未被吞噬的人数不超过“开局杀手数 + 1”（最多 4 人）时，进入生存时刻。"
+            },
+            {
+              "type": "bullet",
+              "text": "生存大师免疫刺客刺杀。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀手必须在 120 秒内找到并杀死生存大师，否则好人阵营立即获胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#32B4A0",
+      "order": 170
+    }
+  ]
+}

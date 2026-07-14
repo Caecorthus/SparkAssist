@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:swapper",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.swapper",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你的目标不会知道自己将被换到哪里赴死。"
+            },
+            {
+              "type": "section",
+              "text": "交换",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "选择两名玩家并交换他们的位置；成功后冷却 60 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#3904AA",
+      "order": 320
+    }
+  ]
+}

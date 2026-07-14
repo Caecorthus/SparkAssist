@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:focus",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.focus.name",
+      "summaryKey": "trait.sparktraits.focus.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "稳定射击",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "使用左轮手枪命中目标后，不再因此损失理智。"
+            },
+            {
+              "type": "bullet",
+              "text": "只会分配给原生好人身份，且不会分配给卧底、义警或老兵。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#5DADEC",
+      "order": 850
+    }
+  ]
+}

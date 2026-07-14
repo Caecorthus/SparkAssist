@@ -1,0 +1,46 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:murder_sense",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.murder_sense.name",
+      "summaryKey": "skill.sparkwitch.murder_sense.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女随机技能之一"
+            },
+            {
+              "type": "section",
+              "text": "杀意感知",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 60 点魔力，在 15 秒内以红色高亮 20 格内主手或副手正拿着危险物品的存活玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "危险物品包括枪械、近战凶器、爆炸物、毒物，以及 SparkWitch 的仪礼剑和烧火棍。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒共享初始冷却；效果结束后开始 60 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#FF3030",
+      "order": 130
+    }
+  ]
+}

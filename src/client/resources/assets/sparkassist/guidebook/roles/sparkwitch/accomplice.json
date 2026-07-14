@@ -1,0 +1,73 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:accomplice",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.accomplice",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我会协助她完成复仇。"
+            },
+            {
+              "type": "paragraph",
+              "text": "本局至少 18 名玩家时才会出现。"
+            },
+            {
+              "type": "section",
+              "text": "魔女同伴",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "获得与杀手相同的起始金币和本能透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "金币低于 200 时，每 10 秒获得 5 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "每次直接击杀获得 100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "免疫大魔女的法术与杀手阵营发动的停电，并能看见隐藏的毒药陷阱。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "专属商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "匕首：100 金币；左轮手枪：300 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "开锁器：50 金币；撬棍：25 金币；鞭炮：25 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "4 张便签：5 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#6B338A",
+      "order": 510
+    }
+  ]
+}

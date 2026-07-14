@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "sparkassist:faction/wathe/civilian",
+      "tab": "FACTION",
+      "sourceModId": "wathe",
+      "nameKey": "guidebook.sparkassist.faction.civilian.name",
+      "summaryKey": "guidebook.sparkassist.faction.pending",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "共同目标",
+              "tone": "good"
+            },
+            {
+              "type": "paragraph",
+              "text": "完成任务、辨认威胁并尽可能让更多好人阵营玩家生还。不同身份会以调查、保护、治疗或追踪等方式提供帮助。"
+            },
+            {
+              "type": "section",
+              "text": "有效阵营",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "拥有“善良”词条的杀手会被改判为好人阵营，但仍保留原杀手身份与对应能力。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#36E51B",
+      "order": 10
+    }
+  ]
+}

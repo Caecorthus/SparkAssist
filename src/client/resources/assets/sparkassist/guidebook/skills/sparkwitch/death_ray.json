@@ -1,0 +1,46 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:death_ray",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.death_ray.name",
+      "summaryKey": "skill.sparkwitch.death_ray.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "杀意魔女专属技能"
+            },
+            {
+              "type": "section",
+              "text": "死亡射线",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒初始冷却。消耗 100 点魔力后，开启持续 10 秒、共 3 发的射线窗口。"
+            },
+            {
+              "type": "bullet",
+              "text": "窗口内左键可沿视线发射红色射线，最远 12 格；射线可击杀路径上的多名存活玩家，但会被固体方块阻挡。"
+            },
+            {
+              "type": "bullet",
+              "text": "时间结束或 3 发全部用完后，开始 60 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:murderous_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#C13838",
+      "order": 170
+    }
+  ]
+}

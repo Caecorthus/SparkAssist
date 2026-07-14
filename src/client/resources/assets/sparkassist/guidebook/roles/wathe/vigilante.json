@@ -1,0 +1,86 @@
+{
+  "entries": [
+    {
+      "id": "wathe:vigilante",
+      "tab": "ROLE",
+      "sourceModId": "wathe",
+      "nameKey": "announcement.role.vigilante",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我会保护你们的安危。"
+            },
+            {
+              "type": "section",
+              "text": "装备与能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "初始获得一把 "
+                },
+                {
+                  "text": "【左轮手枪】",
+                  "bold": true,
+                  "tone": "item"
+                },
+                {
+                  "text": "。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "枪击玩家不会扣除理智。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "可花费 150 金币购买 1 台 "
+                },
+                {
+                  "text": "【平板电脑】。",
+                  "bold": true,
+                  "tone": "item"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "平板电脑",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "每局可召开 1 次紧急会议，会议持续 100 秒；会后冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "每 45 秒可显示可疑玩家 5 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#1B8AE5",
+      "order": 20
+    }
+  ]
+}

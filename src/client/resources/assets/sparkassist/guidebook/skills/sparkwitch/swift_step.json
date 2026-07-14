@@ -1,0 +1,42 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:swift_step",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.swift_step.name",
+      "summaryKey": "skill.sparkwitch.swift_step.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女随机技能之一"
+            },
+            {
+              "type": "section",
+              "text": "滑步",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 30 点魔力，获得速度 III，持续 5 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒共享初始冷却；效果结束后开始 30 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#9CF26F",
+      "order": 120
+    }
+  ]
+}

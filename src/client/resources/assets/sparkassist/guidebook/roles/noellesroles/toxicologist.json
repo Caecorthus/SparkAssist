@@ -1,0 +1,74 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:toxicologist",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.toxicologist",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你对毒理学有着深刻研究，也练就了一双能察觉毒药痕迹的眼睛。"
+            },
+            {
+              "type": "section",
+              "text": "毒物辨识",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可以看见被下毒的食物、饮料和床铺。"
+            },
+            {
+              "type": "bullet",
+              "text": "中毒玩家会在你的眼中发出红光。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始携带【解毒剂】：开局冷却 2 分钟，后续使用冷却 3 分钟。可解除普通中毒并清除普通餐盘毒，但不能解除善良毒师的蓝毒。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "【胶囊】："
+                },
+                {
+                  "text": "100 金币",
+                  "bold": true,
+                  "tone": "money"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "胶囊可以装入一份食物或饮料。投掷命中后，目标会被强制食用其中内容；普通毒与蓝毒都会随内容生效，并以不同颜色显示毒性。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#B8295A",
+      "order": 60
+    }
+  ]
+}

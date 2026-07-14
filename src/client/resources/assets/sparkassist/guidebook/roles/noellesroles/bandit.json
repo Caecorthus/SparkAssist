@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:bandit",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.bandit",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "嘣——死了吗？"
+            },
+            {
+              "type": "section",
+              "text": "武器商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "无法购买毒药、蝎子、手雷和疯魔模式。"
+            },
+            {
+              "type": "bullet",
+              "text": "手枪：150 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "飞斧：200 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "飞斧是一次性蓄力投射物；蓄力越久速度越高，可贯穿并直接击杀多名玩家，每次命中仅损失 10% 速度，落地后无法捡回。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#5A6428",
+      "order": 400
+    }
+  ]
+}

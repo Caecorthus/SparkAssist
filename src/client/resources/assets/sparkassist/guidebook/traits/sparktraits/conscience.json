@@ -1,0 +1,60 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:conscience",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.conscience.name",
+      "summaryKey": "trait.sparktraits.conscience.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营改判",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "只能由杀手身份获得，且本局至少需要 2 名原生杀手；每局最多出现 1 名。保留原身份与能力，但有效阵营改为好人阵营。"
+            },
+            {
+              "type": "bullet",
+              "text": "撬棍冷却变为 2 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "其他玩家被确认真实死亡时，只要你仍然存活，就获得 10 金币；假死或被阻止的死亡不结算。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份专属变化",
+              "tone": "good"
+            },
+            {
+              "type": "paragraph",
+              "text": "变形者、炸弹客、连环杀手和毒师会获得与原身份对应的善良化能力。具体效果请查看各自的身份页面。"
+            },
+            {
+              "type": "paragraph",
+              "text": "指南书仍会分别标记你的原身份与“善良”词条；善良杀手不是一个独立身份。",
+              "tone": "muted"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#FFDEF8",
+      "order": 700
+    }
+  ]
+}

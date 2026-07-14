@@ -1,0 +1,69 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:jester",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.jester",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你才是真正的 Clown！"
+            },
+            {
+              "type": "section",
+              "text": "禁锢模式",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "被符合条件的好人阵营玩家枪击后，先进入 5 秒假死观战状态；猎魔枪命中不会触发该转化。"
+            },
+            {
+              "type": "bullet",
+              "text": "随后在死亡地点定身 3 秒，再进入疯魔模式并持续透视开枪者；与此同时，所有玩家都能看见小丑的高亮边框。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "疯魔模式",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "初始持续 60 秒，拥有 3 倍体力上限且持续补充体力，实际可无限奔跑；期间可以打开任意门锁。"
+            },
+            {
+              "type": "bullet",
+              "text": "初始护盾层数为“开局人数 ÷ 6”，最多 3 层。"
+            },
+            {
+              "type": "bullet",
+              "text": "每次击杀延长 30 秒；奇数次击杀还会增加 1 层护盾，最多 3 层。"
+            },
+            {
+              "type": "bullet",
+              "text": "倒计时结束后立即死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "场上不再有其他存活且未被吞噬的玩家时获胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#F8C8DC",
+      "order": 640
+    }
+  ]
+}

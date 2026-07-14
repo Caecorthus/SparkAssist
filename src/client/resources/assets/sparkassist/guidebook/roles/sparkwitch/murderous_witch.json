@@ -1,0 +1,116 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:murderous_witch",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.murderous_witch",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我再也无法承受这种高压了……"
+            },
+            {
+              "type": "paragraph",
+              "text": "本局至少 24 名玩家时才会出现。"
+            },
+            {
+              "type": "section",
+              "text": "胜利与本能",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "胜利条件是成为唯一存活者。杀意魔女存活时，会阻止好人阵营或杀手阵营按常规条件获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "本能会以红色高亮其他所有存活玩家；免疫停电，并能看见隐藏的毒药陷阱。"
+            },
+            {
+              "type": "bullet",
+              "text": "拥有被动金币和直接击杀金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "专属商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "匕首：100 金币；左轮手枪：300 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "开锁器：50 金币；撬棍：25 金币；飞斧：150 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "死亡射线",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "开局冷却 60 秒。消耗 100 魔力，开启持续 10 秒的射线窗口。"
+            },
+            {
+              "type": "bullet",
+              "text": "窗口内拥有 3 发、射程 12 格的射线；左键发射，可贯穿并处决直线上的多个玩家，但会被墙体阻挡。"
+            },
+            {
+              "type": "section",
+              "text": "魔力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "初始为 0，每 2 秒恢复 1 点，自然恢复上限为 150。"
+            },
+            {
+              "type": "bullet",
+              "text": "普通击杀恢复 25 魔力；击杀拥有魔力的身份恢复 50 魔力。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "烧火棍",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "商店价格 50 金币；必定造成强力击退，冷却 10 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "若拥有至少 20 魔力，会自动扣除 20 魔力，使目标失明并获得缓慢 III 3 秒，同时自己获得速度 III 3 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "魔力不足时仍可正常击退。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#7A3857",
+      "order": 600
+    }
+  ]
+}

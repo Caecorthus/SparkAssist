@@ -1,0 +1,53 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:time_keeper",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.time_keeper",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你的钟向来很准。"
+            },
+            {
+              "type": "section",
+              "text": "时间控制",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可以看到本局剩余时间。"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 100 金币，可使对局时间减少 45 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "内鬼变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "获得内鬼词条后，花费 100 金币会使对局时间增加 45 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#0026FF",
+      "order": 120
+    }
+  ]
+}

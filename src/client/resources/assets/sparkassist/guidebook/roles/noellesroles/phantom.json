@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:phantom",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.phantom",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我隐匿于无形。"
+            },
+            {
+              "type": "section",
+              "text": "隐身",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "开启技能后隐身 30 秒，随后冷却 90 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "隐身期间依然保留实体碰撞箱。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#500505",
+      "order": 310
+    }
+  ]
+}

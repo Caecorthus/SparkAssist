@@ -1,0 +1,45 @@
+{
+  "entries": [
+    {
+      "id": "sparkassist:faction/wathe/killer",
+      "tab": "FACTION",
+      "sourceModId": "wathe",
+      "nameKey": "guidebook.sparkassist.faction.killer.name",
+      "summaryKey": "guidebook.sparkassist.faction.pending",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "共同目标",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "隐藏身份、协同猎杀好人阵营玩家，并清除其他会阻止杀手阵营获胜的威胁。"
+            },
+            {
+              "type": "section",
+              "text": "阵营能力",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "通常拥有本能透视、杀手商店、同伙通讯和被动金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "内鬼会被有效改判为杀手阵营；拥有“善良”的杀手则会改判为好人阵营。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "wathe"
+      ],
+      "color": "#C13838",
+      "order": 20
+    }
+  ]
+}

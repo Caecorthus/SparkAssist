@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:attendant",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.attendant",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你的册子记录了每一个人。"
+            },
+            {
+              "type": "section",
+              "text": "初始物品",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "【乘客名单】会显示每位玩家所在的房间。"
+            },
+            {
+              "type": "bullet",
+              "text": "【手电筒】可以照亮一定范围；手持且开启时，免疫熄灯带来的负面效果。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#6495ED",
+      "order": 160
+    }
+  ]
+}

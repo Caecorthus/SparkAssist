@@ -1,0 +1,42 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:mighty_force",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.mighty_force.name",
+      "summaryKey": "skill.sparkwitch.mighty_force.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女随机技能之一"
+            },
+            {
+              "type": "section",
+              "text": "巨力",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 80 点魔力，开启 10 秒攻击窗口。空手左键一名玩家会将其猛烈击退并直接击杀，随后立刻结束窗口。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒共享初始冷却；使用后的技能冷却为 60 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#75EDFA",
+      "order": 110
+    }
+  ]
+}

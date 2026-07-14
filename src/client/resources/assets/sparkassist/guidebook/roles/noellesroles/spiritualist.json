@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:spiritualist",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.spiritualist",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "穿梭于人间与灵界之间。"
+            },
+            {
+              "type": "section",
+              "text": "灵魂出窍",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可以灵魂出窍或返回肉身，冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "灵魂可以飞行并穿墙，但只能在肉身 30 格内及游玩区域内活动。"
+            },
+            {
+              "type": "bullet",
+              "text": "出窍期间不能攻击、使用物品或切换快捷栏；其他玩家都会显示为不带名字的默认 Steve 外观。"
+            },
+            {
+              "type": "bullet",
+              "text": "肉身受伤、死亡、被吞噬或发生位移时，会被强制拉回肉身。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#A064DC",
+      "order": 210
+    }
+  ]
+}

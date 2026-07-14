@@ -1,0 +1,48 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:recaller",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.recaller",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你可以回溯一切，力挽狂澜吗？"
+            },
+            {
+              "type": "section",
+              "text": "回溯",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "按技能键设置一个存档点。"
+            },
+            {
+              "type": "bullet",
+              "text": "等待 10 秒后，再次按下技能键并消耗 100 金币，可传送回存档位置。"
+            },
+            {
+              "type": "bullet",
+              "text": "读档后冷却 30 秒，随后才能再次设置存档点。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#9EFFFF",
+      "order": 80
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:poisoner",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.poisoner",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "啊哈哈哈哈，鸡汤来喽！"
+            },
+            {
+              "type": "section",
+              "text": "毒物专家",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "无法购买匕首、左轮手枪、手雷或疯魔模式；免疫毒气。"
+            },
+            {
+              "type": "bullet",
+              "text": "毒针：100 金币，限购 1 个；毒气弹：225 金币；催化剂：100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "蝎子与毒药的价格均为 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "新的目标成功进入中毒状态时，额外获得 100 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "毒针与催化剂",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "毒针可重复使用：初始冷却 60 秒，使用后 45 秒。新目标中毒 40 秒；已中毒目标会减少 40 秒剩余时间。"
+            },
+            {
+              "type": "bullet",
+              "text": "催化剂为一次性物品，可将已中毒目标的倒计时设为 5 秒，并重置毒针冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "善良变化",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "蝎子、毒药和毒气弹会改为蓝毒：只会使好人阵营以外的玩家中毒。"
+            },
+            {
+              "type": "bullet",
+              "text": "受到蓝毒影响的玩家会显示淡蓝色边框。"
+            },
+            {
+              "type": "bullet",
+              "text": "可花费 75 金币购买不限量【佳酿】；饮用后理智恢复至 100%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#1E5014",
+      "order": 390
+    }
+  ]
+}

@@ -1,23 +1,21 @@
 package dev.caecorthus.sparkassist.client.guidebook;
 
+import dev.caecorthus.sparkassist.client.guidebook.data.GuidebookResourceLoader;
 import dev.caecorthus.sparkassist.guidebook.GuidebookCatalog;
+import dev.caecorthus.sparkassist.guidebook.GuidebookDiscoveryRules;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.api.WatheRoles;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +31,7 @@ public final class GuidebookRuntimeCatalog {
     }
 
     public static GuidebookCatalog load(MinecraftClient client) {
-        GuidebookCatalog authored = loadAuthoredEntries(client);
+        GuidebookCatalog authored = GuidebookResourceLoader.load(client.getResourceManager());
         Set<String> authoredIds = new HashSet<>();
         authored.entries().forEach(entry -> authoredIds.add(entry.id()));
 
@@ -56,34 +54,11 @@ public final class GuidebookRuntimeCatalog {
                 "skill"
         );
 
-        GuidebookCatalog combined = GuidebookCatalog.merge(List.of(
+        return GuidebookCatalog.mergeAuthoredWithAvailableDiscoveries(
                 authored,
-                GuidebookCatalog.of(discovered)
-        ));
-        return combined.availableFor(loadedModIds());
-    }
-
-    private static GuidebookCatalog loadAuthoredEntries(MinecraftClient client) {
-        Map<Identifier, Resource> resources = client.getResourceManager().findResources(
-                "guidebook",
-                id -> id.getPath().endsWith(".json")
+                GuidebookCatalog.of(discovered),
+                loadedModIds()
         );
-        List<GuidebookCatalog> catalogs = new ArrayList<>();
-        resources.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.comparing(Identifier::toString)))
-                .forEach(entry -> {
-                    try (var reader = entry.getValue().getReader()) {
-                        catalogs.add(GuidebookCatalog.parse(reader.lines().reduce("", (left, right) -> left + right)));
-                    } catch (IOException | RuntimeException exception) {
-                        LOGGER.error("Could not load guidebook resource {}", entry.getKey(), exception);
-                    }
-                });
-        try {
-            return GuidebookCatalog.merge(catalogs);
-        } catch (IllegalArgumentException exception) {
-            LOGGER.error("Guidebook resources contain duplicate entry ids", exception);
-            return GuidebookCatalog.of(List.of());
-        }
     }
 
     private static void discoverRoles(List<GuidebookEntry> entries, Set<String> authoredIds) {
@@ -108,6 +83,7 @@ public final class GuidebookRuntimeCatalog {
                     ),
                     List.of(),
                     List.of(id.getNamespace()),
+                    role.color() & 0xFFFFFF,
                     order++
             ));
         }
@@ -131,11 +107,15 @@ public final class GuidebookRuntimeCatalog {
             int order = 1_000;
             for (Object value : values) {
                 Identifier id = (Identifier) value.getClass().getMethod("id").invoke(value);
-                if (authoredIds.contains(id.toString())) {
+                // Pig chase belongs to Pig God, not to the witch-only skill index.
+                // 皮革追杀属于猪神，不应进入仅收录魔女技能的目录。
+                if (authoredIds.contains(id.toString())
+                        || !GuidebookDiscoveryRules.includes(tab, id.toString())) {
                     continue;
                 }
                 String path = id.getPath().replace('/', '.');
                 String baseKey = translationPrefix + "." + id.getNamespace() + "." + path;
+                int color = ((Number) value.getClass().getMethod("color").invoke(value)).intValue() & 0xFFFFFF;
                 entries.add(new GuidebookEntry(
                         id.toString(),
                         tab,
@@ -145,6 +125,7 @@ public final class GuidebookRuntimeCatalog {
                         List.of(baseKey + ".description"),
                         ownerRoleIds(tab, id),
                         List.of(modId),
+                        color,
                         order++
                 ));
             }
@@ -163,7 +144,6 @@ public final class GuidebookRuntimeCatalog {
             case "ceremonial_sword" -> List.of("sparkwitch:grand_witch");
             case "mighty_force", "swift_step", "murder_sense", "healing", "clairvoyance" ->
                     List.of("sparkwitch:apprentice_witch");
-            case "pig_chase" -> List.of("sparkwitch:pig_god");
             case "death_ray" -> List.of("sparkwitch:murderous_witch");
             default -> List.of();
         };

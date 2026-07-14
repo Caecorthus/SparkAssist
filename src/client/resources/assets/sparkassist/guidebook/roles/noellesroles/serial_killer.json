@@ -1,0 +1,69 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:serial_killer",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.serial_killer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "我看见你了。你跑不掉的。"
+            },
+            {
+              "type": "section",
+              "text": "猎杀目标",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "随机获得一名目标，并持续透视该玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀死目标后获得 150 金币，并减少一半刀刺冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "善良变化",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "只会拥有一个目标，且该目标必定属于好人阵营；你的任务是保护这名玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "目标死亡后，你会得知凶手身份，并持续追踪凶手。"
+            },
+            {
+              "type": "bullet",
+              "text": "亲自杀死凶手可获得 200 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "击杀其他可奖励的非好人目标时获得 150 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "疯魔模式价格降低至 250 金币。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#662222",
+      "order": 380
+    }
+  ]
+}

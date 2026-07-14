@@ -1,0 +1,46 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:healing",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.healing.name",
+      "summaryKey": "skill.sparkwitch.healing.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女随机技能之一"
+            },
+            {
+              "type": "section",
+              "text": "疗愈",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 40 点魔力，展开持续 20 秒的疗愈光环。"
+            },
+            {
+              "type": "bullet",
+              "text": "光环每秒为 8 格内仍然存活的好人阵营玩家恢复 3 点理智，最高恢复至满值。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局先进入 60 秒共享初始冷却；效果结束后开始 120 秒技能冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#6DF2A2",
+      "order": 140
+    }
+  ]
+}

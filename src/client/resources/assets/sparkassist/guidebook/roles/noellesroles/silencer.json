@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:silencer",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.silencer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "让目标闭嘴。"
+            },
+            {
+              "type": "section",
+              "text": "沉默",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "对准 3 格内且视线可达的玩家使用技能，可以将其标记 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "标记期间再次使用技能，即使目标已离开视线或范围，也会使其沉默 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "技能开局冷却 45 秒；每次成功沉默后再次冷却 45 秒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "沉默效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "被沉默者无法在语音聊天中说话或听见其他玩家，也无法进食或饮酒。"
+            },
+            {
+              "type": "bullet",
+              "text": "被沉默者的理智消耗速度翻倍。"
+            },
+            {
+              "type": "section",
+              "text": "静默疯魔",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 350 金币可购买【疯魔模式】，购买冷却 5 分钟。"
+            },
+            {
+              "type": "bullet",
+              "text": "该疯魔不触发全服 BGM、不计入公开疯魔计数，也不会被猎魔人高亮；猎魔人仍会获得猎魔枪。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "SparkTraits 联动",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "安装 SparkTraits 后，被静语且属于有效杀手阵营的玩家，在静语持续期间无法购买物品，也无法使用受支持的主动身份技能。"
+            },
+            {
+              "type": "bullet",
+              "text": "获得【善良】的静语者属于有效好人，因此不受上述技能与商店封锁；但原有的语音、进食、饮酒和理智消耗限制仍然生效。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#50466E",
+      "order": 382
+    }
+  ]
+}

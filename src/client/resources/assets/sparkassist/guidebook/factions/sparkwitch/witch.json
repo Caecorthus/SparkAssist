@@ -1,0 +1,39 @@
+{
+  "entries": [
+    {
+      "id": "sparkassist:faction/sparkwitch/witch",
+      "tab": "FACTION",
+      "sourceModId": "sparkwitch",
+      "nameKey": "guidebook.sparkassist.faction.witch.name",
+      "summaryKey": "guidebook.sparkassist.faction.pending",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "复仇同盟",
+              "tone": "info"
+            },
+            {
+              "type": "paragraph",
+              "text": "大魔女与共犯组成独立的魔女阵营。两者共享胜利目标，并通过魔力、法术、专属商店和阵营免疫互相支援。"
+            },
+            {
+              "type": "bullet",
+              "text": "大魔女负责施法与处决；共犯承担直接击杀，并提供经济与正面作战支援。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch",
+        "sparkwitch:accomplice"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#E9D5F0",
+      "order": 40
+    }
+  ]
+}

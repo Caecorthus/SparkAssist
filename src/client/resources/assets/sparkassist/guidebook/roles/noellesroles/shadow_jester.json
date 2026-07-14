@@ -1,0 +1,82 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:shadow_jester",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.shadow_jester",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "一起，或厮杀。"
+            },
+            {
+              "type": "section",
+              "text": "双生身份",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "影子小丑一定成双出现，两人可以互相透视。12 至 17 人时与普通小丑互斥；18 人及以上时替代普通小丑。"
+            },
+            {
+              "type": "bullet",
+              "text": "每人开局有 3 个任务；完成第 4 个任务后获得【匕首】，但只能用来刺杀另一位影子小丑。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "结盟或背叛",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "双方拿到匕首后，依次瞄准对方并按 G。先提议者成为影瞳，后接受者成为影刃。"
+            },
+            {
+              "type": "bullet",
+              "text": "结盟后命运相连：任意一人死亡，另一人也会死亡。影瞳获得本能透视；影刃获得【匕首】和【德林加】。"
+            },
+            {
+              "type": "bullet",
+              "text": "尚未结盟时，任意一人因任何原因死亡，另一人都会转化为普通小丑。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "双影谢幕时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "当场上只剩杀手阵营、魔女阵营和触发背水一战的好人亡命徒时触发。"
+            },
+            {
+              "type": "bullet",
+              "text": "两位影子小丑都会获得【匕首】、【德林加】和本能透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀死其他所有人，并与你的搭档共同活到最后。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#BE1E5A",
+      "order": 650
+    }
+  ]
+}

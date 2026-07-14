@@ -1,0 +1,61 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:voodoo",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.voodoo",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "这种古老诅咒，会让伤害你的人付出残酷代价。"
+            },
+            {
+              "type": "section",
+              "text": "巫毒绑定",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "选择一名玩家与你绑定。你被击杀时，目标会收到警告，并在 5 秒后死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "切换绑定目标有 30 秒冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "无法触发的情况",
+              "tone": "muted"
+            },
+            {
+              "type": "bullet",
+              "text": "主动卧轨。"
+            },
+            {
+              "type": "bullet",
+              "text": "被刺客刺杀。"
+            },
+            {
+              "type": "bullet",
+              "text": "绑定目标是大魔女。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#8072FD",
+      "order": 100
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:awesome_binglus",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.awesome_binglus",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "格调制造机。"
+            },
+            {
+              "type": "paragraph",
+              "text": "当前默认禁用，正常选角不会出现。",
+              "tone": "muted"
+            },
+            {
+              "type": "section",
+              "text": "初始物品",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "开局拥有 16 张【便签】。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#9BFFA8",
+      "order": 130
+    }
+  ]
+}

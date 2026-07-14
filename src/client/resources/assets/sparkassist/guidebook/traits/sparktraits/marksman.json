@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:marksman",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.marksman.name",
+      "summaryKey": "trait.sparktraits.marksman.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "射程强化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "左轮手枪与德林加的射程提高 30%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:vigilante"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#D6C27A",
+      "order": 900
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:niko",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.niko.name",
+      "summaryKey": "trait.sparktraits.niko.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "蹲伏射击",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "蹲下时获得夜视，左轮手枪与德林加的射程变为 300 格。"
+            },
+            {
+              "type": "bullet",
+              "text": "蹲下使用左轮手枪射击时会进行三连发，后坐力降低 90%，随后进入 60 秒冷却。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:vigilante"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#39FF14",
+      "order": 930
+    }
+  ]
+}

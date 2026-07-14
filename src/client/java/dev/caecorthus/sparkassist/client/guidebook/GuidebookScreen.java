@@ -1,11 +1,13 @@
 package dev.caecorthus.sparkassist.client.guidebook;
 
 import dev.caecorthus.sparkassist.SparkAssist;
+import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer;
 import dev.caecorthus.sparkassist.guidebook.GuidebookCatalog;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSearch;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSessionState;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookPage;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.DrawContext;
@@ -18,8 +20,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 /**
- * Responsive, data-backed guidebook screen with mirrored tabs and personal round markers.
- * 支持响应式布局、镜像书签与本局个人标记的数据化指南书界面。
+ * Responsive, data-backed guidebook screen with left-edge tabs and personal round markers.
+ * 支持响应式布局、左侧书签与本局个人标记的数据化指南书界面。
  */
 public final class GuidebookScreen extends Screen {
     private static final Identifier BOOK_FRAME = SparkAssist.id("textures/gui/guidebook/book_frame.png");
@@ -220,8 +222,8 @@ public final class GuidebookScreen extends Screen {
     private void renderTabs(DrawContext context, int mouseX, int mouseY) {
         renderTab(context, GuidebookTab.ROLE, leftTabX(), tabY(0), mouseX, mouseY);
         renderTab(context, GuidebookTab.FACTION, leftTabX(), tabY(1), mouseX, mouseY);
-        renderTab(context, GuidebookTab.SKILL, rightTabX(), tabY(0), mouseX, mouseY);
-        renderTab(context, GuidebookTab.TRAIT, rightTabX(), tabY(1), mouseX, mouseY);
+        renderTab(context, GuidebookTab.SKILL, leftTabX(), tabY(2), mouseX, mouseY);
+        renderTab(context, GuidebookTab.TRAIT, leftTabX(), tabY(3), mouseX, mouseY);
     }
 
     private void renderTab(
@@ -235,15 +237,7 @@ public final class GuidebookScreen extends Screen {
         boolean selected = activeTab == tab;
         boolean hovered = inside(mouseX, mouseY, x, y, TAB_WIDTH, TAB_HEIGHT);
         Identifier texture = selected || hovered ? TAB_SELECTED : TAB_UNSELECTED;
-        if (tab == GuidebookTab.SKILL || tab == GuidebookTab.TRAIT) {
-            context.getMatrices().push();
-            context.getMatrices().translate(x + TAB_WIDTH, 0, 0);
-            context.getMatrices().scale(-1.0F, 1.0F, 1.0F);
-            context.drawTexture(texture, 0, y, 0, 0, TAB_WIDTH, TAB_HEIGHT, TAB_WIDTH, TAB_HEIGHT);
-            context.getMatrices().pop();
-        } else {
-            context.drawTexture(texture, x, y, 0, 0, TAB_WIDTH, TAB_HEIGHT, TAB_WIDTH, TAB_HEIGHT);
-        }
+        context.drawTexture(texture, x, y, 0, 0, TAB_WIDTH, TAB_HEIGHT, TAB_WIDTH, TAB_HEIGHT);
         Text label = Text.translatable(tabTranslationKey(tab));
         String labelText = this.textRenderer.trimToWidth(label.getString(), TAB_WIDTH - 6);
         int textX = x + (TAB_WIDTH - this.textRenderer.getWidth(labelText)) / 2;
@@ -273,7 +267,7 @@ public final class GuidebookScreen extends Screen {
                 int availableNameWidth = leftPageWidth - 10 - (marked ? 10 : 0);
                 String fullName = chineseString(entry.nameKey());
                 String name = this.textRenderer.trimToWidth(fullName, Math.max(12, availableNameWidth));
-                context.drawText(this.textRenderer, name, leftPageX + 5, y + 3, TEXT_COLOR, false);
+                context.drawText(this.textRenderer, name, leftPageX + 5, y + 3, entryColor(entry), false);
                 if (marked) {
                     context.drawText(
                             this.textRenderer,
@@ -352,29 +346,50 @@ public final class GuidebookScreen extends Screen {
 
         String title = chineseString(selectedEntry.nameKey());
         title = this.textRenderer.trimToWidth(title, Math.max(20, rightPageWidth - 23));
-        context.drawText(this.textRenderer, title, rightPageX + 3, rightPageY + 3, TEXT_COLOR, false);
+        context.drawText(this.textRenderer, title, rightPageX + 3, rightPageY + 3, entryColor(selectedEntry), false);
         String source = Text.translatable("guidebook.sparkassist.source", selectedEntry.sourceModId()).getString();
         source = this.textRenderer.trimToWidth(source, Math.max(20, rightPageWidth - 6));
         context.drawText(this.textRenderer, source, rightPageX + 3, rightPageY + 15, MUTED_COLOR, false);
 
-        List<String> pages = selectedEntry.pageKeys().isEmpty()
-                ? List.of(selectedEntry.summaryKey())
-                : selectedEntry.pageKeys();
-        selectedPage = MathHelper.clamp(selectedPage, 0, pages.size() - 1);
+        int pageCount = pageCount(selectedEntry);
+        selectedPage = MathHelper.clamp(selectedPage, 0, pageCount - 1);
         int contentY = rightPageY + 31;
         int contentHeight = Math.max(20, rightPageHeight - 49);
-        List<OrderedText> lines = wrappedLines(chineseText(pages.get(selectedPage)), rightPageWidth - 8);
-        rightContentHeight = lines.size() * (this.textRenderer.fontHeight + 2);
-        rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
-
         context.enableScissor(rightPageX, contentY, rightPageX + rightPageWidth, contentY + contentHeight);
-        int y = contentY - rightScroll;
-        for (OrderedText line : lines) {
-            context.drawText(this.textRenderer, line, rightPageX + 4, y, TEXT_COLOR, false);
-            y += this.textRenderer.fontHeight + 2;
+        if (!selectedEntry.pages().isEmpty()) {
+            GuidebookPage page = selectedEntry.pages().get(selectedPage);
+            GuidebookContentRenderer.Layout layout = GuidebookContentRenderer.layout(
+                    page,
+                    this.textRenderer,
+                    rightPageWidth - 8
+            );
+            rightContentHeight = layout.height();
+            rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
+            for (GuidebookContentRenderer.RenderedLine line : layout.lines()) {
+                context.drawText(
+                        this.textRenderer,
+                        line.text(),
+                        rightPageX + 4 + line.indent(),
+                        contentY + line.y() - rightScroll,
+                        0xFFFFFFFF,
+                        false
+                );
+            }
+        } else {
+            List<String> pages = selectedEntry.pageKeys().isEmpty()
+                    ? List.of(selectedEntry.summaryKey())
+                    : selectedEntry.pageKeys();
+            List<OrderedText> lines = wrappedLines(chineseText(pages.get(selectedPage)), rightPageWidth - 8);
+            rightContentHeight = lines.size() * (this.textRenderer.fontHeight + 2);
+            rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
+            int y = contentY - rightScroll;
+            for (OrderedText line : lines) {
+                context.drawText(this.textRenderer, line, rightPageX + 4, y, TEXT_COLOR, false);
+                y += this.textRenderer.fontHeight + 2;
+            }
         }
         context.disableScissor();
-        renderPageNavigation(context, mouseX, mouseY, pages.size());
+        renderPageNavigation(context, mouseX, mouseY, pageCount);
     }
 
     private void renderCredits(DrawContext context) {
@@ -512,7 +527,7 @@ public final class GuidebookScreen extends Screen {
         }
 
         if (!creditsOpen && selectedEntry != null) {
-            int pageCount = Math.max(1, selectedEntry.pageKeys().size());
+            int pageCount = pageCount(selectedEntry);
             if (inside(x, y, previousX(), navY(), NAV_WIDTH, NAV_HEIGHT) && selectedPage > 0) {
                 selectedPage--;
                 rightScroll = 0;
@@ -559,6 +574,17 @@ public final class GuidebookScreen extends Screen {
         session.rememberViewPosition(selectedPage, leftScroll, rightScroll);
     }
 
+    private static int pageCount(GuidebookEntry entry) {
+        if (!entry.pages().isEmpty()) {
+            return entry.pages().size();
+        }
+        return Math.max(1, entry.pageKeys().size());
+    }
+
+    private static int entryColor(GuidebookEntry entry) {
+        return 0xFF000000 | entry.color();
+    }
+
     private List<String> localizedOwnerRoleNames(GuidebookEntry entry) {
         return entry.ownerRoleIds().stream().map(roleId -> {
             int separator = roleId.indexOf(':');
@@ -601,10 +627,6 @@ public final class GuidebookScreen extends Screen {
         return bookX - TAB_WIDTH + 9;
     }
 
-    private int rightTabX() {
-        return bookX + bookWidth - 9;
-    }
-
     private int tabY(int index) {
         return bookY + 17 + index * (TAB_HEIGHT + TAB_GAP);
     }
@@ -616,10 +638,10 @@ public final class GuidebookScreen extends Screen {
         if (inside(mouseX, mouseY, leftTabX(), tabY(1), TAB_WIDTH, TAB_HEIGHT)) {
             return GuidebookTab.FACTION;
         }
-        if (inside(mouseX, mouseY, rightTabX(), tabY(0), TAB_WIDTH, TAB_HEIGHT)) {
+        if (inside(mouseX, mouseY, leftTabX(), tabY(2), TAB_WIDTH, TAB_HEIGHT)) {
             return GuidebookTab.SKILL;
         }
-        if (inside(mouseX, mouseY, rightTabX(), tabY(1), TAB_WIDTH, TAB_HEIGHT)) {
+        if (inside(mouseX, mouseY, leftTabX(), tabY(3), TAB_WIDTH, TAB_HEIGHT)) {
             return GuidebookTab.TRAIT;
         }
         return null;

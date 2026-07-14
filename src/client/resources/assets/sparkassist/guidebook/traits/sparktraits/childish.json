@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:childish",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.childish.name",
+      "summaryKey": "trait.sparktraits.childish.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "体型",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "体型缩小 10%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#FF9ACD",
+      "order": 740
+    }
+  ]
+}

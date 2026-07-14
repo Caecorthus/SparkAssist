@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:steady",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.steady.name",
+      "summaryKey": "trait.sparktraits.steady.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "理智上限",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "真实理智上限提高至 125%。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#6AA6FF",
+      "order": 760
+    }
+  ]
+}

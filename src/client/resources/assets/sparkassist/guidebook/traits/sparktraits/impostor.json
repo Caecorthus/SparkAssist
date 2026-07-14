@@ -1,0 +1,84 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:impostor",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.impostor.name",
+      "summaryKey": "trait.sparktraits.impostor.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营改判",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "与杀手阵营共同获胜，并获得本能透视。"
+            },
+            {
+              "type": "bullet",
+              "text": "在杀手的本能透视中显示为蓝色边框。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以分别花费 150 金币购买【左轮手枪】和【平板电脑】，但不能通过拾取等免费方式获得枪械。"
+            },
+            {
+              "type": "bullet",
+              "text": "有效理智改为假理智；停电时获得夜视，而不是失明。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "经济",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务获得 50 金币；若原身份已有原生任务奖励，则保留原奖励而不重复发放。"
+            },
+            {
+              "type": "bullet",
+              "text": "可以使用商店时，击杀公开非杀手阵营玩家获得 100 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "计时员购买“减少时间”时会改为增加时间。"
+            },
+            {
+              "type": "bullet",
+              "text": "保镖不再为目标牺牲；指定目标死亡时，存活的内鬼保镖获得 100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "所有真实原生杀手都死亡后，仍存活的内鬼会因自我醒悟而死亡。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#7D0000",
+      "order": 810
+    }
+  ]
+}

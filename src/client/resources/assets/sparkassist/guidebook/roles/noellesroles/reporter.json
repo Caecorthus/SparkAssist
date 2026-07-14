@@ -1,0 +1,49 @@
+{
+  "entries": [
+    {
+      "id": "noellesroles:reporter",
+      "tab": "ROLE",
+      "sourceModId": "noellesroles",
+      "nameKey": "announcement.role.reporter",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "你们藏不住了。"
+            },
+            {
+              "type": "section",
+              "text": "追踪",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "可以标记一名玩家并持续透视；使用后冷却 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 50 金币购买 4 张【便签】。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "noellesroles"
+      ],
+      "color": "#D2B464",
+      "order": 140
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:apprentice_witch",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.apprentice_witch",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "典狱长特例允许你们出游一次……可是，典狱长呢？"
+            },
+            {
+              "type": "section",
+              "text": "魔力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "每 3 秒恢复 1 点魔力；完成任务恢复 20 点魔力；自然恢复上限为 100。"
+            },
+            {
+              "type": "bullet",
+              "text": "不会获得任何词条。"
+            },
+            {
+              "type": "paragraph",
+              "text": "开局会从五种魔女技能中随机获得一种；无论抽到哪一种，都会先进入共享的 60 秒初始冷却。",
+              "tone": "muted"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "进攻与机动",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "巨力：80 魔力。10 秒内可左键锤杀一名玩家；使用后冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "滑步：30 魔力。获得速度 III 5 秒；冷却 30 秒。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "侦测与支援",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "杀意感知：60 魔力。红色高亮 20 格内手持危险物品的玩家 15 秒；冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "疗愈：40 魔力。20 秒内每秒为 8 格内的好人阵营玩家恢复 3 点理智；冷却 120 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "千里眼：80 魔力。白色高亮其他存活玩家 10 秒，自己淡蓝色高亮 30 秒；冷却 60 秒。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#75EDFA",
+      "order": 240
+    }
+  ]
+}
