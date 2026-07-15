@@ -24,7 +24,7 @@ class GuidebookLocalizationResourcesTest {
     @Test
     void bothLocalesProvideChineseFallbackNamesForEveryAuthoredEntry() throws IOException {
         Set<String> nameKeys = authoredNameKeys();
-        assertEquals(92, nameKeys.size());
+        assertEquals(93, nameKeys.size());
 
         for (String locale : List.of("zh_cn", "en_us")) {
             JsonObject translations = JsonParser.parseString(
@@ -32,6 +32,7 @@ class GuidebookLocalizationResourcesTest {
             ).getAsJsonObject();
             assertTrue(nameKeys.stream().allMatch(translations::has), locale);
             assertEquals("调香师", translations.get("announcement.role.perfumer").getAsString());
+            assertEquals("忍者", translations.get("announcement.role.ninja").getAsString());
             assertEquals("灵探", translations.get("trait.sparktraits.spirit_sleuth.name").getAsString());
         }
     }

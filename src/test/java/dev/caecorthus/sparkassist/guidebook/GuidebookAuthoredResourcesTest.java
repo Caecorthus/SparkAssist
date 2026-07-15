@@ -24,11 +24,11 @@ class GuidebookAuthoredResourcesTest {
                     .toList();
         }
 
-        assertEquals(92, resources.size());
+        assertEquals(93, resources.size());
         GuidebookCatalog catalog = GuidebookCatalog.merge(resources.stream()
                 .map(GuidebookAuthoredResourcesTest::parse)
                 .toList());
-        assertEquals(92, catalog.entries().size());
+        assertEquals(93, catalog.entries().size());
         assertEquals(31, catalog.entries().stream()
                 .filter(entry -> entry.tab() == GuidebookTab.TRAIT)
                 .count());
@@ -101,6 +101,55 @@ class GuidebookAuthoredResourcesTest {
         int killer = ids.indexOf("wathe:killer");
         assertTrue(apprenticeWitch < perfumerIndex);
         assertTrue(perfumerIndex < killer);
+    }
+
+    @Test
+    void includesNinjaBetweenBanditAndGrandWitchInTheKillerBlock() throws IOException {
+        Path resource = GUIDEBOOK_ROOT.resolve("roles/sparkwitch/ninja.json");
+        GuidebookEntry ninja = parse(resource).find("sparkwitch:ninja").orElseThrow();
+
+        assertEquals(GuidebookTab.ROLE, ninja.tab());
+        assertEquals("sparkwitch", ninja.sourceModId());
+        assertEquals("announcement.role.ninja", ninja.nameKey());
+        assertEquals("guidebook.sparkassist.content.role.overview", ninja.summaryKey());
+        assertEquals(List.of(), ninja.ownerRoleIds());
+        assertEquals(List.of("sparkwitch"), ninja.requiredModIds());
+        assertEquals(0x2C2C2C, ninja.color());
+        assertEquals(410, ninja.order());
+        assertEquals(List.of(
+                "身份与经济",
+                "忍者是杀手阵营身份，继承杀手的基础能力；开局携带一把开锁器。",
+                "忍者在自身位置的综合亮度不高于 5，或全局停电期间成功击杀玩家时，额外获得 100 金币。",
+                "专属商店",
+                "苦无：130 金币；手里剑：275 金币；开锁器：75 金币。",
+                "停电沿用杀手的规则：杀手不超过 3 人时售价 400 金币；每多 1 名杀手，价格增加 100 金币。停电持续 30 至 40 秒，并进入全体杀手共享的 5 分钟冷却。",
+                "格挡",
+                "开局冷却 60 秒；激活后开启 2.5 秒格挡窗口。成功挡下一次由其他玩家造成的致命击杀，或窗口自然结束后，进入 180 秒冷却。",
+                "普通伤害不会消耗格挡；环境伤害、自杀、管理员与脚本强制死亡无法被格挡。",
+                "苦无与手里剑",
+                "苦无可立即击杀视线内 4 格内的一名玩家；未命中时不会消耗，成功使用后同类物品冷却 30 秒。",
+                "手里剑至少蓄力 0.2 秒后投出；命中其他玩家时将其击杀，投掷后同类物品冷却 1 秒。",
+                "苦无的使用与手里剑的投掷本身无声；手里剑命中声与正常的尸体、死亡反馈仍会出现。",
+                "两种武器都可由任意持有者使用，也可通过容器或既有转移方式流通；存活玩家无法主动丢出，持有者死亡时会直接移除。"
+        ), ninja.pages().stream()
+                .flatMap(page -> page.blocks().stream())
+                .flatMap(block -> block.runs().stream())
+                .map(run -> run.text())
+                .toList());
+
+        GuidebookCatalog roles;
+        try (var paths = Files.walk(GUIDEBOOK_ROOT.resolve("roles"))) {
+            roles = GuidebookCatalog.merge(paths
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .map(GuidebookAuthoredResourcesTest::parse)
+                    .toList());
+        }
+        List<String> ids = roles.entries().stream().map(GuidebookEntry::id).toList();
+        int bandit = ids.indexOf("noellesroles:bandit");
+        int ninjaIndex = ids.indexOf("sparkwitch:ninja");
+        int grandWitch = ids.indexOf("sparkwitch:grand_witch");
+        assertTrue(bandit < ninjaIndex);
+        assertTrue(ninjaIndex < grandWitch);
     }
 
     private static GuidebookCatalog parse(Path path) {
