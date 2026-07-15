@@ -107,8 +107,8 @@ public final class GuidebookRuntimeCatalog {
             int order = 1_000;
             for (Object value : values) {
                 Identifier id = (Identifier) value.getClass().getMethod("id").invoke(value);
-                // Pig chase belongs to Pig God, not to the witch-only skill index.
-                // 皮革追杀属于猪神，不应进入仅收录魔女技能的目录。
+                // Role-owned active skills are documented with their roles, not in the witch-skill index.
+                // 职业专属主动技能随职业说明，不进入魔女技能目录。
                 if (authoredIds.contains(id.toString())
                         || !GuidebookDiscoveryRules.includes(tab, id.toString())) {
                     continue;
