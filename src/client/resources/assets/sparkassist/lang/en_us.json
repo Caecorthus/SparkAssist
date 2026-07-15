@@ -144,5 +144,6 @@
   "guidebook.sparkassist.faction.killer.name": "杀手阵营",
   "guidebook.sparkassist.faction.neutral.name": "中立阵营",
   "guidebook.sparkassist.faction.witch.name": "魔女阵营",
-  "guidebook.sparkassist.faction.pending": "这个阵营页面已经准备好接入完整的玩家手册正文。"
+  "guidebook.sparkassist.faction.pending": "这个阵营页面已经准备好接入完整的玩家手册正文。",
+  "announcement.role.tarot_reader": "塔罗牌师"
 }

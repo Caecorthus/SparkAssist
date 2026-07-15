@@ -1,0 +1,75 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:tarot_reader",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.tarot_reader",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份与经济",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "塔罗牌师是好人身份；初始金币为 0，每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "常规占卜",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 200 金币，记录购买时本局存活玩家的阵营人数。死亡、断线玩家不计入统计；被吞下但尚未消化的玩家仍会计入。"
+            },
+            {
+              "type": "bullet",
+              "text": "占卜结果持续显示至本局结束，不会实时更新；再次购买会刷新为新的购买时快照。"
+            },
+            {
+              "type": "bullet",
+              "text": "右上角以粗体【占卜结果】为标题；好人、杀手、中立与魔女四行人数分别使用对应阵营颜色。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份占卜",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 50 金币，选择一个身份，得知该身份本局是否被分配过；已经死亡的该身份玩家仍算本局出现过。"
+            },
+            {
+              "type": "section",
+              "text": "存活占卜",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "花费 50 金币，选择一名本局玩家，得知其是否仍然存活。"
+            },
+            {
+              "type": "bullet",
+              "text": "被吞下但尚未消化的玩家仍算存活；消化或死亡后不算存活。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#AEE1CF",
+      "order": 250
+    }
+  ]
+}
