@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:spirit_sleuth",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.spirit_sleuth.name",
+      "summaryKey": "trait.sparktraits.spirit_sleuth.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "灵体视野",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "始终可以看到旁观者漂浮的头。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#B8A7FF",
+      "order": 780
+    }
+  ]
+}
