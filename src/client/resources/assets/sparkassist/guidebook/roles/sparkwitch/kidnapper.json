@@ -1,0 +1,79 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:kidnapper",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.kidnapper",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "绑架者是杀手阵营身份，继承杀手的基础能力。"
+            },
+            {
+              "type": "section",
+              "text": "拖动",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "直接瞄准 2 格内且视线无遮挡的尸体，按身份技能键开始拖动。"
+            },
+            {
+              "type": "bullet",
+              "text": "拖动中可在任意位置再次按身份技能键放下尸体；开始与放下都没有冷却，也不消耗任何资源。"
+            },
+            {
+              "type": "bullet",
+              "text": "每名绑架者同时只能拖动一具尸体，不能抢走其他绑架者正在拖动的尸体。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "跟随与速度",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "尸体会跟在绑架者身后约 1 格处。"
+            },
+            {
+              "type": "bullet",
+              "text": "拖动期间，绑架者的最终行走与疾跑速度倍率均变为 0.8；放下尸体或尸体被移除后恢复。"
+            },
+            {
+              "type": "section",
+              "text": "尸体限制",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "假死尸体无法被拖动；尝试拖动时会提示：TA 真的死了吗...？"
+            },
+            {
+              "type": "bullet",
+              "text": "裹尸袋、秃鹫与既有尸体清理流程仍正常处理拖动中的尸体。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#9B59B6",
+      "order": 420
+    }
+  ]
+}
