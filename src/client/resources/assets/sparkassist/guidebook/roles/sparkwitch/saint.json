@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:saint",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.saint",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份规则",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "圣徒是平民好人身份；没有理智值，不会获得任务，只能使用受限的乘客冲刺，且无法拾取枪械。"
+            },
+            {
+              "type": "bullet",
+              "text": "不会获得内鬼词条。"
+            },
+            {
+              "type": "bullet",
+              "text": "有效阵营为平民阵营的玩家无法击杀圣徒；该次击杀会被取消。"
+            },
+            {
+              "type": "bullet",
+              "text": "巫毒师仍可绑定圣徒，但由绑定触发的最终连锁死亡会被取消。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "业火",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "开局冷却 60 秒；激活后持续 15 秒。若圣徒存活至效果结束，则进入 60 秒冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "效果期间，成功杀死圣徒的非平民阵营玩家会获得永久【业障】，持续到本局结束。"
+            },
+            {
+              "type": "section",
+              "text": "业障",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "【业障】只会在三种动作成功后触发：成功击杀、成功转移定时炸弹、成功命中毒针。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "物品冷却",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "触发时，快捷栏、主背包与副手中所有可以冷却的物品统一进入冷却：当前身份为炸弹客则为 20 秒，否则为 5 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "已有更长冷却时保留更长值；再次触发只刷新而不叠加，之后获得的新物品也会继承当前冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "【业障】跨越死亡、复活、重连和身份变化保留，直到本局结束。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#EEBC78",
+      "order": 226
+    }
+  ]
+}

@@ -24,11 +24,11 @@ class GuidebookAuthoredResourcesTest {
                     .toList();
         }
 
-        assertEquals(93, resources.size());
+        assertEquals(94, resources.size());
         GuidebookCatalog catalog = GuidebookCatalog.merge(resources.stream()
                 .map(GuidebookAuthoredResourcesTest::parse)
                 .toList());
-        assertEquals(93, catalog.entries().size());
+        assertEquals(94, catalog.entries().size());
         assertEquals(31, catalog.entries().stream()
                 .filter(entry -> entry.tab() == GuidebookTab.TRAIT)
                 .count());
@@ -52,6 +52,61 @@ class GuidebookAuthoredResourcesTest {
         int lastStand = ids.indexOf("sparktraits:last_stand");
         assertTrue(excellentPhysique < spiritSleuthIndex);
         assertTrue(spiritSleuthIndex < lastStand);
+    }
+
+    @Test
+    void includesSaintBetweenMermaidAndPigGod() throws IOException {
+        List<Path> resources;
+        try (var paths = Files.walk(GUIDEBOOK_ROOT)) {
+            resources = paths
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .sorted()
+                    .toList();
+        }
+
+        GuidebookCatalog catalog = GuidebookCatalog.merge(resources.stream()
+                .map(GuidebookAuthoredResourcesTest::parse)
+                .toList());
+        assertEquals(52, catalog.entries().stream()
+                .filter(entry -> entry.tab() == GuidebookTab.ROLE)
+                .count());
+
+        GuidebookEntry saint = catalog.find("sparkwitch:saint").orElseThrow();
+        assertEquals(GuidebookTab.ROLE, saint.tab());
+        assertEquals("sparkwitch", saint.sourceModId());
+        assertEquals("announcement.role.saint", saint.nameKey());
+        assertEquals("guidebook.sparkassist.content.role.overview", saint.summaryKey());
+        assertEquals(List.of(), saint.ownerRoleIds());
+        assertEquals(List.of("sparkwitch"), saint.requiredModIds());
+        assertEquals(0xEEBC78, saint.color());
+        assertEquals(226, saint.order());
+        assertEquals(List.of(
+                "身份规则",
+                "圣徒是平民好人身份；没有理智值，不会获得任务，只能使用受限的乘客冲刺，且无法拾取枪械。",
+                "不会获得内鬼词条。",
+                "有效阵营为平民阵营的玩家无法击杀圣徒；该次击杀会被取消。",
+                "巫毒师仍可绑定圣徒，但由绑定触发的最终连锁死亡会被取消。",
+                "业火",
+                "开局冷却 60 秒；激活后持续 15 秒。若圣徒存活至效果结束，则进入 60 秒冷却。",
+                "效果期间，成功杀死圣徒的非平民阵营玩家会获得永久【业障】，持续到本局结束。",
+                "业障",
+                "【业障】只会在三种动作成功后触发：成功击杀、成功转移定时炸弹、成功命中毒针。",
+                "物品冷却",
+                "触发时，快捷栏、主背包与副手中所有可以冷却的物品统一进入冷却：当前身份为炸弹客则为 20 秒，否则为 5 秒。",
+                "已有更长冷却时保留更长值；再次触发只刷新而不叠加，之后获得的新物品也会继承当前冷却。",
+                "【业障】跨越死亡、复活、重连和身份变化保留，直到本局结束。"
+        ), saint.pages().stream()
+                .flatMap(page -> page.blocks().stream())
+                .flatMap(block -> block.runs().stream())
+                .map(run -> run.text())
+                .toList());
+
+        List<String> ids = catalog.entries().stream().map(GuidebookEntry::id).toList();
+        int mermaid = ids.indexOf("noellesroles:mermaid");
+        int saintIndex = ids.indexOf("sparkwitch:saint");
+        int pigGod = ids.indexOf("sparkwitch:pig_god");
+        assertTrue(mermaid < saintIndex);
+        assertTrue(saintIndex < pigGod);
     }
 
     @Test
