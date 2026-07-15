@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:orthopedist",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.orthopedist",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份与刷新",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "骨科大夫是好人身份，可以完成任务并与好人阵营共同获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "本局刷新猎人时，一定会同时刷新一名骨科大夫；骨科大夫也可以在没有猎人的对局中单独刷新。"
+            },
+            {
+              "type": "section",
+              "text": "体力专长",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "骨科大夫自身的实际体力消耗降低 25%。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "正骨",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "按 G 对 3 格内瞄准的玩家使用【正骨】；开局冷却 30 秒，成功使用后冷却 60 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "目标没有骨折时，获得 20 秒【正骨】和 5 秒速度 I；【正骨】使实际体力消耗降低 25%。"
+            },
+            {
+              "type": "bullet",
+              "text": "【正骨】持续期间若目标将获得一层骨折，会消耗【正骨】并抵消这一层骨折。"
+            },
+            {
+              "type": "bullet",
+              "text": "骨科大夫可以高亮看见直接视线内处于【正骨】状态的玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "已有【正骨】的目标不能被重复施放；本次不会进入冷却，界面会提示效果已经生效。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "骨折处理",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "目标已有骨折时，立即移除一层骨折并获得 5 秒速度 I，不会保留【正骨】效果；本次仍视为成功使用。"
+            },
+            {
+              "type": "bullet",
+              "text": "受到大魔女的【恐惧】时无法使用【正骨】。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#90B358",
+      "order": 225
+    }
+  ]
+}

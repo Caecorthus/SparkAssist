@@ -1,0 +1,141 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:hunter",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.hunter",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份与商店",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "猎人是杀手阵营身份，拥有无限体力、杀手本能和本局计时器。"
+            },
+            {
+              "type": "bullet",
+              "text": "猎人刷新时，本局一定会同时刷新一名骨科大夫。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店保留小刀、裹尸袋、撬棍和蝎子；另可购买双管猎枪 100 金币（库存 1）、猎枪弹药 125 金币、捕兽夹 75 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "双管猎枪",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "双管猎枪与猎枪弹药可由任何持有者使用。枪内最多装填 2 发，射程 8 格，命中玩家会立即造成枪杀死亡。"
+            },
+            {
+              "type": "bullet",
+              "text": "射击后若枪内仍有弹药，冷却 4 tick；打空后冷却 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "装入第一发后的 10 秒内才可装入第二发；窗口结束后必须先发射现有弹药才能再次装填。创造模式装填不会消耗猎枪弹药。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "捕兽夹",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "捕兽夹可由任何持有者放置。每名放置者最多保留 2 个夹子，放置第三个时会移除最早放置的夹子。"
+            },
+            {
+              "type": "bullet",
+              "text": "夹子放置 10 tick 后激活，10 分钟后失效；放置者可以潜行交互回收自己的夹子。"
+            },
+            {
+              "type": "bullet",
+              "text": "任何存活玩家都能触发夹子，包括放置者本人和杀手队友。触发后定身 3 秒并增加一层骨折。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "骨折",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "骨折最多叠加 5 层，每层独立持续 60 秒；每层使移动速度降低 20%。骨折期间无法疾跑或恢复体力。"
+            },
+            {
+              "type": "bullet",
+              "text": "使用毒药瓶可为尚未中毒的夹子涂毒；带毒夹触发后会施加 40 秒中毒。"
+            },
+            {
+              "type": "bullet",
+              "text": "受害者确认死于带毒夹时，下毒者获得 75 金币，放置者获得 50 金币；两者为同一人时合计获得 125 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "观察与拆除",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "猎人、原生杀手阵营玩家和本局死亡旁观者会持续隔墙看见夹子。"
+            },
+            {
+              "type": "bullet",
+              "text": "义警、老兵、黑警和工程师只能在直接视线内看见夹子；老兵、黑警和工程师可以拆除，义警不能拆除。"
+            },
+            {
+              "type": "bullet",
+              "text": "成功拆除夹子后，携带的所有可冷却物品至少进入 15 秒共享冷却；已有更长冷却不会缩短。"
+            },
+            {
+              "type": "bullet",
+              "text": "大魔女、杀意魔女和共犯可以在直接视线内看见夹子；开启本能时，夹子会按各自的本能颜色隔墙描边。学徒魔女和猪神看不见夹子。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "死亡掉落",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "猎人确认死亡后，携带的双管猎枪与猎枪弹药会消失，未放置的捕兽夹正常掉落；死亡被取消时不会提前清理这些物品。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#5C4C34",
+      "order": 305
+    }
+  ]
+}
