@@ -1,0 +1,91 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:perfumer",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.perfumer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份与经济",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "调香师是好人身份；每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "香精",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "香精售价 100 金币。右键另一名存活玩家，为其施加仅自己可见的标记；每名调香师的标记彼此独立，持续至目标死亡或本局结束。"
+            },
+            {
+              "type": "bullet",
+              "text": "被标记的玩家成功击杀其他玩家后会沾上【血腥气味】，持续至目标死亡或本局结束。"
+            },
+            {
+              "type": "bullet",
+              "text": "调香师会隔墙高亮 4 格内带有【血腥气味】的玩家；4 格外至 12 格内仅在视线无遮挡时高亮。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "尸体感知",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "调香师会隔墙高亮 4 格内未被清道夫隐藏的新鲜尸体与腐烂尸体；4 格外至 12 格内仅在视线无遮挡时高亮。"
+            },
+            {
+              "type": "bullet",
+              "text": "距离未被隐藏的新鲜尸体或腐烂尸体 4 格内且有未完成任务时，任务造成的理智下降速度变为 2 倍；多个尸体不会叠加该效果。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "古龙水",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "古龙水售价 50 金币。可对自己使用，或对 3 格内视线无遮挡的一名存活玩家使用。"
+            },
+            {
+              "type": "bullet",
+              "text": "目标在 10 秒内每秒恢复 5 点理智；再次使用只会刷新持续时间，不会叠加理智恢复速度。"
+            },
+            {
+              "type": "bullet",
+              "text": "香精与古龙水均可不限次数重复购买。"
+            },
+            {
+              "type": "bullet",
+              "text": "香精与古龙水无法丢弃；持有者自己可见，其他存活且仍在活动的玩家不可见，死亡或旁观状态的玩家可见。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2A4A4",
+      "order": 250
+    }
+  ]
+}
