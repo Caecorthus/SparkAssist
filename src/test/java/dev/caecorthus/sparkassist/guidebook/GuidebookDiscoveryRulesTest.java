@@ -12,6 +12,8 @@ class GuidebookDiscoveryRulesTest {
                 GuidebookTab.SKILL, "sparkwitch:death_omen"));
         assertFalse(GuidebookDiscoveryRules.includes(
                 GuidebookTab.SKILL, "sparkwitch:pig_chase"));
+        assertFalse(GuidebookDiscoveryRules.includes(
+                GuidebookTab.SKILL, "sparkwitch:perception"));
         assertTrue(GuidebookDiscoveryRules.includes(
                 GuidebookTab.SKILL, "sparkwitch:mighty_force"));
         assertTrue(GuidebookDiscoveryRules.includes(

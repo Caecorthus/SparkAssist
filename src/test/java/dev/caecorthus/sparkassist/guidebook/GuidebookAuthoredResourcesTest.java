@@ -24,11 +24,11 @@ class GuidebookAuthoredResourcesTest {
                     .toList();
         }
 
-        assertEquals(100, resources.size());
+        assertEquals(101, resources.size());
         GuidebookCatalog catalog = GuidebookCatalog.merge(resources.stream()
                 .map(GuidebookAuthoredResourcesTest::parse)
                 .toList());
-        assertEquals(100, catalog.entries().size());
+        assertEquals(101, catalog.entries().size());
         assertEquals(31, catalog.entries().stream()
                 .filter(entry -> entry.tab() == GuidebookTab.TRAIT)
                 .count());
@@ -67,7 +67,7 @@ class GuidebookAuthoredResourcesTest {
         GuidebookCatalog catalog = GuidebookCatalog.merge(resources.stream()
                 .map(GuidebookAuthoredResourcesTest::parse)
                 .toList());
-        assertEquals(58, catalog.entries().stream()
+        assertEquals(59, catalog.entries().stream()
                 .filter(entry -> entry.tab() == GuidebookTab.ROLE)
                 .count());
 

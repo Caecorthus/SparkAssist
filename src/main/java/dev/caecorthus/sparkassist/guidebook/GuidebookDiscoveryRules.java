@@ -10,6 +10,7 @@ public final class GuidebookDiscoveryRules {
     private static final Set<String> EXCLUDED_SKILL_IDS = Set.of(
             "sparkwitch:death_omen",
             "sparkwitch:focused_footsteps",
+            "sparkwitch:perception",
             "sparkwitch:pig_chase"
     );
 

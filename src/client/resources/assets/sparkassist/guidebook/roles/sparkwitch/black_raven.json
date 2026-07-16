@@ -1,0 +1,112 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:black_raven",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.black_raven",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "身份与装备",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "黑羽鸦是杀手阵营身份，继承杀手的基础能力；开局携带一把羽刃和一本感知册。"
+            },
+            {
+              "type": "bullet",
+              "text": "撬棍、毒药、蝎子与裹尸袋均售价 75 金币；另保留杀手的停电。"
+            },
+            {
+              "type": "section",
+              "text": "羽刃",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "右键标记视线无遮挡且距离不超过 3 格的一名存活玩家。标记仅自己可见，持续 20 秒；同一目标已有标记时不能重复使用。"
+            },
+            {
+              "type": "bullet",
+              "text": "标记到期时发动一次刀刺击杀，成功使用羽刃后进入 60 秒冷却；羽刃不会被消耗，黑羽鸦死亡时也不会掉落。"
+            },
+            {
+              "type": "bullet",
+              "text": "保镖、疯魔护盾等既有保护仍可拦截到期击杀；拦截后标记结束，羽刃冷却不返还，也不会重试。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "感知",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "开局冷却 60 秒；按身份技能键后持续 15 秒，效果自然结束后再进入 90 秒冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "持续期间会失明，画面呈 50% 灰白，其他玩家显示为 Steve 皮肤但保留姓名；仍可移动、攻击、使用物品和交互。"
+            },
+            {
+              "type": "bullet",
+              "text": "每名处于 8 格球形范围内的有效玩家每秒获得 1 点感知点；离开范围或技能结束只会暂停，累计到 10 点时冻结记录其当时的姓名、身份与身份颜色。"
+            },
+            {
+              "type": "section",
+              "text": "感知册",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "感知册只显示已经达到 10 点的玩家，格式为“玩家名 - 身份”，且只有身份文字使用对应身份颜色。"
+            },
+            {
+              "type": "bullet",
+              "text": "册子对其他玩家隐藏，不能丢弃、死亡掉落、放入容器或转移；物品本身不保存任何身份秘密。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "两种本能模式",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "技能键 2 默认为 N，用于在普通模式与感知模式之间切换；普通本能仍按住原有本能键使用。"
+            },
+            {
+              "type": "bullet",
+              "text": "感知模式只高亮已记录的存活玩家，外框使用冻结的身份颜色，并保留本能的环境增亮；隐身和既有防透视保护仍会隐藏目标。"
+            },
+            {
+              "type": "bullet",
+              "text": "感知模式下靠近并瞄准 2 格内已记录的玩家时，会在原有白色姓名旁显示冻结的身份文字。"
+            },
+            {
+              "type": "bullet",
+              "text": "羽刃标记不会覆盖感知模式：已记录目标仍显示身份色，未记录目标不显示外框。感知技能持续期间两种本能与环境增亮均关闭，但羽刃标记仍可见。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#51445F",
+      "order": 430
+    }
+  ]
+}
