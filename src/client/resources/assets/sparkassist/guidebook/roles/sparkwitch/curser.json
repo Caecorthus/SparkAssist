@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:curser",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.curser",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营归属",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "【诅咒者】是冤魂晋升后获得的魔女阵营身份，与魔女阵营共同获胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#C13838",
+      "order": 520
+    }
+  ]
+}

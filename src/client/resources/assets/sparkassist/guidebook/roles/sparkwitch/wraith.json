@@ -1,0 +1,90 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:wraith",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.wraith",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "转化与名额",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "冤魂是不会参与开局抽取的中立特殊身份。开局至少 10 人时，符合条件的好人或杀手死亡后有 75% 概率转化为冤魂，直到本局名额用尽。"
+            },
+            {
+              "type": "bullet",
+              "text": "名额为：开局 10 至 14 人时 1 名，之后每增加 5 名开局玩家再增加 1 名。逃脱、掉出列车和中立身份死亡不会触发转化。"
+            },
+            {
+              "type": "bullet",
+              "text": "转化时保留生前天赋并额外获得【小心翼翼】；尸体保留生前身份，当前身份变为【冤魂】，物品栏会被清空。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "受限阶段",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "转化后会从旁观模式切换为冒险模式，并持续获得隐身、无碰撞、无敌、缓慢 II 和失明。"
+            },
+            {
+              "type": "bullet",
+              "text": "物品栏可以重新打开；右键交互仅允许食物、饮料和床，且冤魂与其他玩家不能互相施加影响。"
+            },
+            {
+              "type": "bullet",
+              "text": "视野为完全黑白；其他玩家与尸体会显示为默认宽臂 Steve 并隐藏姓名，同时可以看见原本被隐藏的尸体。"
+            },
+            {
+              "type": "bullet",
+              "text": "普通玩家看不见冤魂，真正的旁观者可以看见；文字聊天与接收语音保持正常，仅禁止冤魂主动发送语音。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "晋升",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "冤魂会恢复生前任务并至少保持 3 个不同任务；转化后完成第 3 个任务时晋升。"
+            },
+            {
+              "type": "bullet",
+              "text": "死亡前有效阵营为好人时，会随机成为【风精灵】【守护天使】或【仇杀客】；为杀手时，会随机成为【破坏者】或【诅咒者】。"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升会重新播报身份，解除缓慢和失明，并恢复普通右键交互；冤魂状态仍保持，隐身、无碰撞、无敌、玩家隔离、生前天赋与主动发送语音限制继续存在。"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升后的视野改为半黑白；文字聊天与接收语音仍保持正常，仅禁止主动发送语音。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#79C7D4",
+      "order": 606
+    }
+  ]
+}

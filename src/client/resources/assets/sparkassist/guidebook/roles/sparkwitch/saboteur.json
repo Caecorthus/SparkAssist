@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:saboteur",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.saboteur",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营归属",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "【破坏者】是冤魂晋升后获得的杀手阵营身份，与杀手阵营共同获胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#C13838",
+      "order": 450
+    }
+  ]
+}
