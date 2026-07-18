@@ -13,6 +13,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class GuidebookWraithResourcesTest {
+    private static final String GUARDIAN_ANGEL_DESCRIPTION = "帮助好人阵营。你拥有无限体力、免疫熄灯，"
+            + "并能识别被下毒的食物、饮品和床；你只能与死者进行语音交流。晋升60秒后，瞄准三格内一名"
+            + "存活玩家并按下技能键，可秘密施加一层持续10秒、判定与铁人药剂相同的守护护盾；成功施放后冷却90秒。"
+            + "护盾生效期间，目标会以你的身份色隔墙高亮且仅你可见；目标不会知道自己受到保护。";
     private static final Path ROLE_ROOT = Path.of(
             "src/client/resources/assets/sparkassist/guidebook/roles"
     );
@@ -146,6 +150,33 @@ class GuidebookWraithResourcesTest {
         String text = flattenedText(entry);
         assertTrue(text.contains(PROMOTION_NAMES.get(path)));
         assertTrue(text.contains(factionName));
+        if (path.equals("guardian_angel")) {
+            assertTrue(text.contains(GUARDIAN_ANGEL_DESCRIPTION));
+            return;
+        }
+        if (path.equals("vendetta")) {
+            assertTrue(text.contains("首次死亡时真正对你负责的凶手"));
+            assertTrue(text.contains("无限体力、免疫熄灯"));
+            assertTrue(text.contains("15格内"));
+            assertTrue(text.contains("1格内达到100%"));
+            assertTrue(text.contains("4格内会持续以红色隔墙高亮"));
+            assertTrue(text.contains("每次30秒倒计时结束后"));
+            assertTrue(text.contains("完整循环为35秒"));
+            assertTrue(text.contains("5秒红色隔墙透视"));
+            assertTrue(text.contains("绑定凶手在30秒内重连"));
+            assertTrue(text.contains("超时则按确认逃脱结算"));
+            assertTrue(text.contains("按住右键至少0.5秒"));
+            assertTrue(text.contains("视线内3格以内"));
+            assertTrue(text.contains("只有你与绑定凶手能够互相影响"));
+            assertTrue(text.contains("真正的旁观者能看见灰白史蒂夫"));
+            assertTrue(text.contains("但看不见复仇刀"));
+            assertTrue(text.contains("各获得200点对应资源"));
+            assertTrue(text.contains("直接转为旁观者且不留下尸体"));
+            assertTrue(text.contains("不留下仇杀客尸体，也不触发秃鹫粒子或200点奖励"));
+            assertTrue(text.contains("不产生奖励、仇杀客尸体或粒子"));
+            assertTrue(text.contains("不会更换目标"));
+            return;
+        }
         for (String forbidden : List.of("主动技能", "魔女技能", "物品", "商店", "魔力", "装备")) {
             assertFalse(text.contains(forbidden), path + " must remain identity-only: " + forbidden);
         }

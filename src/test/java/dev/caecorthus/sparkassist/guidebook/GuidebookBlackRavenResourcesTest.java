@@ -44,6 +44,10 @@ class GuidebookBlackRavenResourcesTest {
                 .map(run -> run.text())
                 .toList();
         assertTrue(text.stream().anyMatch(value -> value.contains("60 秒")));
+        assertTrue(text.contains("开锁器售价 50 金币；撬棍、毒药、蝎子与裹尸袋均售价 75 金币；"
+                + "另保留杀手的停电。"));
+        assertTrue(text.contains("羽刃开局先进入 60 秒冷却；标记到期时发动一次刀刺击杀，"
+                + "成功使用后再次进入 60 秒冷却。羽刃不会被消耗，黑羽鸦死亡时也不会掉落。"));
         assertTrue(text.stream().anyMatch(value -> value.contains("20 秒")));
         assertTrue(text.stream().anyMatch(value -> value.contains("保护") && value.contains("不返还")));
         assertTrue(text.stream().anyMatch(value -> value.contains("感知册")));
