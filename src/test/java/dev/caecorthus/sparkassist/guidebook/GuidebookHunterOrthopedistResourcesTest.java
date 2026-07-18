@@ -20,7 +20,7 @@ class GuidebookHunterOrthopedistResourcesTest {
     );
 
     @Test
-    void documentsOrthopedistBetweenMermaidAndPigGod() throws IOException {
+    void documentsOrthopedistBetweenMermaidAndSaint() throws IOException {
         GuidebookEntry orthopedist = parse(GUIDEBOOK_ROOT.resolve(
                 "roles/sparkwitch/orthopedist.json"
         )).find("sparkwitch:orthopedist").orElseThrow();
@@ -53,9 +53,9 @@ class GuidebookHunterOrthopedistResourcesTest {
         List<String> ids = roleIds();
         int mermaid = ids.indexOf("noellesroles:mermaid");
         int orthopedistIndex = ids.indexOf("sparkwitch:orthopedist");
-        int pigGod = ids.indexOf("sparkwitch:pig_god");
+        int saint = ids.indexOf("sparkwitch:saint");
         assertTrue(mermaid < orthopedistIndex);
-        assertTrue(orthopedistIndex < pigGod);
+        assertTrue(orthopedistIndex < saint);
     }
 
     @Test

@@ -24,7 +24,7 @@ class GuidebookLocalizationResourcesTest {
     @Test
     void bothLocalesProvideChineseFallbackNamesForEveryAuthoredEntry() throws IOException {
         Set<String> nameKeys = authoredNameKeys();
-        assertEquals(101, nameKeys.size());
+        assertEquals(107, nameKeys.size());
 
         for (String locale : List.of("zh_cn", "en_us")) {
             JsonObject translations = JsonParser.parseString(
@@ -32,12 +32,17 @@ class GuidebookLocalizationResourcesTest {
             ).getAsJsonObject();
             assertTrue(nameKeys.stream().allMatch(translations::has), locale);
             assertEquals("黑羽鸦", translations.get("announcement.role.black_raven").getAsString());
+            assertEquals("诅咒者", translations.get("announcement.role.curser").getAsString());
+            assertEquals("守护天使", translations.get("announcement.role.guardian_angel").getAsString());
             assertEquals("猎人", translations.get("announcement.role.hunter").getAsString());
+            assertEquals("忍者", translations.get("announcement.role.ninja").getAsString());
             assertEquals("骨科大夫", translations.get("announcement.role.orthopedist").getAsString());
             assertEquals("调香师", translations.get("announcement.role.perfumer").getAsString());
-            assertEquals("绑架者", translations.get("announcement.role.kidnapper").getAsString());
-            assertEquals("忍者", translations.get("announcement.role.ninja").getAsString());
             assertEquals("圣徒", translations.get("announcement.role.saint").getAsString());
+            assertEquals("破坏者", translations.get("announcement.role.saboteur").getAsString());
+            assertEquals("仇杀客", translations.get("announcement.role.vendetta").getAsString());
+            assertEquals("风精灵", translations.get("announcement.role.wind_spirit").getAsString());
+            assertEquals("冤魂", translations.get("announcement.role.wraith").getAsString());
             assertEquals("灵探", translations.get("trait.sparktraits.spirit_sleuth.name").getAsString());
         }
     }

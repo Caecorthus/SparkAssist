@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:guardian_angel",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.guardian_angel",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营归属",
+              "tone": "good"
+            },
+            {
+              "type": "paragraph",
+              "text": "【守护天使】是冤魂晋升后获得的好人阵营身份，与好人阵营共同获胜。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#36E51B",
+      "order": 281
+    }
+  ]
+}

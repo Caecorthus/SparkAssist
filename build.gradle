@@ -169,7 +169,7 @@ tasks.register("verifyArchitecture") {
         if (metadata.environment != "client" || metadata.entrypoints?.main) {
             throw new GradleException("SparkAssist must remain client-only")
         }
-        if (project.wathe_version != "1.5.6-spark-1.21.1") {
+        if (project.wathe_version != "1.5.7-spark-1.21.1") {
             throw new GradleException("wathe_version must remain aligned with the Spark fork")
         }
         if (metadata.depends?.wathe != '${wathe_version}') {

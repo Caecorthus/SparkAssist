@@ -1,0 +1,74 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:saboteur",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.saboteur",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "阵营归属",
+              "tone": "danger"
+            },
+            {
+              "type": "paragraph",
+              "text": "【破坏者】是冤魂晋升后获得的杀手阵营身份，与杀手阵营共同获胜。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "商店固定包含 1 个【开锁器】，售价 50 金币，并保留 Wathe 原版【熄灯】条目；熄灯的价格、激活与共享冷却均由 Wathe 原版处理。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "破坏",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升时先进入 60 秒冷却。冷却结束后按身份技能键，对使用瞬间 20 格球形范围内符合 Wathe 规则且正在供电的灯发动【破坏】，随后进入 120 秒冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "范围内没有可用灯时仍视为成功使用并消耗完整冷却，不会通过失败结果暴露附近是否存在灯。"
+            },
+            {
+              "type": "bullet",
+              "text": "【破坏】与 Wathe 原版【熄灯】相互独立；两者重叠时，灯必须等两个效果都结束后才会恢复。破坏不会触发全局倒计时、失明、夜视或 Wathe 熄灯的共享冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "【破坏】不影响火把、红石灯、手持物动态光源或其他模组的光源。右下角仅显示当前冷却，或使用实际绑定的身份技能键提示技能就绪。"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升后每完成 1 个任务获得 50 金币；触发晋升的那项任务不会补发奖励。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#C13838",
+      "order": 450
+    }
+  ]
+}
