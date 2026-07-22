@@ -104,12 +104,12 @@ public final class GuidebookJsonParser {
             return new GuidebookBlock(type, List.of());
         }
 
-        if (json.has("text")) {
+        if (json.has("text") || json.has("textKey")) {
             return new GuidebookBlock(type, List.of(parseRun(json)));
         }
         JsonArray jsonRuns = json.getAsJsonArray("runs");
         if (jsonRuns == null) {
-            throw new IllegalArgumentException("GuideBook block must contain text or runs");
+            throw new IllegalArgumentException("GuideBook block must contain text, textKey, or runs");
         }
         List<GuidebookRun> runs = new ArrayList<>(jsonRuns.size());
         for (JsonElement run : jsonRuns) {
@@ -122,12 +122,16 @@ public final class GuidebookJsonParser {
         GuidebookTone tone = json.has("tone")
                 ? GuidebookTone.valueOf(json.get("tone").getAsString().toUpperCase(Locale.ROOT))
                 : GuidebookTone.DEFAULT;
-        return new GuidebookRun(
-                json.get("text").getAsString(),
-                json.has("bold") && json.get("bold").getAsBoolean(),
-                json.has("italic") && json.get("italic").getAsBoolean(),
-                tone
-        );
+        boolean bold = json.has("bold") && json.get("bold").getAsBoolean();
+        boolean italic = json.has("italic") && json.get("italic").getAsBoolean();
+        boolean hasText = json.has("text");
+        boolean hasTextKey = json.has("textKey");
+        if (hasText == hasTextKey) {
+            throw new IllegalArgumentException("GuideBook runs must contain exactly one of text or textKey");
+        }
+        return hasText
+                ? new GuidebookRun(json.get("text").getAsString(), bold, italic, tone)
+                : GuidebookRun.translated(json.get("textKey").getAsString(), bold, italic, tone);
     }
 
     private static List<String> parseStringList(JsonArray values) {

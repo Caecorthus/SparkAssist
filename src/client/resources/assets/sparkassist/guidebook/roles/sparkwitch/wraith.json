@@ -11,24 +11,32 @@
           "blocks": [
             {
               "type": "section",
-              "text": "转化与名额",
-              "tone": "info"
+              "tone": "info",
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.0"
             },
             {
               "type": "bullet",
-              "text": "冤魂是不会参与开局抽取的特殊身份。开局至少 10 人时，符合条件的好人、杀手或魔女阵营成员确认死亡后有 75% 概率转化为冤魂，直到本局名额用尽。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.1"
             },
             {
               "type": "bullet",
-              "text": "名额为：开局 10 至 14 人时 1 名，之后每增加 5 名开局玩家再增加 1 名。逃脱、主动跳车、终局消化和其他不符合条件的阵营不会触发转化；掉出列车时 Wathe 记录了玩家攻击者则按被推处理。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.2"
             },
             {
               "type": "bullet",
-              "text": "转化优先返回开局记录的安全位置；该位置不可用时才尝试从尸体或消化位置出现，且列车外 fallback 不进行概率判定。吞噬中因理智归零仍可转化，但不会生成尸体。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.3"
             },
             {
               "type": "bullet",
-              "text": "若安装 SparkTraits，转化时会保留生前天赋并额外获得【小心翼翼】；普通尸体保留生前身份，当前身份变为【冤魂】，剩余物品栏、金币与魔力会被清空。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.4"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.5"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.6"
             }
           ]
         },
@@ -36,28 +44,28 @@
           "blocks": [
             {
               "type": "section",
-              "text": "受限阶段",
-              "tone": "danger"
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.7"
             },
             {
               "type": "bullet",
-              "text": "转化后会从旁观模式切换为冒险模式，并持续获得隐身、无碰撞、无敌、缓慢 II 和失明。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.8"
             },
             {
               "type": "bullet",
-              "text": "物品栏可以重新打开；右键交互仅允许食物、饮料和床，且冤魂与其他玩家不能互相施加影响。所有冤魂都不能捡起地面物品。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.9"
             },
             {
               "type": "bullet",
-              "text": "视野为完全黑白；在冤魂自己的客户端中，其他玩家与尸体会显示为默认宽臂 Steve 并隐藏姓名，同时可以看见原本被隐藏的尸体。此效果不会修改任何玩家的真实皮肤。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.10"
             },
             {
               "type": "bullet",
-              "text": "冤魂可以穿墙看见其他受限或已升变冤魂的青色描边；局内存活的普通玩家看不见冤魂，已死亡或未参加本局的玩家正常看见其真实皮肤。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.11"
             },
             {
               "type": "bullet",
-              "text": "冤魂不能发送文字聊天或主动发送语音，但可以正常接收语音。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.12"
             }
           ]
         },
@@ -65,24 +73,24 @@
           "blocks": [
             {
               "type": "section",
-              "text": "晋升",
-              "tone": "info"
+              "tone": "info",
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.13"
             },
             {
               "type": "bullet",
-              "text": "冤魂会恢复生前任务并至少保持 3 个不同任务；转化后完成第 3 个任务时晋升。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.14"
             },
             {
               "type": "bullet",
-              "text": "死亡前有效阵营为好人时，会随机成为【风精灵】【守护天使】或【仇杀客】；为杀手时成为【破坏者】；为魔女阵营时成为【诅咒者】。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.15"
             },
             {
               "type": "bullet",
-              "text": "晋升会重新播报身份，解除缓慢和失明，并恢复普通右键交互；冤魂状态仍保持，隐身、无碰撞、无敌、玩家隔离、生前天赋、地面拾取限制、文字聊天限制与主动发送语音限制继续存在。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.16"
             },
             {
               "type": "bullet",
-              "text": "晋升后的视野改为半黑白，仍可接收语音。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wraith.17"
             }
           ]
         }

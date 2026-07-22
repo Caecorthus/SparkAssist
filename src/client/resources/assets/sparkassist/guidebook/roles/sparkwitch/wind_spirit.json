@@ -11,12 +11,12 @@
           "blocks": [
             {
               "type": "section",
-              "text": "阵营归属",
-              "tone": "good"
+              "tone": "good",
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.0"
             },
             {
               "type": "paragraph",
-              "text": "【风精灵】是冤魂晋升后获得的好人阵营身份，与好人阵营共同获胜。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.1"
             }
           ]
         },
@@ -24,32 +24,36 @@
           "blocks": [
             {
               "type": "section",
-              "text": "身份能力",
-              "tone": "good"
+              "tone": "good",
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.2"
             },
             {
               "type": "bullet",
-              "text": "永久拥有速度 II；若获得更高等级的速度效果，则保留更高等级，效果结束后恢复速度 II。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.3"
             },
             {
               "type": "bullet",
-              "text": "商店中可以用 50 金币购买 1 个原版【风弹】，不限购买次数且没有商店冷却。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.4"
             },
             {
               "type": "bullet",
-              "text": "拥有 Wathe 原生本能透视，但仍遵守已有的本能隐藏规则。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.5"
             },
             {
               "type": "bullet",
-              "text": "熄灯期间免疫失明并获得夜视。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.6"
             },
             {
               "type": "bullet",
-              "text": "拥有无限体力。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.7"
             },
             {
               "type": "bullet",
-              "text": "晋升后每完成 1 个任务获得 50 金币。"
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.8"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.9"
             }
           ]
         }
@@ -58,7 +62,7 @@
       "requiredModIds": [
         "sparkwitch"
       ],
-      "color": "#36E51B",
+      "color": "#59D8E6",
       "order": 280
     }
   ]

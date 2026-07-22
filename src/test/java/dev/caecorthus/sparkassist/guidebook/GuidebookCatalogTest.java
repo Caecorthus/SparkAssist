@@ -43,6 +43,30 @@ class GuidebookCatalogTest {
     }
 
     @Test
+    void parsesLocalizedAuthoredRunsAlongsideLegacyLiteralText() {
+        GuidebookEntry entry = GuidebookCatalog.parse("""
+                {
+                  "entries": [{
+                    "id": "sparkwitch:wraith", "tab": "ROLE", "sourceModId": "sparkwitch",
+                    "nameKey": "announcement.role.wraith", "summaryKey": "summary",
+                    "pages": [{"blocks": [
+                      {"type": "section", "textKey": "guide.wraith.section"},
+                      {"type": "paragraph", "text": "Legacy literal"}
+                    ]}],
+                    "ownerRoleIds": [], "requiredModIds": ["sparkwitch"], "order": 1
+                  }]
+                }
+                """).entries().getFirst();
+
+        var translated = entry.pages().getFirst().blocks().get(0).runs().getFirst();
+        var literal = entry.pages().getFirst().blocks().get(1).runs().getFirst();
+        assertEquals("guide.wraith.section", translated.translationKey());
+        assertEquals(null, translated.text());
+        assertEquals("Legacy literal", literal.text());
+        assertEquals(null, literal.translationKey());
+    }
+
+    @Test
     void omittedPageKeysDefaultToTheSummaryKey() {
         GuidebookCatalog catalog = GuidebookCatalog.parse("""
                 {

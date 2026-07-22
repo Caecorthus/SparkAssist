@@ -11,12 +11,16 @@
           "blocks": [
             {
               "type": "section",
-              "text": "阵营归属",
-              "tone": "danger"
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.curser.0"
             },
             {
               "type": "paragraph",
-              "text": "【诅咒者】是冤魂晋升后获得的魔女阵营身份，与魔女阵营共同获胜。"
+              "textKey": "guidebook.sparkassist.sparkwitch.curser.1"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.curser.2"
             }
           ]
         }
@@ -25,7 +29,7 @@
       "requiredModIds": [
         "sparkwitch"
       ],
-      "color": "#C13838",
+      "color": "#A968D5",
       "order": 520
     }
   ]

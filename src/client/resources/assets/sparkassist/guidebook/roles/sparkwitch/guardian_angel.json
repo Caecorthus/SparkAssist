@@ -11,12 +11,37 @@
           "blocks": [
             {
               "type": "section",
-              "text": "守护天使",
-              "tone": "good"
+              "tone": "good",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.0"
             },
             {
               "type": "paragraph",
-              "text": "帮助好人阵营。你拥有无限体力、免疫熄灯，并能识别被下毒的食物、饮品和床；你只能与死者进行语音交流。晋升60秒后，瞄准三格内一名存活玩家并按下技能键，可秘密施加一层持续10秒、判定与铁人药剂相同的守护护盾；成功施放后冷却90秒。护盾生效期间，目标会以你的身份色隔墙高亮且仅你可见；目标不会知道自己受到保护。"
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.1"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "tone": "good",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.2"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.3"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.4"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.5"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.6"
             }
           ]
         }
@@ -25,7 +50,7 @@
       "requiredModIds": [
         "sparkwitch"
       ],
-      "color": "#36E51B",
+      "color": "#F0D77A",
       "order": 281
     }
   ]

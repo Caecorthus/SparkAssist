@@ -100,8 +100,56 @@ tasks.named("jar") {
 
 def remappedModJar = tasks.named("remapJar")
 def optionalGuideProviders = ["noellesroles", "sparkwitch", "sparktraits", "sparkstrength"]
+def supportedWatheVersion = "1.5.6-spark-1.21.1"
+def supportedWatheJar = file("libs/wathe-${supportedWatheVersion}.jar")
+def supportedWatheSha256 = "a4e0355c61def0b482c197a7ccd1f86ee91752b7af1b5bdafae8716c652f207f"
 def watheExtendedCommit = "cf3c5c51f3dbc173778597bfb628a7b8e09ccadc"
 def requiredWatheNotice = "Selected Wathe visual assets are \u00a9 2024 doctor4t. Wathe source code is\nnot copied or modified."
+
+tasks.register("verifyWatheDependency") {
+    inputs.file(supportedWatheJar)
+    inputs.property("wathe_version", project.wathe_version)
+    inputs.property("expected_sha256", supportedWatheSha256)
+
+    doLast {
+        if (project.wathe_version != supportedWatheVersion) {
+            throw new GradleException("wathe_version must remain pinned to ${supportedWatheVersion}")
+        }
+        if (!supportedWatheJar.isFile()) {
+            throw new GradleException("Missing authorized Wathe dependency: ${supportedWatheJar}")
+        }
+
+        def digest = java.security.MessageDigest.getInstance("SHA-256")
+        supportedWatheJar.withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            int bytesRead
+            while ((bytesRead = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        def actualSha256 = digest.digest().encodeHex().toString()
+        if (actualSha256 != supportedWatheSha256) {
+            throw new GradleException("Unexpected Wathe jar checksum for ${supportedWatheJar.name}: ${actualSha256}")
+        }
+
+        def zipFile = new java.util.zip.ZipFile(supportedWatheJar)
+        try {
+            def metadataEntry = zipFile.getEntry("fabric.mod.json")
+            if (metadataEntry == null) {
+                throw new GradleException("Missing fabric.mod.json in ${supportedWatheJar.name}")
+            }
+            def metadata = new groovy.json.JsonSlurper().parse(zipFile.getInputStream(metadataEntry))
+            if (metadata.id != "wathe"
+                    || metadata.version != supportedWatheVersion
+                    || metadata.environment != "*"
+                    || metadata.depends?.minecraft != "~${project.minecraft_version}") {
+                throw new GradleException("Unexpected embedded Wathe metadata in ${supportedWatheJar.name}")
+            }
+        } finally {
+            zipFile.close()
+        }
+    }
+}
 
 tasks.register("verifyModJarVersion") {
     dependsOn remappedModJar
@@ -169,7 +217,7 @@ tasks.register("verifyArchitecture") {
         if (metadata.environment != "client" || metadata.entrypoints?.main) {
             throw new GradleException("SparkAssist must remain client-only")
         }
-        if (project.wathe_version != "1.5.7-spark-1.21.1") {
+        if (project.wathe_version != "1.5.6-spark-1.21.1") {
             throw new GradleException("wathe_version must remain aligned with the Spark fork")
         }
         if (metadata.depends?.wathe != '${wathe_version}') {
@@ -185,7 +233,7 @@ tasks.register("verifyArchitecture") {
         }
 
         def notices = file("THIRD_PARTY_NOTICES.md").getText("UTF-8")
-        if (!notices.contains(requiredWatheNotice)) {
+        if (!notices.replace("\r\n", "\n").contains(requiredWatheNotice)) {
             throw new GradleException("THIRD_PARTY_NOTICES.md is missing the required Wathe asset notice")
         }
         if (!notices.contains(watheExtendedCommit)
@@ -221,7 +269,7 @@ tasks.register("verifyDistributionMetadata") {
             }
 
             def packagedNotices = zipFile.getInputStream(zipFile.getEntry("META-INF/THIRD_PARTY_NOTICES.md")).getText("UTF-8")
-            if (!packagedNotices.contains(requiredWatheNotice)
+            if (!packagedNotices.replace("\r\n", "\n").contains(requiredWatheNotice)
                     || !packagedNotices.contains(watheExtendedCommit)
                     || !packagedNotices.contains("No upstream source code was copied.")) {
                 throw new GradleException("Packaged third-party notice is incomplete in ${jarFile.name}")
@@ -283,6 +331,7 @@ tasks.named("check") {
     setDependsOn([])
     dependsOn tasks.named("test")
     dependsOn tasks.named("verifyArchitecture")
+    dependsOn tasks.named("verifyWatheDependency")
     dependsOn tasks.matching { it.name == "validateAccessWidener" }
 }
 
@@ -328,7 +377,7 @@ tasks.named("verifyDistributionMetadata") {
             def sourceNotices = sourcesZip.getInputStream(
                     sourcesZip.getEntry("META-INF/THIRD_PARTY_NOTICES.md")
             ).getText("UTF-8")
-            if (!sourceNotices.contains(requiredWatheNotice)
+            if (!sourceNotices.replace("\r\n", "\n").contains(requiredWatheNotice)
                     || !sourceNotices.contains(watheExtendedCommit)
                     || !sourceNotices.contains("No upstream source code was copied.")) {
                 throw new GradleException("Source-distribution third-party notice is incomplete in ${sourcesFile.name}")

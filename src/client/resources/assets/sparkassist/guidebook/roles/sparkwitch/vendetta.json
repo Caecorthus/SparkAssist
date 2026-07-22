@@ -11,56 +11,54 @@
           "blocks": [
             {
               "type": "section",
-              "text": "阵营归属",
-              "tone": "good"
+              "tone": "good",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.0"
             },
             {
               "type": "paragraph",
-              "text": "【仇杀客】是冤魂晋升后获得的好人阵营身份，与好人阵营共同获胜。你会永久锁定首次死亡时真正对你负责的凶手；凶手之后更换身份或阵营也不会改变目标。"
-            },
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.1"
+            }
+          ]
+        },
+        {
+          "blocks": [
             {
               "type": "section",
-              "text": "幽魂追猎",
-              "tone": "good"
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.2"
             },
             {
-              "type": "paragraph",
-              "text": "你拥有无限体力、免疫熄灯，并仍将所有玩家看作灰白史蒂夫。视野初始为50%黑白；进入凶手15格内后会随三维距离线性加深，1格内达到100%。凶手在4格内会持续以红色隔墙高亮。"
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.3"
             },
             {
-              "type": "paragraph",
-              "text": "每次30秒倒计时结束后，你会获得5秒红色隔墙透视；透视结束后才开始下一轮30秒倒计时，完整循环为35秒。右下角会分别显示“透视倒计时”和“透视剩余时间”。任意一方临时断线时计时暂停；绑定凶手在30秒内重连会从原进度继续，超时则按确认逃脱结算。"
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.4"
             },
             {
-              "type": "section",
-              "text": "复仇刀",
-              "tone": "good"
-            },
-            {
-              "type": "paragraph",
-              "text": "晋升时获得一把只能使用一次的绑定复仇刀。按住右键至少0.5秒后释放，可刺杀视线内3格以内的绑定凶手；只有成功刺杀才会消耗。该物品无法丢弃、转移、放入容器、合成、购买或复制。左键只能击退绑定凶手。"
-            },
-            {
-              "type": "section",
-              "text": "彼此可见",
-              "tone": "info"
-            },
-            {
-              "type": "paragraph",
-              "text": "只有你与绑定凶手能够互相影响。凶手始终能以橙色隔墙高亮看见你的隐身轮廓、真实皮肤和手中复仇刀；其他无关的存活玩家看不见你和这把刀。真正的旁观者能看见灰白史蒂夫外观的你，但看不见复仇刀。"
-            },
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.5"
+            }
+          ]
+        },
+        {
+          "blocks": [
             {
               "type": "section",
-              "text": "复仇结局",
-              "tone": "danger"
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.6"
             },
             {
-              "type": "paragraph",
-              "text": "若凶手再次杀死你，你会直接转为旁观者且不留下尸体，并在原地出现秃鹫吞食尸体的粒子。凶手已有金币或魔力系统时，各获得200点对应资源；不存在的资源系统不会被创建。"
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.7"
             },
             {
-              "type": "paragraph",
-              "text": "若你成功刺杀凶手，凶手按正常死亡处理并留下正常尸体；你随后转为旁观者，不留下仇杀客尸体，也不触发秃鹫粒子或200点奖励。若凶手被别人杀死、逃脱或确认离局，你同样转为旁观者，但不产生奖励、仇杀客尸体或粒子，也不会更换目标。"
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.8"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.9"
             }
           ]
         }
@@ -69,7 +67,7 @@
       "requiredModIds": [
         "sparkwitch"
       ],
-      "color": "#36E51B",
+      "color": "#E34B5F",
       "order": 282
     }
   ]

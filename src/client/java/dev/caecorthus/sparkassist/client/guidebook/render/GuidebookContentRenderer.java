@@ -89,7 +89,10 @@ public final class GuidebookContentRenderer {
         int color = color(run.tone(), blockType);
         boolean bold = run.bold() || blockType == GuidebookBlockType.SECTION;
         boolean italic = run.italic() || blockType == GuidebookBlockType.QUOTE;
-        return Text.literal(run.text()).styled(style -> style
+        MutableText text = run.translationKey() == null
+                ? Text.literal(run.text())
+                : Text.translatable(run.translationKey());
+        return text.styled(style -> style
                 .withColor(color)
                 .withBold(bold)
                 .withItalic(italic));
