@@ -361,7 +361,8 @@ public final class GuidebookScreen extends Screen {
             GuidebookContentRenderer.Layout layout = GuidebookContentRenderer.layout(
                     page,
                     this.textRenderer,
-                    rightPageWidth - 8
+                    rightPageWidth - 8,
+                    this::chineseString
             );
             rightContentHeight = layout.height();
             rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));

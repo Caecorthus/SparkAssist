@@ -21,7 +21,7 @@ class GuidebookWraithResourcesTest {
     );
 
     @Test
-    void wraithDocumentsThreeAlignmentsSettingsSnapshotAndSharedRestrictions() throws IOException {
+    void wraithDocumentsThreeFactionsPromotionAndSharedRestrictions() throws IOException {
         GuidebookEntry wraith = allRoles().find("sparkwitch:wraith").orElseThrow();
         assertEquals(GuidebookTab.ROLE, wraith.tab());
         assertEquals("sparkwitch", wraith.sourceModId());
@@ -33,58 +33,54 @@ class GuidebookWraithResourcesTest {
 
         String text = flattenedText(wraith);
         for (String required : List.of(
-                "GOOD（好人）、KILLER（杀手）或 WITCH（魔女）",
-                "/sparkwitch:ghostChance <0..100>",
-                "/sparkwitch:ghostMinRequirement <非负人数>",
-                "/wathe:gameSettings set roleDividend ghost <n>",
-                "floor(starting players / n)",
-                "局中修改仅从下一局生效",
+                "好人阵营、杀手阵营或魔女阵营",
                 "完成第 3 个任务时晋升",
-                "KILLER 冤魂只会晋升为【破坏者】",
-                "WITCH 冤魂只会晋升为【诅咒者】",
-                "除【守护天使】外的所有晋升身份都不能发送文字聊天",
-                "守护天使可以打开并使用文字聊天",
-                "地图的 no-jump 设置",
-                "不会产生走路、落地或疾跑地面粒子",
-                "风精灵风弹可以影响普通存活参赛玩家",
-                "绝不会影响基础冤魂或任何晋升冤魂身份",
-                "只有基础（restricted）冤魂和晋升后的【仇杀客】",
-                "【风精灵】【守护天使】【破坏者】【诅咒者】恢复真实皮肤"
+                "杀手阵营冤魂晋升为【破坏者】",
+                "魔女阵营冤魂晋升为【诅咒者】",
+                "除【守护天使】外的晋升职业不能发送文字聊天",
+                "禁跳规则",
+                "不会产生行走、落地或疾跑粒子",
+                "无法捡起地面物品",
+                "基础冤魂与【仇杀客】",
+                "其他晋升职业恢复真实外观"
         )) {
             assertTrue(text.contains(required), required);
+        }
+        for (String prohibited : List.of("/sparkwitch", "/wathe", "gameSettings", "forcePromotion", "快照")) {
+            assertTrue(!text.contains(prohibited), prohibited);
         }
     }
 
     @Test
     void promotionsUseApprovedColorsAlignmentsAndExpandedContracts() throws IOException {
         GuidebookCatalog roles = allRoles();
-        assertPromotion(roles, "wind_spirit", 0x59D8E6, 280, "GOOD 冤魂");
-        assertPromotion(roles, "guardian_angel", 0xF0D77A, 281, "GOOD 冤魂");
-        assertPromotion(roles, "vendetta", 0xE34B5F, 282, "GOOD 冤魂");
-        assertPromotion(roles, "saboteur", 0xE28743, 450, "KILLER 冤魂唯一");
-        assertPromotion(roles, "curser", 0xA968D5, 520, "WITCH 冤魂唯一");
+        assertPromotion(roles, "wind_spirit", 0x59D8E6, 280, "好人阵营冤魂");
+        assertPromotion(roles, "guardian_angel", 0xF0D77A, 281, "好人阵营冤魂");
+        assertPromotion(roles, "vendetta", 0xE34B5F, 282, "好人阵营");
+        assertPromotion(roles, "saboteur", 0xE28743, 450, "杀手阵营冤魂");
+        assertPromotion(roles, "curser", 0xA968D5, 520, "魔女阵营冤魂");
 
         String wind = flattenedText(roles.find("sparkwitch:wind_spirit").orElseThrow());
-        assertTrue(wind.contains("普通的存活参赛玩家"));
-        assertTrue(wind.contains("绝不会影响基础冤魂或任何晋升冤魂身份"));
-        assertTrue(wind.contains("不额外造成伤害"));
+        assertTrue(wind.contains("普通存活玩家"));
+        assertTrue(wind.contains("不会影响冤魂或晋升职业"));
+        assertTrue(wind.contains("不会额外造成伤害"));
 
         String guardian = flattenedText(roles.find("sparkwitch:guardian_angel").orElseThrow());
-        assertTrue(guardian.contains("可以打开并使用文字聊天"));
-        assertTrue(guardian.contains("隐藏死者/旁观者语音组"));
+        assertTrue(guardian.contains("可以使用文字聊天"));
+        assertTrue(guardian.contains("死者语音频道"));
 
         String vendetta = flattenedText(roles.find("sparkwitch:vendetta").orElseThrow());
-        assertTrue(vendetta.contains("纯红色 #FF0000"));
-        assertTrue(vendetta.contains("默认宽臂 Steve"));
-        assertTrue(vendetta.contains("动态皮肤模型包装"));
+        assertTrue(vendetta.contains("红色描边"));
+        assertTrue(vendetta.contains("无名 Steve"));
+        assertTrue(vendetta.contains("兼容外部皮肤"));
 
         String saboteur = flattenedText(roles.find("sparkwitch:saboteur").orElseThrow());
-        assertTrue(saboteur.contains("GOOD 与 WITCH 冤魂不会晋升为破坏者"));
-        assertTrue(saboteur.contains("20 格球形范围"));
+        assertTrue(saboteur.contains("杀手阵营冤魂的晋升职业"));
+        assertTrue(saboteur.contains("20 格内"));
 
         String curser = flattenedText(roles.find("sparkwitch:curser").orElseThrow());
         assertTrue(curser.contains("属于魔女阵营"));
-        assertTrue(curser.contains("不再出现在 KILLER 冤魂晋升池中"));
+        assertTrue(curser.contains("所有存活玩家均属于魔女阵营"));
     }
 
     @Test

@@ -14,11 +14,6 @@
               "text": "我能听见死者的悲鸣……"
             },
             {
-              "type": "paragraph",
-              "text": "当前默认禁用，正常选角不会出现。",
-              "tone": "muted"
-            },
-            {
               "type": "section",
               "text": "亡者之声",
               "tone": "danger"

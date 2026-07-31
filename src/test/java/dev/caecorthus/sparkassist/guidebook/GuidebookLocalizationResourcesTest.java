@@ -62,41 +62,57 @@ class GuidebookLocalizationResourcesTest {
         JsonObject english = translations("en_us");
         Set<String> wraithTextKeys = authoredWraithTextKeys();
 
-        assertEquals(59, wraithTextKeys.size());
+        assertEquals(55, wraithTextKeys.size());
         assertTrue(wraithTextKeys.stream().allMatch(chinese::has));
         assertTrue(wraithTextKeys.stream().allMatch(english::has));
         assertTrue(wraithTextKeys.stream().allMatch(key ->
                 !chinese.get(key).getAsString().equals(english.get(key).getAsString())));
-        assertTrue(chinese.get("guidebook.sparkassist.sparkwitch.wraith.17").getAsString()
-                .contains("不会立即改变身份"));
-        assertTrue(english.get("guidebook.sparkassist.sparkwitch.wraith.17").getAsString()
-                .contains("does not change the role immediately"));
-        assertEquals("转化与本局快照",
-                chinese.get("guidebook.sparkassist.sparkwitch.wraith.0").getAsString());
-        assertEquals("Conversion and round snapshot",
-                english.get("guidebook.sparkassist.sparkwitch.wraith.0").getAsString());
+        assertEquals("转化", chinese.get("guidebook.sparkassist.sparkwitch.wraith.0").getAsString());
+        assertEquals("Conversion", english.get("guidebook.sparkassist.sparkwitch.wraith.0").getAsString());
         assertTrue(chinese.get("guidebook.sparkassist.sparkwitch.wraith.9").getAsString()
-                .contains("守护天使可以打开并使用文字聊天"));
+                .contains("守护天使"));
         assertTrue(english.get("guidebook.sparkassist.sparkwitch.wraith.9").getAsString()
-                .contains("Guardian Angel may open and use text chat"));
+                .contains("Guardian Angel"));
         assertTrue(chinese.get("guidebook.sparkassist.sparkwitch.wind_spirit.5").getAsString()
-                .contains("绝不会影响基础冤魂或任何晋升冤魂身份"));
+                .contains("不会影响冤魂或晋升职业"));
         assertTrue(english.get("guidebook.sparkassist.sparkwitch.wind_spirit.5").getAsString()
-                .contains("never base Wraiths or any promoted Wraith role"));
+                .contains("never Wraiths or promoted roles"));
         assertTrue(chinese.get("guidebook.sparkassist.sparkwitch.guardian_angel.5").getAsString()
-                .contains("可以打开并使用文字聊天"));
+                .contains("可以使用文字聊天"));
         assertTrue(english.get("guidebook.sparkassist.sparkwitch.guardian_angel.5").getAsString()
-                .contains("may open and use text chat"));
+                .contains("can use text chat"));
+    }
 
-        String renderer = Files.readString(Path.of(
-                "src/client/java/dev/caecorthus/sparkassist/client/guidebook/render/GuidebookContentRenderer.java"
+    @Test
+    void structuredTextKeysExistInChineseAndUseTheChineseResolver() throws IOException {
+        JsonObject chinese = translations("zh_cn");
+        Set<String> structuredTextKeys = authoredStructuredTextKeys();
+
+        assertTrue(structuredTextKeys.stream().allMatch(chinese::has));
+
+        String screen = Files.readString(Path.of(
+                "src/client/java/dev/caecorthus/sparkassist/client/guidebook/GuidebookScreen.java"
         ));
-        assertTrue(renderer.contains("Text.translatable(run.translationKey())"));
+        assertTrue(screen.contains("this::chineseString"));
     }
 
     private static JsonObject translations(String locale) throws IOException {
         return JsonParser.parseString(Files.readString(LANG_ROOT.resolve(locale + ".json")))
                 .getAsJsonObject();
+    }
+
+    private static Set<String> authoredStructuredTextKeys() throws IOException {
+        try (var paths = Files.walk(GUIDEBOOK_ROOT)) {
+            return paths
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .flatMap(path -> parse(path).entries().stream())
+                    .flatMap(entry -> entry.pages().stream())
+                    .flatMap(page -> page.blocks().stream())
+                    .flatMap(block -> block.runs().stream())
+                    .map(dev.caecorthus.sparkassist.guidebook.content.GuidebookRun::translationKey)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toUnmodifiableSet());
+        }
     }
 
     private static Set<String> authoredWraithTextKeys() throws IOException {

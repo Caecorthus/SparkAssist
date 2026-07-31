@@ -14,11 +14,6 @@
               "text": "格调制造机。"
             },
             {
-              "type": "paragraph",
-              "text": "当前默认禁用，正常选角不会出现。",
-              "tone": "muted"
-            },
-            {
               "type": "section",
               "text": "初始物品",
               "tone": "item"

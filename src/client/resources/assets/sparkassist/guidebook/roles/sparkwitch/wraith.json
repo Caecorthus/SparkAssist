@@ -20,18 +20,6 @@
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.2"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.3"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.4"
-            },
-            {
-              "type": "bullet",
               "textKey": "guidebook.sparkassist.sparkwitch.wraith.5"
             },
             {
@@ -87,10 +75,6 @@
             {
               "type": "bullet",
               "textKey": "guidebook.sparkassist.sparkwitch.wraith.16"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.17"
             }
           ]
         }

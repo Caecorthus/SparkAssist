@@ -7,6 +7,7 @@ import dev.caecorthus.sparkassist.guidebook.content.GuidebookRun;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookTone;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -32,7 +33,12 @@ public final class GuidebookContentRenderer {
     private GuidebookContentRenderer() {
     }
 
-    public static Layout layout(GuidebookPage page, TextRenderer textRenderer, int width) {
+    public static Layout layout(
+            GuidebookPage page,
+            TextRenderer textRenderer,
+            int width,
+            Function<String, String> translationResolver
+    ) {
         List<RenderedLine> renderedLines = new ArrayList<>();
         int y = 0;
         boolean firstBlock = true;
@@ -47,7 +53,7 @@ public final class GuidebookContentRenderer {
                 y += gapBefore(block.type());
             }
             int indent = indent(block.type());
-            MutableText text = styledText(block);
+            MutableText text = styledText(block, translationResolver);
             if (block.type() == GuidebookBlockType.BULLET) {
                 int contentIndent = indent + textRenderer.getWidth(BULLET_GLYPH) + BULLET_TEXT_GAP;
                 List<OrderedText> wrapped = textRenderer.wrapLines(text, Math.max(20, width - contentIndent));
@@ -73,29 +79,42 @@ public final class GuidebookContentRenderer {
         return new Layout(renderedLines, Math.max(0, y - LINE_GAP));
     }
 
-    private static MutableText styledText(GuidebookBlock block) {
+    private static MutableText styledText(
+            GuidebookBlock block,
+            Function<String, String> translationResolver
+    ) {
         MutableText text = Text.empty();
         for (GuidebookRun run : block.runs()) {
-            text.append(styledRun(run, block.type()));
+            text.append(styledRun(run, block.type(), translationResolver));
         }
         return text;
     }
 
     private static MutableText styledBullet() {
-        return styledRun(new GuidebookRun(BULLET_GLYPH, true, false, GuidebookTone.MUTED), GuidebookBlockType.BULLET);
+        return styledRun(
+                new GuidebookRun(BULLET_GLYPH, true, false, GuidebookTone.MUTED),
+                GuidebookBlockType.BULLET,
+                key -> key
+        );
     }
 
-    private static MutableText styledRun(GuidebookRun run, GuidebookBlockType blockType) {
+    private static MutableText styledRun(
+            GuidebookRun run,
+            GuidebookBlockType blockType,
+            Function<String, String> translationResolver
+    ) {
         int color = color(run.tone(), blockType);
         boolean bold = run.bold() || blockType == GuidebookBlockType.SECTION;
         boolean italic = run.italic() || blockType == GuidebookBlockType.QUOTE;
-        MutableText text = run.translationKey() == null
-                ? Text.literal(run.text())
-                : Text.translatable(run.translationKey());
+        MutableText text = Text.literal(resolveText(run, translationResolver));
         return text.styled(style -> style
                 .withColor(color)
                 .withBold(bold)
                 .withItalic(italic));
+    }
+
+    static String resolveText(GuidebookRun run, Function<String, String> translationResolver) {
+        return run.translationKey() == null ? run.text() : translationResolver.apply(run.translationKey());
     }
 
     private static int color(GuidebookTone tone, GuidebookBlockType blockType) {

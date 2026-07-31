@@ -16,18 +16,19 @@
             },
             {
               "type": "paragraph",
-              "text": "大魔女与共犯组成独立的魔女阵营。两者共享胜利目标，并通过魔力、法术、专属商店和阵营免疫互相支援。"
+              "text": "大魔女、共犯与由冤魂晋升的诅咒者属于魔女阵营。所有存活玩家均属于魔女阵营时，魔女阵营获胜。"
             },
             {
               "type": "bullet",
-              "text": "大魔女负责施法与处决；共犯承担直接击杀，并提供经济与正面作战支援。"
+              "text": "大魔女负责施法与处决，共犯负责直接作战；诅咒者作为晋升职业共享阵营胜利。"
             }
           ]
         }
       ],
       "ownerRoleIds": [
         "sparkwitch:grand_witch",
-        "sparkwitch:accomplice"
+        "sparkwitch:accomplice",
+        "sparkwitch:curser"
       ],
       "requiredModIds": [
         "sparkwitch"

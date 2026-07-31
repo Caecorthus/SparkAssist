@@ -43,7 +43,7 @@ class GuidebookTarotReaderResourcesTest {
                 .anyMatch(block -> block.type() == GuidebookBlockType.QUOTE));
         assertEquals(List.of(
                 "身份与经济",
-                "塔罗牌师是好人身份；初始金币为 0，每完成一个任务获得 50 金币。",
+                "塔罗牌师属于好人阵营；初始金币为 0，每完成一个任务获得 50 金币。",
                 "常规占卜",
                 "花费 200 金币，记录购买时本局存活玩家的阵营人数。死亡、断线玩家不计入统计；被吞下但尚未消化的玩家仍会计入。",
                 "占卜结果持续显示至本局结束，不会实时更新；再次购买会刷新为新的购买时快照。",

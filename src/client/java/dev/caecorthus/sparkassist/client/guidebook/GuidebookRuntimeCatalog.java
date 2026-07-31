@@ -107,8 +107,8 @@ public final class GuidebookRuntimeCatalog {
             int order = 1_000;
             for (Object value : values) {
                 Identifier id = (Identifier) value.getClass().getMethod("id").invoke(value);
-                // Role-owned active skills are documented with their roles, not in the witch-skill index.
-                // 职业专属主动技能随职业说明，不进入魔女技能目录。
+                // Witch skills are fail-closed to the supported role-owned set.
+                // 魔女技能目录仅收录受支持的职业专属技能，未知技能默认排除。
                 if (authoredIds.contains(id.toString())
                         || !GuidebookDiscoveryRules.includes(tab, id.toString())) {
                     continue;
@@ -123,7 +123,7 @@ public final class GuidebookRuntimeCatalog {
                         baseKey + ".name",
                         baseKey + ".description",
                         List.of(baseKey + ".description"),
-                        ownerRoleIds(tab, id),
+                        GuidebookDiscoveryRules.ownerRoleIds(id.toString()),
                         List.of(modId),
                         color,
                         order++
@@ -134,19 +134,6 @@ public final class GuidebookRuntimeCatalog {
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassCastException exception) {
             LOGGER.warn("Could not read optional guidebook registry {}", registryClassName, exception);
         }
-    }
-
-    private static List<String> ownerRoleIds(GuidebookTab tab, Identifier id) {
-        if (tab != GuidebookTab.SKILL || !id.getNamespace().equals("sparkwitch")) {
-            return List.of();
-        }
-        return switch (id.getPath()) {
-            case "ceremonial_sword" -> List.of("sparkwitch:grand_witch");
-            case "mighty_force", "swift_step", "murder_sense", "healing", "clairvoyance" ->
-                    List.of("sparkwitch:apprentice_witch");
-            case "death_ray" -> List.of("sparkwitch:murderous_witch");
-            default -> List.of();
-        };
     }
 
     private static Set<String> loadedModIds() {

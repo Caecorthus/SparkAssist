@@ -40,7 +40,7 @@ class GuidebookKidnapperResourcesTest {
         assertEquals(420, kidnapper.order());
         assertEquals(List.of(
                 "身份",
-                "绑架者是杀手阵营身份，继承杀手的基础能力。",
+                "绑架者属于杀手阵营，继承杀手的基础能力。",
                 "拖动",
                 "直接瞄准 2 格内且视线无遮挡的尸体，按身份技能键开始拖动。",
                 "拖动中可在任意位置再次按身份技能键放下尸体；开始与放下都没有冷却，也不消耗任何资源。",

@@ -28,12 +28,7 @@
             },
             {
               "type": "section",
-              "text": "出现条件",
-              "tone": "muted"
-            },
-            {
-              "type": "paragraph",
-              "text": "鲛人是默认关闭的地图专属身份；只有地图配置 special_roles.enabled_roles 启用后，才会加入身份池。",
+              "text": "行动限制",
               "tone": "muted"
             }
           ]

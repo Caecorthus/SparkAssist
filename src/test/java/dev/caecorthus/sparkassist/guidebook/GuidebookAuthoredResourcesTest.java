@@ -1,18 +1,144 @@
 package dev.caecorthus.sparkassist.guidebook;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookRun;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class GuidebookAuthoredResourcesTest {
     private static final Path GUIDEBOOK_ROOT = Path.of(
             "src/client/resources/assets/sparkassist/guidebook"
     );
+    private static final Path LANG_ROOT = Path.of(
+            "src/client/resources/assets/sparkassist/lang"
+    );
+    private static final Map<GuidebookTab, Long> EXPECTED_ENTRY_COUNTS = Map.of(
+            GuidebookTab.ROLE, 65L,
+            GuidebookTab.TRAIT, 31L,
+            GuidebookTab.SKILL, 7L,
+            GuidebookTab.FACTION, 4L
+    );
+    private static final Map<String, List<String>> EXPECTED_SKILL_OWNERS = Map.of(
+            "sparkwitch:ceremonial_sword", List.of("sparkwitch:grand_witch"),
+            "sparkwitch:death_ray", List.of("sparkwitch:murderous_witch"),
+            "sparkwitch:mighty_force", List.of("sparkwitch:apprentice_witch"),
+            "sparkwitch:swift_step", List.of("sparkwitch:apprentice_witch"),
+            "sparkwitch:murder_sense", List.of("sparkwitch:apprentice_witch"),
+            "sparkwitch:healing", List.of("sparkwitch:apprentice_witch"),
+            "sparkwitch:clairvoyance", List.of("sparkwitch:apprentice_witch")
+    );
+    private static final Set<String> ALLOWED_FACTION_LABELS = Set.of(
+            "好人阵营", "杀手阵营", "中立阵营", "魔女阵营"
+    );
+    private static final Pattern FACTION_LABEL = Pattern.compile(
+            "(?:非好人|非平民|原生杀手|好人|杀手|中立|魔女|普通|独立|平民)阵营"
+    );
+    private static final Pattern SLASH_COMMAND = Pattern.compile(
+            "(?<!\\S)/[a-z][a-z0-9_-]*(?::[a-z][a-z0-9_-]*)?",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern RAW_TICKS = Pattern.compile("(?i)(?<![a-z])\\d+\\s*ticks?(?![a-z])");
+    private static final List<String> PROHIBITED_POLICY_TERMS = List.of(
+            "管理员", "脚本", "配置", "职业刷新", "身份刷新", "角色刷新",
+            "刷新职业", "刷新身份", "刷新角色", "身份与刷新", "本局刷新", "同时刷新"
+    );
+
+    @Test
+    void authoredAndLocalizedContentConformsToGuidebookPolicy() throws IOException {
+        List<Path> resources = authoredResources();
+        assertEquals(107, resources.size());
+
+        List<GuidebookCatalog> resourceCatalogs = resources.stream()
+                .map(path -> {
+                    GuidebookCatalog parsed = parse(path);
+                    assertEquals(1, parsed.entries().size(), () -> path + " must contain exactly one entry");
+                    return parsed;
+                })
+                .toList();
+        GuidebookCatalog catalog = GuidebookCatalog.merge(resourceCatalogs);
+        assertEquals(107, catalog.entries().size());
+
+        Map<GuidebookTab, Long> counts = new EnumMap<>(GuidebookTab.class);
+        for (GuidebookTab tab : GuidebookTab.values()) {
+            counts.put(tab, catalog.entries().stream().filter(entry -> entry.tab() == tab).count());
+        }
+        assertEquals(EXPECTED_ENTRY_COUNTS, counts);
+
+        Map<String, List<String>> skillOwners = catalog.entries().stream()
+                .filter(entry -> entry.tab() == GuidebookTab.SKILL)
+                .collect(java.util.stream.Collectors.toMap(
+                        GuidebookEntry::id,
+                        GuidebookEntry::ownerRoleIds
+                ));
+        assertEquals(EXPECTED_SKILL_OWNERS, skillOwners);
+
+        Map<String, JsonObject> translations = Map.of(
+                "zh_cn", translations("zh_cn"),
+                "en_us", translations("en_us")
+        );
+        List<String> chineseProse = new ArrayList<>();
+        List<String> allLocalizedProse = new ArrayList<>();
+        for (GuidebookEntry entry : catalog.entries()) {
+            for (GuidebookRun run : entry.pages().stream()
+                    .flatMap(page -> page.blocks().stream())
+                    .flatMap(block -> block.runs().stream())
+                    .toList()) {
+                if (run.text() != null) {
+                    String line = entry.id() + ": " + run.text();
+                    chineseProse.add(line);
+                    allLocalizedProse.add(line);
+                } else {
+                    for (Map.Entry<String, JsonObject> locale : translations.entrySet()) {
+                        assertTrue(locale.getValue().has(run.translationKey()),
+                                () -> entry.id() + " references missing " + locale.getKey()
+                                        + " key " + run.translationKey());
+                        String line = entry.id() + " [" + locale.getKey() + "]: "
+                                + locale.getValue().get(run.translationKey()).getAsString();
+                        allLocalizedProse.add(line);
+                        if (locale.getKey().equals("zh_cn")) {
+                            chineseProse.add(line);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (String line : chineseProse) {
+            var factions = FACTION_LABEL.matcher(line);
+            while (factions.find()) {
+                assertTrue(ALLOWED_FACTION_LABELS.contains(factions.group()),
+                        () -> "Nonstandard faction label in " + line);
+            }
+            for (String term : PROHIBITED_POLICY_TERMS) {
+                assertFalse(line.contains(term), () -> "Prohibited policy prose '" + term + "' in " + line);
+            }
+        }
+        for (String line : allLocalizedProse) {
+            assertFalse(SLASH_COMMAND.matcher(line).find(), () -> "Slash command in " + line);
+            assertFalse(RAW_TICKS.matcher(line).find(), () -> "Raw tick duration in " + line);
+        }
+
+        GuidebookEntry witch = catalog.find("sparkassist:faction/sparkwitch/witch").orElseThrow();
+        assertTrue(witch.ownerRoleIds().contains("sparkwitch:curser"));
+        String witchProse = chineseProse.stream()
+                .filter(line -> line.startsWith(witch.id() + ": "))
+                .collect(java.util.stream.Collectors.joining("\n"));
+        assertTrue(witchProse.contains("诅咒者"));
+        assertTrue(witchProse.contains("所有存活玩家均属于魔女阵营"));
+    }
 
     @Test
     void includesSpiritSleuthWithTheUniversalTraits() throws IOException {
@@ -82,13 +208,13 @@ class GuidebookAuthoredResourcesTest {
         assertEquals(226, saint.order());
         assertEquals(List.of(
                 "身份规则",
-                "圣徒是平民好人身份；没有理智值，不会获得任务，只能使用受限的乘客冲刺，且无法拾取枪械。",
+                "圣徒属于好人阵营；没有理智值，不会获得任务，只能使用受限冲刺，且无法拾取枪械。",
                 "不会获得内鬼词条。",
-                "有效阵营为平民阵营的玩家无法击杀圣徒；该次击杀会被取消。",
+                "好人阵营玩家无法击杀圣徒；该次击杀会被取消。",
                 "巫毒师仍可绑定圣徒，但由绑定触发的最终连锁死亡会被取消。",
                 "业火",
                 "开局冷却 60 秒；激活后持续 15 秒。若圣徒存活至效果结束，则进入 60 秒冷却。",
-                "效果期间，除大魔女外，成功杀死圣徒的非平民阵营玩家会获得【业障】；除非之后成为大魔女，否则持续到本局结束。",
+                "效果期间，成功杀死圣徒且不属于好人阵营的玩家会获得【业障】，但大魔女除外；除非之后成为大魔女，否则持续到本局结束。",
                 "业障",
                 "【业障】只会在三种动作成功后触发：成功击杀、成功转移定时炸弹、成功命中毒针。",
                 "大魔女不会获得【业障】。已背负【业障】的玩家成为大魔女时，标记会立即清除；之后离开大魔女身份也不会恢复。",
@@ -125,7 +251,7 @@ class GuidebookAuthoredResourcesTest {
         assertEquals(250, perfumer.order());
         assertEquals(List.of(
                 "身份与经济",
-                "调香师是好人身份；每完成一个任务获得 50 金币。",
+                "调香师属于好人阵营；每完成一个任务获得 50 金币。",
                 "香精",
                 "香精售价 100 金币。右键另一名存活玩家，为其施加仅自己可见的标记；每名调香师的标记彼此独立，持续至目标死亡或本局结束。",
                 "标记成功后，调香师会在 12 格内且视线无遮挡时，以自己的身份颜色高亮目标。被标记的玩家成功击杀其他玩家后会沾上【血腥气味】，持续至目标死亡或本局结束。",
@@ -174,14 +300,14 @@ class GuidebookAuthoredResourcesTest {
         assertEquals(410, ninja.order());
         assertEquals(List.of(
                 "身份与经济",
-                "忍者是杀手阵营身份，继承杀手的基础能力。",
+                "忍者属于杀手阵营，继承杀手的基础能力。",
                 "忍者在自身位置的综合亮度不高于 5，或全局停电期间成功击杀玩家时，额外获得 100 金币。",
                 "专属商店",
                 "苦无：100 金币，每局限购 1 次；手里剑：275 金币；开锁器：75 金币。",
                 "停电沿用杀手的规则：杀手不超过 3 人时售价 400 金币；每多 1 名杀手，价格增加 100 金币。停电持续 30 至 40 秒，并进入全体杀手共享的 5 分钟冷却。",
                 "格挡",
                 "开局冷却 60 秒；激活后开启 2.5 秒格挡窗口。成功挡下一次由其他玩家造成的致命击杀，或窗口自然结束后，进入 180 秒冷却。",
-                "普通伤害不会消耗格挡；环境伤害、自杀、管理员与脚本强制死亡无法被格挡。",
+                "普通伤害不会消耗格挡；环境伤害与自杀无法被格挡。",
                 "苦无与手里剑",
                 "苦无可立即击杀视线内 4 格内的一名玩家；无论是否命中都不会消耗，成功使用后同类物品冷却 30 秒。",
                 "左键苦无可击退玩家。安装 SparkTraits 时，嗜血可缩短苦无冷却，突刺可增强左键击退。",
@@ -235,6 +361,20 @@ class GuidebookAuthoredResourcesTest {
                 .flatMap(block -> block.runs().stream())
                 .map(run -> run.text())
                 .toList());
+    }
+
+    private static JsonObject translations(String locale) throws IOException {
+        return JsonParser.parseString(Files.readString(LANG_ROOT.resolve(locale + ".json")))
+                .getAsJsonObject();
+    }
+
+    private static List<Path> authoredResources() throws IOException {
+        try (var paths = Files.walk(GUIDEBOOK_ROOT)) {
+            return paths
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .sorted()
+                    .toList();
+        }
     }
 
     private static GuidebookCatalog parse(Path path) {
