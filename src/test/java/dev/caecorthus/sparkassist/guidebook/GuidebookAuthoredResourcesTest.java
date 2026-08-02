@@ -171,6 +171,10 @@ class GuidebookAuthoredResourcesTest {
                 "始终可以看到旁观者漂浮的头。",
                 spiritSleuth.pages().getFirst().blocks().get(1).runs().getFirst().text()
         );
+        assertEquals(
+                "注：由于无法修复的 bug，目前不会被随机 roll 到。",
+                spiritSleuth.pages().getFirst().blocks().get(2).runs().getFirst().text()
+        );
 
         List<String> ids = catalog.entries().stream().map(GuidebookEntry::id).toList();
         int excellentPhysique = ids.indexOf("sparktraits:excellent_physique");

@@ -17,6 +17,11 @@
             {
               "type": "bullet",
               "text": "始终可以看到旁观者漂浮的头。"
+            },
+            {
+              "type": "paragraph",
+              "text": "注：由于无法修复的 bug，目前不会被随机 roll 到。",
+              "tone": "muted"
             }
           ]
         }
