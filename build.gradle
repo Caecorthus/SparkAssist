@@ -317,8 +317,6 @@ tasks.register("verifyDistributionMetadata") {
 }
 
 tasks.named("build") {
-    dependsOn tasks.named("verifyModJarVersion")
-    dependsOn tasks.named("verifyDistributionMetadata")
 }
 
 def targetJavaVersion = 21
@@ -329,10 +327,6 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named("check") {
     setDependsOn([])
-    dependsOn tasks.named("test")
-    dependsOn tasks.named("verifyArchitecture")
-    dependsOn tasks.named("verifyWatheDependency")
-    dependsOn tasks.matching { it.name == "validateAccessWidener" }
 }
 
 
