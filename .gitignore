@@ -1,12 +1,13 @@
-.gradle/
+/.gradle/
 .idea/
 /ARCHITECTURE.md
 /ARCHITECTURE_LOGS.md
 /ARCHITECTURE LOGS.md
-build/
-bin/
-run/
-logs/
+/build/
+/bin/
+/out/
+/run/
+/logs/
 *.class
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
