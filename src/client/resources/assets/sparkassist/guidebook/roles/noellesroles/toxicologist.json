@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.toxicologist",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.toxicologist.summary",
       "pages": [
         {
           "blocks": [
@@ -15,7 +15,7 @@
             },
             {
               "type": "section",
-              "text": "毒物辨识",
+              "text": "毒物辨识与解毒",
               "tone": "info"
             },
             {
@@ -24,11 +24,19 @@
             },
             {
               "type": "bullet",
-              "text": "中毒玩家会在你的眼中发出红光。"
+              "text": "视线内的中毒玩家会以毒理学家的身份颜色高亮。"
             },
             {
               "type": "bullet",
               "text": "初始携带【解毒剂】：开局冷却 2 分钟，后续使用冷却 3 分钟。可解除普通中毒并清除普通餐盘毒，但不能解除善良毒师的蓝毒。"
+            },
+            {
+              "type": "bullet",
+              "text": "每有 1 名存活玩家从无毒状态进入中毒状态，所有存活毒理学家获得 120 秒解毒剂冷却抵扣；没有冷却时会先积攒，之后自动用于缩短下一次解毒剂冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "成功使用解毒剂救治中毒玩家后，获得 25 金币，并立即尝试消耗已积攒的冷却抵扣。"
             },
             {
               "type": "bullet",
@@ -59,6 +67,23 @@
             {
               "type": "paragraph",
               "text": "胶囊可以装入一份食物或饮料。投掷命中后，目标会被强制食用其中内容；普通毒与蓝毒都会随内容生效，并以不同颜色显示毒性。"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "【解毒剂冷却刷新】："
+                },
+                {
+                  "text": "50 金币",
+                  "bold": true,
+                  "tone": "money"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "仅在解毒剂正在冷却时购买生效；成功购买会清空当前解毒剂冷却，无冷却时不会扣金币。"
             }
           ]
         }

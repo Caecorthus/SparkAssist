@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.recaller",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.recaller.summary",
       "pages": [
         {
           "blocks": [
@@ -20,19 +20,36 @@
             },
             {
               "type": "bullet",
-              "text": "按技能键设置一个存档点。"
+              "text": "按技能键设置一个存档点，并进入 10 秒冷却。"
             },
             {
               "type": "bullet",
-              "text": "等待 10 秒后，再次按下技能键并消耗 100 金币，可传送回存档位置。"
+              "text": "冷却结束且拥有至少 100 金币时，再次按下技能键会消耗 100 金币并传送回存档位置；传送前会先离开座位或载具。"
             },
             {
               "type": "bullet",
-              "text": "读档后冷却 30 秒，随后才能再次设置存档点。"
+              "text": "成功回溯后存档点清空，并进入 30 秒冷却；随后才能再次设置存档点。"
             },
             {
               "type": "bullet",
               "text": "完成任务额外获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "经济与商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "存活且仍在游戏中时，每 10 秒被动获得 5 金币，没有余额上限。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店出售【末影珍珠】：125 金币，不限量。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店出售【紫颂果】：35 金币，不限量。"
             }
           ]
         }
