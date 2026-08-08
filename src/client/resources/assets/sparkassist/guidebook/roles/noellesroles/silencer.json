@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.silencer",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.silencer.summary",
       "pages": [
         {
           "blocks": [
@@ -46,6 +46,27 @@
             {
               "type": "bullet",
               "text": "被沉默者的理智消耗速度翻倍。"
+            },
+            {
+              "type": "section",
+              "text": "武器静音加强",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "使用 Wathe 匕首（knife）时，举刀准备音效和刺杀音效都不会发出。"
+            },
+            {
+              "type": "bullet",
+              "text": "使用 Wathe 左轮（revolver）时，左轮点击音效和开枪音效都不会发出；仅限 Wathe 的 revolver。Derringer 等其他枪械仍保留原音效。"
+            },
+            {
+              "type": "bullet",
+              "text": "使用 Wathe 球棒（bat）进行打击时，打击音效不会发出。"
+            },
+            {
+              "type": "bullet",
+              "text": "验尸官变形成静语者后，同样获得上述武器静音加强。"
             },
             {
               "type": "section",

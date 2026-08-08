@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.phantom",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.phantom.summary",
       "pages": [
         {
           "blocks": [
@@ -25,6 +25,31 @@
             {
               "type": "bullet",
               "text": "隐身期间依然保留实体碰撞箱。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "背包隐身",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "背包中会显示自己以外的其他本局存活玩家头像；被饕餮吞掉的玩家不会出现在列表中。"
+            },
+            {
+              "type": "bullet",
+              "text": "点击目标头像后，使该玩家进入 30 秒隐身，并使背包按钮进入 90 秒冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "背包按钮隐身与幽灵原本按键触发的自身隐身使用两套独立冷却，互不消耗、互不等待。"
+            },
+            {
+              "type": "bullet",
+              "text": "成功使用背包按钮会写入回放“%s隐身了%s”；目标的隐身时间结束时写入“%s隐身时间结束”。"
             }
           ]
         }

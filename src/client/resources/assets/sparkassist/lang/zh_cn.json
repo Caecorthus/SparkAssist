@@ -57,6 +57,8 @@
   "guidebook.sparkassist.noellesroles.toxicologist.summary": "识别毒物、救治中毒者，并通过冷却抵扣与商店刷新更频繁地使用解毒剂。",
   "guidebook.sparkassist.noellesroles.recaller.summary": "保存回溯点并花费金币传送返回，同时依靠被动收入和专属商店维持机动性。",
   "guidebook.sparkassist.noellesroles.coroner.summary": "验尸、靠近尸体获取金币，并用采尸袋收走尸体来解锁尸体身份伪装。",
+  "guidebook.sparkassist.noellesroles.phantom.summary": "通过背包选择其他存活玩家，使其隐身 30 秒；背包能力拥有独立的 90 秒冷却。",
+  "guidebook.sparkassist.noellesroles.silencer.summary": "使 Wathe 匕首、左轮与球棒的指定音效静音，验尸官伪装成静语者时同样生效。",
   "announcement.role.accomplice": "共犯",
   "announcement.role.apprentice_witch": "预备魔女",
   "announcement.role.assassin": "刺客",

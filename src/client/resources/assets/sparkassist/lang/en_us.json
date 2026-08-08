@@ -57,6 +57,8 @@
   "guidebook.sparkassist.noellesroles.toxicologist.summary": "Identifies poison, cures poisoned players, and uses cooldown reductions plus shop refreshes to deploy antidotes more often.",
   "guidebook.sparkassist.noellesroles.recaller.summary": "Marks a recall point and spends money to return, backed by passive income and mobility shop tools.",
   "guidebook.sparkassist.noellesroles.coroner.summary": "Examines bodies, earns money near corpses, and uses body bags to unlock corpse-identity disguises.",
+  "guidebook.sparkassist.noellesroles.phantom.summary": "Uses the backpack to select another living player and make them invisible for 30 seconds; the backpack ability has an independent 90-second cooldown.",
+  "guidebook.sparkassist.noellesroles.silencer.summary": "Silences the specified Wathe knife, revolver, and bat sounds, including when a Coroner uses a Silencer disguise.",
   "announcement.role.accomplice": "共犯",
   "announcement.role.apprentice_witch": "预备魔女",
   "announcement.role.assassin": "刺客",
