@@ -1,687 +1,541 @@
 package dev.caecorthus.sparkassist.client.guidebook;
 
-import dev.caecorthus.sparkassist.SparkAssist;
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer;
 import dev.caecorthus.sparkassist.guidebook.GuidebookCatalog;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
+import dev.caecorthus.sparkassist.guidebook.GuidebookLayout;
+import dev.caecorthus.sparkassist.guidebook.GuidebookLayout.Region;
+import dev.caecorthus.sparkassist.guidebook.GuidebookNavigation;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSearch;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSessionState;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlock;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlockType;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookPage;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookRun;
+import dev.caecorthus.sparkassist.guidebook.content.GuidebookTone;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
 
 /**
- * Responsive, data-backed guidebook screen with left-edge tabs and personal round markers.
- * 支持响应式布局、左侧书签与本局个人标记的数据化指南书界面。
+ * Left-hand directory and centered reader, also usable inside the live inventory.
+ * 左侧目录与居中正文，也可嵌入正在运行的背包界面。
  */
 public final class GuidebookScreen extends Screen {
-    private static final Identifier BOOK_FRAME = SparkAssist.id("textures/gui/guidebook/book_frame.png");
-    private static final Identifier BOOK_PAGES = SparkAssist.id("textures/gui/guidebook/book_pages.png");
-    private static final Identifier TAB_SELECTED = SparkAssist.id("textures/gui/guidebook/tab_selected.png");
-    private static final Identifier TAB_UNSELECTED = SparkAssist.id("textures/gui/guidebook/tab_unselected.png");
-    private static final Identifier CLOSE = SparkAssist.id("textures/gui/guidebook/navigation/close.png");
-    private static final Identifier CLOSE_HOVERED = SparkAssist.id("textures/gui/guidebook/navigation/close_hovered.png");
-    private static final Identifier PREVIOUS = SparkAssist.id("textures/gui/guidebook/navigation/previous.png");
-    private static final Identifier PREVIOUS_HOVERED = SparkAssist.id("textures/gui/guidebook/navigation/previous_hovered.png");
-    private static final Identifier PREVIOUS_DISABLED = SparkAssist.id("textures/gui/guidebook/navigation/previous_disabled.png");
-    private static final Identifier NEXT = SparkAssist.id("textures/gui/guidebook/navigation/next.png");
-    private static final Identifier NEXT_HOVERED = SparkAssist.id("textures/gui/guidebook/navigation/next_hovered.png");
-    private static final Identifier NEXT_DISABLED = SparkAssist.id("textures/gui/guidebook/navigation/next_disabled.png");
-
-    private static final int BOOK_TEXTURE_WIDTH = 640;
-    private static final int BOOK_TEXTURE_HEIGHT = 414;
-    private static final int MAX_BOOK_WIDTH = 420;
-    private static final int TAB_WIDTH = 48;
-    private static final int TAB_HEIGHT = 19;
-    private static final int TAB_GAP = 2;
-    private static final int ROW_HEIGHT = 13;
-    private static final int NAV_WIDTH = 23;
-    private static final int NAV_HEIGHT = 13;
-    private static final int CLOSE_SIZE = 12;
-    private static final int TEXT_COLOR = 0xFF3B2A1A;
-    private static final int MUTED_COLOR = 0xFF8A765D;
-    private static final int HOVER_COLOR = 0x334C2E25;
-    private static final int SELECTED_COLOR = 0x553C211C;
-    private static final int STAR_COLOR = 0xFFF2B84B;
+    private static final int TEXT_COLOR = 0xFF252B30;
+    private static final int MUTED_COLOR = 0xFF68737A;
+    private static final int NAV_TEXT = 0xFFF0F3F4;
+    private static final int NAV_MUTED = 0xFFB0BEC2;
+    private static final int ACCENT = 0xFF72C5B7;
+    private static final int LINE_HEIGHT = 11;
 
     private final Screen parent;
+    private final boolean embedded;
     private final GuidebookSessionState session = GuidebookClientState.session();
-
+    private final Set<String> expandedNodes = new HashSet<>();
     private GuidebookCatalog catalog = GuidebookCatalog.of(List.of());
     private TranslationStorage chineseTranslations;
-    private List<GuidebookEntry> visibleEntries = List.of();
-    private GuidebookTab activeTab = GuidebookTab.ROLE;
+    private GuidebookLayout layout;
+    private List<RenderedRow> rows = List.of();
+    private List<OrderedText> titleLines = List.of();
+    private List<OrderedText> articleTitle = List.of();
+    private List<OrderedText> articleSource = List.of();
+    private GuidebookContentRenderer.Layout content = new GuidebookContentRenderer.Layout(List.of(), 0);
     private GuidebookEntry selectedEntry;
-    private int selectedPage;
-    private int leftScroll;
-    private int leftContentHeight;
-    private int rightScroll;
-    private int rightContentHeight;
+    private TextFieldWidget searchField;
+    private String searchQuery = "";
     private boolean searchExpanded;
     private boolean creditsOpen;
-    private String searchQuery = "";
-    private TextFieldWidget searchField;
-
-    private int bookX;
-    private int bookY;
-    private int bookWidth;
-    private int bookHeight;
-    private int leftPageX;
-    private int leftPageY;
-    private int leftPageWidth;
-    private int leftPageHeight;
-    private int rightPageX;
-    private int rightPageY;
-    private int rightPageWidth;
-    private int rightPageHeight;
+    private boolean initialized;
+    private boolean treeFocused;
+    private int focusedRow = -1;
+    private int directoryScroll;
+    private int articleScroll;
+    private int directoryHeight;
+    private int toolbarY;
+    private Region directoryViewport;
+    private Region articleViewport;
+    private boolean draggingDirectory;
+    private boolean draggingArticle;
 
     public GuidebookScreen(Screen parent) {
+        this(parent, false);
+    }
+
+    private GuidebookScreen(Screen parent, boolean embedded) {
         super(Text.translatable("screen.sparkassist.guidebook"));
         this.parent = parent;
+        this.embedded = embedded;
+    }
+
+    public static GuidebookScreen embedded(Screen parent) {
+        return new GuidebookScreen(parent, true);
     }
 
     @Override
     protected void init() {
-        super.init();
-        computeLayout();
-        catalog = GuidebookRuntimeCatalog.load(this.client);
-        // Guidebook copy stays Chinese even when the rest of the client uses another locale.
-        // 指南书文本固定使用中文，不跟随客户端其余界面的语言。
-        chineseTranslations = TranslationStorage.load(this.client.getResourceManager(), List.of("zh_cn"), false);
-
-        activeTab = session.selectedTab().orElse(activeTab);
-        session.selectedEntryId().flatMap(catalog::find).ifPresent(entry -> selectedEntry = entry);
-        selectedPage = session.selectedPage();
-        leftScroll = session.leftScroll();
-        rightScroll = session.rightScroll();
-        session.consumeRoleAutoSelection().flatMap(catalog::find).ifPresent(entry -> {
-            activeTab = GuidebookTab.ROLE;
-            selectEntry(entry);
-        });
-
-        searchField = new TextFieldWidget(
-                this.textRenderer,
-                leftPageX + 3,
-                leftPageY + 15,
-                Math.max(40, leftPageWidth - 20),
-                15,
-                Text.translatable("guidebook.sparkassist.search")
-        );
+        layout = GuidebookLayout.compute(width, height);
+        catalog = GuidebookRuntimeCatalog.load(client);
+        chineseTranslations = TranslationStorage.load(client.getResourceManager(), List.of("zh_cn"), false);
+        if (!initialized) {
+            expandedNodes.addAll(session.expandedNodeIds());
+            directoryScroll = session.leftScroll();
+            articleScroll = session.rightScroll();
+            session.selectedEntryId().flatMap(catalog::find).ifPresent(entry -> selectedEntry = entry);
+            initialized = true;
+        }
+        // Opening the inventory never selects a role or expands a branch automatically.
+        // 打开背包时不自动选中身份，也不自动展开目录。
+        Region nav = layout.directory();
+        titleLines = wrapped(chineseText("screen.sparkassist.guidebook"), nav.width() - 14);
+        toolbarY = nav.y() + 9 + titleLines.size() * LINE_HEIGHT + 5;
+        directoryViewport = new Region(nav.x() + 4, toolbarY + 21, nav.width() - 8,
+                Math.max(20, nav.bottom() - toolbarY - 44));
+        searchField = new TextFieldWidget(textRenderer, nav.x() + 6, toolbarY,
+                nav.width() - 29, 16, chineseText("guidebook.sparkassist.search"));
         searchField.setMaxLength(64);
-        searchField.setPlaceholder(Text.translatable("guidebook.sparkassist.search.placeholder"));
+        searchField.setPlaceholder(chineseText("guidebook.sparkassist.search"));
         searchField.setText(searchQuery);
         searchField.setChangedListener(value -> {
             searchQuery = value;
-            leftScroll = 0;
-            refreshEntries();
+            directoryScroll = 0;
+            refreshRows();
         });
         searchField.visible = searchExpanded;
-        this.addDrawableChild(searchField);
-
-        refreshEntries();
-        if (selectedEntry == null && !visibleEntries.isEmpty()) {
-            selectEntry(visibleEntries.getFirst());
-        }
+        addDrawableChild(searchField);
+        refreshRows();
+        refreshArticle();
     }
 
-    private void computeLayout() {
-        int availableWidth = Math.max(220, this.width - 96);
-        int availableHeight = Math.max(142, this.height - 18);
-        int heightLimitedWidth = availableHeight * BOOK_TEXTURE_WIDTH / BOOK_TEXTURE_HEIGHT;
-        bookWidth = Math.min(MAX_BOOK_WIDTH, Math.min(availableWidth, heightLimitedWidth));
-        bookHeight = bookWidth * BOOK_TEXTURE_HEIGHT / BOOK_TEXTURE_WIDTH;
-        bookX = (this.width - bookWidth) / 2;
-        bookY = (this.height - bookHeight) / 2;
-
-        int half = bookWidth / 2;
-        int horizontalMargin = Math.max(11, bookWidth / 28);
-        int verticalMargin = Math.max(10, bookHeight / 18);
-        int spineGap = Math.max(7, bookWidth / 48);
-        leftPageX = bookX + horizontalMargin;
-        leftPageY = bookY + verticalMargin;
-        leftPageWidth = half - horizontalMargin - spineGap;
-        leftPageHeight = bookHeight - verticalMargin * 2;
-        rightPageX = bookX + half + spineGap;
-        rightPageY = leftPageY;
-        rightPageWidth = half - horizontalMargin - spineGap;
-        rightPageHeight = leftPageHeight;
+    private void refreshRows() {
+        String needle = searchQuery.strip().toLowerCase(Locale.ROOT);
+        List<GuidebookNavigation.Row> nodes = GuidebookNavigation.rows(catalog, expandedNodes,
+                entry -> matches(entry, needle), !needle.isEmpty());
+        List<RenderedRow> rendered = new ArrayList<>();
+        int y = 0;
+        for (GuidebookNavigation.Row node : nodes) {
+            int nameWidth = directoryViewport.width() - 16 - node.depth() * 8;
+            List<OrderedText> lines = wrapped(chineseText(node.nameKey()), nameWidth);
+            int rowHeight = Math.max(18, lines.size() * LINE_HEIGHT + 7);
+            rendered.add(new RenderedRow(node, y, rowHeight, lines));
+            y += rowHeight;
+        }
+        rows = List.copyOf(rendered);
+        directoryHeight = y;
+        directoryScroll = MathHelper.clamp(directoryScroll, 0, maxDirectoryScroll());
+        focusedRow = Math.min(focusedRow, rows.size() - 1);
     }
 
-    private void refreshEntries() {
-        visibleEntries = catalog.entries().stream()
-                .filter(entry -> entry.tab() == activeTab)
-                .filter(entry -> GuidebookSearch.matches(
-                        entry,
-                        chineseString(entry.nameKey()),
-                        localizedOwnerRoleNames(entry),
-                        searchQuery
-                ))
-                .toList();
-        leftContentHeight = visibleEntries.size() * ROW_HEIGHT;
-        leftScroll = MathHelper.clamp(leftScroll, 0, maxLeftScroll());
+    private boolean matches(GuidebookEntry entry, String needle) {
+        if (GuidebookSearch.matches(entry, chineseString(entry.nameKey()), entry.ownerRoleIds().stream()
+                .map(id -> chineseString("announcement.role." + id.substring(id.indexOf(':') + 1))).toList(), needle)) {
+            return true;
+        }
+        return GuidebookNavigation.groupsFor(entry).stream()
+                .anyMatch(group -> chineseString(GuidebookNavigation.labelKey(group)).toLowerCase(Locale.ROOT).contains(needle));
+    }
 
-        if (selectedEntry != null && !visibleEntries.contains(selectedEntry)) {
-            selectedEntry = null;
+    private void refreshArticle() {
+        if (!isArticleOpen()) {
+            return;
         }
-        if (selectedEntry == null && !visibleEntries.isEmpty() && !creditsOpen) {
-            selectEntry(visibleEntries.getFirst());
+        Region article = layout.article();
+        articleTitle = wrapped(chineseText(creditsOpen ? "guidebook.sparkassist.credits.title" : selectedEntry.nameKey()),
+                article.width() - 42);
+        articleSource = creditsOpen ? List.of() : wrapped(
+                Text.literal(chineseString("guidebook.sparkassist.source").formatted(selectedEntry.sourceModId())),
+                article.width() - 24);
+        int contentY = article.y() + 20 + (articleTitle.size() + articleSource.size()) * LINE_HEIGHT;
+        articleViewport = new Region(article.x() + 12, contentY, article.width() - 24,
+                Math.max(20, article.bottom() - contentY - 12));
+        List<GuidebookBlock> blocks = new ArrayList<>();
+        if (creditsOpen) {
+            blocks.add(paragraph("guidebook.sparkassist.credits.body"));
+        } else if (!selectedEntry.pages().isEmpty()) {
+            for (GuidebookPage page : selectedEntry.pages()) {
+                if (!blocks.isEmpty()) {
+                    blocks.add(new GuidebookBlock(GuidebookBlockType.SPACER, List.of()));
+                }
+                blocks.addAll(page.blocks());
+            }
+        } else {
+            List<String> keys = selectedEntry.pageKeys().isEmpty()
+                    ? List.of(selectedEntry.summaryKey()) : selectedEntry.pageKeys();
+            keys.forEach(key -> blocks.add(paragraph(key)));
         }
+        content = GuidebookContentRenderer.layout(new GuidebookPage(blocks), textRenderer,
+                articleViewport.width() - 5, this::chineseString);
+        articleScroll = MathHelper.clamp(articleScroll, 0, maxArticleScroll());
+    }
+
+    private static GuidebookBlock paragraph(String key) {
+        return new GuidebookBlock(GuidebookBlockType.PARAGRAPH,
+                List.of(GuidebookRun.translated(key, false, false, GuidebookTone.DEFAULT)));
     }
 
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // The book supplies its own backdrop; avoid vanilla blur over its page texture.
-        // 书本已有完整背景，不叠加原版模糊层以免纸张发灰。
+        // The inventory remains visible behind the modal scrim; no extra blur or book texture.
+        // 背包保留在遮罩后方，不再叠加模糊或书本材质。
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(0, 0, this.width, this.height, 0xB0000000);
-        context.drawTexture(
-                BOOK_FRAME,
-                bookX,
-                bookY,
-                bookWidth,
-                bookHeight,
-                0,
-                0,
-                BOOK_TEXTURE_WIDTH,
-                BOOK_TEXTURE_HEIGHT,
-                BOOK_TEXTURE_WIDTH,
-                BOOK_TEXTURE_HEIGHT
-        );
-        renderTabs(context, mouseX, mouseY);
-        context.drawTexture(
-                BOOK_PAGES,
-                bookX,
-                bookY,
-                bookWidth,
-                bookHeight,
-                0,
-                0,
-                BOOK_TEXTURE_WIDTH,
-                BOOK_TEXTURE_HEIGHT,
-                BOOK_TEXTURE_WIDTH,
-                BOOK_TEXTURE_HEIGHT
-        );
-        renderLeftPage(context, mouseX, mouseY);
-        renderRightPage(context, mouseX, mouseY);
-        super.render(context, mouseX, mouseY, delta);
-        renderCloseButton(context, mouseX, mouseY);
+        if (isArticleOpen() || !embedded) {
+            context.fill(0, 0, width, height, isArticleOpen() ? 0xAE000000 : 0x60000000);
+        }
+        if (directoryVisible()) {
+            renderDirectory(context, mouseX, mouseY);
+            searchField.visible = searchExpanded;
+            super.render(context, mouseX, mouseY, delta);
+        } else {
+            searchField.visible = false;
+        }
+        if (isArticleOpen()) {
+            renderArticle(context, mouseX, mouseY);
+        } else if (!embedded) {
+            renderClose(context, new Region(width - 24, 8, 16, 16), mouseX, mouseY);
+        }
     }
 
-    private void renderTabs(DrawContext context, int mouseX, int mouseY) {
-        renderTab(context, GuidebookTab.ROLE, leftTabX(), tabY(0), mouseX, mouseY);
-        renderTab(context, GuidebookTab.FACTION, leftTabX(), tabY(1), mouseX, mouseY);
-        renderTab(context, GuidebookTab.SKILL, leftTabX(), tabY(2), mouseX, mouseY);
-        renderTab(context, GuidebookTab.TRAIT, leftTabX(), tabY(3), mouseX, mouseY);
-    }
-
-    private void renderTab(
-            DrawContext context,
-            GuidebookTab tab,
-            int x,
-            int y,
-            int mouseX,
-            int mouseY
-    ) {
-        boolean selected = activeTab == tab;
-        boolean hovered = inside(mouseX, mouseY, x, y, TAB_WIDTH, TAB_HEIGHT);
-        Identifier texture = selected || hovered ? TAB_SELECTED : TAB_UNSELECTED;
-        context.drawTexture(texture, x, y, 0, 0, TAB_WIDTH, TAB_HEIGHT, TAB_WIDTH, TAB_HEIGHT);
-        Text label = Text.translatable(tabTranslationKey(tab));
-        String labelText = this.textRenderer.trimToWidth(label.getString(), TAB_WIDTH - 6);
-        int textX = x + (TAB_WIDTH - this.textRenderer.getWidth(labelText)) / 2;
-        context.drawText(this.textRenderer, labelText, textX, y + 6, 0xFFF1D9B0, true);
-    }
-
-    private void renderLeftPage(DrawContext context, int mouseX, int mouseY) {
-        Text tabTitle = Text.translatable(tabTranslationKey(activeTab));
-        context.drawText(this.textRenderer, tabTitle, leftPageX + 3, leftPageY + 3, TEXT_COLOR, false);
+    private void renderDirectory(DrawContext context, int mouseX, int mouseY) {
+        Region nav = layout.directory();
+        context.fill(nav.x(), nav.y(), nav.right(), nav.bottom(), 0xEE1D2326);
+        drawLines(context, titleLines, nav.x() + 7, nav.y() + 9, NAV_TEXT);
         renderSearchIcon(context, mouseX, mouseY);
-
-        int listY = listTop();
-        int listHeight = listHeight();
-        context.enableScissor(leftPageX, listY, leftPageX + leftPageWidth, listY + listHeight);
         GuidebookEntry hoveredEntry = null;
-        int y = listY - leftScroll;
-        for (GuidebookEntry entry : visibleEntries) {
-            if (y + ROW_HEIGHT >= listY && y <= listY + listHeight) {
-                boolean hovered = inside(mouseX, mouseY, leftPageX + 2, y, leftPageWidth - 4, ROW_HEIGHT);
-                if (entry.equals(selectedEntry) && !creditsOpen) {
-                    context.fill(leftPageX + 2, y, leftPageX + leftPageWidth - 2, y + ROW_HEIGHT, SELECTED_COLOR);
-                } else if (hovered) {
-                    context.fill(leftPageX + 2, y, leftPageX + leftPageWidth - 2, y + ROW_HEIGHT, HOVER_COLOR);
-                }
-
-                boolean marked = isMarked(entry);
-                int availableNameWidth = leftPageWidth - 10 - (marked ? 10 : 0);
-                String fullName = chineseString(entry.nameKey());
-                String name = this.textRenderer.trimToWidth(fullName, Math.max(12, availableNameWidth));
-                context.drawText(this.textRenderer, name, leftPageX + 5, y + 3, entryColor(entry), false);
-                if (marked) {
-                    context.drawText(
-                            this.textRenderer,
-                            Text.literal("\u2605"),
-                            leftPageX + leftPageWidth - 11,
-                            y + 3,
-                            STAR_COLOR,
-                            true
-                    );
+        context.enableScissor(directoryViewport.x(), directoryViewport.y(), directoryViewport.right(), directoryViewport.bottom());
+        for (int index = 0; index < rows.size(); index++) {
+            RenderedRow row = rows.get(index);
+            int y = directoryViewport.y() + row.y() - directoryScroll;
+            if (y + row.height() <= directoryViewport.y() || y >= directoryViewport.bottom()) {
+                continue;
+            }
+            boolean hovered = directoryViewport.contains(mouseX, mouseY) && mouseY >= y && mouseY < y + row.height();
+            boolean selected = !creditsOpen && row.node().entry() != null && row.node().entry().equals(selectedEntry);
+            if (selected || hovered || treeFocused && focusedRow == index) {
+                context.fill(directoryViewport.x(), y, directoryViewport.right() - 4, y + row.height(),
+                        selected ? 0xFF344D4B : 0xFF303B3F);
+            }
+            int x = directoryViewport.x() + 3 + row.node().depth() * 8;
+            if (row.node().entry() == null) {
+                context.drawText(textRenderer, row.node().expanded() ? "v" : ">", x, y + 4, ACCENT, false);
+            } else {
+                if (isMarked(row.node().entry())) {
+                    context.drawText(textRenderer, "*", x, y + 4, 0xFFF0C869, false);
+                } else {
+                    context.fill(x + 1, y + 6, x + 3, y + 12, 0xFF000000 | row.node().entry().color());
                 }
                 if (hovered) {
-                    hoveredEntry = entry;
+                    hoveredEntry = row.node().entry();
                 }
             }
-            y += ROW_HEIGHT;
+            drawLines(context, row.lines(), x + 8, y + 4, NAV_TEXT);
         }
         context.disableScissor();
-
-        if (visibleEntries.isEmpty()) {
-            Text empty = Text.translatable(searchQuery.isBlank()
-                    ? "guidebook.sparkassist.empty"
-                    : "guidebook.sparkassist.search.no_results");
-            drawWrapped(context, empty, leftPageX + 4, listY + 5, leftPageWidth - 8, MUTED_COLOR, 0);
+        renderScrollbar(context, directoryViewport, directoryHeight, directoryScroll, NAV_MUTED);
+        if (rows.isEmpty()) {
+            drawLines(context, wrapped(chineseText("guidebook.sparkassist.search.no_results"), nav.width() - 16),
+                    nav.x() + 8, directoryViewport.y() + 4, NAV_MUTED);
         }
+        context.drawText(textRenderer, chineseText("guidebook.sparkassist.credits"), nav.x() + 7,
+                nav.bottom() - 15, NAV_MUTED, false);
+        if (hoveredEntry != null && isMarked(hoveredEntry)) {
+            context.drawTooltip(textRenderer, chineseText("guidebook.sparkassist.marked"), mouseX, mouseY);
+        }
+    }
 
-        String credits = this.textRenderer.trimToWidth(
-                Text.translatable("guidebook.sparkassist.credits").getString(),
-                leftPageWidth - 6
-        );
-        int creditsY = leftPageY + leftPageHeight - this.textRenderer.fontHeight;
-        int creditsColor = creditsOpen || inside(mouseX, mouseY, leftPageX + 3, creditsY, this.textRenderer.getWidth(credits), 10)
-                ? TEXT_COLOR
-                : MUTED_COLOR;
-        context.drawText(this.textRenderer, credits, leftPageX + 3, creditsY, creditsColor, false);
+    private void renderArticle(DrawContext context, int mouseX, int mouseY) {
+        Region article = layout.article();
+        context.fill(article.x(), article.y(), article.right(), article.bottom(), 0xFFF0F3F4);
+        context.fill(article.x(), article.y(), article.x() + 2, article.bottom(), ACCENT);
+        drawLines(context, articleTitle, article.x() + 12, article.y() + 12, TEXT_COLOR);
+        drawLines(context, articleSource, article.x() + 12,
+                article.y() + 15 + articleTitle.size() * LINE_HEIGHT, MUTED_COLOR);
+        context.fill(articleViewport.x(), articleViewport.y() - 5, articleViewport.right(), articleViewport.y() - 4, 0xFFCBD4D7);
+        context.enableScissor(articleViewport.x(), articleViewport.y(), articleViewport.right(), articleViewport.bottom());
+        for (GuidebookContentRenderer.RenderedLine line : content.lines()) {
+            context.drawText(textRenderer, line.text(), articleViewport.x() + line.indent(),
+                    articleViewport.y() + line.y() - articleScroll, TEXT_COLOR, false);
+        }
+        context.disableScissor();
+        renderScrollbar(context, articleViewport, content.height(), articleScroll, MUTED_COLOR);
+        renderClose(context, articleCloseButton(), mouseX, mouseY);
+    }
 
-        if (hoveredEntry != null) {
-            List<Text> tooltip = new ArrayList<>();
-            tooltip.add(chineseText(hoveredEntry.nameKey()));
-            if (isMarked(hoveredEntry)) {
-                tooltip.add(Text.translatable("guidebook.sparkassist.marked").withColor(STAR_COLOR));
-            }
-            context.drawTooltip(this.textRenderer, tooltip, mouseX, mouseY);
+    private void renderClose(DrawContext context, Region button, int mouseX, int mouseY) {
+        if (button.contains(mouseX, mouseY)) {
+            context.fill(button.x(), button.y(), button.right(), button.bottom(), 0x30405259);
+        }
+        context.drawCenteredTextWithShadow(textRenderer, Text.literal("×"), button.x() + 8, button.y() + 4,
+                isArticleOpen() ? TEXT_COLOR : NAV_TEXT);
+        if (button.contains(mouseX, mouseY)) {
+            context.drawTooltip(textRenderer, chineseText("gui.back"), mouseX, mouseY);
         }
     }
 
     private void renderSearchIcon(DrawContext context, int mouseX, int mouseY) {
-        int x = searchIconX();
-        int y = searchIconY();
-        boolean hovered = inside(mouseX, mouseY, x - 2, y - 2, 13, 13);
-        int color = hovered || searchExpanded ? TEXT_COLOR : MUTED_COLOR;
+        Region button = searchButton();
+        int x = button.x() + 3;
+        int y = button.y() + 3;
+        int color = searchExpanded || button.contains(mouseX, mouseY) ? ACCENT : NAV_MUTED;
         context.fill(x + 1, y, x + 6, y + 1, color);
         context.fill(x, y + 1, x + 1, y + 6, color);
         context.fill(x + 6, y + 1, x + 7, y + 6, color);
         context.fill(x + 1, y + 6, x + 6, y + 7, color);
-        context.fill(x + 6, y + 6, x + 8, y + 8, color);
-        context.fill(x + 8, y + 8, x + 10, y + 10, color);
+        context.fill(x + 6, y + 6, x + 9, y + 9, color);
+        if (button.contains(mouseX, mouseY)) {
+            context.drawTooltip(textRenderer, chineseText("guidebook.sparkassist.search"), mouseX, mouseY);
+        }
     }
 
-    private void renderRightPage(DrawContext context, int mouseX, int mouseY) {
-        if (creditsOpen) {
-            renderCredits(context);
+    private void renderScrollbar(DrawContext context, Region viewport, int totalHeight, int scroll, int color) {
+        if (totalHeight <= viewport.height()) {
             return;
         }
-        if (selectedEntry == null) {
-            drawWrapped(
-                    context,
-                    Text.translatable("guidebook.sparkassist.select_entry"),
-                    rightPageX + 4,
-                    rightPageY + 18,
-                    rightPageWidth - 8,
-                    MUTED_COLOR,
-                    0
-            );
-            return;
-        }
-
-        String title = chineseString(selectedEntry.nameKey());
-        title = this.textRenderer.trimToWidth(title, Math.max(20, rightPageWidth - 23));
-        context.drawText(this.textRenderer, title, rightPageX + 3, rightPageY + 3, entryColor(selectedEntry), false);
-        String source = Text.translatable("guidebook.sparkassist.source", selectedEntry.sourceModId()).getString();
-        source = this.textRenderer.trimToWidth(source, Math.max(20, rightPageWidth - 6));
-        context.drawText(this.textRenderer, source, rightPageX + 3, rightPageY + 15, MUTED_COLOR, false);
-
-        int pageCount = pageCount(selectedEntry);
-        selectedPage = MathHelper.clamp(selectedPage, 0, pageCount - 1);
-        int contentY = rightPageY + 31;
-        int contentHeight = Math.max(20, rightPageHeight - 49);
-        context.enableScissor(rightPageX, contentY, rightPageX + rightPageWidth, contentY + contentHeight);
-        if (!selectedEntry.pages().isEmpty()) {
-            GuidebookPage page = selectedEntry.pages().get(selectedPage);
-            GuidebookContentRenderer.Layout layout = GuidebookContentRenderer.layout(
-                    page,
-                    this.textRenderer,
-                    rightPageWidth - 8,
-                    this::chineseString
-            );
-            rightContentHeight = layout.height();
-            rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
-            for (GuidebookContentRenderer.RenderedLine line : layout.lines()) {
-                context.drawText(
-                        this.textRenderer,
-                        line.text(),
-                        rightPageX + 4 + line.indent(),
-                        contentY + line.y() - rightScroll,
-                        0xFFFFFFFF,
-                        false
-                );
-            }
-        } else {
-            List<String> pages = selectedEntry.pageKeys().isEmpty()
-                    ? List.of(selectedEntry.summaryKey())
-                    : selectedEntry.pageKeys();
-            List<OrderedText> lines = wrappedLines(chineseText(pages.get(selectedPage)), rightPageWidth - 8);
-            rightContentHeight = lines.size() * (this.textRenderer.fontHeight + 2);
-            rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
-            int y = contentY - rightScroll;
-            for (OrderedText line : lines) {
-                context.drawText(this.textRenderer, line, rightPageX + 4, y, TEXT_COLOR, false);
-                y += this.textRenderer.fontHeight + 2;
-            }
-        }
-        context.disableScissor();
-        renderPageNavigation(context, mouseX, mouseY, pageCount);
-    }
-
-    private void renderCredits(DrawContext context) {
-        String title = Text.translatable("guidebook.sparkassist.credits.title").getString();
-        title = this.textRenderer.trimToWidth(title, Math.max(20, rightPageWidth - CLOSE_SIZE - 5));
-        context.drawText(this.textRenderer, title, rightPageX + 3, rightPageY + 3, TEXT_COLOR, false);
-        int contentY = rightPageY + 19;
-        int contentHeight = Math.max(20, rightPageHeight - 23);
-        List<OrderedText> lines = wrappedLines(
-                Text.translatable("guidebook.sparkassist.credits.body"),
-                rightPageWidth - 8
-        );
-        rightContentHeight = lines.size() * (this.textRenderer.fontHeight + 2);
-        rightScroll = MathHelper.clamp(rightScroll, 0, maxRightScroll(contentHeight));
-        context.enableScissor(rightPageX, contentY, rightPageX + rightPageWidth, contentY + contentHeight);
-        int y = contentY - rightScroll;
-        for (OrderedText line : lines) {
-            context.drawText(this.textRenderer, line, rightPageX + 4, y, TEXT_COLOR, false);
-            y += this.textRenderer.fontHeight + 2;
-        }
-        context.disableScissor();
-    }
-
-    private void renderPageNavigation(DrawContext context, int mouseX, int mouseY, int pageCount) {
-        int y = navY();
-        int previousX = previousX();
-        int nextX = nextX();
-        boolean hasPrevious = selectedPage > 0;
-        boolean hasNext = selectedPage < pageCount - 1;
-        boolean previousHovered = hasPrevious && inside(mouseX, mouseY, previousX, y, NAV_WIDTH, NAV_HEIGHT);
-        boolean nextHovered = hasNext && inside(mouseX, mouseY, nextX, y, NAV_WIDTH, NAV_HEIGHT);
-        Identifier previousTexture = hasPrevious ? (previousHovered ? PREVIOUS_HOVERED : PREVIOUS) : PREVIOUS_DISABLED;
-        Identifier nextTexture = hasNext ? (nextHovered ? NEXT_HOVERED : NEXT) : NEXT_DISABLED;
-        context.drawTexture(previousTexture, previousX, y, 0, 0, NAV_WIDTH, NAV_HEIGHT, NAV_WIDTH, NAV_HEIGHT);
-        context.drawTexture(nextTexture, nextX, y, 0, 0, NAV_WIDTH, NAV_HEIGHT, NAV_WIDTH, NAV_HEIGHT);
-
-        Text indicator = Text.translatable("guidebook.sparkassist.page", selectedPage + 1, pageCount);
-        int indicatorX = rightPageX + (rightPageWidth - this.textRenderer.getWidth(indicator)) / 2;
-        context.drawText(this.textRenderer, indicator, indicatorX, y + 3, MUTED_COLOR, false);
-    }
-
-    private void renderCloseButton(DrawContext context, int mouseX, int mouseY) {
-        Identifier texture = inside(mouseX, mouseY, closeX(), closeY(), CLOSE_SIZE, CLOSE_SIZE)
-                ? CLOSE_HOVERED
-                : CLOSE;
-        context.drawTexture(texture, closeX(), closeY(), 0, 0, CLOSE_SIZE, CLOSE_SIZE, CLOSE_SIZE, CLOSE_SIZE);
-    }
-
-    private void drawWrapped(
-            DrawContext context,
-            Text text,
-            int x,
-            int y,
-            int width,
-            int color,
-            int scroll
-    ) {
-        int lineY = y - scroll;
-        for (OrderedText line : wrappedLines(text, width)) {
-            context.drawText(this.textRenderer, line, x, lineY, color, false);
-            lineY += this.textRenderer.fontHeight + 2;
-        }
-    }
-
-    private List<OrderedText> wrappedLines(Text text, int width) {
-        List<OrderedText> lines = new ArrayList<>();
-        String[] paragraphs = text.getString().split("\\n", -1);
-        for (String paragraph : paragraphs) {
-            if (paragraph.isEmpty()) {
-                lines.add(Text.empty().asOrderedText());
-            } else {
-                lines.addAll(this.textRenderer.wrapLines(Text.literal(paragraph), Math.max(20, width)));
-            }
-        }
-        return lines;
+        int thumb = Math.max(12, viewport.height() * viewport.height() / totalHeight);
+        int y = viewport.y() + scroll * (viewport.height() - thumb) / (totalHeight - viewport.height());
+        context.fill(viewport.right() - 3, viewport.y(), viewport.right() - 1, viewport.bottom(), 0x3068737A);
+        context.fill(viewport.right() - 3, y, viewport.right() - 1, y + thumb, color);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+        boolean captured = capturesMouse(mouseX, mouseY);
+        if (button != 0) {
+            return captured;
+        }
+        if (isArticleOpen() && articleCloseButton().contains(mouseX, mouseY)) {
+            dismissArticle();
             return true;
         }
-        if (button != 0) {
-            return false;
-        }
-        int x = (int) mouseX;
-        int y = (int) mouseY;
-
-        if (inside(x, y, closeX(), closeY(), CLOSE_SIZE, CLOSE_SIZE)) {
+        if (!embedded && !isArticleOpen() && new Region(width - 24, 8, 16, 16).contains(mouseX, mouseY)) {
             close();
             return true;
         }
-        GuidebookTab clickedTab = tabAt(x, y);
-        if (clickedTab != null) {
-            activeTab = clickedTab;
-            selectedEntry = null;
-            selectedPage = 0;
-            leftScroll = 0;
-            rightScroll = 0;
+        if (directoryVisible()) {
+            if (searchButton().contains(mouseX, mouseY)) {
+                searchExpanded = !searchExpanded;
+                searchField.visible = searchExpanded;
+                searchField.setFocused(searchExpanded);
+                if (!searchExpanded) {
+                    searchField.setText("");
+                }
+                treeFocused = false;
+                return true;
+            }
+            if (searchExpanded && searchField.mouseClicked(mouseX, mouseY, button)) {
+                treeFocused = false;
+                return true;
+            }
+            searchField.setFocused(false);
+            if (directoryViewport.contains(mouseX, mouseY)) {
+                treeFocused = true;
+                if (mouseX >= directoryViewport.right() - 5 && maxDirectoryScroll() > 0) {
+                    draggingDirectory = true;
+                    dragScroll(mouseY);
+                } else {
+                    int y = (int) mouseY - directoryViewport.y() + directoryScroll;
+                    for (int i = 0; i < rows.size(); i++) {
+                        RenderedRow row = rows.get(i);
+                        if (y >= row.y() && y < row.y() + row.height()) {
+                            focusedRow = i;
+                            activate(row.node());
+                            break;
+                        }
+                    }
+                }
+                return true;
+            }
+            Region nav = layout.directory();
+            if (new Region(nav.x(), nav.bottom() - 20, nav.width(), 20).contains(mouseX, mouseY)) {
+                creditsOpen = true;
+                articleScroll = 0;
+                refreshArticle();
+                return true;
+            }
+        }
+        treeFocused = false;
+        if (isArticleOpen() && articleViewport.contains(mouseX, mouseY)
+                && mouseX >= articleViewport.right() - 5 && maxArticleScroll() > 0) {
+            draggingArticle = true;
+            dragScroll(mouseY);
+        }
+        return captured;
+    }
+
+    private void activate(GuidebookNavigation.Row node) {
+        if (node.entry() == null) {
+            if (!expandedNodes.remove(node.key())) {
+                expandedNodes.add(node.key());
+            }
+            refreshRows();
+        } else {
+            selectedEntry = node.entry();
             creditsOpen = false;
-            refreshEntries();
-            return true;
+            articleScroll = 0;
+            session.rememberSelection(selectedEntry.tab(), selectedEntry.id());
+            refreshArticle();
         }
-        if (inside(x, y, searchIconX() - 2, searchIconY() - 2, 13, 13)) {
-            searchExpanded = !searchExpanded;
-            searchField.visible = searchExpanded;
-            if (searchExpanded) {
-                this.setFocused(searchField);
-                searchField.setFocused(true);
-            } else {
-                searchField.setText("");
-                searchField.setFocused(false);
-                this.setFocused(null);
-            }
-            return true;
-        }
-
-        String credits = this.textRenderer.trimToWidth(
-                Text.translatable("guidebook.sparkassist.credits").getString(),
-                leftPageWidth - 6
-        );
-        int creditsY = leftPageY + leftPageHeight - this.textRenderer.fontHeight;
-        if (inside(x, y, leftPageX + 3, creditsY, this.textRenderer.getWidth(credits), 10)) {
-            creditsOpen = true;
-            rightScroll = 0;
-            return true;
-        }
-
-        if (inside(x, y, leftPageX, listTop(), leftPageWidth, listHeight())) {
-            int index = (y - listTop() + leftScroll) / ROW_HEIGHT;
-            if (index >= 0 && index < visibleEntries.size()) {
-                selectEntry(visibleEntries.get(index));
-                return true;
-            }
-        }
-
-        if (!creditsOpen && selectedEntry != null) {
-            int pageCount = pageCount(selectedEntry);
-            if (inside(x, y, previousX(), navY(), NAV_WIDTH, NAV_HEIGHT) && selectedPage > 0) {
-                selectedPage--;
-                rightScroll = 0;
-                rememberViewPosition();
-                return true;
-            }
-            if (inside(x, y, nextX(), navY(), NAV_WIDTH, NAV_HEIGHT) && selectedPage < pageCount - 1) {
-                selectedPage++;
-                rightScroll = 0;
-                rememberViewPosition();
-                return true;
-            }
-        }
-        return false;
+        rememberView();
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        int amount = (int) Math.round(-verticalAmount * ROW_HEIGHT);
-        if (inside((int) mouseX, (int) mouseY, leftPageX, listTop(), leftPageWidth, listHeight())) {
-            leftScroll = MathHelper.clamp(leftScroll + amount, 0, maxLeftScroll());
-            rememberViewPosition();
-            return true;
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
+        int amount = (int) Math.round(-vertical * 22);
+        if (directoryVisible() && layout.directory().contains(mouseX, mouseY)) {
+            directoryScroll = MathHelper.clamp(directoryScroll + amount, 0, maxDirectoryScroll());
+        } else if (isArticleOpen() && layout.article().contains(mouseX, mouseY)) {
+            articleScroll = MathHelper.clamp(articleScroll + amount, 0, maxArticleScroll());
         }
-        if (inside((int) mouseX, (int) mouseY, rightPageX, rightPageY, rightPageWidth, rightPageHeight)) {
-            int contentHeight = Math.max(20, rightPageHeight - (creditsOpen ? 23 : 49));
-            rightScroll = MathHelper.clamp(rightScroll + amount, 0, maxRightScroll(contentHeight));
-            rememberViewPosition();
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        rememberView();
+        return capturesMouse(mouseX, mouseY);
     }
 
-    private void selectEntry(GuidebookEntry entry) {
-        selectedEntry = entry;
-        selectedPage = 0;
-        rightScroll = 0;
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (button == 0 && (draggingDirectory || draggingArticle)) {
+            dragScroll(mouseY);
+            return true;
+        }
+        return isArticleOpen();
+    }
+
+    private void dragScroll(double mouseY) {
+        Region viewport = draggingDirectory ? directoryViewport : articleViewport;
+        int total = draggingDirectory ? directoryHeight : content.height();
+        int thumb = Math.max(12, viewport.height() * viewport.height() / total);
+        double fraction = (mouseY - viewport.y() - thumb / 2.0) / Math.max(1, viewport.height() - thumb);
+        int scroll = (int) Math.round(MathHelper.clamp(fraction, 0, 1) * (total - viewport.height()));
+        if (draggingDirectory) {
+            directoryScroll = scroll;
+        } else {
+            articleScroll = scroll;
+        }
+        rememberView();
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        boolean dragging = draggingDirectory || draggingArticle;
+        draggingDirectory = false;
+        draggingArticle = false;
+        return dragging || isArticleOpen();
+    }
+
+    @Override
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (key == GLFW.GLFW_KEY_ESCAPE) {
+            if (searchField.isFocused()) {
+                searchField.setFocused(false);
+                return true;
+            }
+            if (isArticleOpen()) {
+                dismissArticle();
+                return true;
+            }
+            if (!embedded) {
+                close();
+                return true;
+            }
+            treeFocused = false;
+            return false;
+        }
+        if (searchField.isFocused()) {
+            searchField.keyPressed(key, scanCode, modifiers);
+            return true;
+        }
+        if (isArticleOpen() && client.options.inventoryKey.matchesKey(key, scanCode)) {
+            dismissArticle();
+            return true;
+        }
+        if (treeFocused && !rows.isEmpty() && directoryVisible()) {
+            if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
+                focusedRow = MathHelper.clamp(focusedRow + (key == GLFW.GLFW_KEY_DOWN ? 1 : -1), 0, rows.size() - 1);
+                RenderedRow row = rows.get(focusedRow);
+                if (row.y() < directoryScroll) {
+                    directoryScroll = row.y();
+                } else if (row.y() + row.height() > directoryScroll + directoryViewport.height()) {
+                    directoryScroll = Math.min(row.y(), row.y() + row.height() - directoryViewport.height());
+                }
+                directoryScroll = MathHelper.clamp(directoryScroll, 0, maxDirectoryScroll());
+                rememberView();
+                return true;
+            }
+            if (focusedRow >= 0 && (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE)) {
+                activate(rows.get(focusedRow).node());
+                return true;
+            }
+        }
+        if (isArticleOpen() && (key == GLFW.GLFW_KEY_PAGE_DOWN || key == GLFW.GLFW_KEY_PAGE_UP)) {
+            articleScroll = MathHelper.clamp(articleScroll + (key == GLFW.GLFW_KEY_PAGE_DOWN ? 1 : -1)
+                    * articleViewport.height(), 0, maxArticleScroll());
+            rememberView();
+            return true;
+        }
+        return isArticleOpen();
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        return searchField.isFocused() && searchField.charTyped(chr, modifiers);
+    }
+
+    public boolean isArticleOpen() {
+        return selectedEntry != null || creditsOpen;
+    }
+
+    public boolean capturesMouse(double x, double y) {
+        return isArticleOpen() || directoryVisible() && layout.directory().contains(x, y);
+    }
+
+    public boolean capturesKeyboard() {
+        return isArticleOpen() || searchField.isFocused();
+    }
+
+    private boolean directoryVisible() {
+        return !layout.compact() || !isArticleOpen();
+    }
+
+    private void dismissArticle() {
+        selectedEntry = null;
         creditsOpen = false;
-        session.rememberSelection(entry.tab(), entry.id());
-        rememberViewPosition();
+        articleScroll = 0;
+        treeFocused = false;
+        searchField.setFocused(false);
+        session.dismissEntry();
+        rememberView();
     }
 
-    private void rememberViewPosition() {
-        session.rememberViewPosition(selectedPage, leftScroll, rightScroll);
+    private void rememberView() {
+        session.rememberExpandedNodes(expandedNodes);
+        session.rememberViewPosition(0, directoryScroll, articleScroll);
     }
 
-    private static int pageCount(GuidebookEntry entry) {
-        if (!entry.pages().isEmpty()) {
-            return entry.pages().size();
+    @Override
+    public void removed() {
+        rememberView();
+    }
+
+    @Override
+    public void close() {
+        if (embedded) {
+            dismissArticle();
+        } else {
+            rememberView();
+            client.setScreen(parent);
         }
-        return Math.max(1, entry.pageKeys().size());
-    }
-
-    private static int entryColor(GuidebookEntry entry) {
-        return 0xFF000000 | entry.color();
-    }
-
-    private List<String> localizedOwnerRoleNames(GuidebookEntry entry) {
-        return entry.ownerRoleIds().stream().map(roleId -> {
-            int separator = roleId.indexOf(':');
-            String path = separator >= 0 ? roleId.substring(separator + 1) : roleId;
-            return chineseString("announcement.role." + path);
-        }).toList();
-    }
-
-    private Text chineseText(String translationKey) {
-        return Text.literal(chineseString(translationKey));
-    }
-
-    private String chineseString(String translationKey) {
-        String fallback = Text.translatable(translationKey).getString();
-        return chineseTranslations == null ? fallback : chineseTranslations.get(translationKey, fallback);
-    }
-
-    private boolean isMarked(GuidebookEntry entry) {
-        return entry.tab() == GuidebookTab.ROLE && session.observedRoleIds().contains(entry.id())
-                || entry.tab() == GuidebookTab.TRAIT && session.observedTraitIds().contains(entry.id());
-    }
-
-    private int listTop() {
-        return leftPageY + (searchExpanded ? 34 : 18);
-    }
-
-    private int listHeight() {
-        return Math.max(20, leftPageY + leftPageHeight - this.textRenderer.fontHeight - 4 - listTop());
-    }
-
-    private int maxLeftScroll() {
-        return Math.max(0, leftContentHeight - listHeight());
-    }
-
-    private int maxRightScroll(int contentHeight) {
-        return Math.max(0, rightContentHeight - contentHeight);
-    }
-
-    private int leftTabX() {
-        return bookX - TAB_WIDTH + 9;
-    }
-
-    private int tabY(int index) {
-        return bookY + 17 + index * (TAB_HEIGHT + TAB_GAP);
-    }
-
-    private GuidebookTab tabAt(int mouseX, int mouseY) {
-        if (inside(mouseX, mouseY, leftTabX(), tabY(0), TAB_WIDTH, TAB_HEIGHT)) {
-            return GuidebookTab.ROLE;
-        }
-        if (inside(mouseX, mouseY, leftTabX(), tabY(1), TAB_WIDTH, TAB_HEIGHT)) {
-            return GuidebookTab.FACTION;
-        }
-        if (inside(mouseX, mouseY, leftTabX(), tabY(2), TAB_WIDTH, TAB_HEIGHT)) {
-            return GuidebookTab.SKILL;
-        }
-        if (inside(mouseX, mouseY, leftTabX(), tabY(3), TAB_WIDTH, TAB_HEIGHT)) {
-            return GuidebookTab.TRAIT;
-        }
-        return null;
-    }
-
-    private int searchIconX() {
-        return leftPageX + leftPageWidth - 13;
-    }
-
-    private int searchIconY() {
-        return leftPageY + 3;
-    }
-
-    private int closeX() {
-        return rightPageX + rightPageWidth - CLOSE_SIZE - 1;
-    }
-
-    private int closeY() {
-        return rightPageY + 1;
-    }
-
-    private int navY() {
-        return rightPageY + rightPageHeight - NAV_HEIGHT - 1;
-    }
-
-    private int previousX() {
-        return rightPageX + 4;
-    }
-
-    private int nextX() {
-        return rightPageX + rightPageWidth - NAV_WIDTH - 4;
-    }
-
-    private static String tabTranslationKey(GuidebookTab tab) {
-        return "guidebook.sparkassist.tab." + tab.name().toLowerCase(java.util.Locale.ROOT);
-    }
-
-    private static boolean inside(int mouseX, int mouseY, int x, int y, int width, int height) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
     @Override
@@ -689,11 +543,47 @@ public final class GuidebookScreen extends Screen {
         return false;
     }
 
-    @Override
-    public void close() {
-        if (this.client != null) {
-            rememberViewPosition();
-            this.client.setScreen(parent);
+    private Region articleCloseButton() {
+        return new Region(layout.article().right() - 24, layout.article().y() + 8, 16, 16);
+    }
+
+    private Region searchButton() {
+        return new Region(layout.directory().right() - 22, toolbarY, 16, 16);
+    }
+
+    private int maxDirectoryScroll() {
+        return Math.max(0, directoryHeight - directoryViewport.height());
+    }
+
+    private int maxArticleScroll() {
+        return Math.max(0, content.height() - articleViewport.height());
+    }
+
+    private boolean isMarked(GuidebookEntry entry) {
+        return entry.tab() == GuidebookTab.ROLE && session.observedRoleIds().contains(entry.id())
+                || entry.tab() == GuidebookTab.TRAIT && session.observedTraitIds().contains(entry.id());
+    }
+
+    private List<OrderedText> wrapped(Text text, int width) {
+        return textRenderer.wrapLines(text, Math.max(12, width));
+    }
+
+    private void drawLines(DrawContext context, List<OrderedText> lines, int x, int y, int color) {
+        for (OrderedText line : lines) {
+            context.drawText(textRenderer, line, x, y, color, false);
+            y += LINE_HEIGHT;
         }
+    }
+
+    private Text chineseText(String key) {
+        return Text.literal(chineseString(key));
+    }
+
+    private String chineseString(String key) {
+        String fallback = Text.translatable(key).getString();
+        return chineseTranslations == null ? fallback : chineseTranslations.get(key, fallback);
+    }
+
+    private record RenderedRow(GuidebookNavigation.Row node, int y, int height, List<OrderedText> lines) {
     }
 }
