@@ -13,6 +13,22 @@
               "type": "quote",
               "text": "人类杀死了我的其他血亲……我会让你们偿还。"
             },
+            { "type": "section", "textKey": "skill.sparkwitch.witch_factor.name", "tone": "info" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.description" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.income" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.sanity" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.transfer" }
+          ]
+        },
+        {
+          "blocks": [
+            { "type": "section", "textKey": "skill.sparkwitch.recruit_accomplice.name", "tone": "info" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.description" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.inventory" }
+          ]
+        },
+        {
+          "blocks": [
             {
               "type": "section",
               "textKey": "skill.sparkwitch.ceremonial_sword.name",
@@ -26,22 +42,6 @@
               "type": "bullet",
               "textKey": "skill.sparkwitch.ceremonial_sword.protection"
             }
-          ]
-        },
-        {
-          "blocks": [
-            { "type": "section", "textKey": "skill.sparkwitch.witch_factor.name", "tone": "info" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.description" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.income" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.sanity" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.transfer" }
-          ]
-        },
-        {
-          "blocks": [
-            { "type": "section", "textKey": "skill.sparkwitch.recruit_accomplice.name", "tone": "info" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.description" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.inventory" }
           ]
         },
         {

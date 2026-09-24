@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -46,9 +47,10 @@ public abstract class LimitedInventoryScreenMixin extends LimitedHandledScreen<P
 
         ScreenEvents.afterRender(screen).register((current, context, mouseX, mouseY, delta) -> {
             context.getMatrices().push();
-            // Persistent navigation stays below shop tooltips; readers remain modal.
-            // 常驻目录位于商品说明下方，主动阅读时保留模态层。
-            context.getMatrices().translate(0, 0, sparkassist$guide.isModal() ? 400 : 100);
+            // Persistent navigation stays below shop tooltips (z 400); the modal layer sits above them at 500, so
+            // price-tag glyphs (z 400.03) no longer bleed through the scrim.
+            // 常驻目录位于商品说明（z 400）下方；模态层位于其上方的 500，价签文字（z 400.03）不再透出遮罩。
+            context.getMatrices().translate(0, 0, sparkassist$guide.isModal() ? 500 : 100);
             sparkassist$guide.render(context, mouseX, mouseY, delta);
             context.getMatrices().pop();
         });
@@ -79,6 +81,21 @@ public abstract class LimitedInventoryScreenMixin extends LimitedHandledScreen<P
         });
         ScreenKeyboardEvents.allowKeyRelease(screen).register((current, key, scanCode, modifiers) ->
                 !sparkassist$guideInput.releaseKey(key, sparkassist$guide.capturesKeyboard()));
+    }
+
+    // The modal guide owns the pointer: the inventory, Wathe's shop/item tooltips and the SparkWitch/SparkTraits
+    // card must not hover under the scrim. -100000 rather than -1 because shop widgets can sit at negative x (about
+    // -10 at 427 px). The guide itself still receives the real coordinates through afterRender.
+    // 模态指南独占指针：遮罩下的背包、Wathe 商店与物品提示以及 SparkWitch/SparkTraits 信息卡都不应响应悬停。使用
+    // -100000 而非 -1，因为商店控件可能位于负横坐标（427 像素宽时约为 -10）。指南本身仍通过 afterRender 获得真实坐标。
+    @ModifyVariable(method = "render", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private int sparkassist$hideMouseX(int mouseX) {
+        return sparkassist$guide != null && sparkassist$guide.isModal() ? -100000 : mouseX;
+    }
+
+    @ModifyVariable(method = "render", at = @At("HEAD"), argsOnly = true, ordinal = 1)
+    private int sparkassist$hideMouseY(int mouseY) {
+        return sparkassist$guide != null && sparkassist$guide.isModal() ? -100000 : mouseY;
     }
 
     // Fabric has no per-screen drag/character events in this Minecraft version.

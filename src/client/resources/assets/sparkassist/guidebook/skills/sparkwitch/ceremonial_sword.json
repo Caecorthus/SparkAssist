@@ -9,14 +9,32 @@
       "pages": [
         {
           "blocks": [
-            { "type": "section", "textKey": "skill.sparkwitch.ceremonial_sword.name", "tone": "item" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.ceremonial_sword.description" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.ceremonial_sword.protection" }
+            {
+              "type": "quote",
+              "text": "大魔女专属武器"
+            },
+            {
+              "type": "section",
+              "textKey": "skill.sparkwitch.ceremonial_sword.name",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.ceremonial_sword.description"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.ceremonial_sword.protection"
+            }
           ]
         }
       ],
-      "ownerRoleIds": ["sparkwitch:grand_witch"],
-      "requiredModIds": ["sparkwitch"],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
       "color": "#F2DFF7",
       "order": 100
     }

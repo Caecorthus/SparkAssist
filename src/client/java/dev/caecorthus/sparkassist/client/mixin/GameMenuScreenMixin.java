@@ -2,6 +2,7 @@ package dev.caecorthus.sparkassist.client.mixin;
 
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookOpenButton;
 import dev.doctor4t.wathe.client.WatheClient;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -30,6 +31,12 @@ public abstract class GameMenuScreenMixin extends Screen {
         }
 
         int x = this.width - GuidebookOpenButton.SIZE - 8;
-        this.addDrawableChild(new GuidebookOpenButton(x, 8, (GameMenuScreen) (Object) this));
+        GuidebookOpenButton button = new GuidebookOpenButton(x, 8, (GameMenuScreen) (Object) this);
+        this.addDrawableChild(button);
+        // The brass tooltip goes on top of the finished pause menu. Fabric resets screen events on every init and
+        // resize, so this never registers twice.
+        // 黄铜提示框绘制在已完成的暂停菜单之上。Fabric 每次初始化与缩放都会重置界面事件，因此不会重复注册。
+        ScreenEvents.afterRender(this).register((screen, context, mouseX, mouseY, delta) ->
+                button.renderTooltip(context, this.textRenderer));
     }
 }

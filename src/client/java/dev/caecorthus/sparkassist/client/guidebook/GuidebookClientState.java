@@ -13,12 +13,24 @@ import net.minecraft.client.MinecraftClient;
  */
 public final class GuidebookClientState {
     private static final GuidebookSessionState SESSION = new GuidebookSessionState();
+    private static boolean directoryFolded;
 
     private GuidebookClientState() {
     }
 
     public static GuidebookSessionState session() {
         return SESSION;
+    }
+
+    /** The player folded the persistent directory to its book button. Client-lifetime only: kept across rounds
+     * and disconnects, never written to disk, and not part of the per-round session.
+     * 玩家把常驻目录收起为书本按钮。仅在客户端运行期间有效：跨对局与断线保留，不写入磁盘，也不属于单局会话状态。 */
+    public static boolean directoryFolded() {
+        return directoryFolded;
+    }
+
+    public static void setDirectoryFolded(boolean folded) {
+        directoryFolded = folded;
     }
 
     public static void tick(MinecraftClient client) {
