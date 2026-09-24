@@ -1,0 +1,127 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:bell_ringer",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.bell_ringer",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.0"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.1"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.2"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.3"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.4"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.5"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.6"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.7"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.8"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "tone": "danger",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.9"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.10"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.11"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.12"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.13"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.14"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.15"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.16"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "tone": "money",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.17"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.18"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.19"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.20"
+            },
+            {
+              "type": "bullet",
+              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.21"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#8C6D3F",
+      "order": 460
+    }
+  ]
+}

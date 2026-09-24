@@ -16,6 +16,7 @@ public enum EventSoundGroup {
             "grand_witch_ceremonial_sword_bgm",
             "option.sparkassist.event_sound_volume.grand_witch_ceremonial_sword_bgm"
     ),
+    BELL_RINGER_TOLL("bell_ringer_toll", "option.sparkassist.event_sound_volume.bell_ringer_toll"),
     DEPRESSION_PSYCHO_RANGE("depression_psycho_range", "option.sparkassist.event_sound_volume.depression_psycho_range"),
     DEPRESSION_PSYCHO_MUSIC("depression_psycho_music", "option.sparkassist.event_sound_volume.depression_psycho_music"),
     DEPRESSION_PSYCHO_ALERT("depression_psycho_alert", "option.sparkassist.event_sound_volume.depression_psycho_alert");
