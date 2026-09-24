@@ -10,6 +10,7 @@ import java.util.Set;
 public final class GuidebookSessionState {
     private final Set<String> observedRoleIds = new LinkedHashSet<>();
     private final Set<String> observedTraitIds = new LinkedHashSet<>();
+    private final Set<String> expandedNodeIds = new LinkedHashSet<>();
 
     private boolean roundActive;
     private String currentRoleId;
@@ -102,6 +103,26 @@ public final class GuidebookSessionState {
         return Optional.ofNullable(selectedTab);
     }
 
+    public Set<String> expandedNodeIds() {
+        return immutableSnapshot(expandedNodeIds);
+    }
+
+    public void rememberExpandedNodes(Collection<String> ids) {
+        if (roundActive) {
+            Set<String> snapshot = Set.copyOf(ids);
+            expandedNodeIds.clear();
+            expandedNodeIds.addAll(snapshot);
+        }
+    }
+
+    /** Dismiss the article without resetting the directory. 关闭正文但保留目录位置。 */
+    public void dismissEntry() {
+        selectedTab = null;
+        selectedEntryId = null;
+        selectedPage = 0;
+        rightScroll = 0;
+    }
+
     public Optional<String> selectedEntryId() {
         return Optional.ofNullable(selectedEntryId);
     }
@@ -122,6 +143,7 @@ public final class GuidebookSessionState {
         roundActive = false;
         observedRoleIds.clear();
         observedTraitIds.clear();
+        expandedNodeIds.clear();
         currentRoleId = null;
         pendingRoleAutoSelection = null;
         selectedTab = null;

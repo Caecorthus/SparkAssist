@@ -18,14 +18,14 @@ import net.minecraft.text.Text;
  * 在不绑定特定 GUI 缩放的前提下排版结构化指南书正文。
  */
 public final class GuidebookContentRenderer {
-    private static final int DEFAULT_COLOR = 0x3B2A1A;
-    private static final int SECTION_COLOR = 0x71442D;
-    private static final int MUTED_COLOR = 0x806B58;
-    private static final int ITEM_COLOR = 0x8A5A16;
-    private static final int MONEY_COLOR = 0x98710E;
-    private static final int GOOD_COLOR = 0xA13E68;
-    private static final int DANGER_COLOR = 0xA33932;
-    private static final int INFO_COLOR = 0x3F668F;
+    private static final int DEFAULT_COLOR = 0x252B30;
+    private static final int SECTION_COLOR = 0x344C52;
+    private static final int MUTED_COLOR = 0x68737A;
+    private static final int ITEM_COLOR = 0x466B72;
+    private static final int MONEY_COLOR = 0x886615;
+    private static final int GOOD_COLOR = 0x39734E;
+    private static final int DANGER_COLOR = 0xB13E49;
+    private static final int INFO_COLOR = 0x3C64A0;
     private static final int LINE_GAP = 1;
     private static final String BULLET_GLYPH = "•";
     private static final int BULLET_TEXT_GAP = 3;

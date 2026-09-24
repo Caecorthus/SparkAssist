@@ -10,6 +10,7 @@ import java.util.Map;
 public final class GuidebookDiscoveryRules {
     private static final Map<String, String> WITCH_SKILL_OWNER_ROLE_IDS = Map.ofEntries(
             Map.entry("sparkwitch:ceremonial_sword", "sparkwitch:grand_witch"),
+            Map.entry("sparkwitch:emma_factor", "sparkwitch:emma"),
             Map.entry("sparkwitch:death_ray", "sparkwitch:murderous_witch"),
             Map.entry("sparkwitch:mighty_force", "sparkwitch:apprentice_witch"),
             Map.entry("sparkwitch:swift_step", "sparkwitch:apprentice_witch"),

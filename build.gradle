@@ -186,7 +186,6 @@ tasks.register("verifyModJarVersion") {
 
 tasks.register("verifyArchitecture") {
     def requiredFiles = [
-            file("AGENTS.md"),
             file("CONTEXT.md"),
             file("THIRD_PARTY_NOTICES.md"),
             file("docs/adr/0001-risk-based-tests.md"),
@@ -314,9 +313,6 @@ tasks.register("verifyDistributionMetadata") {
             zipFile.close()
         }
     }
-}
-
-tasks.named("build") {
 }
 
 def targetJavaVersion = 21
