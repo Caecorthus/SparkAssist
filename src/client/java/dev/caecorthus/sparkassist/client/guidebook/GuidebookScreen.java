@@ -14,6 +14,7 @@ import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlockType;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookPage;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookRun;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookTone;
+import dev.doctor4t.wathe.client.gui.screen.ingame.LimitedInventoryScreen.StoreItemWidget;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Locale;
 import java.util.Set;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.text.OrderedText;
@@ -68,6 +70,9 @@ public final class GuidebookScreen extends Screen {
     private Region articleViewport;
     private boolean draggingDirectory;
     private boolean draggingArticle;
+    private boolean directoryCollapsed;
+    private boolean directoryExpanded;
+    private boolean modalLayout;
 
     public GuidebookScreen(Screen parent) {
         this(parent, false);
@@ -85,7 +90,6 @@ public final class GuidebookScreen extends Screen {
 
     @Override
     protected void init() {
-        layout = GuidebookLayout.compute(width, height);
         catalog = GuidebookRuntimeCatalog.load(client);
         chineseTranslations = TranslationStorage.load(client.getResourceManager(), List.of("zh_cn"), false);
         if (!initialized) {
@@ -97,13 +101,8 @@ public final class GuidebookScreen extends Screen {
         }
         // Opening the inventory never selects a role or expands a branch automatically.
         // 打开背包时不自动选中身份，也不自动展开目录。
-        Region nav = layout.directory();
-        titleLines = wrapped(chineseText("screen.sparkassist.guidebook"), nav.width() - 14);
-        toolbarY = nav.y() + 9 + titleLines.size() * LINE_HEIGHT + 5;
-        directoryViewport = new Region(nav.x() + 4, toolbarY + 21, nav.width() - 8,
-                Math.max(20, nav.bottom() - toolbarY - 44));
-        searchField = new TextFieldWidget(textRenderer, nav.x() + 6, toolbarY,
-                nav.width() - 29, 16, chineseText("guidebook.sparkassist.search"));
+        searchField = new TextFieldWidget(textRenderer, 0, 0, 1, 16,
+                chineseText("guidebook.sparkassist.search"));
         searchField.setMaxLength(64);
         searchField.setPlaceholder(chineseText("guidebook.sparkassist.search"));
         searchField.setText(searchQuery);
@@ -112,10 +111,58 @@ public final class GuidebookScreen extends Screen {
             directoryScroll = 0;
             refreshRows();
         });
-        searchField.visible = searchExpanded;
         addDrawableChild(searchField);
+        layout = null;
+        updateInventoryLayout();
+    }
+
+    /** Refresh geometry after other mods finish adding widgets, without reloading the catalog.
+     * 其他模组完成控件初始化后更新布局，不重新加载指南内容。 */
+    private void updateInventoryLayout() {
+        GuidebookLayout next = embedded && !isModal()
+                ? GuidebookLayout.computeEmbedded(width, height, shopBounds())
+                : GuidebookLayout.compute(width, height);
+        if (next.equals(layout) && modalLayout == isModal()) {
+            return;
+        }
+        modalLayout = isModal();
+        layout = next;
+        Region nav = layout.directory();
+        titleLines = wrapped(chineseText("screen.sparkassist.guidebook"), nav.width() - 14);
+        directoryCollapsed = embedded && !isModal()
+                && (nav.height() < titleLines.size() * LINE_HEIGHT + 78 || nav.width() < 48);
+        toolbarY = nav.y() + 9 + titleLines.size() * LINE_HEIGHT + 5;
+        directoryViewport = new Region(nav.x() + 4, toolbarY + 21, Math.max(0, nav.width() - 8),
+                Math.max(0, nav.bottom() - toolbarY - 44));
+        searchField.setX(nav.x() + 6);
+        searchField.setY(toolbarY);
+        searchField.setWidth(Math.max(1, nav.width() - 29));
+        searchField.visible = searchExpanded && directoryVisible();
+        if (!directoryVisible()) {
+            searchField.setFocused(false);
+            treeFocused = false;
+        }
+        draggingDirectory = false;
+        draggingArticle = false;
         refreshRows();
         refreshArticle();
+    }
+
+    private List<Region> shopBounds() {
+        List<Region> occupied = new ArrayList<>();
+        for (var child : parent.children()) {
+            if (child instanceof StoreItemWidget item && item.visible) {
+                int priceWidth = textRenderer.getWidth(Text.literal(item.entry.price() + "\uE781"));
+                var price = HoveredTooltipPositioner.INSTANCE.getPosition(width, height,
+                        item.getX() - 4 - priceWidth / 2, item.getY() - 9, priceWidth, 8);
+                int left = Math.min(item.getX() - 7, price.x() - 4) - 2;
+                int top = Math.min(item.getY() - 7, price.y() - 4) - 2;
+                int right = Math.max(item.getX() + 23, price.x() + priceWidth + 4) + 2;
+                int bottom = Math.max(item.getY() + 23, price.y() + 12) + 2;
+                occupied.add(new Region(left, top, right - left, bottom - top));
+            }
+        }
+        return occupied;
     }
 
     private void refreshRows() {
@@ -192,8 +239,9 @@ public final class GuidebookScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (isArticleOpen() || !embedded) {
-            context.fill(0, 0, width, height, isArticleOpen() ? 0xAE000000 : 0x60000000);
+        updateInventoryLayout();
+        if (isModal() || !embedded) {
+            context.fill(0, 0, width, height, isModal() ? 0xAE000000 : 0x60000000);
         }
         if (directoryVisible()) {
             renderDirectory(context, mouseX, mouseY);
@@ -201,10 +249,19 @@ public final class GuidebookScreen extends Screen {
             super.render(context, mouseX, mouseY, delta);
         } else {
             searchField.visible = false;
+            if (directoryCollapsed && directoryButton().height() > 0) {
+                Region button = directoryButton();
+                context.fill(button.x(), button.y(), button.right(), button.bottom(), 0xEE1D2326);
+                context.drawCenteredTextWithShadow(textRenderer, Text.literal(">"),
+                        button.x() + button.width() / 2, button.y() + 5, ACCENT);
+                if (button.contains(mouseX, mouseY)) {
+                    context.drawTooltip(textRenderer, chineseText("button.sparkassist.guidebook.open"), mouseX, mouseY);
+                }
+            }
         }
         if (isArticleOpen()) {
             renderArticle(context, mouseX, mouseY);
-        } else if (!embedded) {
+        } else if (!embedded || directoryExpanded) {
             renderClose(context, new Region(width - 24, 8, 16, 16), mouseX, mouseY);
         }
     }
@@ -313,14 +370,25 @@ public final class GuidebookScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean captured = capturesMouse(mouseX, mouseY);
+        if (!captured && embedded) {
+            searchField.setFocused(false);
+            treeFocused = false;
+            return false;
+        }
         if (button != 0) {
             return captured;
+        }
+        if (directoryCollapsed && directoryButton().contains(mouseX, mouseY)) {
+            directoryExpanded = true;
+            updateInventoryLayout();
+            return true;
         }
         if (isArticleOpen() && articleCloseButton().contains(mouseX, mouseY)) {
             dismissArticle();
             return true;
         }
-        if (!embedded && !isArticleOpen() && new Region(width - 24, 8, 16, 16).contains(mouseX, mouseY)) {
+        if ((!embedded || directoryExpanded) && !isArticleOpen()
+                && new Region(width - 24, 8, 16, 16).contains(mouseX, mouseY)) {
             close();
             return true;
         }
@@ -393,6 +461,7 @@ public final class GuidebookScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
+        updateInventoryLayout();
         int amount = (int) Math.round(-vertical * 22);
         if (directoryVisible() && layout.directory().contains(mouseX, mouseY)) {
             directoryScroll = MathHelper.clamp(directoryScroll + amount, 0, maxDirectoryScroll());
@@ -409,7 +478,7 @@ public final class GuidebookScreen extends Screen {
             dragScroll(mouseY);
             return true;
         }
-        return isArticleOpen();
+        return isModal();
     }
 
     private void dragScroll(double mouseY) {
@@ -431,17 +500,18 @@ public final class GuidebookScreen extends Screen {
         boolean dragging = draggingDirectory || draggingArticle;
         draggingDirectory = false;
         draggingArticle = false;
-        return dragging || isArticleOpen();
+        return dragging || isModal();
     }
 
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
+        updateInventoryLayout();
         if (key == GLFW.GLFW_KEY_ESCAPE) {
             if (searchField.isFocused()) {
                 searchField.setFocused(false);
                 return true;
             }
-            if (isArticleOpen()) {
+            if (isModal()) {
                 dismissArticle();
                 return true;
             }
@@ -456,7 +526,7 @@ public final class GuidebookScreen extends Screen {
             searchField.keyPressed(key, scanCode, modifiers);
             return true;
         }
-        if (isArticleOpen() && client.options.inventoryKey.matchesKey(key, scanCode)) {
+        if (isModal() && client.options.inventoryKey.matchesKey(key, scanCode)) {
             dismissArticle();
             return true;
         }
@@ -484,7 +554,7 @@ public final class GuidebookScreen extends Screen {
             rememberView();
             return true;
         }
-        return isArticleOpen();
+        return isModal();
     }
 
     @Override
@@ -496,25 +566,40 @@ public final class GuidebookScreen extends Screen {
         return selectedEntry != null || creditsOpen;
     }
 
+    public boolean isModal() {
+        return isArticleOpen() || directoryExpanded;
+    }
+
     public boolean capturesMouse(double x, double y) {
-        return isArticleOpen() || directoryVisible() && layout.directory().contains(x, y);
+        updateInventoryLayout();
+        return isModal() || (directoryCollapsed ? directoryButton().contains(x, y)
+                : directoryVisible() && layout.directory().contains(x, y));
     }
 
     public boolean capturesKeyboard() {
-        return isArticleOpen() || searchField.isFocused();
+        updateInventoryLayout();
+        return isModal() || searchField.isFocused();
     }
 
     private boolean directoryVisible() {
-        return !layout.compact() || !isArticleOpen();
+        return !directoryCollapsed && (!layout.compact() || !isArticleOpen());
+    }
+
+    private Region directoryButton() {
+        Region nav = layout.directory();
+        int size = Math.min(20, Math.min(nav.width(), nav.height()));
+        return new Region(nav.x(), nav.y(), size, size >= 16 ? size : 0);
     }
 
     private void dismissArticle() {
         selectedEntry = null;
         creditsOpen = false;
+        directoryExpanded = false;
         articleScroll = 0;
         treeFocused = false;
         searchField.setFocused(false);
         session.dismissEntry();
+        updateInventoryLayout();
         rememberView();
     }
 

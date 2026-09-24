@@ -38,11 +38,17 @@ public abstract class LimitedInventoryScreenMixin extends LimitedHandledScreen<P
             sparkassist$guide = GuidebookScreen.embedded(screen);
         }
         sparkassist$guide.init(this.client, this.width, this.height);
-        sparkassist$guideInput = new GuidebookInputState();
+        // Resize reinitializes this screen while a guide-owned press may still be held.
+        // 窗口缩放会重新初始化同一界面，保留尚未释放的指南输入。
+        if (sparkassist$guideInput == null) {
+            sparkassist$guideInput = new GuidebookInputState();
+        }
 
         ScreenEvents.afterRender(screen).register((current, context, mouseX, mouseY, delta) -> {
             context.getMatrices().push();
-            context.getMatrices().translate(0, 0, 400);
+            // Persistent navigation stays below shop tooltips; readers remain modal.
+            // 常驻目录位于商品说明下方，主动阅读时保留模态层。
+            context.getMatrices().translate(0, 0, sparkassist$guide.isModal() ? 400 : 100);
             sparkassist$guide.render(context, mouseX, mouseY, delta);
             context.getMatrices().pop();
         });
@@ -53,7 +59,7 @@ public abstract class LimitedInventoryScreenMixin extends LimitedHandledScreen<P
             return !captured;
         });
         ScreenMouseEvents.allowMouseRelease(screen).register((current, x, y, button) -> {
-            boolean captured = sparkassist$guideInput.releaseMouse(button, sparkassist$guide.isArticleOpen());
+            boolean captured = sparkassist$guideInput.releaseMouse(button, sparkassist$guide.isModal());
             if (captured) {
                 sparkassist$guide.mouseReleased(x, y, button);
             }
@@ -79,7 +85,7 @@ public abstract class LimitedInventoryScreenMixin extends LimitedHandledScreen<P
     // 当前版本的 Fabric 没有界面级拖动和字符事件，因此仅补充这两个入口。
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (sparkassist$guide != null && sparkassist$guideInput.dragMouse(button, sparkassist$guide.isArticleOpen())) {
+        if (sparkassist$guide != null && sparkassist$guideInput.dragMouse(button, sparkassist$guide.isModal())) {
             sparkassist$guide.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
             return true;
         }
