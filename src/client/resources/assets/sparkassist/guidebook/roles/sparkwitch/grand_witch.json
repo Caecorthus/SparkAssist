@@ -15,25 +15,33 @@
             },
             {
               "type": "section",
-              "text": "仪礼剑",
+              "textKey": "skill.sparkwitch.ceremonial_sword.name",
               "tone": "danger"
             },
             {
               "type": "bullet",
-              "text": "完成 2 个任务后解锁。背包中必须有匕首；消耗 150 魔力，将匕首替换为仪礼剑 15 秒，并获得速度 II。"
+              "textKey": "skill.sparkwitch.ceremonial_sword.description"
             },
             {
               "type": "bullet",
-              "text": "仪礼剑左键可直接处决玩家，没有攻击冷却。"
-            },
-            {
-              "type": "bullet",
-              "text": "右键向前突进最多 6 格，碰到玩家会直接处决；突进冷却 5 秒。"
-            },
-            {
-              "type": "bullet",
-              "text": "仪礼剑结束后恢复匕首，并开始 90 秒冷却。"
+              "textKey": "skill.sparkwitch.ceremonial_sword.protection"
             }
+          ]
+        },
+        {
+          "blocks": [
+            { "type": "section", "textKey": "skill.sparkwitch.witch_factor.name", "tone": "info" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.description" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.income" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.sanity" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.transfer" }
+          ]
+        },
+        {
+          "blocks": [
+            { "type": "section", "textKey": "skill.sparkwitch.recruit_accomplice.name", "tone": "info" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.description" },
+            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.inventory" }
           ]
         },
         {

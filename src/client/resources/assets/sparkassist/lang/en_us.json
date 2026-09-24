@@ -22,8 +22,8 @@
   "guidebook.sparkassist.tab.faction": "阵营",
   "guidebook.sparkassist.tab.skill": "魔女技能",
   "guidebook.sparkassist.tab.trait": "天赋",
-  "skill.sparkwitch.ceremonial_sword.name": "仪礼剑",
-  "skill.sparkwitch.ceremonial_sword.description": "完成 2 个任务后解锁。消耗 150 点魔力值，将一把匕首临时替换为 15 秒仪礼剑，并获得速度 II。",
+  "skill.sparkwitch.ceremonial_sword.name": "Ceremonial Sword",
+  "skill.sparkwitch.ceremonial_sword.description": "Complete 2 tasks to permanently receive a free Ceremonial Sword this round. Either hand: +40% movement speed (does not stack). Sword attack speed: 2. Successful kills share a 30s cooldown; right-click dash has an independent 5s cooldown and still moves you during kill cooldown. Pierces shields, but consumes protections and triggers retaliation. Trait-based protections, including Last Stand and Last Escape, are not bypassed.",
   "skill.sparkwitch.mighty_force.name": "巨力",
   "skill.sparkwitch.mighty_force.description": "消耗 80 点魔力值，10 秒内空手左键玩家可击退并发动一次致命攻击。",
   "skill.sparkwitch.swift_step.name": "滑步",
@@ -214,5 +214,14 @@
   "guidebook.sparkassist.sparkwitch.saboteur.10": "Saboteur sees real player and body appearances. Wraith chat, voice, jump, footstep-particle, and pickup restrictions remain.",
   "guidebook.sparkassist.sparkwitch.curser.0": "Faction",
   "guidebook.sparkassist.sparkwitch.curser.1": "Curser is the Witch-faction Wraith promotion. Curser wins with the Witch faction when every living player belongs to it.",
-  "guidebook.sparkassist.sparkwitch.curser.2": "Curser sees real player and body appearances. Wraith chat, voice, jump, footstep-particle, and pickup restrictions remain."
+  "guidebook.sparkassist.sparkwitch.curser.2": "Curser sees real player and body appearances. Wraith chat, voice, jump, footstep-particle, and pickup restrictions remain.",
+  "skill.sparkwitch.ceremonial_sword.protection": "Pierces shields and parries, but still consumes protections and triggers retaliation. A protected Witch Maiden can die with the Grand Witch. The crosshair bar shows attack recharge, not dash or kill cooldown; gray means killing is unavailable. Trait-based protections, including Last Stand and Last Escape, are not bypassed.",
+  "skill.sparkwitch.witch_factor.name": "Witch Factor",
+  "skill.sparkwitch.witch_factor.description": "Primary ability (default G): freely spread a factor to the living player under your crosshair within 8 unobstructed blocks. Success starts a 20-second cooldown. Capacity is floor(round participants / 5); one factor per player.",
+  "skill.sparkwitch.witch_factor.income": "Each factor grants 25 mana every 30 seconds, or 40 from an Apprentice Witch and 60 from a Murderous Witch.",
+  "skill.sparkwitch.witch_factor.sanity": "Every 60 seconds, holders with sanity lose 10 sanity; an Apprentice Witch loses 30. Factor holders appear red in Grand Witch and Accomplice instinct, without bypassing instinct hiding.",
+  "skill.sparkwitch.witch_factor.transfer": "On a player kill, the factor transfers to the killer and retains its timer. Grand Witch/Accomplice kills, environmental deaths, invalid or already marked killers, and recruiting the holder reclaim it without bonus mana.",
+  "skill.sparkwitch.recruit_accomplice.name": "Recruit Accomplice",
+  "skill.sparkwitch.recruit_accomplice.description": "After 2 tasks, use ability key 2 (default N) on a living player within 8 unobstructed blocks to force them into Accomplice. Free, no cooldown. Cannot recruit yourself or an existing Accomplice. Quota: max(0, floor((round participants - 18) / 6)); successful recruits consume it permanently, even if they die. Accomplices are no longer assigned naturally.",
+  "skill.sparkwitch.recruit_accomplice.inventory": "Only keys, master keys, revolvers and letters remain. Other items, including food and drinks, convert to coins at shop value, or 25 each if unpriced. Existing coins are preserved; the new role's shop purchase limits reset."
 }
