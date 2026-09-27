@@ -20,6 +20,7 @@ public final class GuidebookSessionState {
     private int selectedPage;
     private int leftScroll;
     private int rightScroll;
+    private int observationRevision;
 
     public void startRound() {
         clear();
@@ -46,17 +47,29 @@ public final class GuidebookSessionState {
         // Empty death/sync observations never erase discoveries from this round.
         // 死亡或同步空档中的空观察不会抹去本局已经发现的内容。
         if (isPresent(roleId)) {
-            observedRoleIds.add(roleId);
+            if (observedRoleIds.add(roleId)) {
+                observationRevision++;
+            }
             if (!roleId.equals(currentRoleId)) {
                 currentRoleId = roleId;
                 pendingRoleAutoSelection = roleId;
             }
         }
         if (ownerVisibleOrRevealedTraitIds != null) {
-            ownerVisibleOrRevealedTraitIds.stream()
-                    .filter(GuidebookSessionState::isPresent)
-                    .forEach(observedTraitIds::add);
+            for (String traitId : ownerVisibleOrRevealedTraitIds) {
+                if (isPresent(traitId) && observedTraitIds.add(traitId)) {
+                    observationRevision++;
+                }
+            }
         }
+    }
+
+    /**
+     * Changes whenever the observed role or trait sets change, so per-frame readers can skip copying them.
+     * 已观察的身份或词条集合发生变化时随之改变，逐帧读取方可据此跳过集合复制。
+     */
+    public int observationRevision() {
+        return observationRevision;
     }
 
     public Set<String> observedRoleIds() {
@@ -141,6 +154,9 @@ public final class GuidebookSessionState {
 
     private void clear() {
         roundActive = false;
+        if (!observedRoleIds.isEmpty() || !observedTraitIds.isEmpty()) {
+            observationRevision++;
+        }
         observedRoleIds.clear();
         observedTraitIds.clear();
         expandedNodeIds.clear();

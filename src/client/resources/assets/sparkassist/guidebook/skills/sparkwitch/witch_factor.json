@@ -1,0 +1,59 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:witch_factor",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.witch_factor.name",
+      "summaryKey": "skill.sparkwitch.witch_factor.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "大魔女主技能"
+            },
+            {
+              "type": "section",
+              "textKey": "skill.sparkwitch.witch_factor.name",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.witch_factor.description"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.witch_factor.income"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "持有者",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.witch_factor.sanity"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.witch_factor.transfer"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2DFF7",
+      "order": 80
+    }
+  ]
+}

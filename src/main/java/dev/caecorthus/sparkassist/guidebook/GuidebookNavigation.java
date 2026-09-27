@@ -3,6 +3,8 @@ package dev.caecorthus.sparkassist.guidebook;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,19 +65,10 @@ public final class GuidebookNavigation {
 
     public static List<Row> rows(GuidebookCatalog catalog, Set<String> expandedIds,
                                  Predicate<GuidebookEntry> matches, boolean searching) {
-        Map<String, List<GuidebookEntry>> grouped = new HashMap<>();
-        for (GuidebookEntry entry : catalog.entries()) {
-            if (matches.test(entry)) {
-                for (String group : groupsFor(entry)) {
-                    grouped.computeIfAbsent(group, key -> new ArrayList<>()).add(entry);
-                }
-            }
-        }
+        Map<String, List<GuidebookEntry>> grouped = grouped(catalog, matches);
         List<Row> rows = new ArrayList<>();
         for (String root : ROOTS) {
-            List<String> groups = GROUPS.stream().filter(group -> group.startsWith(root + "."))
-                    .filter(group -> grouped.containsKey(group) || !searching && !group.endsWith(".other"))
-                    .toList();
+            List<String> groups = visibleGroups(root, grouped, searching);
             if (searching && groups.isEmpty()) {
                 continue;
             }
@@ -99,6 +92,64 @@ public final class GuidebookNavigation {
             }
         }
         return List.copyOf(rows);
+    }
+
+    /**
+     * Row counts and marked flags for every root and group row that {@link #rows} can show, keyed by row key.
+     * Counts cover exactly the groups a root shows when expanded (an ".other" group only when it has entries, e.g.
+     * search matches), so a count never promises a row the player cannot open. Overview rows are not counted, an
+     * entry listed in several groups (Wraith) counts once per root, and overview rows still carry the marked flag.
+     * 为 {@link #rows} 可能显示的每个根目录与分组行给出计数与已获得标记（按行键索引）：只统计展开后实际可见的分组
+     * （".other" 仅在有条目时可见，例如搜索命中），计数不会指向玩家打不开的行；不计总览行，出现在多个分组的条目
+     * （冤魂）在根目录只计一次；总览行仍可带出已获得标记。
+     */
+    public static Map<String, Summary> summaries(GuidebookCatalog catalog, Predicate<GuidebookEntry> matches,
+                                                 boolean searching, Predicate<GuidebookEntry> marked) {
+        Map<String, List<GuidebookEntry>> grouped = grouped(catalog, matches);
+        Map<String, Summary> summaries = new LinkedHashMap<>();
+        for (String root : ROOTS) {
+            List<String> groups = visibleGroups(root, grouped, searching);
+            if (searching && groups.isEmpty()) {
+                continue;
+            }
+            Set<String> rootIds = new HashSet<>();
+            boolean rootMarked = false;
+            for (String group : groups) {
+                Set<String> groupIds = new HashSet<>();
+                boolean groupMarked = false;
+                for (GuidebookEntry entry : grouped.getOrDefault(group, List.of())) {
+                    if (!isOverview(group, entry)) {
+                        groupIds.add(entry.id());
+                    }
+                    groupMarked |= marked.test(entry);
+                }
+                rootIds.addAll(groupIds);
+                rootMarked |= groupMarked;
+                summaries.put("group:" + group, new Summary(groupIds.size(), groupMarked));
+            }
+            summaries.put("root:" + root, new Summary(rootIds.size(), rootMarked));
+        }
+        return Map.copyOf(summaries);
+    }
+
+    private static Map<String, List<GuidebookEntry>> grouped(GuidebookCatalog catalog,
+                                                             Predicate<GuidebookEntry> matches) {
+        Map<String, List<GuidebookEntry>> grouped = new HashMap<>();
+        for (GuidebookEntry entry : catalog.entries()) {
+            if (matches.test(entry)) {
+                for (String group : groupsFor(entry)) {
+                    grouped.computeIfAbsent(group, key -> new ArrayList<>()).add(entry);
+                }
+            }
+        }
+        return grouped;
+    }
+
+    private static List<String> visibleGroups(String root, Map<String, List<GuidebookEntry>> grouped,
+                                              boolean searching) {
+        return GROUPS.stream().filter(group -> group.startsWith(root + "."))
+                .filter(group -> grouped.containsKey(group) || !searching && !group.endsWith(".other"))
+                .toList();
     }
 
     public static List<String> groupsFor(GuidebookEntry entry) {
@@ -141,5 +192,10 @@ public final class GuidebookNavigation {
     }
 
     public record Row(String key, int depth, String nameKey, GuidebookEntry entry, boolean expanded) {
+    }
+
+    /** Unique non-overview entries under a row, and whether any entry there (overviews included) is marked.
+     * 行下去重后的非总览条目数，以及其中（含总览行）是否有本局已获得的条目。 */
+    public record Summary(int count, boolean containsMarked) {
     }
 }

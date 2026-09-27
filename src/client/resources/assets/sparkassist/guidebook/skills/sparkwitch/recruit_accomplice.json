@@ -1,0 +1,55 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:recruit_accomplice",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.recruit_accomplice.name",
+      "summaryKey": "skill.sparkwitch.recruit_accomplice.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "大魔女第二技能"
+            },
+            {
+              "type": "section",
+              "textKey": "skill.sparkwitch.recruit_accomplice.name",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.recruit_accomplice.description"
+            },
+            {
+              "type": "bullet",
+              "text": "【樱羽艾玛】无法被招募：尝试会失败且不消耗名额，但她会在本局持续看见这名大魔女。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "物品与金币",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "textKey": "skill.sparkwitch.recruit_accomplice.inventory"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2DFF7",
+      "order": 90
+    }
+  ]
+}
