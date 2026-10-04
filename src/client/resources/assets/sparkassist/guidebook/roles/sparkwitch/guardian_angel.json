@@ -10,38 +10,78 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "good",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.0"
-            },
-            {
               "type": "paragraph",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.1"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "好人阵营冤魂的晋升身份之一。你悄悄给队友套上护盾，替对方挡下一次致命攻击。冤魂的共同限制大多仍然有效（见冤魂页），但你可以和死者交流。"
+            },
             {
               "type": "section",
-              "tone": "good",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.2"
+              "text": "能力",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.3"
+              "runs": [
+                {
+                  "text": "守护",
+                  "tone": "good"
+                },
+                {
+                  "text": "（技能键）：晋升 60 秒后可用。对准 3 格内、看得见的一名活着的玩家，给对方 10 秒守护护盾；冷却 90 秒，从施放时开始计算。不能给自己或冤魂上盾。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.4"
+              "text": "护盾能挡下一次致命攻击，挡住时附近会听到一声盔甲碰撞声。误杀惩罚、掉下火车、被刺客猜中身份和巫毒诅咒挡不住；大魔女仪礼剑的封喉会打碎护盾，并且照样致死。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.5"
+              "text": "目标不会收到任何提示。护盾持续期间，目标会隔墙对你高亮。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.guardian_angel.6"
+              "runs": [
+                {
+                  "text": "识毒",
+                  "tone": "good"
+                },
+                {
+                  "text": "：能看出被下了毒的餐盘、饮品和床。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "与死者交流",
+                  "tone": "good"
+                },
+                {
+                  "text": "：可以发文字聊天，也能进入死者的语音频道。活着的玩家看不到你的聊天，也听不到你说话。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "停电对你无效，体力无限。你没有商店，也没有金币收入。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "护盾只有 10 秒，乱套很浪费。跟在落单或被盯上的人身边，看到有人靠近再出手。"
+            },
+            {
+              "type": "bullet",
+              "text": "停电、疯魔音乐响起时最危险，提前给附近的人上盾。"
+            },
+            {
+              "type": "bullet",
+              "text": "冷却从施放时就开始算，护盾一结束就差不多该准备下一次了。"
             }
           ]
         }

@@ -10,71 +10,130 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "info",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.0"
+              "type": "paragraph",
+              "text": "冤魂不会在开局出现。好人、杀手、魔女阵营的玩家死后有机会变成冤魂：活人看不见你，你也碰不到任何人，但完成 3 个任务就能晋升成新的身份，继续帮自己的阵营。"
             },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.1"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.5"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.6"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.7"
+              "text": "怎么变成冤魂",
+              "tone": "info"
+            },
+            {
+              "type": "paragraph",
+              "text": "以下为默认规则，服务器可能有所调整。",
+              "tone": "muted"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.8"
+              "text": "默认 10 人以上的对局才会出现冤魂，每 5 名玩家最多 1 个。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.9"
+              "text": "好人、杀手、魔女阵营的玩家死亡时，默认有 75% 的概率变成冤魂，每人每局最多一次。中立阵营不会变成冤魂。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.10"
+              "text": "中途退出、自己掉下火车不会变成冤魂；被别人推下车则可以。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.11"
+              "text": "你会在死亡的位置立刻变成冤魂，尸体留在原地，仍显示你生前的身份。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.12"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "物品和魔力会清空，金币要等晋升后从 0 开始重新攒。词条保留，并额外获得【小心翼翼】（移动、进食和饮用不发出声音）。"
+            },
             {
               "type": "section",
-              "tone": "info",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.13"
+              "text": "冤魂能做什么",
+              "tone": "info"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.14"
+              "runs": [
+                {
+                  "text": "隐身",
+                  "tone": "info"
+                },
+                {
+                  "text": "：活着的玩家都看不见你。你不会受伤，不会和人碰撞，还能穿过关着的门（但打不开门）。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.15"
+              "runs": [
+                {
+                  "text": "做任务",
+                  "tone": "info"
+                },
+                {
+                  "text": "：你会拿回生前的任务，至少 3 个。变成冤魂后完成 3 个任务就会晋升。期间只能用餐盘、饮品托盘和床，只能吃喝食物和饮品。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wraith.16"
+              "text": "理智不会下降，体力无限。"
+            },
+            {
+              "type": "section",
+              "text": "共同限制",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "冤魂带有缓慢 II 和失明，眼中的世界完全变灰，其他玩家和尸体都显示成没有名字的默认皮肤。"
+            },
+            {
+              "type": "bullet",
+              "text": "不能发送或查看文字聊天；语音既不能说，也听不到。"
+            },
+            {
+              "type": "bullet",
+              "text": "不能捡地上的东西，也不能和其他玩家互相影响。"
+            },
+            {
+              "type": "bullet",
+              "text": "冤魂和晋升后的身份都不算存活玩家，不会阻止或促成任何一方获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "掉出地图或断线重连，会直接结束冤魂状态，变回旁观者。"
+            },
+            {
+              "type": "section",
+              "text": "晋升",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "好人阵营：随机成为风精灵、守护天使或仇杀客之一。仇杀客只在杀死你的人已知、仍存活且不是你自己时才可能出现。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀手阵营：成为破坏者。"
+            },
+            {
+              "type": "bullet",
+              "text": "魔女阵营：成为诅咒者。"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升后解除缓慢和失明，可以正常右键交互，世界变成半灰；除仇杀客外，都能看到别人的真实外观。"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升后仍然隐身、无敌（仇杀客除外）、不能捡东西，也仍然不能聊天和语音（守护天使除外）。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "你看不清、说不了话，也传递不了情报。晋升前只管尽快做完 3 个任务，越早晋升，能帮上阵营的时间越长。"
             }
           ]
         }

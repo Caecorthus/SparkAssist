@@ -1,0 +1,55 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:team_first",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.team_first.name",
+      "summaryKey": "trait.sparktraits.team_first.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "给团队钱包多存一点。只会出现在杀手身上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "团队钱包：开局有 2 名以上杀手时，杀手们赚到的金币（定时收入除外）会额外按比例存一份进公共钱包；谁的钱不够买东西，都会自动从里面补上差价。"
+            },
+            {
+              "type": "bullet",
+              "text": "有这个词条时，你每笔收入额外存进团队钱包的那一份增加 20%，你自己到手的金币不变。"
+            },
+            {
+              "type": "bullet",
+              "text": "例如开局只有 2 名杀手时，你击杀得到 100 金币，平时会额外存 25 金币进团队钱包，有这个词条则存 30 金币。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "开局只有 1 名杀手时不会开启团队钱包，这个词条也就没有效果。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#D6A640",
+      "order": 1090
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:well_supplied",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.well_supplied.name",
+      "summaryKey": "trait.sparktraits.well_supplied.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "开局多带一些钱。通用词条，但只会出现在会用金币的身份上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局时，你的初始金币变为 1.2 倍。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "只放大开局时已有的钱。开局 0 金币、靠任务赚钱的身份（例如侦探）拿到它没有任何效果。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#D9A441",
+      "order": 795
+    }
+  ]
+}

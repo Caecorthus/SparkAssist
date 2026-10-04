@@ -1,0 +1,64 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:chameleon",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.chameleon.name",
+      "summaryKey": "trait.sparktraits.chameleon.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "站着不动，就能融进环境。好人词条，只会出现在好人身上，不会和外向、内向同时出现。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "双手空着并且站着不动时，你的身体会在 15 秒内逐渐变透明；完全透明时会收到提示。"
+            },
+            {
+              "type": "bullet",
+              "text": "完全透明后，其他活着的玩家无法用本能透视看到你。"
+            },
+            {
+              "type": "bullet",
+              "text": "一走动或手上拿起任何东西，就会立刻恢复原样，重新计时。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "只看位置有没有变，转动视角不会打断。适合躲在角落里静静观察。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "透明只是看不见，你人还在原地，被刀刺、被枪打照样会死。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:civilian"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#8DBF4A",
+      "order": 870
+    }
+  ]
+}

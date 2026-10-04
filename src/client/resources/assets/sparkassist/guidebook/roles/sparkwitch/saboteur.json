@@ -10,59 +10,88 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.0"
-            },
-            {
               "type": "paragraph",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.1"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "杀手阵营冤魂晋升而来的身份，与杀手阵营共同获胜。你仍然隐身、无敌，也仍受冤魂的部分限制（详见冤魂页）；你的工作是熄灭灯光，为队友制造黑暗。"
+            },
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.2"
+              "text": "能力",
+              "tone": "danger"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.3"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "runs": [
+                {
+                  "text": "破坏",
+                  "tone": "danger"
+                },
+                {
+                  "text": "（技能键）：熄灭身边 20 格内的列车灯，持续 20 秒。晋升后先冷却 60 秒，之后每次冷却 120 秒；附近没有灯时也照常进入冷却。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "任务收入",
+                  "tone": "danger"
+                },
+                {
+                  "text": "：晋升后每完成一个任务获得 50 金币。晋升时还会获得一台【对讲机】。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "队友识别",
+                  "tone": "danger"
+                },
+                {
+                  "text": "：活着的杀手开本能时，会看到你显示为橙色。"
+                }
+              ]
+            },
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.4"
+              "text": "商店",
+              "tone": "money"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.5"
+              "text": "只有【开锁器】50 金币（限购 1 个）和【停电器】；停电器与其他杀手共享价格和 5 分钟冷却。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.6"
+              "text": "用对讲机和队友约好位置，在对方动手前把灯熄掉。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.7"
+              "text": "破坏和停电互不冲突：停电还在冷却时，用破坏补上一片局部黑暗。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.8"
+              "text": "忍者在黑暗中击杀有额外赏金，可以优先在忍者附近破坏灯光。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.9"
+              "text": "破坏只影响列车上的灯，火把、手持光源等照样亮着。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.saboteur.10"
+              "text": "破坏不会让人失明，只是把灯关掉；好人仍能借着其他光源看见周围。"
             }
           ]
         }

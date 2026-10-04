@@ -1,0 +1,53 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:snowball",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.snowball.name",
+      "summaryKey": "trait.sparktraits.snowball.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "钱越赚越多，奖励也越滚越大。通用词条，但只会出现在会用金币的身份上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "每当一笔收入让你的金币跨过一个 100 的整数倍（100、200、300……），额外获得 15 金币；一笔收入跨过几条线就奖励几次。"
+            },
+            {
+              "type": "bullet",
+              "text": "这 15 金币如果又让你跨过下一条线，还会再奖励一次。"
+            },
+            {
+              "type": "bullet",
+              "text": "被动收入、击杀奖励、任务金币都算收入；开局发的金币（包括【物资充沛】的加成）不算。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "花掉的钱再赚回来，重新跨过同一条线也会再奖励一次，不必为了攒奖励舍不得花钱。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#BFE6F5",
+      "order": 790
+    }
+  ]
+}
