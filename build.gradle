@@ -93,6 +93,10 @@ tasks.named("jar") {
         into("META-INF")
         rename { "LICENSE_SPARKASSIST" }
     }
+    from("LICENSE-TEXTURES.md") {
+        into("META-INF")
+        rename { "LICENSE-TEXTURES_SPARKASSIST.md" }
+    }
     from("THIRD_PARTY_NOTICES.md") {
         into("META-INF")
     }
@@ -259,6 +263,7 @@ tasks.register("verifyDistributionMetadata") {
         try {
             [
                     "META-INF/LICENSE_SPARKASSIST",
+                    "META-INF/LICENSE-TEXTURES_SPARKASSIST.md",
                     "META-INF/THIRD_PARTY_NOTICES.md",
                     "META-INF/licenses/WATHE_EXTENDED_GPL-3.0.txt"
             ].each { requiredEntry ->
@@ -288,8 +293,8 @@ tasks.register("verifyDistributionMetadata") {
             if (metadata.environment != "client" || metadata.entrypoints?.main) {
                 throw new GradleException("Packaged SparkAssist metadata must remain client-only")
             }
-            if (metadata.license != "AGPL-3.0-only") {
-                throw new GradleException("Packaged SparkAssist metadata must retain AGPL-3.0-only")
+            if (metadata.license != ["AGPL-3.0-only", "LicenseRef-Textures-ARR"]) {
+                throw new GradleException("Packaged SparkAssist metadata must declare AGPL-3.0-only code and ARR textures")
             }
             if (metadata.depends?.wathe != project.wathe_version.toString()) {
                 throw new GradleException("Packaged Wathe dependency must match wathe_version")
@@ -342,6 +347,10 @@ sourceArchive.configure {
         into("META-INF")
         rename { "LICENSE_SPARKASSIST" }
     }
+    from("LICENSE-TEXTURES.md") {
+        into("META-INF")
+        rename { "LICENSE-TEXTURES_SPARKASSIST.md" }
+    }
     from("THIRD_PARTY_NOTICES.md") {
         into("META-INF")
     }
@@ -357,6 +366,7 @@ tasks.named("verifyDistributionMetadata") {
         try {
             [
                     "META-INF/LICENSE_SPARKASSIST",
+                    "META-INF/LICENSE-TEXTURES_SPARKASSIST.md",
                     "META-INF/THIRD_PARTY_NOTICES.md",
                     "META-INF/licenses/WATHE_EXTENDED_GPL-3.0.txt"
             ].each { requiredEntry ->
