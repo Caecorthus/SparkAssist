@@ -1,0 +1,136 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:control_expert",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.control_expert",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "好人阵营的警职，靠非致命道具控场：关掉附近杀手的本能，或者把人电在原地，给自己和队友创造开枪的机会。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "干扰器",
+                  "tone": "info"
+                },
+                {
+                  "text": "：使用后，6 格内除你以外的所有玩家 10 秒内无法使用本能；不需要视线，受影响的人会收到提示。冷却 90 秒。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "电击枪",
+                  "tone": "info"
+                },
+                {
+                  "text": "：电击准心对准的 6 格内一名玩家，会被墙挡住。冷却 30 秒，打空也一样进入冷却。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "电击装置",
+                  "tone": "info"
+                },
+                {
+                  "text": "：像手雷一样投出，落地或砸中玩家时，电击落点周围 3×3 范围内除你以外的所有人。冷却 60 秒，用一次消耗一个。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "电击效果",
+                  "tone": "info"
+                },
+                {
+                  "text": "：被电的人 5 秒内不能移动、攻击，也不能使用任何物品和技能，只能转动视角，同时失明并获得缓慢 III；之后还会缓慢一段时间（电击枪 10 秒，电击装置 15 秒）。电击不会致命，还会打断对方正在蓄力的刀。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "三件道具只有你能用，也丢不出去；开局都有 30 秒冷却。"
+            },
+            {
+              "type": "section",
+              "text": "商店与金币",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局带【左轮手枪】和【平板电脑】（接入义警频道），金币为 0。每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店：【干扰器】、【电击枪】各 100 金币（各限购 1 个），【电击装置】150 金币（用完可以再买）。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "电击加左轮最稳：先电住确认的目标，5 秒内补枪，对方无法反击。"
+            },
+            {
+              "type": "bullet",
+              "text": "看到有人持刀靠近队友，用电击枪打断对方的蓄力。"
+            },
+            {
+              "type": "bullet",
+              "text": "停电或人多混乱时开干扰器，附近的杀手就没法靠本能找人。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "干扰器和电击装置不分敌我，附近的队友也会中招。"
+            },
+            {
+              "type": "bullet",
+              "text": "电击只控不杀。电住的人如果没有确认身份，别急着开枪。"
+            },
+            {
+              "type": "section",
+              "text": "词条变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "获得【精确枪手】时，电击枪射程提高到 7.8 格。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#4DD0E1",
+      "order": 23
+    }
+  ]
+}

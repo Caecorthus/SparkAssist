@@ -10,13 +10,30 @@
         {
           "blocks": [
             {
+              "type": "paragraph",
+              "text": "走路和吃喝都悄无声息。通用词条，好人、杀手、中立都可能抽到。"
+            },
+            {
               "type": "section",
-              "text": "静默行动",
+              "text": "效果",
               "tone": "info"
             },
             {
               "type": "bullet",
-              "text": "移动、进食和饮用不会发出声音。"
+              "text": "你的脚步声，以及吃东西、喝饮品的声音，别人都听不到。"
+            },
+            {
+              "type": "bullet",
+              "text": "开门、开枪等其他动作的声音照常。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "好人可以悄悄跟上可疑的人；杀手可以摸到目标身后再动手。"
             }
           ]
         }

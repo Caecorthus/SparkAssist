@@ -1,0 +1,81 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:close_quarters",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.close_quarters.name",
+      "summaryKey": "trait.sparktraits.close_quarters.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "举刀更快、更灵活，还能格挡近战。只会出现在商店里卖【刀】的杀手身上（忍者和清道夫除外），与【老练】不会同时出现。"
+            },
+            {
+              "type": "section",
+              "text": "举刀",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "按住右键举刀，约 0.15 秒就能出刀（平时约 0.55 秒）。"
+            },
+            {
+              "type": "bullet",
+              "text": "举刀最长可以保持 10 秒，期间移速翻倍。超过 10 秒会自动收刀，不会出刀。"
+            },
+            {
+              "type": "section",
+              "text": "格挡",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "举刀期间被敌人用近战武器攻击（例如【刀】、蓄满力的【球棒】），会自动挡下这一击并收刀。每次举刀只能挡一次。"
+            },
+            {
+              "type": "bullet",
+              "text": "格挡后，你的【刀】至少冷却 5 秒；攻击者手里的武器至少冷却 15 秒，期间不能用它攻击。双方获得 2 秒缓慢 II，攻击者还会失明 2 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "这些冷却不受其他缩短冷却的效果影响。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "被人贴近时先把刀举起来：对方出手就会被挡下并失明，趁机拉开距离。5 秒后你的刀就能再用，对方的武器还要再等 10 秒。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "只能挡近战，挡不住枪和投掷物。【刀】在冷却时举不起来，也就没法格挡。"
+            },
+            {
+              "type": "bullet",
+              "text": "被人用【刀】左键推一下也会触发格挡，可能被故意骗掉。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#A93236",
+      "order": 1110
+    }
+  ]
+}

@@ -10,13 +10,17 @@
         {
           "blocks": [
             {
+              "type": "paragraph",
+              "text": "买东西更便宜。只会出现在杀手身上。"
+            },
+            {
               "type": "section",
-              "text": "商店折扣",
+              "text": "效果",
               "tone": "money"
             },
             {
               "type": "bullet",
-              "text": "商店中的所有商品价格降低 10%。"
+              "text": "商店里所有商品打九折（向下取整），商店显示的就是打折后的价格。"
             }
           ]
         }

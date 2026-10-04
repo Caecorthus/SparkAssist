@@ -10,17 +10,21 @@
         {
           "blocks": [
             {
+              "type": "paragraph",
+              "text": "能看见已经死去、正在旁观的玩家。通用词条。"
+            },
+            {
               "type": "section",
-              "text": "灵体视野",
+              "text": "效果",
               "tone": "info"
             },
             {
               "type": "bullet",
-              "text": "始终可以看到旁观者漂浮的头。"
+              "text": "旁观者对你可见：你能看到他们漂浮在场上的头。"
             },
             {
               "type": "paragraph",
-              "text": "注：由于无法修复的 bug，目前不会被随机 roll 到。",
+              "text": "由于一个暂时无法修复的问题，这个词条目前不会被随机抽到。",
               "tone": "muted"
             }
           ]

@@ -1,0 +1,128 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:blind",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.blind",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "好人阵营的特殊身份。你什么都看不见，只能靠声音“看”：附近有人走路、说话、开枪，声音响起的地方就会亮起白色轮廓。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "听声辨位",
+                  "tone": "good"
+                },
+                {
+                  "text": "：屏幕一片漆黑。10 格内响起声音时，声源周围约 4 格会以白色线条亮起 1.5 秒，隔着墙也一样；发出声音的玩家（走路、用语音说话、开枪等）会短暂显示为白色人影。停电对你没有影响。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "盲杖",
+                  "tone": "good"
+                },
+                {
+                  "text": "：右键敲击，5 秒内照亮周围 15 格，并显示 5 格内的所有玩家，包括不出声的人；结束后冷却 10 秒，开局冷却 30 秒。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "凝神",
+                  "tone": "good"
+                },
+                {
+                  "text": "（技能键，默认 G）：10 秒内感知范围变为 5 倍，环境杂音变小；结束后冷却 45 秒，开局冷却 90 秒。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "初始物品与商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局只有一根【盲杖】，金币为 0；每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店只有【ComTac VIII】耳机，100 金币，每局限购一副。戴在头上后感知范围变为 3 倍，可以和凝神叠加。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "听到枪声时留意亮起的人影，那就是开枪的人。"
+            },
+            {
+              "type": "bullet",
+              "text": "找床、找吃的时多敲盲杖，把周围的环境照出来。"
+            },
+            {
+              "type": "bullet",
+              "text": "尽早买耳机。耳机加凝神，能感知 150 格内的动静。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "盲人视野需要关闭光影包。开着光影包时整个画面全黑，什么也看不到，屏幕上会提示“盲人视野不可用（需关闭光影包）”。"
+            },
+            {
+              "type": "bullet",
+              "text": "不出声的人你看不到，潜行走路的人不会发出脚步声。想确认身边有没有人，就敲盲杖。"
+            },
+            {
+              "type": "bullet",
+              "text": "你看不到别人的名字和手里的东西，也看不到尸体的信息和便条上的字。捡到枪也很容易误杀好人。"
+            },
+            {
+              "type": "bullet",
+              "text": "盲杖和耳机拿在手上别人看不见，但敲击声是公开的，开了字幕的人会看到“盲杖敲击”。"
+            },
+            {
+              "type": "section",
+              "text": "词条变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "盲人不会获得【内鬼】和【抑郁】词条。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#B8C7D9",
+      "order": 254
+    }
+  ]
+}

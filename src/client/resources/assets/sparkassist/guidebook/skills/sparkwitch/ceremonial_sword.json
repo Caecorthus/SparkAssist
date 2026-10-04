@@ -14,17 +14,95 @@
               "text": "大魔女专属武器"
             },
             {
+              "type": "paragraph",
+              "text": "大魔女的收割之刃：拿着它跑得更快、砍得更远，还能无视护盾一击毙命。"
+            },
+            {
               "type": "section",
-              "textKey": "skill.sparkwitch.ceremonial_sword.name",
-              "tone": "item"
+              "text": "获得",
+              "tone": "info"
             },
             {
               "type": "bullet",
-              "textKey": "skill.sparkwitch.ceremonial_sword.description"
+              "text": "完成 2 个任务后免费获得，本局一直保留，原来的【刀】也还在。快捷栏满了的话剑会掉在脚下，记得捡起来。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "info"
             },
             {
               "type": "bullet",
-              "textKey": "skill.sparkwitch.ceremonial_sword.protection"
+              "runs": [
+                {
+                  "text": "移速",
+                  "tone": "info"
+                },
+                {
+                  "text": "：主手或副手拿着剑时，移速提高 40%。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "斩杀",
+                  "tone": "info"
+                },
+                {
+                  "text": "：主手左键，攻击距离比平时远 2 格。等准心下方的蓄力条充满（约 0.5 秒）再出手，命中即击杀。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "冲刺",
+                  "tone": "info"
+                },
+                {
+                  "text": "：右键向前冲刺约 6 格，途中碰到的第一名玩家直接被击杀，撞墙就停；冷却 5 秒。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "击杀冷却",
+                  "tone": "info"
+                },
+                {
+                  "text": "：左键和冲刺共用 30 秒击杀冷却，成功杀人后才开始计算。冷却期间蓄力条变灰，仍然可以冲刺赶路，但杀不了人。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "穿盾",
+                  "tone": "info"
+                },
+                {
+                  "text": "：无视护盾和格挡，但护盾照样会被消耗；带反杀效果的保护仍会触发，可能让你和对方同归于尽。背水一战、绝处逢生等词条的保护不受影响。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "使用建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "冲刺能一下拉近 6 格直接击杀，适合追逃跑的人，或者突然闯进房间。"
+            },
+            {
+              "type": "bullet",
+              "text": "剑不分敌我：冲刺会击杀路线上第一个碰到的人，共犯也一样，出手前看清前方。"
             }
           ]
         }

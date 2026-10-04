@@ -13,39 +13,10 @@
               "type": "quote",
               "text": "人类杀死了我的其他血亲……我会让你们偿还。"
             },
-            { "type": "section", "textKey": "skill.sparkwitch.witch_factor.name", "tone": "info" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.description" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.income" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.sanity" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.witch_factor.transfer" }
-          ]
-        },
-        {
-          "blocks": [
-            { "type": "section", "textKey": "skill.sparkwitch.recruit_accomplice.name", "tone": "info" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.description" },
-            { "type": "bullet", "textKey": "skill.sparkwitch.recruit_accomplice.inventory" }
-          ]
-        },
-        {
-          "blocks": [
             {
-              "type": "section",
-              "textKey": "skill.sparkwitch.ceremonial_sword.name",
-              "tone": "danger"
+              "type": "paragraph",
+              "text": "魔女阵营的核心。你靠魔力施法，把魔女因子散进人群来壮大自己，再招募共犯，最后亲手用仪礼剑收割。目标是让场上只剩魔女阵营。"
             },
-            {
-              "type": "bullet",
-              "textKey": "skill.sparkwitch.ceremonial_sword.description"
-            },
-            {
-              "type": "bullet",
-              "textKey": "skill.sparkwitch.ceremonial_sword.protection"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
               "text": "魔力",
@@ -53,86 +24,172 @@
             },
             {
               "type": "bullet",
-              "text": "初始魔力为 0，每秒恢复 1 点，自然恢复上限为 300。"
+              "text": "开局魔力为 0，每秒恢复 1 点，自然恢复最多到 300。"
             },
             {
               "type": "bullet",
-              "text": "普通击杀恢复 50 魔力；击杀魔力身份（大魔女、预备魔女或杀意魔女）恢复 100 魔力。"
+              "text": "击杀恢复 50 魔力，击杀大魔女、预备魔女或杀意魔女恢复 100；共犯击杀时，你也获得同样的魔力。"
             },
             {
               "type": "bullet",
-              "text": "共犯击杀时，所有存活的大魔女获得同等魔力奖励。"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "场上每个魔女因子每 30 秒额外给你 25 魔力（持有者是预备魔女时 40，杀意魔女时 60）。"
+            },
             {
               "type": "section",
-              "text": "经济与抗性",
-              "tone": "money"
+              "text": "技能",
+              "tone": "info"
             },
             {
               "type": "bullet",
-              "text": "开局获得【匕首】、【平板电脑】（接入魔女频道）和与杀手相同的起始金币；没有被动金币，直接击杀获得 100 金币。"
+              "runs": [
+                {
+                  "text": "魔女因子",
+                  "tone": "info"
+                },
+                {
+                  "text": "（技能键，默认 G）：消耗 50 魔力，把因子传给准心对准的 8 格内一名玩家；冷却 20 秒。因子会持续为你产出魔力，并让持有者慢慢掉理智。详见“魔女因子”页。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "text": "大魔女击杀时，每名存活共犯额外获得 25 金币。"
+              "runs": [
+                {
+                  "text": "招募同伙",
+                  "tone": "info"
+                },
+                {
+                  "text": "（第二技能键，默认 N）：完成 2 个任务后解锁，把 8 格内一名玩家直接变成共犯。免费、无冷却，但名额有限。详见“招募同伙”页。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "text": "免疫停电与巫毒诅咒。"
+              "runs": [
+                {
+                  "text": "仪礼剑",
+                  "tone": "info"
+                },
+                {
+                  "text": "：完成 2 个任务后免费获得。手持时移速提高 40%、攻击距离更远，还能穿透护盾；击杀冷却 30 秒。详见“仪礼剑”页。"
+                }
+              ]
             },
-            {
-              "type": "bullet",
-              "text": "拥有魔女阵营本能，并能看见隐藏的毒药陷阱。"
-            }
-          ]
-        },
-        {
-          "blocks": [
-            {
-              "type": "section",
-              "text": "专属商店",
-              "tone": "money"
-            },
-            {
-              "type": "bullet",
-              "text": "左轮手枪：300 金币；开锁器：50 金币。"
-            },
-            {
-              "type": "bullet",
-              "text": "毒药瓶：100 金币；蝎子：100 金币。"
-            },
-            {
-              "type": "paragraph",
-              "text": "四种法术也从该商店购买。"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
               "text": "法术",
               "tone": "info"
             },
             {
-              "type": "bullet",
-              "text": "障眼：80 魔力。遮蔽非魔女的本能 30 秒；冷却 2 分钟。"
+              "type": "paragraph",
+              "text": "法术在商店里用魔力购买，效果作用于所有魔女阵营以外的玩家。"
             },
             {
               "type": "bullet",
-              "text": "失明：80 魔力。持续 20 秒；冷却 3 分钟。"
+              "runs": [
+                {
+                  "text": "障眼",
+                  "tone": "info"
+                },
+                {
+                  "text": " 80 魔力：本能失效 30 秒；冷却 2 分钟。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "text": "恐惧：50 魔力。持续 10 秒，禁止非魔女使用本能、身份技能与商店，并总计降低 50 理智；冷却 5 分钟。"
+              "runs": [
+                {
+                  "text": "失明",
+                  "tone": "info"
+                },
+                {
+                  "text": " 80 魔力：失明 20 秒；冷却 3 分钟。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "text": "沉重：60 魔力。施加缓慢 III 10 秒；冷却 3 分钟。"
+              "runs": [
+                {
+                  "text": "恐惧",
+                  "tone": "info"
+                },
+                {
+                  "text": " 50 魔力：10 秒内不能使用本能、身份技能和商店，并总共降低 50 理智；冷却 5 分钟。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "沉重",
+                  "tone": "info"
+                },
+                {
+                  "text": " 60 魔力：获得缓慢 III，持续 10 秒；冷却 3 分钟。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "金币与商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局带【刀】和【平板电脑】，起始金币与杀手相同。没有被动收入，每次直接击杀获得 100 金币，同时每名存活的共犯获得 25 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "商店：【左轮手枪】300 金币，【开锁器】50 金币，【毒药瓶】和【蝎子】各 100 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "不受停电和巫毒诅咒影响，能看见隐藏的毒药陷阱。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "前期魔力很少，先混在人群里做任务：做完 2 个任务就能拿到仪礼剑并解锁招募。"
+            },
+            {
+              "type": "bullet",
+              "text": "因子越早散出去，魔力来得越快。优先传给活得久、常在人群里走动的人。"
+            },
+            {
+              "type": "bullet",
+              "text": "让共犯打正面，你攒着魔力，在关键时刻用恐惧或失明配合进攻。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "你从开局就能看见樱羽艾玛（粉色边框）。她是专门克制你的警职，招募她会失败，还会让她在本局一直看见你。"
+            },
+            {
+              "type": "bullet",
+              "text": "警职和黑警同样无法被招募。"
+            },
+            {
+              "type": "bullet",
+              "text": "用【左轮手枪】打死好人阵营玩家后，这把枪会直接消失。"
+            },
+            {
+              "type": "bullet",
+              "text": "仪礼剑不分敌我，冲刺时别撞上自己的共犯。"
+            },
+            {
+              "type": "bullet",
+              "text": "只要魔女阵营还有人活着，好人和杀手都无法提前获胜，所以两边都会来找你。"
             }
           ]
         }

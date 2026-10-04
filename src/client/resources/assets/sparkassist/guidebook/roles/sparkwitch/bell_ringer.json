@@ -10,108 +10,101 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.0"
+              "type": "paragraph",
+              "text": "杀手阵营的收割者。用回响逼好人限时完成指定任务，失败的人理智暴跌；再敲响丧钟，一次带走所有理智低于 0 的人。"
             },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.1"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.2"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.3"
+              "text": "能力",
+              "tone": "danger"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.4"
+              "runs": [
+                {
+                  "text": "丧钟",
+                  "tone": "danger"
+                },
+                {
+                  "text": "：开局自带一口【钟】。只要有人理智低于 0，钟就会发光（只有你看得见）。右键敲钟，立刻杀死所有理智低于 0 的其他玩家，无视一切护盾和保护，每一个都算你的击杀；之后冷却 30 秒。没人符合条件时不会进入冷却。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.5"
+              "runs": [
+                {
+                  "text": "回响",
+                  "tone": "danger"
+                },
+                {
+                  "text": "（技能键）：消耗 45 秒对局时间，钟声传遍全车。所有有理智的好人立刻失去手上的全部任务，换成一项随机任务（睡觉、呼吸新鲜空气、吃东西或喝饮品），必须在 60 秒内完成。开局冷却 120 秒，之后每次冷却 90 秒；剩余时间不到 60 秒时不能发动。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.6"
+              "runs": [
+                {
+                  "text": "回响任务",
+                  "tone": "danger"
+                },
+                {
+                  "text": "：期间理智下降速度变为 1.5 倍。按时完成照常回复理智，但不算完成任务，拿不到金币；超时则直接失去 50% 理智，可能当场精神崩溃。"
+                }
+              ]
             },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.7"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.8"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.9"
+              "text": "商店",
+              "tone": "money"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.10"
+              "text": "和普通杀手的区别：只保留【刀】、【左轮手枪】、【毒药瓶】、【蝎子】、【开锁器】、【撬棍】和【停电器】，价格不变；买不到【手雷】、【M67 手雷】、【疯魔模式】、【裹尸袋】、【便条】和【爆竹】。"
             },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.11"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.12"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.13"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.14"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.15"
-            },
-            {
-              "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.16"
-            }
-          ]
-        },
-        {
-          "blocks": [
             {
               "type": "section",
-              "tone": "money",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.17"
+              "text": "玩法建议",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.18"
+              "text": "先用回响把大家的理智压下去，再留意钟有没有发光：一发光就敲，往往能一次带走好几个人。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.19"
+              "text": "回响会把人赶去睡觉、吃喝或出门透气，正好方便你和队友在这些地方埋伏。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.20"
+              "text": "停电、追杀这类让好人顾不上做任务的时机，最容易让回响任务失败。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.bell_ringer.21"
+              "text": "回响花的是对局时间，用得太多会让列车时间更快耗尽，反而让好人按时获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀手阵营、中立阵营、魔女阵营、卧底和带【内鬼】词条的人不会收到回响任务，只会看到“你听到了敲钟人的钟声”的提示。"
+            },
+            {
+              "type": "bullet",
+              "text": "钟丢不掉，别人也看不见。被大魔女的恐惧影响时不能发动回响，但仍然可以敲钟。"
+            },
+            {
+              "type": "section",
+              "text": "词条变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "即使本局启用了【善良】词条，敲钟人也不会获得它。"
             }
           ]
         }

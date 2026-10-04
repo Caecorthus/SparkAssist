@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 public final class GuidebookNavigation {
     private static final List<String> ROOTS = List.of("roles", "traits", "skills");
     private static final List<String> GROUPS = List.of(
-            "roles.civilian", "roles.killer", "roles.witch", "roles.neutral", "roles.other",
+            "roles.basics", "roles.civilian", "roles.killer", "roles.witch", "roles.neutral", "roles.other",
             "traits.global", "traits.civilian", "traits.police", "traits.killer", "traits.other",
             "skills.apprentice", "skills.murderous", "skills.grand"
     );
@@ -38,26 +38,31 @@ public final class GuidebookNavigation {
                 "spiritualist", "detective", "waiter", "mermaid");
         assign(ROLE_GROUPS, "roles.civilian", "sparkwitch",
                 "orthopedist", "saint", "pig_god", "apprentice_witch", "perfumer", "tarot_reader",
-                "prophet", "wind_spirit", "guardian_angel", "vendetta");
+                "prophet", "wind_spirit", "guardian_angel", "vendetta", "emma", "judge", "control_expert",
+                "seeker", "fisher", "blind");
         assign(ROLE_GROUPS, "roles.killer", "wathe", "killer", "secret_killer");
         assign(ROLE_GROUPS, "roles.killer", "noellesroles",
                 "phantom", "swapper", "the_insane_damned_paranoid_killer", "morphling", "assassin",
                 "scavenger", "bomber", "serial_killer", "silencer", "party_animal", "poisoner", "bandit");
         assign(ROLE_GROUPS, "roles.killer", "sparkwitch",
-                "hunter", "ninja", "kidnapper", "black_raven", "witch_maiden", "saboteur", "bell_ringer");
-        assign(ROLE_GROUPS, "roles.witch", "sparkwitch", "grand_witch", "accomplice", "curser");
+                "hunter", "ninja", "kidnapper", "black_raven", "witch_maiden", "saboteur", "bell_ringer",
+                "time_stealer");
+        assign(ROLE_GROUPS, "roles.witch", "sparkwitch", "grand_witch", "accomplice", "abyss_listener",
+                "riftwalker", "potion_gunner", "curser");
         assign(ROLE_GROUPS, "roles.neutral", "wathe", "loose_end");
-        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch");
+        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend", "insider");
         assign(ROLE_GROUPS, "roles.neutral", "noellesroles",
                 "corrupt_cop", "taotie", "pathogen", "vulture", "jester", "shadow_jester");
         assign(TRAIT_GROUPS, "traits.global", "sparktraits", "cautious", "task_master", "fast_hands",
-                "childish", "pig", "steady", "excellent_physique", "spirit_sleuth");
+                "childish", "pig", "steady", "excellent_physique", "spirit_sleuth", "snowball", "well_supplied");
         assign(TRAIT_GROUPS, "traits.civilian", "sparktraits", "last_stand", "impostor", "extroverted",
-                "introverted", "money_tree", "focus", "depression");
+                "introverted", "money_tree", "focus", "depression", "chameleon");
         assign(TRAIT_GROUPS, "traits.police", "sparktraits", "marksman", "fast_reload", "heavy_artillery",
                 "niko", "well_trained", "going_dark");
         assign(TRAIT_GROUPS, "traits.killer", "sparktraits", "conscience", "bloodthirsty", "the_showman",
-                "plunderer", "charisma", "paranoid", "thrust", "second_strike", "oppressive", "cornered");
+                "plunderer", "charisma", "paranoid", "thrust", "second_strike", "oppressive", "cornered",
+                "team_first", "exhilarated", "close_quarters", "last_escape", "herculean_strength",
+                "master_saboteur", "seasoned", "manic");
     }
 
     private GuidebookNavigation() {
@@ -171,6 +176,7 @@ public final class GuidebookNavigation {
                 case "sparkassist:faction/sparkwitch/witch" -> "roles.witch";
                 default -> "roles.other";
             });
+            case GUIDE -> List.of("roles.basics");
             case TRAIT -> List.of(TRAIT_GROUPS.getOrDefault(entry.id(), "traits.other"));
             case SKILL -> GuidebookDiscoveryRules.ownerRoleIds(entry.id()).stream()
                     .map(WITCH_GROUPS::get).filter(java.util.Objects::nonNull).toList();
