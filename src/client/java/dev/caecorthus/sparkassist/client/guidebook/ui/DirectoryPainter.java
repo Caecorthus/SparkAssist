@@ -19,7 +19,10 @@ import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.WELL
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.WELL_LIP;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.WELL_SHADE;
 
+import dev.caecorthus.sparkassist.client.guidebook.ui.decor.DrawContextSink;
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout.Region;
+import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
+import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
 import java.util.List;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -239,12 +242,30 @@ public final class DirectoryPainter {
                         boolean searchOpen, boolean searchFocused, boolean queryEmpty, boolean closeInBand,
                         boolean foldable, boolean creditsOpen, int hoveredRow, int focusedRow,
                         @Nullable String selectedId, boolean closeHover, boolean searchHover, boolean creditsHover,
-                        boolean foldHover, boolean thumbHot) {
+                        boolean foldHover, boolean thumbHot, boolean trim, int titleWidth, int accent) {
+        /**
+         * @param trim       draw the frame ornaments (corner plates, inner line, nameplate, tag) / 是否画边框点缀
+         * @param titleWidth width of the shown band title, for the nameplate and the tag / 标题带标题的宽度
+         * @param accent     the player's faction colour 0xRRGGBB for the luggage tag / 行李牌的阵营色
+         */
+        public Model {
+        }
     }
 
     // ================================================================ drawing / 绘制
 
     public static void draw(DrawContext c, TextRenderer f, Model m) {
+        drawChrome(c, f, m);
+        drawRows(c, f, m);
+    }
+
+    /**
+     * Panel, band, search well and footer: everything under the rows. The screen draws the decoration layer
+     * (wallpaper, sigil) after this and {@link #drawRows} after that, so the layer sits between body and rows.
+     * 面板、标题带、搜索槽与页脚，即行之下的一切。界面在其后画点缀层（墙纸、暗纹），再调用 drawRows，点缀层因此夹在
+     * 面板底与行之间。
+     */
+    public static void drawChrome(DrawContext c, TextRenderer f, Model m) {
         Region nav = m.nav();
         int x = nav.x();
         int y = nav.y();
@@ -252,10 +273,23 @@ public final class DirectoryPainter {
         int h = nav.height();
         ExpressPaint.panel(c, x, y, w, h);
         ExpressPaint.titleBand(c, x, y, w);
+        if (m.trim()) {
+            PixelSink sink = new DrawContextSink(c);
+            Ornaments.innerLine(sink, x, y, w, h);
+            Ornaments.cornerPlates(sink, x, y, w, h);
+        }
         band(c, f, m);
         if (m.searchOpen()) {
             searchWell(c, f, m);
         }
+        footer(c, f, m);
+    }
+
+    /** The scissored rows with their fades and scrollbar. 裁剪视口内的行、渐隐与滚动条。 */
+    public static void drawRows(DrawContext c, TextRenderer f, Model m) {
+        Region nav = m.nav();
+        int x = nav.x();
+        int w = nav.width();
         Region view = viewport(nav, m.searchOpen());
         int total = m.contentHeight();
         boolean scrollable = total > view.height();
@@ -294,7 +328,6 @@ public final class DirectoryPainter {
             ExpressPaint.scrollbarDark(c, x + w - 8, view.y(), view.height(), thumbY, thumb, m.thumbHot());
             c.getMatrices().pop();
         }
-        footer(c, f, m);
     }
 
     /**
@@ -330,6 +363,16 @@ public final class DirectoryPainter {
         }
         ExpressPaint.magnifier(c, search.x() + 2, nav.y() + 6,
                 m.searchOpen() ? COIN : m.searchHover() ? BRASS_HI : BRASS);
+        if (m.trim()) {
+            // Nameplate under the title; the luggage tag only when the band keeps 6 px between title and string.
+            // 标题下的铭牌；行李牌只在标题与绳子之间还剩 6 像素时出现。
+            PixelSink sink = new DrawContextSink(c);
+            Ornaments.nameplate(sink, nav.x() + 4, nav.y() + 5, m.titleWidth() + Ornaments.NAMEPLATE_PADDING);
+            int tagX = search.x() - 6 - Ornaments.TAG_WIDTH;
+            if (tagX - Ornaments.TAG_STRING - 6 >= nav.x() + 7 + m.titleWidth()) {
+                Ornaments.luggageTag(sink, tagX, nav.y() + 7, m.accent());
+            }
+        }
         c.drawText(f, m.chrome().title(), nav.x() + 7, nav.y() + 7, TITLE, false);
     }
 
