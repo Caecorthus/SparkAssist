@@ -18,6 +18,7 @@ import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorRandom;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSetResolver;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorZones;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlock;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlockType;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookPage;
@@ -619,8 +620,48 @@ public final class GuidebookScreen extends Screen {
                 tip = readerTip;
             }
         }
+        renderOverlays(context);
         if (tip != null) {
             drawTip(context, tip, mouseX, mouseY);
+        }
+    }
+
+    /**
+     * Ornaments that sit on top of the finished panels (ribbon, seal, steam) and the developer zone overlay.
+     * They are drawn after every panel and before tooltips; curls never enter a panel or the HUD band.
+     * 画在完成的面板之上的点缀（丝带、火漆、蒸汽）与开发用禁区叠加。在所有面板之后、提示框之前绘制；卷云不会进入
+     * 面板或 HUD 带。
+     */
+    private void renderOverlays(DrawContext context) {
+        if (!DecorSettings.enabled()) {
+            return;
+        }
+        List<Region> zones = new ArrayList<>();
+        if (embedded) {
+            zones.add(DecorZones.hud(width));
+            if (!isModal()) {
+                zones.addAll(obstacles);
+            }
+        }
+        boolean directoryShown = directoryVisible();
+        boolean readerShown = readerFrameVisible();
+        if (directoryShown) {
+            zones.add(DecorZones.panelInterior(nav));
+        }
+        if (readerShown) {
+            zones.add(DecorZones.panelInterior(reader));
+        }
+        if (directoryShown) {
+            decorator.drawDirectoryOverlay(context, nav, ownerSet(), session.roundSeed(), zones);
+        }
+        if (readerShown) {
+            boolean article = isArticleOpen();
+            DecorSet set = article ? pageSet : ownerSet();
+            long seed = article ? pageSeed : DecorRandom.ownerSeed("frontispiece", session.roundSeed());
+            decorator.drawReaderOverlay(context, reader, sheet, set, article && set.equals(ownerSet()), seed, zones);
+        }
+        if (DecorSettings.debugZones()) {
+            GuidebookDecorator.drawDebugZones(context, zones);
         }
     }
 

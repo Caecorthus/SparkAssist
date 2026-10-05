@@ -1,14 +1,21 @@
 package dev.caecorthus.sparkassist.client.guidebook.ui.decor;
 
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout.Region;
+import dev.caecorthus.sparkassist.client.guidebook.ui.ReaderPainter;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorPalette;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorRandom;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorZones;
+import dev.caecorthus.sparkassist.guidebook.decor.OffsetSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
-import dev.caecorthus.sparkassist.client.guidebook.ui.ReaderPainter;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
+import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Plates;
 import dev.caecorthus.sparkassist.guidebook.decor.Sigils;
+import dev.caecorthus.sparkassist.guidebook.decor.Steam;
+import dev.caecorthus.sparkassist.guidebook.decor.ZonedSink;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.gui.DrawContext;
 
 /**
@@ -29,10 +36,20 @@ public final class GuidebookDecorator implements AutoCloseable {
     /** The watermark's bottom edge keeps this far from the sheet bottom. 暗纹底边与纸底的距离。 */
     private static final int WATERMARK_BOTTOM = 18;
 
+    /** Overlay layers keep this much room around their panel for curls and vines. 覆盖层在面板四周留的余量。 */
+    public static final int OVERLAY_MARGIN = 20;
+    private static final int DEBUG_ZONE = 0x66E03030;
+
     private final DecorLayer directory = new DecorLayer("sparkassist_guide_directory");
     private final DecorLayer plate = new DecorLayer("sparkassist_guide_plate");
     private final DecorLayer frontPlate = new DecorLayer("sparkassist_guide_front_plate");
     private final DecorLayer watermark = new DecorLayer("sparkassist_guide_watermark");
+    private final DecorLayer readerOverlay = new DecorLayer("sparkassist_guide_reader_overlay");
+    private final DecorLayer directoryOverlay = new DecorLayer("sparkassist_guide_directory_overlay");
+
+    private record OverlayKey(Region panel, List<Region> zones, DecorSet set, boolean ownPage, long seed,
+                              int density) {
+    }
 
     private record DirectoryKey(int width, int height, DecorSet set, long seed, int density) {
     }
@@ -143,6 +160,78 @@ public final class GuidebookDecorator implements AutoCloseable {
         directory.draw(context, x, viewportTop);
     }
 
+    /**
+     * The reader's overlay, drawn last: the ribbon bookmark down the left paper margin, the wax seal on the
+     * bottom-left corner and steam curls rising from the outer corners. Curls go through the no-go zones.
+     * 正文的覆盖层，最后绘制：垂在纸页左边距的丝带书签、左下角的火漆印、从外角升起的蒸汽卷云。卷云受禁区约束。
+     *
+     * @param ownPage the page belongs to the player's own faction, so the ribbon is gold / 自己阵营的页面，丝带为金线
+     * @param zones   no-go rectangles beyond this panel's own interior / 本面板内部以外的禁区
+     */
+    public void drawReaderOverlay(DrawContext context, Region reader, ReaderPainter.Sheet sheet, DecorSet set,
+                                  boolean ownPage, long seed, List<Region> zones) {
+        int density = DecorSettings.density();
+        if (density < 0 || reader.width() <= 0 || reader.height() <= 0) {
+            return;
+        }
+        OverlayKey key = new OverlayKey(reader, zones, set, ownPage, seed, density);
+        int ox = reader.x() - OVERLAY_MARGIN;
+        int oy = reader.y() - OVERLAY_MARGIN;
+        if (!readerOverlay.isCurrent(key)) {
+            PixelBuffer buffer = new PixelBuffer(reader.width() + 2 * OVERLAY_MARGIN,
+                    reader.height() + 2 * OVERLAY_MARGIN);
+            PixelSink sink = new OffsetSink(buffer, -ox, -oy);
+            DecorRandom rand = new DecorRandom(seed ^ 0xA11L);
+            int colour = DecorPalette.opaque(set.colour());
+            int ribbonEnd = reader.y() + 21 + Math.round(reader.height() * 0.42f) + rand.nextInt(10);
+            Ornaments.ribbon(sink, sheet.x() + 3, reader.y() + 21, Math.min(ribbonEnd, sheet.bottom() - 12),
+                    ownPage ? DecorPalette.POLISHED : DecorPalette.mix(colour, DecorPalette.INK, 0.3));
+            if (density >= 1) {
+                Ornaments.waxSeal(sink, reader.x() + 8, reader.bottom() - 10, colour, set.mark());
+                List<Region> forbidden = new ArrayList<>(zones);
+                forbidden.add(DecorZones.panelInterior(reader));
+                PixelSink curls = new ZonedSink(sink, List.of(), forbidden);
+                Steam.wisps(curls, reader.right() + 1, reader.bottom() - 8, -Math.PI / 2 + 0.2, 3, rand);
+                if (density >= 2) {
+                    Steam.wisps(curls, reader.x() - 1, reader.bottom() - 8, -Math.PI / 2 - 0.2, 2, rand);
+                }
+            }
+            readerOverlay.update(key, buffer);
+        }
+        readerOverlay.draw(context, ox, oy);
+    }
+
+    /** Steam curls at the directory's outer corners, drawn last. 目录外角的蒸汽卷云，最后绘制。 */
+    public void drawDirectoryOverlay(DrawContext context, Region nav, DecorSet set, long seed, List<Region> zones) {
+        int density = DecorSettings.density();
+        if (density < 1 || nav.width() <= 0 || nav.height() <= 0) {
+            return;
+        }
+        OverlayKey key = new OverlayKey(nav, zones, set, false, seed, density);
+        int ox = nav.x() - OVERLAY_MARGIN;
+        int oy = nav.y() - OVERLAY_MARGIN;
+        if (!directoryOverlay.isCurrent(key)) {
+            PixelBuffer buffer = new PixelBuffer(nav.width() + 2 * OVERLAY_MARGIN, nav.height() + 2 * OVERLAY_MARGIN);
+            List<Region> forbidden = new ArrayList<>(zones);
+            forbidden.add(DecorZones.panelInterior(nav));
+            PixelSink curls = new ZonedSink(new OffsetSink(buffer, -ox, -oy), List.of(), forbidden);
+            DecorRandom rand = new DecorRandom(seed ^ 0xD1FL);
+            Steam.wisps(curls, nav.x() - 1, nav.bottom() - 6, -Math.PI / 2, 3, rand);
+            if (density >= 2) {
+                Steam.wisps(curls, nav.right() + 1, nav.y() + 24, Math.PI / 2 + 0.3, 2, rand);
+            }
+            directoryOverlay.update(key, buffer);
+        }
+        directoryOverlay.draw(context, ox, oy);
+    }
+
+    /** Developer overlay: every no-go rectangle in translucent red. 开发用叠加：所有禁区矩形涂半透明红。 */
+    public static void drawDebugZones(DrawContext context, List<Region> zones) {
+        for (Region zone : zones) {
+            context.fill(zone.x(), zone.y(), zone.right(), zone.bottom(), DEBUG_ZONE);
+        }
+    }
+
     /** Release every texture; layers come back lazily on the next draw. 释放全部纹理，下次绘制时惰性重建。 */
     @Override
     public void close() {
@@ -150,5 +239,7 @@ public final class GuidebookDecorator implements AutoCloseable {
         plate.close();
         frontPlate.close();
         watermark.close();
+        readerOverlay.close();
+        directoryOverlay.close();
     }
 }
