@@ -234,7 +234,7 @@
   "announcement.win.emma": "乘客胜利！",
   "skill.sparkwitch.emma_factor.name": "魔女因子",
   "skill.sparkwitch.emma_factor.description": "主技能键消耗100魔力向8格内目标传递共通因子，冷却20秒。每秒恢复1魔力，自然上限100；任务获得20魔力，可超过上限。",
-  "skill.sparkwitch.emma_factor.backlash": "给大魔女、共犯或巫女传递将于20秒后死于因子反噬；给巫毒师传递会于20秒后扣除最大理智的一半。目标不会获得因子。",
+  "skill.sparkwitch.emma_factor.backlash": "给大魔女、魔化使、共犯或巫女传递将于20秒后死于因子反噬；给巫毒师传递会于20秒后扣除最大理智的一半。目标不会获得因子。",
   "skill.sparkwitch.emma_factor.gun": "左轮击杀因子持有者，本次射击批次冷却减少90%并获得2秒速度III；Niko三连发只奖励一次。误杀惩罚不变。",
   "skill.sparkwitch.emma_factor.network": "成熟存活持有者曾达到额度一半后，获得速度I直到死亡或对局结束；无限额度时要求开局人数的一半。",
   "hud.sparkwitch.emma.factor.need_mana": "需要 %s 魔力值",

@@ -234,7 +234,7 @@
   "announcement.win.emma": "Passengers win!",
   "skill.sparkwitch.emma_factor.name": "Witch Factor",
   "skill.sparkwitch.emma_factor.description": "Primary ability: spend 100 mana to spread a shared factor within 8 blocks; 20s cooldown. Regenerate 1 mana per second up to 100; tasks grant 20 and may exceed that cap.",
-  "skill.sparkwitch.emma_factor.backlash": "Attempting to mark a Grand Witch, Accomplice or Witch Maiden kills you after 20s by Factor Backlash. Voodoo instead costs half your maximum sanity after 20s. These targets receive no factor.",
+  "skill.sparkwitch.emma_factor.backlash": "Attempting to mark a Grand Witch, Bewitched, Accomplice or Witch Maiden kills you after 20s by Factor Backlash. Voodoo instead costs half your maximum sanity after 20s. These targets receive no factor.",
   "skill.sparkwitch.emma_factor.gun": "A revolver kill on a carrier reduces this shot cycle's cooldown by 90% and grants Speed III for 2s. Niko bursts reward only once. Innocent-shot penalties still apply.",
   "skill.sparkwitch.emma_factor.network": "Once mature living carriers reach half the quota, gain Speed I until death or round end. Unlimited mode uses half the opening player count.",
   "hud.sparkwitch.emma.factor.need_mana": "Requires %s mana",
