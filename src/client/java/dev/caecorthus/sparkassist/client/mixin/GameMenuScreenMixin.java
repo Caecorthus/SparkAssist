@@ -1,7 +1,8 @@
 package dev.caecorthus.sparkassist.client.mixin;
 
+import dev.caecorthus.sparkassist.client.guidebook.GuidebookClientState;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookOpenButton;
-import dev.doctor4t.wathe.client.WatheClient;
+import dev.caecorthus.sparkassist.guidebook.GuidebookEntryPoint;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -12,8 +13,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Provides the same book icon when lobby or spectator players have no limited inventory.
- * 大厅和旁观玩家无法打开受限背包时，在暂停菜单提供同款书本入口。
+ * Provides the same book icon for lobby and creative players, who have no limited inventory; dead spectators use the
+ * inventory key instead.
+ * 大厅和创造模式玩家没有受限背包，在暂停菜单提供同款书本入口；死亡旁观者改用背包键打开。
  */
 @Mixin(GameMenuScreen.class)
 public abstract class GameMenuScreenMixin extends Screen {
@@ -23,10 +25,7 @@ public abstract class GameMenuScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void sparkassist$addGuidebookFallback(CallbackInfo ci) {
-        boolean limitedInventoryAvailable = WatheClient.trainComponent != null
-                && WatheClient.trainComponent.hasHud()
-                && WatheClient.isPlayerAliveAndInSurvival();
-        if (limitedInventoryAvailable) {
+        if (GuidebookClientState.entryPoint(this.client) != GuidebookEntryPoint.PAUSE_MENU) {
             return;
         }
 

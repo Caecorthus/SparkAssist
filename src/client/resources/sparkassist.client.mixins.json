@@ -7,6 +7,7 @@
     "GameMenuScreenMixin",
     "KeyBindingMixin",
     "LimitedInventoryScreenMixin",
+    "MinecraftClientMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin"
   ],
