@@ -41,23 +41,21 @@ public final class DecorLayer implements AutoCloseable {
 
     /** Upload {@code buffer} as this layer's pixels for {@code key}. 把 buffer 作为 key 的像素上传。 */
     public void update(Object key, PixelBuffer buffer) {
-        this.key = key;
         TextureManager textures = MinecraftClient.getInstance().getTextureManager();
         if (texture == null || width != buffer.width() || height != buffer.height()) {
+            // A GL texture keeps the size it was created with, so a resize means a fresh texture, not a re-upload.
+            // GL 纹理尺寸在创建时固定，尺寸变化必须新建纹理，不能只重新上传。
+            close();
             NativeImage image = new NativeImage(NativeImage.Format.RGBA, buffer.width(), buffer.height(), false);
             write(image, buffer);
-            if (texture == null) {
-                texture = new NativeImageBackedTexture(image);
-                id = textures.registerDynamicTexture(name, texture);
-            } else {
-                // setImage closes the previous image before adopting the new one. setImage 会先关闭旧图像。
-                texture.setImage(image);
-                texture.upload();
-            }
+            texture = new NativeImageBackedTexture(image);
+            id = textures.registerDynamicTexture(name, texture);
             width = buffer.width();
             height = buffer.height();
+            this.key = key;
             return;
         }
+        this.key = key;
         NativeImage image = texture.getImage();
         if (image == null) {
             return;
