@@ -40,6 +40,39 @@ Identifier-based support for known Wathe, NoellesRoles, SparkWitch, and
 SparkTraits sounds without owning those mods' role or talent logic.
 _Avoid_: required sibling mod, shared role system
 
+**Guidebook decoration**:
+Faction-keyed ornaments drawn on and around the guide's panels and the owner info card: chapter plate,
+watermark sigil, ribbon bookmark, wax seal, steam curls, rim foliage, frame plates and the directory wallpaper.
+Generated as pixels from the **Round seed**, cached as dynamic textures, and never changing any geometry or hit
+area. Controlled by the `guidebookDecor` (off / light / medium / full) and `guidebookFoliage` settings.
+_Avoid_: theme, skin, texture pack, resource pack
+
+**Decoration set**:
+The plate, sigil, foliage, accent colour, seal mark and charm a page or a player gets. Resolved from the entry's
+tab and faction group (the directory's own grouping) and overridden per member by the entry's optional JSON
+`decor` object; a player's set follows their role's faction.
+_Avoid_: theme, style preset
+
+**Chapter plate**:
+The 56 px duotone scene at the top of a page, above its header, that scrolls with the page; six scenes, one per
+decoration set.
+_Avoid_: banner, header image, cover
+
+**No-go zone**:
+A rectangle decorations may never paint over: band text, buttons, the text column, the scrollbar gutter,
+directory rows, the HUD band, panel interiors and the small ornaments themselves. Enforced per pixel.
+_Avoid_: hit box, obstacle (the directory's placement term)
+
+**Round seed**:
+A value fixed when a round starts that picks this round's decoration variants (stars, trees, curls, vines) and
+is kept after the round ends so the lobby and title screen show the last round's look.
+_Avoid_: world seed, random
+
+**Card decoration bridge**:
+SparkWitch's and SparkTraits' reflective call into SparkAssist's public `GuidebookDecorApi` at two points of
+their card draw; a no-op without SparkAssist.
+_Avoid_: dependency, mixin
+
 **Safety rule for unrelated roles/talents/sounds**:
 The rule that anything outside the named assist case must keep previous behavior.
 _Avoid_: broad audio suppression, role rebalance, talent patch
