@@ -966,6 +966,12 @@ public final class GuidebookScreen extends Screen {
             dismissArticle();
             return true;
         }
+        // Standalone, the inventory key closes the guide like Esc, so spectators toggle it as they would an inventory.
+        // 独立打开时，背包键与 Esc 一样关闭指南，旁观者可像开关背包一样使用。
+        if (!embedded && client.options.inventoryKey.matchesKey(key, scanCode)) {
+            close();
+            return true;
+        }
         boolean vertical = key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN;
         if (!embedded && !treeFocused && vertical && directoryVisible() && !rows.isEmpty()) {
             // Standalone: the first arrow focuses the tree (the selected row, else the first) so the ↑↓ hint holds.
