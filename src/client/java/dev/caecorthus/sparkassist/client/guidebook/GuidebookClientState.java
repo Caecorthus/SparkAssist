@@ -1,9 +1,11 @@
 package dev.caecorthus.sparkassist.client.guidebook;
 
+import dev.caecorthus.sparkassist.guidebook.GuidebookEntryPoint;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSessionState;
 import dev.caecorthus.sparkassist.guidebook.GuidebookObservationRules;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
+import dev.doctor4t.wathe.client.WatheClient;
 import java.util.Set;
 import net.minecraft.client.MinecraftClient;
 
@@ -63,6 +65,12 @@ public final class GuidebookClientState {
                 ? SparkTraitsGuideBridge.ownerVisibleActiveTraitIds(client.player)
                 : Set.of();
         SESSION.observe(roleId, visibleTraits);
+    }
+
+    public static GuidebookEntryPoint entryPoint(MinecraftClient client) {
+        boolean roundHud = WatheClient.trainComponent != null && WatheClient.trainComponent.hasHud();
+        boolean spectator = client.player != null && client.player.isSpectator();
+        return GuidebookEntryPoint.resolve(roundHud, WatheClient.isPlayerAliveAndInSurvival(), spectator);
     }
 
     public static void disconnect() {
