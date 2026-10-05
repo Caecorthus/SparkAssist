@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
+import dev.caecorthus.sparkassist.guidebook.GuidebookEntryDecor;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlock;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlockType;
@@ -14,6 +15,7 @@ import dev.caecorthus.sparkassist.guidebook.content.GuidebookTone;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Parses authored GuideBook JSON without coupling the catalog to its storage format.
@@ -62,8 +64,25 @@ public final class GuidebookJsonParser {
                 parseStringList(json.getAsJsonArray("ownerRoleIds")),
                 parseStringList(json.getAsJsonArray("requiredModIds")),
                 parseColor(json),
-                json.get("order").getAsInt()
+                json.get("order").getAsInt(),
+                parseDecor(json)
         );
+    }
+
+    /** Optional {@code "decor": {"plate": ..., "sigil": ..., "foliage": ...}}; each member optional.
+     * 可选的 decor 对象，三个成员各自可选。 */
+    private static GuidebookEntryDecor parseDecor(JsonObject json) {
+        if (!json.has("decor") || !json.get("decor").isJsonObject()) {
+            return GuidebookEntryDecor.NONE;
+        }
+        JsonObject decor = json.getAsJsonObject("decor");
+        return new GuidebookEntryDecor(optionalString(decor, "plate"), optionalString(decor, "sigil"),
+                optionalString(decor, "foliage"));
+    }
+
+    private static Optional<String> optionalString(JsonObject json, String key) {
+        return json.has(key) && json.get(key).isJsonPrimitive()
+                ? Optional.of(json.get(key).getAsString()) : Optional.empty();
     }
 
     private static int parseColor(JsonObject json) {

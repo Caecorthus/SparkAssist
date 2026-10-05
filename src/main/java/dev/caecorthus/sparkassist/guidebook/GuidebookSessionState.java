@@ -21,10 +21,24 @@ public final class GuidebookSessionState {
     private int leftScroll;
     private int rightScroll;
     private int observationRevision;
+    // Survives clear(): the lobby and title screen keep showing the last round's decorations.
+    // 不随 clear() 重置：大厅与标题界面沿用上一局的点缀。
+    private long roundSeed = 0x5EED;
 
     public void startRound() {
+        startRound(System.nanoTime() ^ (System.currentTimeMillis() << 20));
+    }
+
+    /** A round with a known seed (tests, replays). 指定种子的一局。 */
+    public void startRound(long seed) {
         clear();
         roundActive = true;
+        roundSeed = seed;
+    }
+
+    /** Seed that picks this round's decoration variants; kept after the round ends. 本局点缀的种子，局后保留。 */
+    public long roundSeed() {
+        return roundSeed;
     }
 
     public void endRound() {
