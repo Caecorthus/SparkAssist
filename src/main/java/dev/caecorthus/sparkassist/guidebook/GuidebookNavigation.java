@@ -56,7 +56,7 @@ public final class GuidebookNavigation {
         assign(TRAIT_GROUPS, "traits.global", "sparktraits", "cautious", "task_master", "fast_hands",
                 "childish", "pig", "steady", "excellent_physique", "spirit_sleuth", "snowball", "well_supplied");
         assign(TRAIT_GROUPS, "traits.civilian", "sparktraits", "last_stand", "impostor", "extroverted",
-                "introverted", "money_tree", "focus", "depression", "chameleon");
+                "introverted", "money_tree", "focus", "depression");
         assign(TRAIT_GROUPS, "traits.police", "sparktraits", "marksman", "fast_reload", "heavy_artillery",
                 "niko", "well_trained", "going_dark");
         assign(TRAIT_GROUPS, "traits.killer", "sparktraits", "conscience", "bloodthirsty", "the_showman",
