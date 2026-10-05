@@ -651,18 +651,59 @@ public final class GuidebookScreen extends Screen {
         if (readerShown) {
             zones.add(DecorZones.panelInterior(reader));
         }
+        int density = DecorSettings.density();
+        boolean foliage = DecorSettings.foliage();
+        List<Region> debug = new ArrayList<>(zones);
         if (directoryShown) {
-            decorator.drawDirectoryOverlay(context, nav, ownerSet(), session.roundSeed(), zones);
+            int searchX = DirectoryPainter.searchToggle(nav, closeInBand()).x();
+            List<Region> directoryZones = new ArrayList<>(zones);
+            directoryZones.addAll(DecorZones.directory(nav, titleWidth, searchX));
+            if (readerShown) {
+                directoryZones.add(DecorZones.panelInterior(reader));
+            }
+            debug.addAll(DecorZones.directory(nav, titleWidth, searchX));
+            decorator.drawDirectoryOverlay(context, new GuidebookDecorator.DirectoryOverlaySpec(nav, ownerSet(),
+                    session.roundSeed(), directoryZones, titleWidth, searchX, density, foliage));
         }
         if (readerShown) {
             boolean article = isArticleOpen();
             DecorSet set = article ? pageSet : ownerSet();
             long seed = article ? pageSeed : DecorRandom.ownerSeed("frontispiece", session.roundSeed());
-            decorator.drawReaderOverlay(context, reader, sheet, set, article && set.equals(ownerSet()), seed, zones);
+            ReaderPainter.Band band = article ? readerBand : emptyBand;
+            int bandText = bandTextWidth(band, article && articleScroll > ReaderPainter.runningHeadScroll(plateShown()));
+            int sourceWidth = band != null && band.source() != null ? band.sourceWidth() : 0;
+            List<Region> readerZones = new ArrayList<>(zones);
+            readerZones.addAll(DecorZones.reader(reader, sheet.textLeft(), sheet.textRight(), sheet.y(),
+                    sheet.bottom(), sheet.right(), bandText, sourceWidth));
+            if (directoryShown) {
+                readerZones.add(DecorZones.panelInterior(nav));
+            }
+            debug.addAll(DecorZones.reader(reader, sheet.textLeft(), sheet.textRight(), sheet.y(), sheet.bottom(),
+                    sheet.right(), bandText, sourceWidth));
+            int leftEdge = directoryShown ? nav.right() : reader.x() - 8;
+            decorator.drawReaderOverlay(context, new GuidebookDecorator.ReaderOverlaySpec(reader, sheet, set,
+                    article && set.equals(ownerSet()), seed, readerZones, bandText, sourceWidth, leftEdge, density,
+                    foliage));
         }
         if (DecorSettings.debugZones()) {
-            GuidebookDecorator.drawDebugZones(context, zones);
+            GuidebookDecorator.drawDebugZones(context, debug);
         }
+    }
+
+    /** Width of what the band currently shows at x + 7: the crumb, or the running head with its section.
+     * 标题带此刻在 x + 7 处显示的内容宽度：路径，或带分节的页眉。 */
+    private int bandTextWidth(ReaderPainter.Band band, boolean running) {
+        if (band == null) {
+            return 0;
+        }
+        if (running) {
+            int width = 8 + band.headTitleWidth();
+            if (runningSectionText != null) {
+                width += textRenderer.getWidth(" \u203A ") + textRenderer.getWidth(runningSectionText);
+            }
+            return width;
+        }
+        return band.crumb() == null ? 0 : textRenderer.getWidth(band.crumb());
     }
 
     /**
