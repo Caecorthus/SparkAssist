@@ -13,7 +13,6 @@ import dev.caecorthus.sparkassist.guidebook.decor.OffsetSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
-import dev.caecorthus.sparkassist.guidebook.decor.Sigils;
 import dev.caecorthus.sparkassist.guidebook.decor.ZonedSink;
 import java.util.List;
 import net.minecraft.client.gui.DrawContext;
@@ -29,14 +28,8 @@ import net.minecraft.client.gui.DrawContext;
  * 这里读取，调用方只传几何。方法签名是跨模组约定，保持稳定。
  */
 public final class GuidebookDecorApi {
-    private static final int SIGIL_RADIUS = 40;
-    private static final int SIGIL_MIN_HEIGHT = 100;
     private static final int OVERLAY_MARGIN = 20;
-    private static final DecorLayer SIGIL = new DecorLayer("sparkassist_card_sigil");
     private static final DecorLayer OVERLAY = new DecorLayer("sparkassist_card_overlay");
-
-    private record SigilKey(int width, int height, DecorSet.Sigil sigil, long seed) {
-    }
 
     private record OverlayKey(Region card, DecorSet set, long seed, int density, boolean foliage) {
     }
@@ -45,9 +38,9 @@ public final class GuidebookDecorApi {
     }
 
     /**
-     * Frame ornaments and, at full density, the faction sigil engraved in the body. Call right after the card's
-     * panel and before its rows; (x, y, width, height) is the panel rectangle.
-     * 边框点缀，以及满密度时刻在卡身上的阵营暗纹。在卡片面板之后、行之前调用；参数为面板矩形。
+     * Frame ornaments: the inner hairline and the brass corner plates. Call right after the card's panel and before
+     * its rows; (x, y, width, height) is the panel rectangle. Nothing is drawn behind the rows themselves.
+     * 边框点缀：内细线与黄铜角板。在卡片面板之后、行之前调用；参数为面板矩形。行的下面不画任何东西。
      */
     public static void cardChrome(DrawContext context, int x, int y, int width, int height) {
         if (!DecorSettings.enabled() || width < 24 || height < 24) {
@@ -56,23 +49,12 @@ public final class GuidebookDecorApi {
         PixelSink sink = new DrawContextSink(context);
         Ornaments.innerLine(sink, x, y, width, height);
         Ornaments.cornerPlates(sink, x, y, width, height);
-        if (DecorSettings.density() >= 2 && height >= SIGIL_MIN_HEIGHT) {
-            DecorSet set = ownerSet();
-            SigilKey key = new SigilKey(width, height, set.sigil(), roundSeed());
-            if (!SIGIL.isCurrent(key)) {
-                PixelBuffer buffer = new PixelBuffer(width - 6, height - 6);
-                Sigils.draw(buffer, set.sigil(), buffer.width() / 2, buffer.height() - 43, SIGIL_RADIUS,
-                        DecorPalette.WATERMARK_BRASS, new DecorRandom(DecorRandom.ownerSeed("card", roundSeed())));
-                SIGIL.update(key, buffer);
-            }
-            SIGIL.draw(context, x + 3, y + 3);
-        }
     }
 
     /**
-     * The dog-ear tab peeking over the top-right corner, the charm hanging under the bottom edge and the faction
-     * foliage along the left, bottom and (full density) top rims. Call after the card's rows.
-     * 右上角探出的折角书签、底边下的吊坠，以及沿左沿、底沿与（满密度）顶沿的阵营枝叶。在卡片的行之后调用。
+     * The dog-ear tab peeking over the top-right corner, the charm hanging under the bottom edge and a sprig of the
+     * faction foliage at the bottom-left corner (full density: a second along the bottom). Call after the card's rows.
+     * 右上角探出的折角书签、底边下的吊坠，以及左下角的一小枝阵营枝叶（满密度时底边再一枝）。在卡片的行之后调用。
      */
     public static void cardOverlay(DrawContext context, int x, int y, int width, int height) {
         int density = DecorSettings.density();
@@ -101,16 +83,14 @@ public final class GuidebookDecorApi {
                         new Region(x + 12, bottom, 10, Ornaments.CHARM_HEIGHT + 2),
                         new Region(right - 16, tabTop, 9, y + 10 - tabTop),
                         new Region(0, 0, Integer.MAX_VALUE / 2, DecorZones.HUD_HEIGHT));
-                int[] lengths = {30, 50, 70};
+                // One sprig climbing from the bottom-left corner; at full density a second one along the bottom.
+                // 左下角向上一小枝；满密度时沿底边再一枝。
                 grow(sink, forbidden, new Region(x - 5, y + 20, 10, height - 24),
-                        Foliage.Vine.alongRim(set.foliage(), x + 1, bottom - 8, -Math.PI / 2, lengths[density],
-                                set.berry()), rand);
-                grow(sink, forbidden, new Region(x + 24, bottom - 4, width - 30, 10),
-                        Foliage.Vine.alongRim(set.foliage(), x + 28, bottom - 2, 0, lengths[density], set.berry()),
-                        rand);
+                        Foliage.Vine.alongRim(set.foliage(), x + 1, bottom - 8, -Math.PI / 2,
+                                new int[] {24, 34, 46}[density], set.berry()), rand);
                 if (density >= 2) {
-                    grow(sink, forbidden, new Region(x + 8, Math.max(DecorZones.HUD_HEIGHT, y - 4), width - 30, 7),
-                            Foliage.Vine.alongRim(set.foliage(), right - 20, y + 1, Math.PI, 80, set.berry()), rand);
+                    grow(sink, forbidden, new Region(x + 24, bottom - 4, width - 30, 10),
+                            Foliage.Vine.alongRim(set.foliage(), x + 28, bottom - 2, 0, 40, set.berry()), rand);
                 }
             }
             OVERLAY.update(key, buffer);
@@ -120,7 +100,6 @@ public final class GuidebookDecorApi {
 
     /** Drop the card textures (disconnect); they come back on the next draw. 释放卡片纹理（断开连接时），下次绘制重建。 */
     public static void release() {
-        SIGIL.close();
         OVERLAY.close();
     }
 

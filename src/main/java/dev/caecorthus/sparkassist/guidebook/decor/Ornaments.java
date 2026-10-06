@@ -7,8 +7,6 @@ import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.COIN;
 import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.EDGE;
 import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.INNER_LINE;
 import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.NAMEPLATE;
-import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.WALLPAPER;
-import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.WALLPAPER_DOT;
 
 /**
  * The fixed chrome ornaments of the decorated guide: brass corner plates, the second hairline inside the brass
@@ -179,25 +177,6 @@ public final class Ornaments {
         };
         Dither.bitmap(s, x - 2, y + CHARM_CHAIN, BRASS, glyph);
         s.set(x - 1, y + CHARM_CHAIN + 1, BRASS_HI);
-    }
-
-    // ================================================================ directory background / 目录背景
-
-    /** Damask wallpaper over a dark body: an 8 px diagonal lattice with a brighter dot at every crossing. The
-     * phase follows the absolute coordinates so adjoining tiles continue each other.
-     * 暗底上的菱格墙纸：8 像素斜格，交点亮一级。相位按绝对坐标计算，相邻区域可以接续。 */
-    public static void wallpaper(PixelSink s, int x, int y, int w, int h) {
-        for (int yy = y; yy < y + h; yy++) {
-            for (int xx = x; xx < x + w; xx++) {
-                int u = (xx + yy) & 7;
-                int v = (xx - yy) & 7;
-                if (u == 0 && v == 0) {
-                    s.set(xx, yy, WALLPAPER_DOT);
-                } else if (u == 0 || v == 0) {
-                    s.set(xx, yy, WALLPAPER);
-                }
-            }
-        }
     }
 
     // ================================================================ helpers / 工具

@@ -682,7 +682,7 @@ public final class GuidebookScreen extends Screen {
                     sheet.right(), bandText, sourceWidth));
             int leftEdge = directoryShown ? nav.right() : reader.x() - 8;
             decorator.drawReaderOverlay(context, new GuidebookDecorator.ReaderOverlaySpec(reader, sheet, set,
-                    article && set.equals(ownerSet()), seed, readerZones, bandText, sourceWidth, leftEdge, density,
+                    article && set.sameFaction(ownerSet()), seed, readerZones, bandText, sourceWidth, leftEdge, density,
                     foliage));
         }
         if (DecorSettings.debugZones()) {
@@ -759,7 +759,9 @@ public final class GuidebookScreen extends Screen {
         // between them: over the panel body, under the rows. 边框与行分成两个批次，点缀层（一个贴图四边形）夹在中间：
         // 在面板底之上、行之下。
         context.draw(() -> DirectoryPainter.drawChrome(context, textRenderer, model));
-        decorator.drawDirectoryBackground(context, nav, directoryViewport().y(), ownerSet(), session.roundSeed());
+        int viewportTop = directoryViewport().y();
+        decorator.drawDirectoryBackground(context, nav, viewportTop, viewportTop - directoryScroll + directoryHeight,
+                ownerSet(), session.roundSeed());
         context.draw(() -> DirectoryPainter.drawRows(context, textRenderer, model));
         searchField.visible = searchExpanded;
         if (searchField.visible) {
@@ -826,6 +828,7 @@ public final class GuidebookScreen extends Screen {
         if (viewportOpen) {
             decorator.drawPaperWatermark(context, sheet, pageSet, pageSeed);
             decorator.drawPagePlate(context, sheet, pageSet, pageSeed, articleScroll);
+            decorator.drawEndSeal(context, sheet, pageSet, ReaderPainter.bodyEnd(content, plate), articleScroll);
             context.draw(() -> ReaderPainter.content(context, textRenderer, sheet, pageHeader, content,
                     articleScroll, thumbHot, plate));
         }

@@ -64,13 +64,10 @@ public final class DecorPalette {
     public static final int PAPER_RIBBON_B = GILT_STAR;
 
     // ---- translucent layers / 半透明层
-    /** Sigil watermark under the body text: 12.5 % ink. 文字下的暗纹：12.5% 墨色。 */
-    public static final int WATERMARK_INK = 0x202F1B1B;
-    /** Sigil engraved into a dark body: 10 % brass. 暗底上的暗纹：10% 黄铜。 */
-    public static final int WATERMARK_BRASS = 0x1AC5A244;
-    /** Directory wallpaper lattice lines and crossings. 目录墙纸的格线与交点。 */
-    public static final int WALLPAPER = 0x0AFFBF49;
-    public static final int WALLPAPER_DOT = 0x1CFFBF49;
+    /** Sigil watermark under the body text: 9.4 % ink. 文字下的暗纹：9.4% 墨色。 */
+    public static final int WATERMARK_INK = 0x182F1B1B;
+    /** Sigil engraved into the empty part of a dark body: 8 % brass. 暗底空白处的暗纹：8% 黄铜。 */
+    public static final int WATERMARK_BRASS = 0x14C5A244;
     /** Steam curls, two tones. 蒸汽卷云的两阶。 */
     public static final int STEAM = 0x40FFF7E6;
     public static final int STEAM_SOFT = 0x22FFF7E6;
