@@ -64,8 +64,8 @@ public final class DecorPalette {
     public static final int PAPER_RIBBON_B = GILT_STAR;
 
     // ---- translucent layers / 半透明层
-    /** Sigil watermark under the body text: 9.4 % ink. 文字下的暗纹：9.4% 墨色。 */
-    public static final int WATERMARK_INK = 0x182F1B1B;
+    /** Sigil watermark under the body text: 6 % ink, barely there. 文字下的暗纹：6% 墨色，若有若无。 */
+    public static final int WATERMARK_INK = 0x102F1B1B;
     /** Sigil engraved into the empty part of a dark body: 8 % brass. 暗底空白处的暗纹：8% 黄铜。 */
     public static final int WATERMARK_BRASS = 0x14C5A244;
     /** Steam curls, two tones. 蒸汽卷云的两阶。 */
