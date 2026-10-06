@@ -55,6 +55,18 @@
               ]
             },
             {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "语音",
+                  "tone": "danger"
+                },
+                {
+                  "text": "：你说话（包括用对讲机）只有活着的杀手能听到，你也只听得到活着的杀手说话。"
+                }
+              ]
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"
