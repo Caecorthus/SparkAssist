@@ -15,6 +15,7 @@ import dev.caecorthus.sparkassist.guidebook.GuidebookNavigation;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSearch;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSessionState;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorRandom;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSetResolver;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlock;
@@ -92,6 +93,8 @@ public final class GuidebookScreen extends Screen {
     private int titleWidth;
     // ---- decoration / 点缀
     private final GuidebookDecorator decorator = new GuidebookDecorator();
+    private DecorSet pageSet = DecorSet.CIVILIAN;
+    private long pageSeed;
     private Set<String> markedRoles = Set.of();
     private Set<String> markedTraits = Set.of();
     private int marksRevision;
@@ -544,6 +547,8 @@ public final class GuidebookScreen extends Screen {
         pageHeader = ReaderPainter.PageHeader.fit(textRenderer, title, gem, marked, markedLabel, sheet.measure());
         readerBand = ReaderPainter.Band.fit(textRenderer, reader, crumb, source, title, gem);
         sourceTooltip = source == null ? null : Text.literal(sourceFormat.formatted(source));
+        pageSet = creditsOpen ? DecorSetResolver.forCredits() : DecorSetResolver.forEntry(selectedEntry);
+        pageSeed = DecorRandom.pageSeed(creditsOpen ? "credits" : selectedEntry.id(), session.roundSeed());
         articleScroll = MathHelper.clamp(articleScroll, 0, maxArticleScroll());
     }
 
@@ -700,34 +705,48 @@ public final class GuidebookScreen extends Screen {
     private Tip renderReader(DrawContext context, int mouseX, int mouseY) {
         boolean closeHover = ReaderPainter.closeBox(reader).contains(mouseX, mouseY);
         if (!isArticleOpen()) {
+            boolean frontPlate = decorator.frontPlateShown(sheet);
             context.draw(() -> {
                 ReaderPainter.frame(context, reader, DecorSettings.enabled());
                 ReaderPainter.band(context, textRenderer, reader, emptyBand, false, null, closeHover,
                         DecorSettings.enabled());
             });
+            if (frontPlate) {
+                decorator.drawFrontispiecePlate(context, sheet, ownerSet(), session.roundSeed());
+            }
             // The frontispiece draws the book texture, which is not batched, so it stays outside draw().
             // 扉页含书本贴图（不参与批量提交），因此放在 draw() 之外。
             if (sheet.viewport().height() > 0) {
-                ReaderPainter.frontispiece(context, textRenderer, sheet, frontTitle, frontSelect, frontKeys);
+                ReaderPainter.frontispiece(context, textRenderer, sheet, frontTitle, frontSelect, frontKeys,
+                        frontPlate);
             }
             return closeHover ? new Tip(List.of(backTip), -1) : null;
         }
-        boolean running = articleScroll > ReaderPainter.RUNNING_HEAD_SCROLL;
-        Text section = ReaderPainter.currentSection(content, articleScroll);
+        boolean plate = plateShown();
+        boolean running = articleScroll > ReaderPainter.runningHeadScroll(plate);
+        Text section = ReaderPainter.currentSection(content, articleScroll, plate);
         if (section != runningSection) {
             runningSection = section;
             runningSectionText = readerBand.section(textRenderer, section);
         }
         boolean thumbHot = draggingArticle || sheet.scrollHit().contains(mouseX, mouseY);
         OrderedText head = runningSectionText;
+        // Frame and band, then the paper layers (watermark, scrolled plate), then the content: the layers are
+        // textured quads between two fill-and-text batches, under the text by draw order alone.
+        // 先外框与标题带，再纸面各层（暗纹、随页滚动的扉画），最后正文：各层是夹在两个批次之间的贴图四边形，仅凭绘制顺序
+        // 位于文字之下。
         context.draw(() -> {
             ReaderPainter.frame(context, reader, DecorSettings.enabled());
             ReaderPainter.band(context, textRenderer, reader, readerBand, running, head, closeHover,
                     DecorSettings.enabled());
-            if (sheet.viewport().height() > 0 && sheet.viewport().width() > 0) {
-                ReaderPainter.content(context, textRenderer, sheet, pageHeader, content, articleScroll, thumbHot);
-            }
         });
+        boolean viewportOpen = sheet.viewport().height() > 0 && sheet.viewport().width() > 0;
+        if (viewportOpen) {
+            decorator.drawPaperWatermark(context, sheet, pageSet, pageSeed);
+            decorator.drawPagePlate(context, sheet, pageSet, pageSeed, articleScroll);
+            context.draw(() -> ReaderPainter.content(context, textRenderer, sheet, pageHeader, content,
+                    articleScroll, thumbHot, plate));
+        }
         if (closeHover) {
             return new Tip(List.of(backTip), -1);
         }
@@ -938,7 +957,7 @@ public final class GuidebookScreen extends Screen {
         } else {
             Region view = sheet.viewport();
             int track = view.height() - 4;
-            int thumb = ExpressPaint.thumbSize(track, view.height(), ReaderPainter.contentHeight(content));
+            int thumb = ExpressPaint.thumbSize(track, view.height(), ReaderPainter.contentHeight(content, plateShown()));
             double fraction = (mouseY - (view.y() + 2) - thumb / 2.0) / Math.max(1, track - thumb);
             articleScroll = (int) Math.round(MathHelper.clamp(fraction, 0, 1) * maxArticleScroll());
         }
@@ -1155,7 +1174,12 @@ public final class GuidebookScreen extends Screen {
     }
 
     private int maxArticleScroll() {
-        return ReaderPainter.maxScroll(sheet, content);
+        return ReaderPainter.maxScroll(sheet, content, plateShown());
+    }
+
+    /** Whether the open page carries a chapter plate above its header. 当前页面页眉上方是否有扉画。 */
+    private boolean plateShown() {
+        return decorator.plateShown(sheet.measure());
     }
 
     private boolean isMarked(GuidebookEntry entry) {

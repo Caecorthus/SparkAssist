@@ -18,6 +18,7 @@ import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.PAPE
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer;
 import dev.caecorthus.sparkassist.client.guidebook.ui.decor.DrawContextSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
+import dev.caecorthus.sparkassist.guidebook.decor.Plates;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer.Ornament;
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer.RenderedLine;
@@ -42,6 +43,10 @@ public final class ReaderPainter {
     public static final int HEADER_HEIGHT = 37;
     /** Past this scroll the header rule has left the view and the band shows the running head. 超过后标题带显示页眉。 */
     public static final int RUNNING_HEAD_SCROLL = 29;
+    /** Height the chapter plate adds above the header: the picture at content y 3 plus a gap. 扉画为页眉增加的高度。 */
+    public static final int PLATE_BLOCK = Plates.HEIGHT + 8;
+    /** Content y of the chapter plate's top edge. 扉画顶边的内容坐标。 */
+    public static final int PLATE_TOP = 3;
     private static final int TITLE_X = 14;
     private static final String HEAD_SEPARATOR = " \u203A ";
 
@@ -239,19 +244,41 @@ public final class ReaderPainter {
         return OrderedText.styledForwardsVisitedString(text, Style.EMPTY);
     }
 
+    /** Header height with or without the chapter plate above it. 有无扉画时的页眉高度。 */
+    public static int headerHeight(boolean plate) {
+        return (plate ? PLATE_BLOCK : 0) + HEADER_HEIGHT;
+    }
+
+    /** Scroll past which the band shows the running head. 超过后标题带显示页眉的滚动量。 */
+    public static int runningHeadScroll(boolean plate) {
+        return (plate ? PLATE_BLOCK : 0) + RUNNING_HEAD_SCROLL;
+    }
+
     /** Total scroll content height: header + laid body. 滚动内容总高度。 */
     public static int contentHeight(GuidebookContentRenderer.Layout body) {
-        return HEADER_HEIGHT + body.height();
+        return contentHeight(body, false);
+    }
+
+    public static int contentHeight(GuidebookContentRenderer.Layout body, boolean plate) {
+        return headerHeight(plate) + body.height();
     }
 
     public static int maxScroll(Sheet sheet, GuidebookContentRenderer.Layout body) {
-        return Math.max(0, contentHeight(body) - sheet.viewport().height());
+        return maxScroll(sheet, body, false);
+    }
+
+    public static int maxScroll(Sheet sheet, GuidebookContentRenderer.Layout body, boolean plate) {
+        return Math.max(0, contentHeight(body, plate) - sheet.viewport().height());
     }
 
     /** Running-head section: null until the header rule has scrolled away, then the last section with its row top
      * at or above scroll + 6. 页眉的当前分节：标题线滚出前为 null，之后为行顶不低于 scroll + 6 的最后一个分节。 */
     public static @Nullable Text currentSection(GuidebookContentRenderer.Layout body, int scroll) {
-        return scroll > RUNNING_HEAD_SCROLL ? body.sectionAt(scroll + 6 - HEADER_HEIGHT) : null;
+        return currentSection(body, scroll, false);
+    }
+
+    public static @Nullable Text currentSection(GuidebookContentRenderer.Layout body, int scroll, boolean plate) {
+        return scroll > runningHeadScroll(plate) ? body.sectionAt(scroll + 6 - headerHeight(plate)) : null;
     }
 
     /** 1 px EDGE recess ring outside P, then the paper. 纸张外圈 1 像素凹槽，然后绘制纸张。 */
@@ -291,13 +318,20 @@ public final class ReaderPainter {
      */
     public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
                                GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot) {
+        content(c, f, s, header, body, scroll, thumbHot, false);
+    }
+
+    /** @param plate a chapter plate occupies the first {@link #PLATE_BLOCK} content pixels (drawn by the caller
+     *              before this), so the header and body start lower / 扉画占据内容最上方 PLATE_BLOCK 像素，页眉与正文下移 */
+    public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
+                               GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot, boolean plate) {
         Region view = s.viewport();
         int originY = view.y() - scroll;
         c.enableScissor(view.x(), view.y(), view.right(), view.bottom());
-        pageHeader(c, f, header, s.textLeft(), s.textRight(), originY);
-        body(c, f, body, s.textLeft(), originY + HEADER_HEIGHT, view.y(), view.bottom());
+        pageHeader(c, f, header, s.textLeft(), s.textRight(), originY + (plate ? PLATE_BLOCK : 0));
+        body(c, f, body, s.textLeft(), originY + headerHeight(plate), view.y(), view.bottom());
         c.disableScissor();
-        int total = contentHeight(body);
+        int total = contentHeight(body, plate);
         if (total <= view.height()) {
             return;
         }
@@ -392,7 +426,7 @@ public final class ReaderPainter {
     }
 
     /** Height of the frontispiece block, book top to diamond bottom. 扉页内容块高度（书本顶边到菱形底边）。 */
-    private static final int FRONTISPIECE_HEIGHT = 109;
+    public static final int FRONTISPIECE_HEIGHT = 109;
 
     /**
      * Frontispiece for the standalone screen with nothing selected (spec §5.7, m6): 2x book, title (2x, or 1x when
@@ -405,8 +439,16 @@ public final class ReaderPainter {
      */
     public static void frontispiece(DrawContext c, TextRenderer f, Sheet s, OrderedText title, OrderedText selectEntry,
                                     OrderedText keysHint) {
+        frontispiece(c, f, s, title, selectEntry, keysHint, false);
+    }
+
+    /** @param plate the player's chapter plate sits at the top of the sheet, so the block starts below it
+     *              / 纸页顶部有玩家的扉画时，内容块从其下方开始 */
+    public static void frontispiece(DrawContext c, TextRenderer f, Sheet s, OrderedText title, OrderedText selectEntry,
+                                    OrderedText keysHint, boolean plate) {
         int cx = (s.x() + s.right()) / 2;
-        int top = s.y() + Math.max(4, Math.min(Math.round(s.height() * 0.28f), s.height() - FRONTISPIECE_HEIGHT - 4));
+        int top = s.y() + Math.max(plate ? PLATE_BLOCK + 2 : 4,
+                Math.min(Math.round(s.height() * 0.28f), s.height() - FRONTISPIECE_HEIGHT - 4));
         int limit = s.bottom() - 2;
         Region view = s.viewport();
         c.enableScissor(view.x(), view.y(), view.right(), view.bottom());
