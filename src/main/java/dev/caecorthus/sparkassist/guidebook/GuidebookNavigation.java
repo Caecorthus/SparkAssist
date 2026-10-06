@@ -183,6 +183,12 @@ public final class GuidebookNavigation {
         };
     }
 
+    /** Faction group of a role id ({@code roles.other} when unknown), for the player's own decoration set.
+     * 身份 id 所属的阵营分组（未知为 roles.other），用于玩家自身的点缀套别。 */
+    public static String roleGroup(String roleId) {
+        return ROLE_GROUPS.getOrDefault(roleId, "roles.other");
+    }
+
     public static String labelKey(String category) {
         return "guidebook.sparkassist.tree." + category;
     }

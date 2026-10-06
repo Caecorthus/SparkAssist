@@ -15,7 +15,8 @@ public record GuidebookEntry(
         List<String> ownerRoleIds,
         List<String> requiredModIds,
         int color,
-        int order
+        int order,
+        GuidebookEntryDecor decor
 ) {
     public static final int DEFAULT_COLOR = 0x3B2A1A;
 
@@ -41,7 +42,8 @@ public record GuidebookEntry(
                 ownerRoleIds,
                 requiredModIds,
                 DEFAULT_COLOR,
-                order
+                order,
+                GuidebookEntryDecor.NONE
         );
     }
 
@@ -68,8 +70,28 @@ public record GuidebookEntry(
                 ownerRoleIds,
                 requiredModIds,
                 color,
-                order
+                order,
+                GuidebookEntryDecor.NONE
         );
+    }
+
+    /** The pre-decor canonical shape; entries without a {@code decor} object use their faction defaults.
+     * 加入点缀字段之前的构造形式；没有 decor 对象的条目使用阵营默认。 */
+    public GuidebookEntry(
+            String id,
+            GuidebookTab tab,
+            String sourceModId,
+            String nameKey,
+            String summaryKey,
+            List<String> pageKeys,
+            List<GuidebookPage> pages,
+            List<String> ownerRoleIds,
+            List<String> requiredModIds,
+            int color,
+            int order
+    ) {
+        this(id, tab, sourceModId, nameKey, summaryKey, pageKeys, pages, ownerRoleIds, requiredModIds, color, order,
+                GuidebookEntryDecor.NONE);
     }
 
     public GuidebookEntry {
@@ -82,6 +104,7 @@ public record GuidebookEntry(
         pages = List.copyOf(Objects.requireNonNull(pages, "pages"));
         ownerRoleIds = List.copyOf(Objects.requireNonNull(ownerRoleIds, "ownerRoleIds"));
         requiredModIds = List.copyOf(Objects.requireNonNull(requiredModIds, "requiredModIds"));
+        Objects.requireNonNull(decor, "decor");
         if (color < 0 || color > 0xFFFFFF) {
             throw new IllegalArgumentException("color must be a 24-bit RGB value");
         }

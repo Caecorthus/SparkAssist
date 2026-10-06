@@ -13,8 +13,12 @@ public final class SparkAssistConfig {
     private static final String INSTINCT_KEY_MODE = "instinctKeyMode";
     private static final String EVENT_SOUND_VOLUME = "eventSoundVolume";
     private static final String EVENT_SOUND_VOLUMES = "eventSoundVolumes";
+    private static final String GUIDEBOOK_DECOR = "guidebookDecor";
+    private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
+    private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
+    private boolean guidebookFoliage = true;
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
 
     private SparkAssistConfig() {
@@ -36,6 +40,13 @@ public final class SparkAssistConfig {
         if (json.has(EVENT_SOUND_VOLUME)) {
             config.setAllEventSoundVolumes(json.get(EVENT_SOUND_VOLUME).getAsDouble());
         }
+        if (json.has(GUIDEBOOK_DECOR)) {
+            config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
+                && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
+            config.setGuidebookFoliage(json.get(GUIDEBOOK_FOLIAGE).getAsBoolean());
+        }
         if (json.has(EVENT_SOUND_VOLUMES) && json.get(EVENT_SOUND_VOLUMES).isJsonObject()) {
             JsonObject eventVolumes = json.getAsJsonObject(EVENT_SOUND_VOLUMES);
             for (String key : eventVolumes.keySet()) {
@@ -56,7 +67,25 @@ public final class SparkAssistConfig {
             eventVolumes.addProperty(group.serializedName(), eventSoundVolume(group));
         }
         json.add(EVENT_SOUND_VOLUMES, eventVolumes);
+        json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
+        json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
         return json;
+    }
+
+    public GuidebookDecor guidebookDecor() {
+        return guidebookDecor;
+    }
+
+    public void setGuidebookDecor(GuidebookDecor guidebookDecor) {
+        this.guidebookDecor = guidebookDecor == null ? GuidebookDecor.MEDIUM : guidebookDecor;
+    }
+
+    public boolean guidebookFoliage() {
+        return guidebookFoliage;
+    }
+
+    public void setGuidebookFoliage(boolean guidebookFoliage) {
+        this.guidebookFoliage = guidebookFoliage;
     }
 
     public InstinctKeyMode instinctKeyMode() {
@@ -93,6 +122,54 @@ public final class SparkAssistConfig {
             return 1.0D;
         }
         return Math.max(0.0D, Math.min(1.0D, value));
+    }
+
+    /** How much guidebook decoration to draw; {@link #density()} is the generators' 0..2 scale, -1 for off.
+     * 指南点缀的多少；density() 为生成器使用的 0 到 2 档，关为 -1。 */
+    public enum GuidebookDecor implements TranslatableOption {
+        OFF(0, "off", "option.sparkassist.guidebook_decor.off", -1),
+        LIGHT(1, "light", "option.sparkassist.guidebook_decor.light", 0),
+        MEDIUM(2, "medium", "option.sparkassist.guidebook_decor.medium", 1),
+        FULL(3, "full", "option.sparkassist.guidebook_decor.full", 2);
+
+        private final int id;
+        private final String serializedName;
+        private final String translationKey;
+        private final int density;
+
+        GuidebookDecor(int id, String serializedName, String translationKey, int density) {
+            this.id = id;
+            this.serializedName = serializedName;
+            this.translationKey = translationKey;
+            this.density = density;
+        }
+
+        public static GuidebookDecor fromSerialized(String serializedName) {
+            for (GuidebookDecor value : values()) {
+                if (value.serializedName.equals(serializedName)) {
+                    return value;
+                }
+            }
+            return MEDIUM;
+        }
+
+        public String serializedName() {
+            return serializedName;
+        }
+
+        public int density() {
+            return density;
+        }
+
+        @Override
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String getTranslationKey() {
+            return translationKey;
+        }
     }
 
     public enum InstinctKeyMode implements TranslatableOption {
