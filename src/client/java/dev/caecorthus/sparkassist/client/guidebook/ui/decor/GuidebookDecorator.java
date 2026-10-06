@@ -12,12 +12,14 @@ import dev.caecorthus.sparkassist.guidebook.decor.OffsetSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
+import dev.caecorthus.sparkassist.guidebook.decor.PlateArt;
 import dev.caecorthus.sparkassist.guidebook.decor.Plates;
 import dev.caecorthus.sparkassist.guidebook.decor.Sigils;
 import dev.caecorthus.sparkassist.guidebook.decor.Steam;
 import dev.caecorthus.sparkassist.guidebook.decor.ZonedSink;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.gui.DrawContext;
 
 /**
@@ -70,7 +72,7 @@ public final class GuidebookDecorator implements AutoCloseable {
                                        int searchToggleX, int density, boolean foliage) {
     }
 
-    private record PlateKey(DecorSet.Plate kind, String emblem, int width, int colour, long seed) {
+    private record PlateKey(DecorSet.Plate kind, String page, boolean art, int width, int theme, long seed) {
     }
 
     private record SigilKey(DecorSet.Sigil kind, int radius, long seed) {
@@ -111,11 +113,16 @@ public final class GuidebookDecorator implements AutoCloseable {
     private static void drawPlate(DecorLayer layer, DrawContext context, ReaderPainter.Sheet sheet, DecorSet set,
                                   long seed, int top, boolean clipToViewport) {
         int width = sheet.measure();
-        PlateKey key = new PlateKey(set.plate(), set.emblem(), width, set.colour(), seed);
+        Optional<PlateArt> art = PlateArtLoader.forEntry(set.page());
+        PlateKey key = new PlateKey(set.plate(), set.page(), art.isPresent(), width, set.theme(), seed);
         if (!layer.isCurrent(key)) {
             PixelBuffer buffer = new PixelBuffer(width + 2 * Plates.MARGIN, Plates.HEIGHT + 2 * Plates.MARGIN);
-            Plates.plate(buffer, set.plate(), Emblems.forEntry(set.emblem()).orElse(null), Plates.MARGIN,
-                    Plates.MARGIN, width, set.colour(), seed);
+            String[] emblem = Emblems.forEntry(set.page()).orElse(null);
+            if (art.isPresent()) {
+                Plates.art(buffer, art.get(), emblem, Plates.MARGIN, Plates.MARGIN, width, set.theme());
+            } else {
+                Plates.plate(buffer, set.plate(), emblem, Plates.MARGIN, Plates.MARGIN, width, set.theme(), seed);
+            }
             layer.update(key, buffer);
         }
         Region view = sheet.viewport();
@@ -363,6 +370,7 @@ public final class GuidebookDecorator implements AutoCloseable {
         frontPlate.close();
         watermark.close();
         endSeal.close();
+        PlateArtLoader.clear();
         readerOverlay.close();
         directoryOverlay.close();
     }

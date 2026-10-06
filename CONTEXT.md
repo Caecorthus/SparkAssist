@@ -50,22 +50,23 @@ settings.
 _Avoid_: theme, skin, texture pack, resource pack
 
 **Decoration set**:
-The plate scene and **Emblem**, sigil, foliage, accent colour, seal mark and charm a page or a player gets.
-The faction part comes from the entry's tab and faction group (the directory's own grouping); the scene and
-emblem are the page's own; the entry's optional JSON `decor` object overrides single members. A player's set is
-the set of their role's page.
+The page (whose **Chapter plate** and **Emblem** are shown) and its theme colour, plus the faction's fallback
+scene, sigil, foliage, accent colour, seal mark and charm. The faction part comes from the entry's tab and
+faction group (the directory's own grouping); the entry's optional JSON `decor` object overrides single members.
+A player's set is the set of their role's page.
 _Avoid_: theme, style preset
 
 **Chapter plate**:
-The 56 px duotone scene at the top of a page, above its header, that scrolls with the page. Sixteen scenes
-(carriage, station, sea, chapel, graveyard, study, rooftops, forest, stage, workshop, and the six faction
-defaults), picked per page by what the role or trait is about; each has a focal disc carrying the page's
-**Emblem**.
+The 56 px picture at the top of a page, above its header, that scrolls with the page. Every guide page has its
+own hand-made plate (`guidebook_plates/<namespace>/<path>.png` + `.json`), painted in paper, three inks and four
+theme tones and cropped to the text column around its focus; pages without one fall back to their faction's
+procedural scene.
 _Avoid_: banner, header image, cover
 
 **Emblem**:
-A page's own 17×17 woodcut-style picture (one per role, skill, trait, faction page and the basics), drawn on the
-chapter plate's focal disc in the plate's inks. Keyed by entry id.
+A page's own 17×17 woodcut-style picture (one per role, skill, trait, faction page and the basics), printed in
+the page's theme colour on a light carrier inside its chapter plate (a moon, a clock face, a sign...). Keyed by
+entry id.
 _Avoid_: icon, avatar, portrait
 
 **Closing seal**:

@@ -8,14 +8,14 @@ import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.INK_RULE_S
 import static dev.caecorthus.sparkassist.guidebook.decor.DecorPalette.PAPER;
 
 /**
- * The chapter plates: duotone scenes 56 px tall and as wide as the text column, painted in paper, three inks and
- * one accent (the set's colour mixed into the paper) with Bayer dither for every gradient. Each scene has a focal
- * disc — a moon, a sun, a clock, a rose window — and the page's emblem sits on it, so every role and trait gets its
- * own picture on a scene that suits it. Stars, trees, buildings and rain come from the page seed; the composition
- * does not. {@link #plate} also draws the thin plate frame with its corner ticks, 3 px outside the picture.
- * 扉画：高 56、宽同版心的双色景，只用纸色、三阶墨色与一个点睛色（套别色调进纸色），渐变全靠 Bayer 抖动。每幅景都有
- * 一个焦点圆盘（月亮、太阳、钟面、玫瑰窗……），页面徽记就画在上面，因此每个身份与词条都在合适的景里有自己的画。星、
- * 树、楼、雨随页种子变化，构图不变。plate() 同时在画外 3 像素处画细框与角标。
+ * The chapter plates, 56 px tall and as wide as the text column. Every guide page has its own hand-made picture
+ * ({@link PlateArt}, drawn by {@link #art}); pages without one (the credits, the lobby frontispiece, entries added
+ * by other mods) fall back to their faction's procedural scene ({@link #plate}): paper, three inks and the theme
+ * colour, with Bayer dither for every gradient, stars and trees from the page seed. Both draw the thin plate frame
+ * with its corner ticks, 3 px outside the picture.
+ * 扉画，高 56、宽同版心。每个指南页面都有自己手绘的画（PlateArt，由 art() 绘制）；没有的页面（鸣谢页、大厅扉页、
+ * 其他模组新增的条目）退回阵营的程序化景（plate()）：纸色、三阶墨色与主题色，渐变全靠 Bayer 抖动，星与树随页种子
+ * 变化。两者都会在画外 3 像素处画细框与角标。
  */
 public final class Plates {
     public static final int HEIGHT = 56;
@@ -27,15 +27,27 @@ public final class Plates {
     public static final int DISC = 12;
 
     /** How a scene frames its focal disc. 景对焦点圆盘的装框方式。 */
-    enum Focal { MOON, SUN, CLOCK, ROSE, GEAR, SPOT, WINDOW, PLAIN }
+    enum Focal { MOON, SUN, PLAIN }
 
-    /** The seven colours of a plate; {@code deep} is the accent darkened, for emblem details.
-     * 一幅扉画的七种颜色；deep 是压暗的点睛色，用于徽记细节。 */
-    public record Palette(int paper, int light, int mid, int dark, int accent, int glow, int deep) {
-        public static Palette of(int accentRgb) {
-            int accent = DecorPalette.opaque(accentRgb);
-            return new Palette(PAPER, INK_FAINT, INK_MUTED, INK, DecorPalette.mix(PAPER, accent, 0.55),
-                    DecorPalette.mix(PAPER, accent, 0.22), DecorPalette.mix(accent, INK, 0.3));
+    /**
+     * The colours of a plate, all from the page's theme colour: paper, three inks, the accent and glow mixed into the
+     * paper, {@code deep} (the theme darkened) for scene details, and the emblem's own ramp ({@code mark*}), so the
+     * emblem is drawn in the theme colour itself.
+     * 一幅扉画的颜色，全部取自页面主题色：纸色、三阶墨色、调进纸色的点睛色与辉光、压暗的 deep（景的细节），以及徽记
+     * 自己的色阶（mark*），让徽记本身就是主题色。
+     */
+    public record Palette(int paper, int light, int mid, int dark, int accent, int glow, int deep, int markDark,
+                          int markMid, int markLight, int markBright, int theme) {
+        public static Palette of(int themeRgb) {
+            int theme = DecorPalette.opaque(themeRgb);
+            // A pale theme (a near-white witch, a pink pig) would vanish on the glowing disc: darken its bright tone.
+            // 很浅的主题色（近白的魔女、粉色的猪）在发光圆盘上会看不见，压暗其亮色。
+            double luma = (0.299 * ((theme >> 16) & 0xFF) + 0.587 * ((theme >> 8) & 0xFF) + 0.114 * (theme & 0xFF)) / 255;
+            int bright = luma > 0.62 ? DecorPalette.mix(theme, INK, Math.min(0.55, (luma - 0.62) * 1.6 + 0.2)) : theme;
+            return new Palette(PAPER, INK_FAINT, INK_MUTED, INK, DecorPalette.mix(PAPER, theme, 0.55),
+                    DecorPalette.mix(PAPER, theme, 0.22), DecorPalette.mix(theme, INK, 0.3),
+                    DecorPalette.mix(theme, INK, 0.66), DecorPalette.mix(theme, INK, 0.38),
+                    DecorPalette.mix(theme, PAPER, 0.4), bright, theme);
         }
     }
 
@@ -53,6 +65,37 @@ public final class Plates {
     public static void plate(PixelSink sink, DecorSet.Plate kind, String[] emblem, int x, int y, int w,
                              int accentRgb, long seed) {
         scene(sink, kind, emblem, x, y, w, Palette.of(accentRgb), new DecorRandom(seed));
+        frame(sink, x, y, w);
+    }
+
+    /**
+     * A page's own hand-made plate with its frame: the picture cropped to {@code w} around its focus, the theme
+     * tones inked with {@code themeRgb}, and the emblem printed on the carrier the picture leaves for it (when the
+     * crop shows it).
+     * 页面自己的手绘扉画连同画框：围绕 focus 裁成 w 宽，主题色阶用 themeRgb 着色，徽记印在画里留出的底上（裁切后可见时）。
+     */
+    public static void art(PixelSink sink, PlateArt art, String[] emblem, int x, int y, int w, int themeRgb) {
+        Palette p = Palette.of(themeRgb);
+        int[] colours = PlateArt.colours(p);
+        int left = art.cropLeft(w);
+        for (int row = 0; row < HEIGHT; row++) {
+            for (int col = 0; col < w; col++) {
+                int ax = Math.max(0, Math.min(art.width() - 1, left + col));
+                sink.set(x + col, y + row, colours[art.tone(ax, row)]);
+            }
+        }
+        if (emblem != null) {
+            int ex = x + art.emblemX() - left;
+            if (ex - Emblems.SIZE / 2 >= x && ex + Emblems.SIZE / 2 < x + w) {
+                Emblems.draw(new ClipSink(sink, x, y, w, HEIGHT), emblem, ex, y + art.emblemY(), p.markDark(),
+                        p.markMid(), p.markLight(), p.markBright(), p.paper());
+            }
+        }
+        frame(sink, x, y, w);
+    }
+
+    /** The thin frame and corner ticks in the 3 px margin around a picture. 画外 3 像素内的细框与角标。 */
+    private static void frame(PixelSink sink, int x, int y, int w) {
         Ornaments.roundedOutline(sink, x - 1, y - 1, w + 2, HEIGHT + 2, INK_RULE);
         sink.fill(x, y + HEIGHT + 1, x + w + 1, y + HEIGHT + 2, INK_RULE_SOFT);
         sink.fill(x + w + 1, y, x + w + 2, y + HEIGHT + 1, INK_RULE_SOFT);
@@ -74,11 +117,6 @@ public final class Plates {
     public static void scene(PixelSink sink, DecorSet.Plate kind, String[] emblem, int x, int y, int w, Palette p,
                              DecorRandom rand) {
         PixelSink s = new ClipSink(sink, x, y, w, HEIGHT);
-        // Half the pages see their scene from the other side, so pages sharing a scene still differ.
-        // 一半页面的景左右翻转，同景的页面也各不相同。
-        if (rand.chance(0.5)) {
-            s = new MirrorSink(s, x, w);
-        }
         switch (kind) {
             case MARSH -> PlateScenes.marsh(s, x, y, w, p, rand, emblem);
             case VIADUCT -> PlateScenes.viaduct(s, x, y, w, p, rand, emblem);
@@ -86,16 +124,6 @@ public final class Plates {
             case FAIR -> PlateScenes.fair(s, x, y, w, p, rand, emblem);
             case FIELD -> PlateScenes.field(s, x, y, w, p, rand, emblem);
             case ARCANE -> PlateScenes.arcane(s, x, y, w, p, rand, emblem);
-            case CARRIAGE -> PlateScenes.carriage(s, x, y, w, p, rand, emblem);
-            case STATION -> PlateScenes.station(s, x, y, w, p, rand, emblem);
-            case SEA -> PlateScenes.sea(s, x, y, w, p, rand, emblem);
-            case CHAPEL -> PlateScenes.chapel(s, x, y, w, p, rand, emblem);
-            case GRAVEYARD -> PlateScenes.graveyard(s, x, y, w, p, rand, emblem);
-            case STUDY -> PlateScenes.study(s, x, y, w, p, rand, emblem);
-            case ROOFTOPS -> PlateScenes.rooftops(s, x, y, w, p, rand, emblem);
-            case FOREST -> PlateScenes.forest(s, x, y, w, p, rand, emblem);
-            case STAGE -> PlateScenes.stage(s, x, y, w, p, rand, emblem);
-            case WORKSHOP -> PlateScenes.workshop(s, x, y, w, p, rand, emblem);
         }
     }
 
@@ -122,54 +150,6 @@ public final class Plates {
                 }
                 Dither.discDithered(s, cx, cy, 15, p.glow(), 8);
             }
-            case CLOCK -> {
-                Dither.disc(s, cx, cy, 16, p.dark());
-                Dither.ring(s, cx, cy, 16, p.mid());
-                for (int k = 0; k < 12; k++) {
-                    double a = k * Math.PI / 6;
-                    int tx = (int) Math.round(cx + Math.cos(a) * 14);
-                    int ty = (int) Math.round(cy + Math.sin(a) * 14);
-                    s.set(tx, ty, p.light());
-                    if (k % 3 == 0) {
-                        s.set((int) Math.round(cx + Math.cos(a) * 15), (int) Math.round(cy + Math.sin(a) * 15),
-                                p.light());
-                    }
-                }
-            }
-            case ROSE -> {
-                Dither.disc(s, cx, cy, 17, p.dark());
-                Dither.ring(s, cx, cy, 17, p.mid());
-                for (int k = 0; k < 8; k++) {
-                    double a = k * Math.PI / 4 + Math.PI / 8;
-                    Dither.disc(s, (int) Math.round(cx + Math.cos(a) * 14.5), (int) Math.round(cy + Math.sin(a) * 14.5),
-                            1, (k & 1) == 0 ? p.accent() : p.glow());
-                }
-            }
-            case GEAR -> {
-                for (int k = 0; k < 14; k++) {
-                    double a = k * Math.PI / 7;
-                    int tx = (int) Math.round(cx + Math.cos(a) * 16);
-                    int ty = (int) Math.round(cy + Math.sin(a) * 16);
-                    s.fill(tx - 1, ty - 1, tx + 2, ty + 2, p.mid());
-                }
-                Dither.disc(s, cx, cy, 15, p.mid());
-                Dither.ring(s, cx, cy, 15, p.light());
-                Dither.ring(s, cx, cy, 14, p.dark());
-            }
-            case SPOT -> {
-                Dither.discDithered(s, cx, cy, 19, p.glow(), 3);
-                Dither.discDithered(s, cx, cy, 16, p.glow(), 6);
-            }
-            case WINDOW -> {
-                Dither.disc(s, cx, cy, 16, p.dark());
-                Dither.ring(s, cx, cy, 16, p.mid());
-                Dither.ring(s, cx, cy, 14, p.mid());
-                for (int k = 0; k < 4; k++) {
-                    double a = k * Math.PI / 2;
-                    Dither.line(s, cx + Math.cos(a) * 13, cy + Math.sin(a) * 13, cx + Math.cos(a) * 15,
-                            cy + Math.sin(a) * 15, p.mid());
-                }
-            }
             case PLAIN -> {
             }
         }
@@ -178,10 +158,7 @@ public final class Plates {
         if (emblem == null) {
             return false;
         }
-        // The emblem keeps its handedness on a mirrored scene. 镜像的景上，徽记保持原本朝向。
-        PixelSink target = s instanceof MirrorSink mirror ? mirror.inner() : s;
-        int ex = s instanceof MirrorSink mirror ? mirror.flip(cx) : cx;
-        Emblems.draw(target, emblem, ex, cy, p.dark(), p.mid(), p.light(), p.deep(), p.paper());
+        Emblems.draw(s, emblem, cx, cy, p.markDark(), p.markMid(), p.markLight(), p.markBright(), p.paper());
         return true;
     }
 
@@ -234,43 +211,5 @@ public final class Plates {
         double spread = 0.45 + rand.next() * 0.35;
         tree(s, x2, y2, len * 0.68, angle - spread, depth - 1, col, rand);
         tree(s, x2, y2, len * 0.68, angle + spread * (0.6 + rand.next() * 0.6), depth - 1, col, rand);
-    }
-
-    /** A tiered pine with its trunk foot at (x, baseY). 底部在 (x, baseY) 的分层松树。 */
-    static void pine(PixelSink s, int x, int baseY, int height, int col) {
-        int top = baseY - height;
-        int tiers = Math.max(2, height / 7);
-        int tierHeight = Math.max(4, (height - 2) / tiers + 2);
-        for (int t = 0; t < tiers; t++) {
-            int ty = top + t * (height - 2) / tiers;
-            int maxHalf = 2 + (t + 1) * height / (tiers * 4);
-            for (int r = 0; r < tierHeight; r++) {
-                int half = Math.max(0, r * maxHalf / tierHeight);
-                s.fill(x - half, ty + r, x + half + 1, ty + r + 1, col);
-            }
-        }
-        s.fill(x, baseY - 2, x + 1, baseY, col);
-    }
-
-    /** A pointed (lancet) arch outline filled with {@code fill}. 尖拱，内填 fill。 */
-    static void lancet(PixelSink s, int x, int top, int w, int bottom, int fill) {
-        int half = w / 2;
-        for (int y = top; y < bottom; y++) {
-            int dy = y - top;
-            int span = dy < half * 2 ? (int) Math.round(half * Math.sqrt(Math.min(1.0, dy / (half * 2.0)))) : half;
-            s.fill(x + half - span, y, x + half + span + (w & 1), y + 1, fill);
-        }
-    }
-
-    /** A gear outline with {@code teeth} teeth. 有 teeth 个齿的齿轮。 */
-    static void gear(PixelSink s, int cx, int cy, int r, int teeth, int col, int hole) {
-        for (int k = 0; k < teeth; k++) {
-            double a = k * 2 * Math.PI / teeth;
-            int tx = (int) Math.round(cx + Math.cos(a) * (r + 1));
-            int ty = (int) Math.round(cy + Math.sin(a) * (r + 1));
-            s.fill(tx - 1, ty - 1, tx + 2, ty + 2, col);
-        }
-        Dither.disc(s, cx, cy, r, col);
-        Dither.disc(s, cx, cy, Math.max(1, r / 3), hole);
     }
 }

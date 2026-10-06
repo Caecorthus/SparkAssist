@@ -1236,7 +1236,9 @@ public final class GuidebookScreen extends Screen {
     /** The player's own decoration set (directory, card): by role during a round, the train otherwise.
      * 玩家自身的点缀套别（目录、信息卡）：对局中按身份，其余时候是那列火车。 */
     private DecorSet ownerSet() {
-        return DecorSetResolver.forRole(session.currentRoleId().orElse(null));
+        String roleId = session.currentRoleId().orElse(null);
+        return roleId == null ? DecorSetResolver.forRole(null) : catalog.find(roleId)
+                .map(DecorSetResolver::forEntry).orElseGet(() -> DecorSetResolver.forRole(roleId));
     }
 
     @Override
