@@ -7,12 +7,16 @@ import dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette;
 import dev.caecorthus.sparkassist.client.guidebook.ui.ReaderPainter;
 import dev.caecorthus.sparkassist.guidebook.GuidebookCatalog;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
+import dev.caecorthus.sparkassist.client.guidebook.ui.decor.DecorSettings;
+import dev.caecorthus.sparkassist.client.guidebook.ui.decor.GuidebookDecorator;
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout;
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout.Region;
 import dev.caecorthus.sparkassist.guidebook.GuidebookNavigation;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSearch;
 import dev.caecorthus.sparkassist.guidebook.GuidebookSessionState;
 import dev.caecorthus.sparkassist.guidebook.GuidebookTab;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorSetResolver;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlock;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookBlockType;
 import dev.caecorthus.sparkassist.guidebook.content.GuidebookPage;
@@ -85,6 +89,9 @@ public final class GuidebookScreen extends Screen {
     private List<ContainerLabel> containerLabels = List.of();
     private int directoryHeight;
     private DirectoryPainter.Chrome chrome;
+    private int titleWidth;
+    // ---- decoration / 点缀
+    private final GuidebookDecorator decorator = new GuidebookDecorator();
     private Set<String> markedRoles = Set.of();
     private Set<String> markedTraits = Set.of();
     private int marksRevision;
@@ -436,6 +443,7 @@ public final class GuidebookScreen extends Screen {
                 titleFull, titleShort, titleTiny);
         String placeholder = ExpressPaint.firstFitting(textRenderer, DirectoryPainter.fieldWidth(nav) - 7,
                 placeholderFull, placeholderShort, placeholderTiny, searchLabel);
+        titleWidth = textRenderer.getWidth(title);
         chrome = new DirectoryPainter.Chrome(plain(title), plain(placeholder), creditsLabel, creditsWidth,
                 noResultsLabel, noResultsWidth);
         int fieldWidth = DirectoryPainter.fieldWidth(nav);
@@ -659,9 +667,13 @@ public final class GuidebookScreen extends Screen {
         DirectoryPainter.Model model = new DirectoryPainter.Model(nav, chrome, paintRows, directoryHeight,
                 directoryScroll, searchExpanded, searchField.isFocused(), searchQuery.isEmpty(), closeInBand, foldable,
                 creditsOpen, hovered, treeFocused ? focusedRow : -1, selectedId(), closeHover, searchHover,
-                creditsHover, foldHover, thumbHot);
-        // Fill-and-text only (no textures), so the whole panel can be batched. 仅含填充与文字，可整体批量提交。
-        context.draw(() -> DirectoryPainter.draw(context, textRenderer, model));
+                creditsHover, foldHover, thumbHot, DecorSettings.enabled(), titleWidth, ownerSet().colour());
+        // Chrome and rows are separate fill-and-text batches so the decoration layer (one textured quad) can sit
+        // between them: over the panel body, under the rows. 边框与行分成两个批次，点缀层（一个贴图四边形）夹在中间：
+        // 在面板底之上、行之下。
+        context.draw(() -> DirectoryPainter.drawChrome(context, textRenderer, model));
+        decorator.drawDirectoryBackground(context, nav, directoryViewport().y(), ownerSet(), session.roundSeed());
+        context.draw(() -> DirectoryPainter.drawRows(context, textRenderer, model));
         searchField.visible = searchExpanded;
         if (searchField.visible) {
             searchField.render(context, mouseX, mouseY, delta);
@@ -689,8 +701,9 @@ public final class GuidebookScreen extends Screen {
         boolean closeHover = ReaderPainter.closeBox(reader).contains(mouseX, mouseY);
         if (!isArticleOpen()) {
             context.draw(() -> {
-                ReaderPainter.frame(context, reader);
-                ReaderPainter.band(context, textRenderer, reader, emptyBand, false, null, closeHover);
+                ReaderPainter.frame(context, reader, DecorSettings.enabled());
+                ReaderPainter.band(context, textRenderer, reader, emptyBand, false, null, closeHover,
+                        DecorSettings.enabled());
             });
             // The frontispiece draws the book texture, which is not batched, so it stays outside draw().
             // 扉页含书本贴图（不参与批量提交），因此放在 draw() 之外。
@@ -708,8 +721,9 @@ public final class GuidebookScreen extends Screen {
         boolean thumbHot = draggingArticle || sheet.scrollHit().contains(mouseX, mouseY);
         OrderedText head = runningSectionText;
         context.draw(() -> {
-            ReaderPainter.frame(context, reader);
-            ReaderPainter.band(context, textRenderer, reader, readerBand, running, head, closeHover);
+            ReaderPainter.frame(context, reader, DecorSettings.enabled());
+            ReaderPainter.band(context, textRenderer, reader, readerBand, running, head, closeHover,
+                    DecorSettings.enabled());
             if (sheet.viewport().height() > 0 && sheet.viewport().width() > 0) {
                 ReaderPainter.content(context, textRenderer, sheet, pageHeader, content, articleScroll, thumbHot);
             }
@@ -1110,6 +1124,15 @@ public final class GuidebookScreen extends Screen {
     @Override
     public void removed() {
         rememberView();
+        // Textures come back lazily on the next frame; an embedded guide is reused across inventory opens.
+        // 纹理在下一帧惰性重建；嵌入式指南在多次打开背包之间会被复用。
+        decorator.close();
+    }
+
+    /** The player's own decoration set (directory, card): by role during a round, the train otherwise.
+     * 玩家自身的点缀套别（目录、信息卡）：对局中按身份，其余时候是那列火车。 */
+    private DecorSet ownerSet() {
+        return DecorSetResolver.forRole(session.currentRoleId().orElse(null));
     }
 
     @Override

@@ -16,6 +16,9 @@ import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.MUTE
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.PAPER;
 
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer;
+import dev.caecorthus.sparkassist.client.guidebook.ui.decor.DrawContextSink;
+import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
+import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer.Ornament;
 import dev.caecorthus.sparkassist.client.guidebook.render.GuidebookContentRenderer.RenderedLine;
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout.Region;
@@ -189,6 +192,12 @@ public final class ReaderPainter {
      */
     public static void band(DrawContext c, TextRenderer f, Region reader, Band band, boolean running,
                             @Nullable OrderedText section, boolean closeHover) {
+        band(c, f, reader, band, running, section, closeHover, false);
+    }
+
+    /** @param trim also draw the recessed nameplate under the crumb or running head / 是否在文字下画凹铭牌 */
+    public static void band(DrawContext c, TextRenderer f, Region reader, Band band, boolean running,
+                            @Nullable OrderedText section, boolean closeHover, boolean trim) {
         int x = reader.x();
         int y = reader.y();
         Region close = closeBox(reader);
@@ -198,6 +207,20 @@ public final class ReaderPainter {
         ExpressPaint.close7(c, reader.right() - 14, y + 8, closeHover ? COIN : BRASS_HI);
         if (band.source() != null) {
             c.drawText(f, band.source(), reader.right() - 22 - band.sourceWidth(), y + 7, FAINT, true);
+        }
+        if (trim) {
+            int textEnd;
+            if (running) {
+                textEnd = x + 15 + band.headTitleWidth()
+                        + (section == null ? 0 : f.getWidth(HEAD_SEPARATOR) + f.getWidth(section));
+            } else if (band.crumb() != null) {
+                textEnd = x + 7 + f.getWidth(band.crumb());
+            } else {
+                textEnd = -1;
+            }
+            if (textEnd > 0) {
+                Ornaments.nameplate(new DrawContextSink(c), x + 4, y + 5, textEnd + 4 - (x + 4));
+            }
         }
         if (running) {
             ExpressPaint.gem(c, x + 7, y + 9, band.gemRgb(), false);
@@ -243,9 +266,22 @@ public final class ReaderPainter {
     /** Reader frame: panel + title band + recessed sheet; the band text is drawn by the caller.
      * 阅读器外框：面板、标题带与嵌入的纸张；标题带文字由调用方绘制。 */
     public static void frame(DrawContext c, Region reader) {
+        frame(c, reader, false);
+    }
+
+    /** @param trim add the double-ruled frame, corner plates and two book clasps on the left rim
+     *             / 是否加双线框、角板与左沿的两枚书口扣 */
+    public static void frame(DrawContext c, Region reader, boolean trim) {
         ExpressPaint.panel(c, reader.x(), reader.y(), reader.width(), reader.height());
         ExpressPaint.titleBand(c, reader.x(), reader.y(), reader.width());
         sheet(c, Sheet.of(reader));
+        if (trim) {
+            PixelSink sink = new DrawContextSink(c);
+            Ornaments.innerLine(sink, reader.x(), reader.y(), reader.width(), reader.height());
+            Ornaments.cornerPlates(sink, reader.x(), reader.y(), reader.width(), reader.height());
+            Ornaments.clasp(sink, reader.x(), reader.y() + Math.round(reader.height() / 3f));
+            Ornaments.clasp(sink, reader.x(), reader.y() + Math.round(reader.height() * 2 / 3f));
+        }
     }
 
     /**
