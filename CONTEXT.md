@@ -53,7 +53,9 @@ _Avoid_: theme, skin, texture pack, resource pack
 The page (whose **Chapter plate** and **Emblem** are shown) and its theme colour, plus the faction's fallback
 scene, sigil, foliage, accent colour, seal mark and charm. The faction part comes from the entry's tab and
 faction group (the directory's own grouping); the entry's optional JSON `decor` object overrides single members.
-A player's set is the set of their role's page.
+The accent (ribbon and closing seal) is the directory group's faction colour, so killer traits are red like
+killers, and grey for pages of no faction (global traits, the basics, credits, no role). A player's set is the set
+of their role's page.
 _Avoid_: theme, style preset
 
 **Chapter plate**:

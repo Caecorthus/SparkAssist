@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.guidebook.ui.decor;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
 import java.util.Objects;
 import net.minecraft.client.MinecraftClient;
@@ -14,9 +15,11 @@ import org.jetbrains.annotations.Nullable;
  * One cached decoration layer: a {@link PixelBuffer} uploaded to a dynamic texture and drawn as a single quad. The
  * owner regenerates the buffer only when its {@code key} (geometry, seed, settings, set) changes; every other frame
  * costs one texture draw. Textures are registered lazily and destroyed with {@link #close()}; the image is reused
- * while the size stays the same.
+ * while the size stays the same. Layers are drawn with alpha blending on: {@code drawTexture} does not turn it on
+ * itself, and without it a 6 % watermark would print as solid ink.
  * 一块缓存的点缀层：PixelBuffer 上传为动态纹理，每帧只画一个四边形。只有 key（几何、种子、设置、套别）变化时才重新
- * 生成；纹理延迟注册、close() 时销毁；尺寸不变时复用同一张图。
+ * 生成；纹理延迟注册、close() 时销毁；尺寸不变时复用同一张图。绘制时开启 alpha 混合：drawTexture 自身不开，
+ * 否则 6% 的暗纹会印成实色墨。
  */
 public final class DecorLayer implements AutoCloseable {
     private final String name;
@@ -87,7 +90,7 @@ public final class DecorLayer implements AutoCloseable {
         if (id == null) {
             return;
         }
-        context.drawTexture(id, x, y, 0, 0, width, height, width, height);
+        draw(context, x, y, 0, 0, width, height);
     }
 
     /** Draw a sub-rectangle of the layer (u, v, w, h) with its top-left at (x, y). 绘制层内的一块子矩形。 */
@@ -95,7 +98,10 @@ public final class DecorLayer implements AutoCloseable {
         if (id == null) {
             return;
         }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         context.drawTexture(id, x, y, u, v, w, h, width, height);
+        RenderSystem.disableBlend();
     }
 
     @Override
