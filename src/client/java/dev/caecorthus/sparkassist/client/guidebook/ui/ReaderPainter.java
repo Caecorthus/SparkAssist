@@ -47,6 +47,8 @@ public final class ReaderPainter {
     public static final int PLATE_BLOCK = Plates.HEIGHT + 8;
     /** Content y of the chapter plate's top edge. 扉画顶边的内容坐标。 */
     public static final int PLATE_TOP = 3;
+    /** Height the closing wax seal adds under the body when the page is decorated. 落款火漆在正文后增加的高度。 */
+    public static final int SEAL_BLOCK = 30;
     private static final int TITLE_X = 14;
     private static final String HEAD_SEPARATOR = " \u203A ";
 
@@ -259,7 +261,14 @@ public final class ReaderPainter {
         return contentHeight(body, false);
     }
 
+    /** @param plate the page is decorated: a chapter plate above the header and a closing seal under the body
+     *              / 页面带点缀：页眉上方有扉画，正文下方有落款火漆 */
     public static int contentHeight(GuidebookContentRenderer.Layout body, boolean plate) {
+        return headerHeight(plate) + body.height() + (plate ? SEAL_BLOCK : 0);
+    }
+
+    /** Content y where the body ends and the closing seal's block begins. 正文结束、落款火漆区开始的内容坐标。 */
+    public static int bodyEnd(GuidebookContentRenderer.Layout body, boolean plate) {
         return headerHeight(plate) + body.height();
     }
 

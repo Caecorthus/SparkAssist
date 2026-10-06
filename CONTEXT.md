@@ -42,21 +42,37 @@ _Avoid_: required sibling mod, shared role system
 
 **Guidebook decoration**:
 Faction-keyed ornaments drawn on and around the guide's panels and the owner info card: chapter plate,
-watermark sigil, ribbon bookmark, wax seal, steam curls, rim foliage, frame plates and the directory wallpaper.
-Generated as pixels from the **Round seed**, cached as dynamic textures, and never changing any geometry or hit
-area. Controlled by the `guidebookDecor` (off / light / medium / full) and `guidebookFoliage` settings.
+watermark sigil, ribbon bookmark, closing seal, steam curls, rim foliage and frame plates. Nothing is drawn
+behind directory rows or card rows. Generated as pixels from the **Round seed**, cached as dynamic textures, and
+never changing any hit area; the only geometry they add is the plate block above a page's header and the seal
+block under its body. Controlled by the `guidebookDecor` (off / light / medium / full) and `guidebookFoliage`
+settings.
 _Avoid_: theme, skin, texture pack, resource pack
 
 **Decoration set**:
-The plate, sigil, foliage, accent colour, seal mark and charm a page or a player gets. Resolved from the entry's
-tab and faction group (the directory's own grouping) and overridden per member by the entry's optional JSON
-`decor` object; a player's set follows their role's faction.
+The page (whose **Chapter plate** and **Emblem** are shown) and its theme colour, plus the faction's fallback
+scene, sigil, foliage, accent colour, seal mark and charm. The faction part comes from the entry's tab and
+faction group (the directory's own grouping); the entry's optional JSON `decor` object overrides single members.
+A player's set is the set of their role's page.
 _Avoid_: theme, style preset
 
 **Chapter plate**:
-The 56 px duotone scene at the top of a page, above its header, that scrolls with the page; six scenes, one per
-decoration set.
+The 56 px picture at the top of a page, above its header, that scrolls with the page. Every guide page has its
+own hand-made plate (`guidebook_plates/<namespace>/<path>.png` + `.json`), painted in paper, three inks and four
+theme tones and cropped to the text column around its focus; pages without one fall back to their faction's
+procedural scene.
 _Avoid_: banner, header image, cover
+
+**Emblem**:
+A page's own 17×17 woodcut-style picture (one per role, skill, trait, faction page and the basics), printed in
+the page's theme colour on a light carrier inside its chapter plate (a moon, a clock face, a sign...). Keyed by
+entry id.
+_Avoid_: icon, avatar, portrait
+
+**Closing seal**:
+The faction wax seal between two hairlines under a page's last paragraph; it scrolls with the page, so it only
+shows at the end of the article.
+_Avoid_: stamp, footer
 
 **No-go zone**:
 A rectangle decorations may never paint over: band text, buttons, the text column, the scrollbar gutter,

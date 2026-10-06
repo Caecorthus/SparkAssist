@@ -39,16 +39,16 @@ public final class Foliage {
                          int leafLength) {
     }
 
-    private static final Motif BRIAR = new Motif(Leaf.LOBED, 5, 0.55, 0.0, 0.6, true, false, false, false, false,
-            0.35, 0);
-    private static final Motif WILLOW = new Motif(Leaf.NARROW, 3, 0.25, 0.05, 0.5, false, false, false, false,
+    private static final Motif BRIAR = new Motif(Leaf.LOBED, 6, 0.45, 0.0, 0.35, true, false, false, false, false,
+            0.18, 0);
+    private static final Motif WILLOW = new Motif(Leaf.NARROW, 4, 0.25, 0.05, 0.3, false, false, false, false,
             false, 0.0, 4);
-    private static final Motif DEAD_BRANCH = new Motif(Leaf.NONE, 9, 0.7, 0.03, 0.9, false, true, false, false,
-            true, 0.15, 0);
-    private static final Motif RIBBON_VINE = new Motif(Leaf.HEART, 7, 0.6, 0.0, 0.4, false, false, true, true,
+    private static final Motif DEAD_BRANCH = new Motif(Leaf.NONE, 9, 0.6, 0.03, 0.5, false, true, false, false,
+            true, 0.1, 0);
+    private static final Motif RIBBON_VINE = new Motif(Leaf.HEART, 8, 0.5, 0.0, 0.25, false, false, true, true,
             false, 0.0, 0);
-    private static final Motif IVY = new Motif(Leaf.HEART, 5, 0.45, 0.02, 0.5, false, false, false, false, false,
-            0.1, 0);
+    private static final Motif IVY = new Motif(Leaf.HEART, 6, 0.4, 0.02, 0.3, false, false, false, false, false,
+            0.06, 0);
 
     /**
      * One vine to grow. {@code pull} is the heading the stem is drawn toward (NaN for none) with strength
@@ -65,12 +65,12 @@ public final class Foliage {
          * 贴边的安静藤：小摆动、少分叉，并以起点沿 along 方向为轨，主茎不断被拉回轨上，不会离开边条。
          */
         public static Vine alongRim(DecorSet.Foliage motif, double x, double y, double along, int length, int berry) {
-            return new Vine(motif, x, y, along, length, along, 0.3, 0.2, 0.25, berry, true);
+            return new Vine(motif, x, y, along, length, along, 0.3, 0.2, 0.12, berry, true);
         }
 
-        /** A free twig with the motif's own wobble and branching, e.g. along a title band. 自由小枝。 */
+        /** A short free twig with a gentle wobble and few branches, e.g. in a title band. 平缓少分叉的自由小枝。 */
         public static Vine twig(DecorSet.Foliage motif, double x, double y, double angle, int length, int berry) {
-            return new Vine(motif, x, y, angle, length, Double.NaN, 0.03, -1, -1, berry, false);
+            return new Vine(motif, x, y, angle, length, Double.NaN, 0.03, 0.35, 0.25, berry, false);
         }
     }
 
@@ -177,7 +177,7 @@ public final class Foliage {
                         }
                     }
                 }
-                if (m.bells() && i % 9 == 0 && i > 6) {
+                if (m.bells() && i % 16 == 0 && i > 6) {
                     double bx = rx + ux * 2;
                     double by = ry + uy * 2;
                     dot(s, rx + ux, ry + uy, STEM_DARK);
@@ -190,14 +190,11 @@ public final class Foliage {
                     dot(s, bx, by + 2, STEM_DARK);
                 }
             }
-            if (m.thorns() && i % 5 == 2) {
-                double t = a + (i % 10 < 5 ? 1 : -1) * Math.PI / 2;
+            if (m.thorns() && i % 8 == 2) {
+                double t = a + (i % 16 < 8 ? 1 : -1) * Math.PI / 2;
                 dot(s, rx + Math.cos(t), ry + Math.sin(t), THORN);
-                if (i % 10 == 7) {
-                    dot(s, rx + Math.cos(t) * 2, ry + Math.sin(t) * 2, THORN);
-                }
             }
-            if (m.barbed() && i % 7 == 3) {
+            if (m.barbed() && i % 11 == 3) {
                 s.set(rx + 1, ry + 1, WIRE);
                 s.set(rx - 1, ry - 1, WIRE);
                 s.set(rx + 1, ry - 1, WIRE);

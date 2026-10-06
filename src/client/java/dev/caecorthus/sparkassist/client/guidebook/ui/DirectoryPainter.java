@@ -261,8 +261,9 @@ public final class DirectoryPainter {
 
     /**
      * Panel, band, search well and footer: everything under the rows. The screen draws the decoration layer
-     * (wallpaper, sigil) after this and {@link #drawRows} after that, so the layer sits between body and rows.
-     * 面板、标题带、搜索槽与页脚，即行之下的一切。界面在其后画点缀层（墙纸、暗纹），再调用 drawRows，点缀层因此夹在
+     * (the sigil under the last row) after this and {@link #drawRows} after that, so the layer sits between body and
+     * rows.
+     * 面板、标题带、搜索槽与页脚，即行之下的一切。界面在其后画点缀层（末行下方的暗纹），再调用 drawRows，点缀层因此夹在
      * 面板底与行之间。
      */
     public static void drawChrome(DrawContext c, TextRenderer f, Model m) {

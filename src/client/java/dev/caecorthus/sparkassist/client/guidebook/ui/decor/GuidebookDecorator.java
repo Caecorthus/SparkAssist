@@ -6,17 +6,20 @@ import dev.caecorthus.sparkassist.guidebook.decor.DecorPalette;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorRandom;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorZones;
+import dev.caecorthus.sparkassist.guidebook.decor.Emblems;
 import dev.caecorthus.sparkassist.guidebook.decor.Foliage;
 import dev.caecorthus.sparkassist.guidebook.decor.OffsetSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelSink;
+import dev.caecorthus.sparkassist.guidebook.decor.PlateArt;
 import dev.caecorthus.sparkassist.guidebook.decor.Plates;
 import dev.caecorthus.sparkassist.guidebook.decor.Sigils;
 import dev.caecorthus.sparkassist.guidebook.decor.Steam;
 import dev.caecorthus.sparkassist.guidebook.decor.ZonedSink;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.client.gui.DrawContext;
 
 /**
@@ -27,9 +30,9 @@ import net.minecraft.client.gui.DrawContext;
  * 全部同一 z，纯靠绘制顺序决定遮盖。只有 key 变化时才重新生成。
  */
 public final class GuidebookDecorator implements AutoCloseable {
-    /** Rows area must be at least this tall for the directory sigil. 目录行区至少这么高才画暗纹。 */
-    private static final int SIGIL_MIN_HEIGHT = 100;
     private static final int SIGIL_RADIUS = 40;
+    /** Clear space kept between the directory sigil and the rows above / the footer below. 目录暗纹与上方各行、下方页脚之间的留白。 */
+    private static final int SIGIL_GAP = 6;
 
     /** Largest paper watermark radius; smaller sheets shrink it, below 24 it is dropped. 纸面暗纹的最大半径。 */
     private static final int WATERMARK_RADIUS = 54;
@@ -45,6 +48,7 @@ public final class GuidebookDecorator implements AutoCloseable {
     private final DecorLayer plate = new DecorLayer("sparkassist_guide_plate");
     private final DecorLayer frontPlate = new DecorLayer("sparkassist_guide_front_plate");
     private final DecorLayer watermark = new DecorLayer("sparkassist_guide_watermark");
+    private final DecorLayer endSeal = new DecorLayer("sparkassist_guide_end_seal");
     private final DecorLayer readerOverlay = new DecorLayer("sparkassist_guide_reader_overlay");
     private final DecorLayer directoryOverlay = new DecorLayer("sparkassist_guide_directory_overlay");
 
@@ -68,13 +72,13 @@ public final class GuidebookDecorator implements AutoCloseable {
                                        int searchToggleX, int density, boolean foliage) {
     }
 
-    private record DirectoryKey(int width, int height, DecorSet set, long seed, int density) {
-    }
-
-    private record PlateKey(DecorSet.Plate kind, int width, int colour, long seed) {
+    private record PlateKey(DecorSet.Plate kind, String page, boolean art, int width, int theme, long seed) {
     }
 
     private record SigilKey(DecorSet.Sigil kind, int radius, long seed) {
+    }
+
+    private record SealKey(int width, int colour, DecorSet.Mark mark) {
     }
 
     /** Whether a page gets a chapter plate: decorations on and a text column at least 160 px wide.
@@ -109,10 +113,16 @@ public final class GuidebookDecorator implements AutoCloseable {
     private static void drawPlate(DecorLayer layer, DrawContext context, ReaderPainter.Sheet sheet, DecorSet set,
                                   long seed, int top, boolean clipToViewport) {
         int width = sheet.measure();
-        PlateKey key = new PlateKey(set.plate(), width, set.colour(), seed);
+        Optional<PlateArt> art = PlateArtLoader.forEntry(set.page());
+        PlateKey key = new PlateKey(set.plate(), set.page(), art.isPresent(), width, set.theme(), seed);
         if (!layer.isCurrent(key)) {
             PixelBuffer buffer = new PixelBuffer(width + 2 * Plates.MARGIN, Plates.HEIGHT + 2 * Plates.MARGIN);
-            Plates.plate(buffer, set.plate(), Plates.MARGIN, Plates.MARGIN, width, set.colour(), seed);
+            String[] emblem = Emblems.forEntry(set.page()).orElse(null);
+            if (art.isPresent()) {
+                Plates.art(buffer, art.get(), emblem, Plates.MARGIN, Plates.MARGIN, width, set.theme());
+            } else {
+                Plates.plate(buffer, set.plate(), emblem, Plates.MARGIN, Plates.MARGIN, width, set.theme(), seed);
+            }
             layer.update(key, buffer);
         }
         Region view = sheet.viewport();
@@ -123,6 +133,45 @@ public final class GuidebookDecorator implements AutoCloseable {
         if (clipToViewport) {
             context.disableScissor();
         }
+    }
+
+    /**
+     * The closing wax seal: centred under the last paragraph between two hairlines, scrolling with the page and
+     * clipped to the viewport, so it only shows once the reader reaches the end. Call after the paper and before
+     * the content. {@code bodyEnd} is the content y where the body ends ({@link ReaderPainter#bodyEnd}).
+     * 落款火漆：在最后一段下方居中、夹在两道细线之间，随页滚动并裁剪到视口，只有读到末尾才看得见。在纸张之后、内容之前
+     * 调用；bodyEnd 为正文结束处的内容坐标。
+     */
+    public void drawEndSeal(DrawContext context, ReaderPainter.Sheet sheet, DecorSet set, int bodyEnd, int scroll) {
+        if (!plateShown(sheet.measure())) {
+            return;
+        }
+        int width = sheet.measure();
+        SealKey key = new SealKey(width, set.colour(), set.mark());
+        if (!endSeal.isCurrent(key)) {
+            PixelBuffer buffer = new PixelBuffer(width, ReaderPainter.SEAL_BLOCK);
+            int cx = width / 2;
+            int cy = 13;
+            int reach = Math.min(64, width / 2 - 4);
+            buffer.fill(cx - reach, cy, cx - 11, cy + 1, DecorPalette.INK_RULE_SOFT);
+            buffer.fill(cx + 12, cy, cx + reach + 1, cy + 1, DecorPalette.INK_RULE_SOFT);
+            for (int end : new int[] {cx - reach - 2, cx + reach + 2}) {
+                buffer.set(end, cy - 1, DecorPalette.INK_RULE);
+                buffer.set(end - 1, cy, DecorPalette.INK_RULE);
+                buffer.set(end + 1, cy, DecorPalette.INK_RULE);
+                buffer.set(end, cy + 1, DecorPalette.INK_RULE);
+            }
+            Ornaments.waxSeal(buffer, cx, cy, DecorPalette.opaque(set.colour()), set.mark());
+            endSeal.update(key, buffer);
+        }
+        Region view = sheet.viewport();
+        int top = view.y() - scroll + bodyEnd;
+        if (top >= view.bottom() || top + ReaderPainter.SEAL_BLOCK <= view.y()) {
+            return;
+        }
+        context.enableScissor(view.x(), view.y(), view.right(), view.bottom());
+        endSeal.draw(context, sheet.textLeft(), top);
+        context.disableScissor();
     }
 
     /** Faint sigil on the sheet's lower half, under the body text; shrinks with the sheet and disappears below
@@ -149,40 +198,39 @@ public final class GuidebookDecorator implements AutoCloseable {
     }
 
     /**
-     * Wallpaper and the player's faction sigil behind the directory rows: the area from the row viewport's top
-     * to the footer rule, inside the panel's 3 px frame. Call between the chrome and the rows.
-     * 目录行区身后的墙纸与玩家阵营暗纹：从行视口顶边到页脚刻线、面板 3 像素边框之内。在边框与行之间调用。
+     * The player's faction sigil, faintly engraved in the empty part of the directory under the last row. It is only
+     * drawn while the rows end above it, so it never sits behind text. Call between the chrome and the rows.
+     * 玩家阵营暗纹，淡淡刻在目录最后一行下方的空白处。只在各行结束于它上方时绘制，绝不垫在文字下。在边框与行之间调用。
+     *
+     * @param rowsBottom screen y where the (scrolled) rows end / 各行（含滚动）结束处的屏幕 y
      */
-    public void drawDirectoryBackground(DrawContext context, Region nav, int viewportTop, DecorSet set, long seed) {
-        int density = DecorSettings.density();
-        if (density < 0) {
+    public void drawDirectoryBackground(DrawContext context, Region nav, int viewportTop, int rowsBottom, DecorSet set,
+                                        long seed) {
+        if (DecorSettings.density() < 1) {
             return;
         }
-        int x = nav.x() + 3;
-        int width = nav.width() - 6;
-        int height = nav.bottom() - 21 - viewportTop;
-        if (width < 8 || height < 8) {
+        int floor = nav.bottom() - 21 - SIGIL_GAP;
+        int top = floor - 2 * SIGIL_RADIUS - 1;
+        if (top < viewportTop || rowsBottom + SIGIL_GAP > top || nav.width() - 6 < 2 * SIGIL_RADIUS + 3) {
             return;
         }
-        DirectoryKey key = new DirectoryKey(width, height, set, seed, density);
+        SigilKey key = new SigilKey(set.sigil(), SIGIL_RADIUS, DecorRandom.ownerSeed("directory", seed));
         if (!directory.isCurrent(key)) {
-            PixelBuffer buffer = new PixelBuffer(width, height);
-            Ornaments.wallpaper(buffer, 0, 0, width, height);
-            if (density >= 1 && height >= SIGIL_MIN_HEIGHT) {
-                Sigils.draw(buffer, set.sigil(), width / 2, height - 51, SIGIL_RADIUS, DecorPalette.WATERMARK_BRASS,
-                        new DecorRandom(DecorRandom.ownerSeed("directory", seed)));
-            }
+            int size = 2 * SIGIL_RADIUS + 3;
+            PixelBuffer buffer = new PixelBuffer(size, size);
+            Sigils.draw(buffer, set.sigil(), SIGIL_RADIUS + 1, SIGIL_RADIUS + 1, SIGIL_RADIUS,
+                    DecorPalette.WATERMARK_BRASS, new DecorRandom(key.seed()));
             directory.update(key, buffer);
         }
-        directory.draw(context, x, viewportTop);
+        directory.draw(context, nav.x() + nav.width() / 2 - SIGIL_RADIUS - 1, top - 1);
     }
 
     /**
-     * The reader's overlay, drawn last: the ribbon bookmark down the left paper margin, the wax seal on the
-     * bottom-left corner, steam curls rising from the outer corners and the faction foliage hugging the rims
-     * (band gap, left gap, right rim, bottom rim). Curls and vines go through the no-go zones pixel by pixel.
-     * 正文的覆盖层，最后绘制：垂在纸页左边距的丝带书签、左下角的火漆印、从外角升起的蒸汽卷云，以及贴着边框的阵营枝叶
-     * （标题带空档、左侧缝隙、右沿、底沿）。卷云与枝条逐像素受禁区约束。
+     * The reader's overlay, drawn last: the ribbon bookmark down the left paper margin, steam curls rising from the
+     * outer corners and a little faction foliage on the rims. Curls and vines go through the no-go zones pixel by
+     * pixel. (The wax seal is no longer here: it closes the article, see {@link #drawEndSeal}.)
+     * 正文的覆盖层，最后绘制：垂在纸页左边距的丝带书签、从外角升起的蒸汽卷云，以及边框上的少量阵营枝叶。卷云与枝条
+     * 逐像素受禁区约束。（火漆印不在这里：它落在正文末尾，见 drawEndSeal。）
      */
     public void drawReaderOverlay(DrawContext context, ReaderOverlaySpec spec) {
         Region reader = spec.reader();
@@ -204,7 +252,6 @@ public final class GuidebookDecorator implements AutoCloseable {
             Ornaments.ribbon(sink, sheet.x() + 3, reader.y() + 21, Math.min(ribbonEnd, sheet.bottom() - 12),
                     spec.ownPage() ? DecorPalette.POLISHED : DecorPalette.mix(colour, DecorPalette.INK, 0.3));
             if (density >= 1) {
-                Ornaments.waxSeal(sink, reader.x() + 8, reader.bottom() - 10, colour, set.mark());
                 List<Region> forbidden = new ArrayList<>(spec.zones());
                 forbidden.add(DecorZones.panelInterior(reader));
                 PixelSink curls = new ZonedSink(sink, List.of(), forbidden);
@@ -221,33 +268,36 @@ public final class GuidebookDecorator implements AutoCloseable {
         readerOverlay.draw(context, ox, oy);
     }
 
-    /** Vines in 10–14 px strips along the reader's rims; each strip is its own allowed rectangle.
-     * 正文边沿 10 到 14 像素边条里的枝条；每条边条是一个允许矩形。 */
+    /** Longest band twig: a sprig, not a garland. 标题带小枝的最大长度：一小枝，而不是一整条花环。 */
+    private static final int TWIG_LENGTH = 34;
+
+    /**
+     * A little foliage at a few anchors, kept in 10–14 px strips along the rims: a sprig in the band gap and one
+     * climbing the bottom-right corner; at full density a vine down the left gap and one along the bottom rim.
+     * 少量枝叶，只在几个锚点、贴着边框的 10 到 14 像素边条里：标题带空档一小枝，右下角向上一小枝；满密度时左侧缝隙
+     * 与底沿各加一根。
+     */
     private static void readerFoliage(PixelSink sink, ReaderOverlaySpec spec, DecorRandom rand) {
         Region r = spec.reader();
         DecorSet set = spec.set();
         int density = spec.density();
-        // band twig between the crumb and the source (or the close box)
         int f1 = r.x() + 7 + spec.bandTextWidth() + 10;
         int f2 = (spec.sourceWidth() > 0 ? r.right() - 22 - spec.sourceWidth() : r.right() - 18) - 6;
         if (f2 - f1 >= 16) {
-            grow(sink, spec.zones(), new Region(f1 - 3, r.y() + 4, f2 - f1 + 6, 14),
-                    Foliage.Vine.twig(set.foliage(), f1 - 2, r.y() + 11, 0, f2 - f1 + 6, set.berry()), rand);
+            int length = Math.min(TWIG_LENGTH, f2 - f1 + 6);
+            grow(sink, spec.zones(), new Region(f1 - 3, r.y() + 4, length + 2, 14),
+                    Foliage.Vine.twig(set.foliage(), f1 - 2, r.y() + 11, 0, length, set.berry()), rand);
         }
-        // right rim, climbing
         grow(sink, spec.zones(), new Region(r.right() - 4, r.y() + 4, 10, r.height() - 8),
                 Foliage.Vine.alongRim(set.foliage(), r.right() - 1, r.bottom() - 10, -Math.PI / 2,
-                        new int[] {40, 90, 130}[density], set.berry()), rand);
-        if (density >= 1) {
-            // left gap and rim, drooping; the strip starts right after the left neighbour
+                        new int[] {26, 38, 60}[density], set.berry()), rand);
+        if (density >= 2) {
             int left = spec.leftEdge() + 1;
             grow(sink, spec.zones(), new Region(left, r.y() + 22, Math.max(6, r.x() + 7 - left), r.height() - 30),
-                    Foliage.Vine.alongRim(set.foliage(), r.x() + 2, r.y() + 26, Math.PI / 2,
-                            new int[] {0, 120, 170}[density], set.berry()), rand);
-            // bottom rim, running left
+                    Foliage.Vine.alongRim(set.foliage(), r.x() + 2, r.y() + 26, Math.PI / 2, 70, set.berry()), rand);
             grow(sink, spec.zones(), new Region(r.x() + 24, r.bottom() - 4, r.width() - 32, 10),
-                    Foliage.Vine.alongRim(set.foliage(), r.right() - 10, r.bottom() - 1, Math.PI,
-                            new int[] {0, 70, 110}[density], set.berry()), rand);
+                    Foliage.Vine.alongRim(set.foliage(), r.right() - 10, r.bottom() - 1, Math.PI, 50, set.berry()),
+                    rand);
         }
     }
 
@@ -285,13 +335,14 @@ public final class GuidebookDecorator implements AutoCloseable {
                 boolean tagShown = tagX - Ornaments.TAG_STRING - 6 >= nav.x() + 7 + spec.titleWidth();
                 int f2 = (tagShown ? tagX - Ornaments.TAG_STRING - 4 : spec.searchToggleX() - 6);
                 if (f2 - f1 >= 16) {
-                    grow(sink, spec.zones(), new Region(f1 - 3, nav.y() + 4, f2 - f1 + 6, 14),
-                            Foliage.Vine.twig(set.foliage(), f1 - 2, nav.y() + 11, 0, f2 - f1 + 6, set.berry()), rand);
+                    int length = Math.min(TWIG_LENGTH, f2 - f1 + 6);
+                    grow(sink, spec.zones(), new Region(f1 - 3, nav.y() + 4, length + 2, 14),
+                            Foliage.Vine.twig(set.foliage(), f1 - 2, nav.y() + 11, 0, length, set.berry()), rand);
                 }
                 if (density >= 2) {
                     grow(sink, spec.zones(), new Region(Math.max(0, nav.x() - 12), nav.y() + 40, Math.min(nav.x(), 12) + 4,
                             nav.height() - 44), Foliage.Vine.alongRim(set.foliage(), nav.x() - 1, nav.bottom() - 10,
-                            -Math.PI / 2, 80, set.berry()), rand);
+                            -Math.PI / 2, 50, set.berry()), rand);
                 }
             }
             directoryOverlay.update(spec, buffer);
@@ -318,6 +369,8 @@ public final class GuidebookDecorator implements AutoCloseable {
         plate.close();
         frontPlate.close();
         watermark.close();
+        endSeal.close();
+        PlateArtLoader.clear();
         readerOverlay.close();
         directoryOverlay.close();
     }
