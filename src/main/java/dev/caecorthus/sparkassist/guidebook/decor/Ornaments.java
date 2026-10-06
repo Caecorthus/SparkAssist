@@ -97,6 +97,90 @@ public final class Ornaments {
         s.set(x - TAG_STRING, y + 1, BRASS);
     }
 
+    // ================================================================ paper ornaments / 纸面小件
+
+    /** Ribbon width. 丝带宽度。 */
+    public static final int RIBBON_WIDTH = 4;
+
+    /**
+     * Silk bookmark ribbon hanging down from y1 to y2 at x: lit left edge, shaded right edge, a 1 px drop shadow
+     * to the right and a forked tail. 从 y1 垂到 y2 的丝带书签：左缘受光、右缘背光、右侧 1 像素投影、燕尾收尾。
+     */
+    public static void ribbon(PixelSink s, int x, int y1, int y2, int argb) {
+        if (y2 - y1 < 6) {
+            return;
+        }
+        int hi = DecorPalette.mix(argb, 0xFFFFFFFF, 0.25);
+        int lo = DecorPalette.mix(argb, 0xFF000000, 0.35);
+        s.fill(x, y1, x + 4, y2 - 2, argb);
+        s.fill(x, y1, x + 1, y2 - 2, hi);
+        s.fill(x + 3, y1, x + 4, y2 - 2, lo);
+        s.fill(x, y2 - 2, x + 1, y2 + 1, hi);
+        s.fill(x + 3, y2 - 2, x + 4, y2 + 1, lo);
+        s.set(x + 1, y2 - 2, argb);
+        s.set(x + 2, y2 - 2, argb);
+        s.fill(x + 4, y1 + 2, x + 5, y2 - 1, DecorPalette.SHADOW);
+    }
+
+    private static final String[] MARK_MOON = {"..##.", ".#...", "#....", ".#...", "..##."};
+    private static final String[] MARK_STAR = {"..#..", "..#..", "#####", ".###.", "#...#"};
+    private static final String[] MARK_DAGGER = {"..#..", "..#..", "#####", "..#..", "..#.."};
+    private static final String[] MARK_MASK = {".###.", "#.#.#", "#####", ".#.#.", "..#.."};
+
+    /** Wax seal (13x13 around cx, cy) in the faction colour with its mark engraved, and a small drip at the
+     * bottom right. 阵营色火漆印（以 cx, cy 为中心 13×13），印面刻徽记，右下一滴蜡。 */
+    public static void waxSeal(PixelSink s, int cx, int cy, int argb, DecorSet.Mark mark) {
+        int wax = DecorPalette.mix(argb, 0xFF000000, 0.35);
+        int rim = DecorPalette.mix(argb, 0xFFFFFFFF, 0.2);
+        int deep = DecorPalette.mix(argb, 0xFF000000, 0.6);
+        Dither.disc(s, cx + 1, cy + 1, 6, DecorPalette.SHADOW);
+        Dither.disc(s, cx, cy, 6, wax);
+        Dither.ring(s, cx, cy, 6, deep);
+        for (int y = -6; y <= 0; y++) {
+            for (int x = -6; x <= 0; x++) {
+                int d = x * x + y * y;
+                if (d <= 42 && d >= 25 && x + y < -5) {
+                    s.set(cx + x, cy + y, rim);
+                }
+            }
+        }
+        Dither.ring(s, cx, cy, 4, deep);
+        s.set(cx + 5, cy + 6, wax);
+        s.set(cx + 5, cy + 7, wax);
+        s.set(cx + 6, cy + 7, deep);
+        String[] glyph = switch (mark) {
+            case MOON -> MARK_MOON;
+            case STAR -> MARK_STAR;
+            case DAGGER -> MARK_DAGGER;
+            case MASK -> MARK_MASK;
+        };
+        Dither.bitmap(s, cx - 2, cy - 2, rim, glyph);
+    }
+
+    private static final String[] CHARM_MOON = {".###.", "#....", "#....", "#....", "#....", "#....", ".###."};
+    private static final String[] CHARM_KEY = {".###.", "#...#", "#...#", ".###.", "..#..", "..##.", "..#.."};
+    private static final String[] CHARM_DAGGER = {"..#..", "..#..", "#####", "..#..", "..#..", "..#..", "..#.."};
+    private static final String[] CHARM_BELL = {"..#..", ".###.", ".###.", ".###.", "#####", "..#..", "....."};
+    /** Chain length above a charm. 吊坠上方链子的长度。 */
+    public static final int CHARM_CHAIN = 7;
+    /** Total height of chain plus charm. 链子加吊坠的总高度。 */
+    public static final int CHARM_HEIGHT = CHARM_CHAIN + 7;
+
+    /** A 7 px chain hanging from (x, y) with a 5x7 brass charm below it. 从 (x, y) 垂下 7 像素链子与 5×7 黄铜吊坠。 */
+    public static void charm(PixelSink s, int x, int y, DecorSet.Charm kind) {
+        for (int i = 0; i < CHARM_CHAIN; i++) {
+            s.set(x, y + i, (i & 1) == 1 ? BRASS_LO : EDGE);
+        }
+        String[] glyph = switch (kind) {
+            case MOON -> CHARM_MOON;
+            case KEY -> CHARM_KEY;
+            case DAGGER -> CHARM_DAGGER;
+            case BELL -> CHARM_BELL;
+        };
+        Dither.bitmap(s, x - 2, y + CHARM_CHAIN, BRASS, glyph);
+        s.set(x - 1, y + CHARM_CHAIN + 1, BRASS_HI);
+    }
+
     // ================================================================ directory background / 目录背景
 
     /** Damask wallpaper over a dark body: an 8 px diagonal lattice with a brighter dot at every crossing. The
