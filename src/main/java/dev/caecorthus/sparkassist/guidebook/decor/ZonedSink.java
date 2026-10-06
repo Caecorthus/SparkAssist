@@ -32,6 +32,21 @@ public final class ZonedSink implements PixelSink {
         return inner.height();
     }
 
+    /** Inside one of the allowed rectangles (ignoring forbidden ones): what a stem steers by, so it walks on
+     * through a forbidden box without drawing instead of dying at it. 是否在允许区内（不看禁区）：主茎据此导航，
+     * 遇到禁区只是不落笔，继续前进而不是停在那里。 */
+    public boolean allowed(int x, int y) {
+        if (allowed.isEmpty()) {
+            return true;
+        }
+        for (Region region : allowed) {
+            if (region.contains(x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean admits(int x, int y) {
         if (!allowed.isEmpty()) {
             boolean inside = false;

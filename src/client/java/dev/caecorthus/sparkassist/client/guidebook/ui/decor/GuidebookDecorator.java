@@ -6,6 +6,7 @@ import dev.caecorthus.sparkassist.guidebook.decor.DecorPalette;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorRandom;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorSet;
 import dev.caecorthus.sparkassist.guidebook.decor.DecorZones;
+import dev.caecorthus.sparkassist.guidebook.decor.Foliage;
 import dev.caecorthus.sparkassist.guidebook.decor.OffsetSink;
 import dev.caecorthus.sparkassist.guidebook.decor.Ornaments;
 import dev.caecorthus.sparkassist.guidebook.decor.PixelBuffer;
@@ -47,8 +48,24 @@ public final class GuidebookDecorator implements AutoCloseable {
     private final DecorLayer readerOverlay = new DecorLayer("sparkassist_guide_reader_overlay");
     private final DecorLayer directoryOverlay = new DecorLayer("sparkassist_guide_directory_overlay");
 
-    private record OverlayKey(Region panel, List<Region> zones, DecorSet set, boolean ownPage, long seed,
-                              int density) {
+    /**
+     * Everything the reader overlay depends on; it doubles as the layer's cache key.
+     * 正文覆盖层的全部输入，同时作为缓存键。
+     *
+     * @param ownPage       the page belongs to the player's own faction: gold ribbon / 自己阵营的页面，金线丝带
+     * @param zones         no-go rectangles: the reader's own text boxes plus everything outside it / 禁区
+     * @param bandTextWidth width of the crumb or running head drawn at x + 7 / 路径或页眉宽度
+     * @param sourceWidth   width of the source label, 0 for none / 来源宽度
+     * @param leftEdge      right edge of whatever sits left of the reader (directory, or screen margin) / 左侧邻居的右缘
+     */
+    public record ReaderOverlaySpec(Region reader, ReaderPainter.Sheet sheet, DecorSet set, boolean ownPage, long seed,
+                                    List<Region> zones, int bandTextWidth, int sourceWidth, int leftEdge, int density,
+                                    boolean foliage) {
+    }
+
+    /** Everything the directory overlay depends on; also its cache key. 目录覆盖层的全部输入，同时作为缓存键。 */
+    public record DirectoryOverlaySpec(Region nav, DecorSet set, long seed, List<Region> zones, int titleWidth,
+                                       int searchToggleX, int density, boolean foliage) {
     }
 
     private record DirectoryKey(int width, int height, DecorSet set, long seed, int density) {
@@ -162,33 +179,33 @@ public final class GuidebookDecorator implements AutoCloseable {
 
     /**
      * The reader's overlay, drawn last: the ribbon bookmark down the left paper margin, the wax seal on the
-     * bottom-left corner and steam curls rising from the outer corners. Curls go through the no-go zones.
-     * 正文的覆盖层，最后绘制：垂在纸页左边距的丝带书签、左下角的火漆印、从外角升起的蒸汽卷云。卷云受禁区约束。
-     *
-     * @param ownPage the page belongs to the player's own faction, so the ribbon is gold / 自己阵营的页面，丝带为金线
-     * @param zones   no-go rectangles beyond this panel's own interior / 本面板内部以外的禁区
+     * bottom-left corner, steam curls rising from the outer corners and the faction foliage hugging the rims
+     * (band gap, left gap, right rim, bottom rim). Curls and vines go through the no-go zones pixel by pixel.
+     * 正文的覆盖层，最后绘制：垂在纸页左边距的丝带书签、左下角的火漆印、从外角升起的蒸汽卷云，以及贴着边框的阵营枝叶
+     * （标题带空档、左侧缝隙、右沿、底沿）。卷云与枝条逐像素受禁区约束。
      */
-    public void drawReaderOverlay(DrawContext context, Region reader, ReaderPainter.Sheet sheet, DecorSet set,
-                                  boolean ownPage, long seed, List<Region> zones) {
-        int density = DecorSettings.density();
+    public void drawReaderOverlay(DrawContext context, ReaderOverlaySpec spec) {
+        Region reader = spec.reader();
+        int density = spec.density();
         if (density < 0 || reader.width() <= 0 || reader.height() <= 0) {
             return;
         }
-        OverlayKey key = new OverlayKey(reader, zones, set, ownPage, seed, density);
         int ox = reader.x() - OVERLAY_MARGIN;
         int oy = reader.y() - OVERLAY_MARGIN;
-        if (!readerOverlay.isCurrent(key)) {
+        if (!readerOverlay.isCurrent(spec)) {
             PixelBuffer buffer = new PixelBuffer(reader.width() + 2 * OVERLAY_MARGIN,
                     reader.height() + 2 * OVERLAY_MARGIN);
             PixelSink sink = new OffsetSink(buffer, -ox, -oy);
-            DecorRandom rand = new DecorRandom(seed ^ 0xA11L);
+            DecorRandom rand = new DecorRandom(spec.seed() ^ 0xA11L);
+            DecorSet set = spec.set();
             int colour = DecorPalette.opaque(set.colour());
+            ReaderPainter.Sheet sheet = spec.sheet();
             int ribbonEnd = reader.y() + 21 + Math.round(reader.height() * 0.42f) + rand.nextInt(10);
             Ornaments.ribbon(sink, sheet.x() + 3, reader.y() + 21, Math.min(ribbonEnd, sheet.bottom() - 12),
-                    ownPage ? DecorPalette.POLISHED : DecorPalette.mix(colour, DecorPalette.INK, 0.3));
+                    spec.ownPage() ? DecorPalette.POLISHED : DecorPalette.mix(colour, DecorPalette.INK, 0.3));
             if (density >= 1) {
                 Ornaments.waxSeal(sink, reader.x() + 8, reader.bottom() - 10, colour, set.mark());
-                List<Region> forbidden = new ArrayList<>(zones);
+                List<Region> forbidden = new ArrayList<>(spec.zones());
                 forbidden.add(DecorZones.panelInterior(reader));
                 PixelSink curls = new ZonedSink(sink, List.of(), forbidden);
                 Steam.wisps(curls, reader.right() + 1, reader.bottom() - 8, -Math.PI / 2 + 0.2, 3, rand);
@@ -196,33 +213,95 @@ public final class GuidebookDecorator implements AutoCloseable {
                     Steam.wisps(curls, reader.x() - 1, reader.bottom() - 8, -Math.PI / 2 - 0.2, 2, rand);
                 }
             }
-            readerOverlay.update(key, buffer);
+            if (spec.foliage()) {
+                readerFoliage(sink, spec, rand);
+            }
+            readerOverlay.update(spec, buffer);
         }
         readerOverlay.draw(context, ox, oy);
     }
 
-    /** Steam curls at the directory's outer corners, drawn last. 目录外角的蒸汽卷云，最后绘制。 */
-    public void drawDirectoryOverlay(DrawContext context, Region nav, DecorSet set, long seed, List<Region> zones) {
-        int density = DecorSettings.density();
-        if (density < 1 || nav.width() <= 0 || nav.height() <= 0) {
+    /** Vines in 10–14 px strips along the reader's rims; each strip is its own allowed rectangle.
+     * 正文边沿 10 到 14 像素边条里的枝条；每条边条是一个允许矩形。 */
+    private static void readerFoliage(PixelSink sink, ReaderOverlaySpec spec, DecorRandom rand) {
+        Region r = spec.reader();
+        DecorSet set = spec.set();
+        int density = spec.density();
+        // band twig between the crumb and the source (or the close box)
+        int f1 = r.x() + 7 + spec.bandTextWidth() + 10;
+        int f2 = (spec.sourceWidth() > 0 ? r.right() - 22 - spec.sourceWidth() : r.right() - 18) - 6;
+        if (f2 - f1 >= 16) {
+            grow(sink, spec.zones(), new Region(f1 - 3, r.y() + 4, f2 - f1 + 6, 14),
+                    Foliage.Vine.twig(set.foliage(), f1 - 2, r.y() + 11, 0, f2 - f1 + 6, set.berry()), rand);
+        }
+        // right rim, climbing
+        grow(sink, spec.zones(), new Region(r.right() - 4, r.y() + 4, 10, r.height() - 8),
+                Foliage.Vine.alongRim(set.foliage(), r.right() - 1, r.bottom() - 10, -Math.PI / 2,
+                        new int[] {40, 90, 130}[density], set.berry()), rand);
+        if (density >= 1) {
+            // left gap and rim, drooping; the strip starts right after the left neighbour
+            int left = spec.leftEdge() + 1;
+            grow(sink, spec.zones(), new Region(left, r.y() + 22, Math.max(6, r.x() + 7 - left), r.height() - 30),
+                    Foliage.Vine.alongRim(set.foliage(), r.x() + 2, r.y() + 26, Math.PI / 2,
+                            new int[] {0, 120, 170}[density], set.berry()), rand);
+            // bottom rim, running left
+            grow(sink, spec.zones(), new Region(r.x() + 24, r.bottom() - 4, r.width() - 32, 10),
+                    Foliage.Vine.alongRim(set.foliage(), r.right() - 10, r.bottom() - 1, Math.PI,
+                            new int[] {0, 70, 110}[density], set.berry()), rand);
+        }
+    }
+
+    /** Steam curls at the directory's outer corners and, with foliage on, a twig in the band gap (and at full
+     * density a vine up the outer left edge), drawn last. 目录外角的蒸汽卷云；开枝叶时标题带空档一根横枝，满密度时左外沿
+     * 再长一根；最后绘制。 */
+    public void drawDirectoryOverlay(DrawContext context, DirectoryOverlaySpec spec) {
+        Region nav = spec.nav();
+        int density = spec.density();
+        if (density < 0 || nav.width() <= 0 || nav.height() <= 0) {
             return;
         }
-        OverlayKey key = new OverlayKey(nav, zones, set, false, seed, density);
+        if (density < 1 && !spec.foliage()) {
+            return;
+        }
         int ox = nav.x() - OVERLAY_MARGIN;
         int oy = nav.y() - OVERLAY_MARGIN;
-        if (!directoryOverlay.isCurrent(key)) {
+        if (!directoryOverlay.isCurrent(spec)) {
             PixelBuffer buffer = new PixelBuffer(nav.width() + 2 * OVERLAY_MARGIN, nav.height() + 2 * OVERLAY_MARGIN);
-            List<Region> forbidden = new ArrayList<>(zones);
-            forbidden.add(DecorZones.panelInterior(nav));
-            PixelSink curls = new ZonedSink(new OffsetSink(buffer, -ox, -oy), List.of(), forbidden);
-            DecorRandom rand = new DecorRandom(seed ^ 0xD1FL);
-            Steam.wisps(curls, nav.x() - 1, nav.bottom() - 6, -Math.PI / 2, 3, rand);
-            if (density >= 2) {
-                Steam.wisps(curls, nav.right() + 1, nav.y() + 24, Math.PI / 2 + 0.3, 2, rand);
+            PixelSink sink = new OffsetSink(buffer, -ox, -oy);
+            DecorRandom rand = new DecorRandom(spec.seed() ^ 0xD1FL);
+            if (density >= 1) {
+                List<Region> forbidden = new ArrayList<>(spec.zones());
+                forbidden.add(DecorZones.panelInterior(nav));
+                PixelSink curls = new ZonedSink(sink, List.of(), forbidden);
+                Steam.wisps(curls, nav.x() - 1, nav.bottom() - 6, -Math.PI / 2, 3, rand);
+                if (density >= 2) {
+                    Steam.wisps(curls, nav.right() + 1, nav.y() + 24, Math.PI / 2 + 0.3, 2, rand);
+                }
             }
-            directoryOverlay.update(key, buffer);
+            if (spec.foliage()) {
+                DecorSet set = spec.set();
+                int f1 = nav.x() + 7 + spec.titleWidth() + 10;
+                int tagX = spec.searchToggleX() - 6 - Ornaments.TAG_WIDTH;
+                boolean tagShown = tagX - Ornaments.TAG_STRING - 6 >= nav.x() + 7 + spec.titleWidth();
+                int f2 = (tagShown ? tagX - Ornaments.TAG_STRING - 4 : spec.searchToggleX() - 6);
+                if (f2 - f1 >= 16) {
+                    grow(sink, spec.zones(), new Region(f1 - 3, nav.y() + 4, f2 - f1 + 6, 14),
+                            Foliage.Vine.twig(set.foliage(), f1 - 2, nav.y() + 11, 0, f2 - f1 + 6, set.berry()), rand);
+                }
+                if (density >= 2) {
+                    grow(sink, spec.zones(), new Region(Math.max(0, nav.x() - 12), nav.y() + 40, Math.min(nav.x(), 12) + 4,
+                            nav.height() - 44), Foliage.Vine.alongRim(set.foliage(), nav.x() - 1, nav.bottom() - 10,
+                            -Math.PI / 2, 80, set.berry()), rand);
+                }
+            }
+            directoryOverlay.update(spec, buffer);
         }
         directoryOverlay.draw(context, ox, oy);
+    }
+
+    private static void grow(PixelSink sink, List<Region> zones, Region strip, Foliage.Vine vine, DecorRandom rand) {
+        ZonedSink zoned = new ZonedSink(sink, List.of(strip), zones);
+        Foliage.grow(zoned, zoned::allowed, vine, rand);
     }
 
     /** Developer overlay: every no-go rectangle in translucent red. 开发用叠加：所有禁区矩形涂半透明红。 */
