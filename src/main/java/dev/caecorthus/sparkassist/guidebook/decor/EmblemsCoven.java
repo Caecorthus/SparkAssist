@@ -168,8 +168,8 @@ final class EmblemsCoven {
                 "......#####...+..",
                 "................."});
 
-        // 招募同伙：张开的魔女之手，掌心烙着印记
-        table.put("sparkwitch:recruit_accomplice", new String[] {
+        // 魔化使：张开的手，掌心烙着魔女的印记
+        table.put("sparkwitch:bewitched", new String[] {
                 ".................",
                 ".......##........",
                 ".......##.##.....",
