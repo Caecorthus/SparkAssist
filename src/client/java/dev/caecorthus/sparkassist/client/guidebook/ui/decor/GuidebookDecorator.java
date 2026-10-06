@@ -25,14 +25,17 @@ import net.minecraft.client.gui.DrawContext;
 /**
  * Owns the guide's cached decoration layers and draws them between the painters' batches: a layer is drawn after
  * the surface under it (panel body, paper) and before the content over it (rows, text), all at the same z, so
- * plain draw order settles what covers what. Layers regenerate only when their key changes.
+ * plain draw order settles what covers what; only the reader overlay, which lies on top of everything, is lifted
+ * over the content's fades. Layers regenerate only when their key changes.
  * 持有指南的缓存点缀层，并在绘制批次之间画出：每层画在其下的面（面板底、纸）之后、其上的内容（行、文字）之前，
- * 全部同一 z，纯靠绘制顺序决定遮盖。只有 key 变化时才重新生成。
+ * 全部同一 z，纯靠绘制顺序决定遮盖；只有盖在最上面的正文覆盖层抬高到正文渐隐之上。只有 key 变化时才重新生成。
  */
 public final class GuidebookDecorator implements AutoCloseable {
     private static final int SIGIL_RADIUS = 40;
     /** Clear space kept between the directory sigil and the rows above / the footer below. 目录暗纹与上方各行、下方页脚之间的留白。 */
     private static final int SIGIL_GAP = 6;
+    /** Depth of the reader overlay, over the content's fades and scrollbar. 正文覆盖层的深度，高于渐隐与滚动条。 */
+    private static final int OVERLAY_Z = 3;
 
     /** Largest paper watermark radius; smaller sheets shrink it, below 24 it is dropped. 纸面暗纹的最大半径。 */
     private static final int WATERMARK_RADIUS = 54;
@@ -56,13 +59,12 @@ public final class GuidebookDecorator implements AutoCloseable {
      * Everything the reader overlay depends on; it doubles as the layer's cache key.
      * 正文覆盖层的全部输入，同时作为缓存键。
      *
-     * @param ownPage       the page belongs to the player's own faction: gold ribbon / 自己阵营的页面，金线丝带
      * @param zones         no-go rectangles: the reader's own text boxes plus everything outside it / 禁区
      * @param bandTextWidth width of the crumb or running head drawn at x + 7 / 路径或页眉宽度
      * @param sourceWidth   width of the source label, 0 for none / 来源宽度
      * @param leftEdge      right edge of whatever sits left of the reader (directory, or screen margin) / 左侧邻居的右缘
      */
-    public record ReaderOverlaySpec(Region reader, ReaderPainter.Sheet sheet, DecorSet set, boolean ownPage, long seed,
+    public record ReaderOverlaySpec(Region reader, ReaderPainter.Sheet sheet, DecorSet set, long seed,
                                     List<Region> zones, int bandTextWidth, int sourceWidth, int leftEdge, int density,
                                     boolean foliage) {
     }
@@ -250,7 +252,7 @@ public final class GuidebookDecorator implements AutoCloseable {
             ReaderPainter.Sheet sheet = spec.sheet();
             int ribbonEnd = reader.y() + 21 + Math.round(reader.height() * 0.42f) + rand.nextInt(10);
             Ornaments.ribbon(sink, sheet.x() + 3, reader.y() + 21, Math.min(ribbonEnd, sheet.bottom() - 12),
-                    spec.ownPage() ? DecorPalette.POLISHED : DecorPalette.mix(colour, DecorPalette.INK, 0.3));
+                    DecorPalette.mix(colour, DecorPalette.INK, 0.3));
             if (density >= 1) {
                 List<Region> forbidden = new ArrayList<>(spec.zones());
                 forbidden.add(DecorZones.panelInterior(reader));
@@ -265,7 +267,13 @@ public final class GuidebookDecorator implements AutoCloseable {
             }
             readerOverlay.update(spec, buffer);
         }
+        // Above the content's paper fades (z+1, which write depth) and scrollbar (z+2): at z 0 the ribbon would
+        // vanish under the top fade as soon as the page scrolls. 高于正文的纸色渐隐（z+1，会写入深度）与滚动条（z+2）：
+        // 若在 z 0，页面一滚动，丝带顶端就会被顶部渐隐吃掉。
+        context.getMatrices().push();
+        context.getMatrices().translate(0, 0, OVERLAY_Z);
         readerOverlay.draw(context, ox, oy);
+        context.getMatrices().pop();
     }
 
     /** Longest band twig: a sprig, not a garland. 标题带小枝的最大长度：一小枝，而不是一整条花环。 */

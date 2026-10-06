@@ -681,9 +681,8 @@ public final class GuidebookScreen extends Screen {
             debug.addAll(DecorZones.reader(reader, sheet.textLeft(), sheet.textRight(), sheet.y(), sheet.bottom(),
                     sheet.right(), bandText, sourceWidth));
             int leftEdge = directoryShown ? nav.right() : reader.x() - 8;
-            decorator.drawReaderOverlay(context, new GuidebookDecorator.ReaderOverlaySpec(reader, sheet, set,
-                    article && set.sameFaction(ownerSet()), seed, readerZones, bandText, sourceWidth, leftEdge, density,
-                    foliage));
+            decorator.drawReaderOverlay(context, new GuidebookDecorator.ReaderOverlaySpec(reader, sheet, set, seed,
+                    readerZones, bandText, sourceWidth, leftEdge, density, foliage));
         }
         if (DecorSettings.debugZones()) {
             GuidebookDecorator.drawDebugZones(context, debug);

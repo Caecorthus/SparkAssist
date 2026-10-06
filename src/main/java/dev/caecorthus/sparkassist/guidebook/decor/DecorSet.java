@@ -12,7 +12,8 @@ import java.util.Optional;
  * 一页（或一名玩家）的点缀套别：所属页面（显示它的手绘扉画与徽记）与主题色、后备扉画景、暗纹、植物、阵营点睛色、
  * 火漆印面与吊坠。各阵营有默认值；DecorSetResolver 填入页面与主题色，条目 JSON 的 decor 字段可以单独覆盖其中一项。
  *
- * @param colour 0xRRGGBB accent (ribbon, seal, plate highlight) / 点睛色
+ * @param colour 0xRRGGBB faction accent (ribbon, seal, luggage tag), grey for pages of no faction / 阵营点睛色（丝带、
+ *               火漆印、行李牌），不属于任何阵营的页面为灰色
  * @param berry  ARGB berry colour for the foliage, 0 for none / 浆果色，0 表示没有
  * @param page   entry id of the page, whose plate art and emblem are drawn; empty for none / 页面的条目 id，取其扉画与
  *               徽记；空串为无
@@ -34,8 +35,8 @@ public record DecorSet(Plate plate, Sigil sigil, Foliage foliage, int colour, in
 
     public static final DecorSet WITCH = new DecorSet(Plate.MARSH, Sigil.CIRCLE, Foliage.BRIAR, 0xB567FF,
             0xFFB567FF, Mark.MOON, Charm.MOON, "", 0xB567FF);
-    public static final DecorSet CIVILIAN = new DecorSet(Plate.VIADUCT, Sigil.COMPASS, Foliage.WILLOW, 0x5FA3C9,
-            0, Mark.STAR, Charm.KEY, "", 0x5FA3C9);
+    public static final DecorSet CIVILIAN = new DecorSet(Plate.VIADUCT, Sigil.COMPASS, Foliage.WILLOW, 0x36E51B,
+            0, Mark.STAR, Charm.KEY, "", 0x36E51B);
     public static final DecorSet KILLER = new DecorSet(Plate.RAIN, Sigil.WEB, Foliage.DEAD, 0xC13838,
             0xFF8A1B29, Mark.DAGGER, Charm.DAGGER, "", 0xC13838);
     public static final DecorSet NEUTRAL = new DecorSet(Plate.FAIR, Sigil.HARLEQUIN, Foliage.RIBBON, 0xDFA94F,
@@ -48,6 +49,11 @@ public record DecorSet(Plate plate, Sigil sigil, Foliage foliage, int colour, in
     /** This set for one page: its entry id and theme colour. 用于某一页：条目 id 与主题色。 */
     public DecorSet withPage(String pageId, int themeRgb) {
         return new DecorSet(plate, sigil, foliage, colour, berry, mark, charm, pageId, themeRgb & 0xFFFFFF);
+    }
+
+    /** This set wearing another faction's ribbon and seal. 换上另一阵营的丝带与火漆印。 */
+    public DecorSet withAccent(int accentRgb, Mark sealMark) {
+        return new DecorSet(plate, sigil, foliage, accentRgb & 0xFFFFFF, berry, sealMark, charm, page, theme);
     }
 
     /** Same faction look, whatever the plate: used for "is this my own faction's page". 不论扉画，阵营外观相同。 */
