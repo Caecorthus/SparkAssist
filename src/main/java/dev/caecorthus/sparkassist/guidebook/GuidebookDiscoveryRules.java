@@ -17,6 +17,9 @@ public final class GuidebookDiscoveryRules {
     // group leaves its skill with no directory row.
     // 所属身份同时决定技能页所在的目录分组（GuidebookNavigation.groupsFor），因此从不被自动发现的人工页面（如仪礼剑）
     // 也必须保留在此映射中；所属身份没有技能分组时，该技能在目录中不会出现。
+    // Apprentice Witch: five random registry skills plus Purify, the fixed second skill unlocked by graduating; Purify
+    // is not in the skill registry either, so it too appears only through its authored page.
+    // 预备魔女：五个随机的注册表技能，加上出师后固定解锁的第二技能净化；净化同样不在技能注册表中，只通过人工编写的页面出现。
     private static final Map<String, String> WITCH_SKILL_OWNER_ROLE_IDS = Map.ofEntries(
             Map.entry("sparkwitch:witch_factor", "sparkwitch:grand_witch"),
             Map.entry("sparkwitch:ceremonial_sword", "sparkwitch:grand_witch"),
@@ -26,7 +29,8 @@ public final class GuidebookDiscoveryRules {
             Map.entry("sparkwitch:swift_step", "sparkwitch:apprentice_witch"),
             Map.entry("sparkwitch:murder_sense", "sparkwitch:apprentice_witch"),
             Map.entry("sparkwitch:healing", "sparkwitch:apprentice_witch"),
-            Map.entry("sparkwitch:clairvoyance", "sparkwitch:apprentice_witch")
+            Map.entry("sparkwitch:clairvoyance", "sparkwitch:apprentice_witch"),
+            Map.entry("sparkwitch:purify", "sparkwitch:apprentice_witch")
     );
 
     private GuidebookDiscoveryRules() {
