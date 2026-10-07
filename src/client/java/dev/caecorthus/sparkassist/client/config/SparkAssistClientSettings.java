@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.SparkAssistClient;
 import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import dev.caecorthus.sparkassist.client.sound.EventSoundVolumeController;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig;
+import dev.caecorthus.sparkassist.config.SparkAssistConfig.GuidebookDecor;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
 import dev.caecorthus.sparkassist.sound.EventSoundGroup;
 
@@ -35,6 +36,26 @@ public final class SparkAssistClientSettings {
         manager.config().setEventSoundVolume(group, volume);
         manager.save();
         EventSoundVolumeController.refreshPlayingSounds();
+    }
+
+    public static GuidebookDecor guidebookDecor() {
+        return config().guidebookDecor();
+    }
+
+    public static void setGuidebookDecor(GuidebookDecor decor) {
+        SparkAssistConfigManager manager = SparkAssistClient.configManager();
+        manager.config().setGuidebookDecor(decor);
+        manager.save();
+    }
+
+    public static boolean guidebookFoliage() {
+        return config().guidebookFoliage();
+    }
+
+    public static void setGuidebookFoliage(boolean foliage) {
+        SparkAssistConfigManager manager = SparkAssistClient.configManager();
+        manager.config().setGuidebookFoliage(foliage);
+        manager.save();
     }
 
     private static SparkAssistConfig config() {

@@ -10,13 +10,26 @@
         {
           "blocks": [
             {
+              "type": "paragraph",
+              "text": "个子比别人小一圈。通用词条，比其他通用词条稀有得多，不会和【猪】词条同时出现。"
+            },
+            {
               "type": "section",
-              "text": "体型",
+              "text": "效果",
               "tone": "info"
             },
             {
               "type": "bullet",
-              "text": "体型缩小 10%。"
+              "text": "整个人缩小到原来的 90%。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "矮一截很显眼，别人可能凭身形认出你。"
             }
           ]
         }

@@ -3,10 +3,12 @@
   "package": "dev.caecorthus.sparkassist.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AccessibilityOptionsScreenMixin",
     "ControlsOptionsScreenMixin",
     "GameMenuScreenMixin",
     "KeyBindingMixin",
     "LimitedInventoryScreenMixin",
+    "MinecraftClientMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin"
   ],

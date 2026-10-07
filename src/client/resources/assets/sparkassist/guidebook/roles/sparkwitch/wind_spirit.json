@@ -10,50 +10,82 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "good",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.0"
-            },
-            {
               "type": "paragraph",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.1"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "好人阵营冤魂的晋升身份之一。你永远保持高速，用风弹把杀手从队友身边推开。冤魂的共同限制仍然有效，见冤魂页。"
+            },
             {
               "type": "section",
-              "tone": "good",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.2"
+              "text": "能力",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.3"
+              "runs": [
+                {
+                  "text": "迅捷",
+                  "tone": "good"
+                },
+                {
+                  "text": "：永久速度 II，体力无限。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.4"
+              "runs": [
+                {
+                  "text": "风弹",
+                  "tone": "good"
+                },
+                {
+                  "text": "：在商店购买【风弹】，50 金币一个，不限购。风弹能把活着的玩家击退，但不造成伤害，也不会触发门、按钮等任何方块。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.5"
+              "runs": [
+                {
+                  "text": "本能",
+                  "tone": "good"
+                },
+                {
+                  "text": "：按住本能透视键，能隔墙看到所有活着的玩家，但他们都显示为同一种颜色，分不出谁是杀手；掉落物显示为金色。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.6"
+              "runs": [
+                {
+                  "text": "不怕停电",
+                  "tone": "good"
+                },
+                {
+                  "text": "：停电时不会失明，还会获得夜视。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.7"
+              "text": "晋升时金币归零，之后每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.8"
+              "text": "用本能找到落单的队友，跟在附近。看到有人被追杀，就用风弹把杀手推开，帮队友争取逃跑的时间。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.wind_spirit.9"
+              "text": "风弹的作用是拉开距离，在杀手贴近目标之前出手最有效。"
+            },
+            {
+              "type": "bullet",
+              "text": "活人看不见你，杀手也不知道是谁推的他。多攒几发风弹，关键时刻连续出手。"
             }
           ]
         }

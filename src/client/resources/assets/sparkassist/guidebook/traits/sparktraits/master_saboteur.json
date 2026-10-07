@@ -1,0 +1,47 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:master_saboteur",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.master_saboteur.name",
+      "summaryKey": "trait.sparktraits.master_saboteur.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "你发动的停电更久。只会出现在商店里有【停电器】的杀手身上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "你用【停电器】发动的停电持续时间延长 50%，约 45–60 秒。同伴发动的停电不受影响。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "停电期间好人失明、杀手有夜视，多出来的时间足够你多走一段路、多找一个目标。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#4A5A8C",
+      "order": 1140
+    }
+  ]
+}

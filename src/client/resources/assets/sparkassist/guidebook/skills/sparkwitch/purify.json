@@ -1,0 +1,84 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:purify",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.purify.name",
+      "summaryKey": "skill.sparkwitch.purify.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "预备魔女出师后解锁"
+            },
+            {
+              "type": "paragraph",
+              "text": "把魔女因子从人身上拔除：既能救下被因子拖垮理智的人，也能证明对方不是魔女阵营。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "完成 2 个任务出师后解锁，每个预备魔女都有，不在随机技能之列。按第二技能键（默认 N）使用，冷却 20 秒，和主技能的冷却各算各的。"
+            },
+            {
+              "type": "bullet",
+              "text": "消耗 30 魔力，清除准心对准的 6 格内一名玩家身上的魔女因子；没瞄准任何人、而你自己身上有因子时，清除你自己的。"
+            },
+            {
+              "type": "bullet",
+              "text": "清除成功后你获得 30 魔力，对方也会收到因子被净化的提示。"
+            },
+            {
+              "type": "bullet",
+              "text": "对方身上没有因子时，你会收到“没有在（玩家名）身上感知到魔女因子”的提示，魔力照扣、照样进入冷却。没瞄准任何人、自己也没有因子时，不消耗任何东西。"
+            },
+            {
+              "type": "bullet",
+              "text": "恐惧封锁不了净化。"
+            },
+            {
+              "type": "section",
+              "text": "使用建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "大魔女、魔化使和共犯都不能持有魔女因子。净化成功，就说明对方不是魔女阵营，可以把结果告诉大家。"
+            },
+            {
+              "type": "bullet",
+              "text": "净化掉的因子不会退回大魔女的传播额度：她就此少了一份魔力来源，因子网络也少了一双眼睛。"
+            },
+            {
+              "type": "bullet",
+              "text": "你身上的因子每 60 秒扣你 30 理智，还会给大魔女提供更多魔力，发现自己被传了因子就先净化自己。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "没感知到因子什么也证明不了：好人身上本来就多半没有因子，魔女阵营也从来不会有。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:apprentice_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#D9C2FF",
+      "order": 160
+    }
+  ]
+}

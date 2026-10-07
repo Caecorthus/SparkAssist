@@ -13,3 +13,7 @@
 !gradle/wrapper/gradle-wrapper.jar
 *.iml
 *.log
+
+# Local test sources
+/src/test/
+/docs/

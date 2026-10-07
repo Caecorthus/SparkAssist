@@ -1,0 +1,51 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:herculean_strength",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.herculean_strength.name",
+      "summaryKey": "trait.sparktraits.herculean_strength.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "扔东西更快更远。只会出现在能买到或带着投掷物的杀手身上，例如【手雷】、【毒气弹】、【飞斧】、【手里剑】。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "你扔出的投掷物初速提高 30%，飞得更快更远。"
+            },
+            {
+              "type": "bullet",
+              "text": "需要蓄力的投掷物，蓄力时间缩短 30%。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "扔【手雷】时可以站得更远，少冒被自己炸到的风险。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#C9772B",
+      "order": 1130
+    }
+  ]
+}

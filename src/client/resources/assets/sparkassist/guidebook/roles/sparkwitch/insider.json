@@ -1,0 +1,148 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:insider",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.insider",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "中立阵营里黑警的同伙。你混在乘客中做任务赚钱，和黑警组成嘉豪阵营，目标是让列车上只剩你们。"
+            },
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "只剩嘉豪阵营（黑警和你）存活时，你们共同获胜，已经阵亡的成员也算赢。就算黑警死了，只要最后只剩你，你们依然获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "只要你们还有人活着，杀手和好人就无法提前获胜；列车时间耗尽时仍算好人阵营获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "嘉豪阵营有自己的阵营色土豪金：获胜时结算显示金色的「嘉豪胜利！」——整列列车的人都被嘉豪们豪完了。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "认出同伙",
+                  "tone": "money"
+                },
+                {
+                  "text": "：你和黑警看向对方时会显示金色的“嘉豪同伙”。按住本能透视键时，黑警显示为黑警的颜色，其他人显示为你的颜色。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "中立万能钥匙",
+                  "tone": "money"
+                },
+                {
+                  "text": "：开局获得，能打开列车门和上锁的房间门，开门后冷却 10 秒。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "平板电脑",
+                  "tone": "money"
+                },
+                {
+                  "text": "：开局免费获得，接入义警频道，与义警共享聊天、紧急会议和嫌疑人功能；本局完成 2 个任务后才能看到其他成员的身份。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "开枪无惩罚",
+                  "tone": "money"
+                },
+                {
+                  "text": "：用枪打死好人也不会掉枪或受惩罚，之后照样能捡枪。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "金币",
+                  "tone": "money"
+                },
+                {
+                  "text": "：开局 0 金币，每完成一个任务获得 50 金币。你的理智是假理智，不会精神崩溃。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "【左轮手枪】150 金币、【撬棍】50 金币，各限购 1 次。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "先做任务攒钱买【左轮手枪】，有枪之后可以放心开火。"
+            },
+            {
+              "type": "bullet",
+              "text": "平板让你掌握义警的会议和嫌疑人情报，找机会提醒黑警避开风头。"
+            },
+            {
+              "type": "bullet",
+              "text": "杀手眼里你和普通乘客没有区别，不会放过你；混在人群里，让杀手和好人互相消耗。"
+            },
+            {
+              "type": "bullet",
+              "text": "你和黑警只要有一人活着就能拖住其他阵营，别一起去冒险。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "内应只在有黑警、并且至少 4 名杀手的对局中出现。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#00FFD0",
+      "order": 612
+    }
+  ]
+}

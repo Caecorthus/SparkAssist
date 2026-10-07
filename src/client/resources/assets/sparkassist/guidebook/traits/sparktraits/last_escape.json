@@ -1,0 +1,76 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:last_escape",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.last_escape.name",
+      "summaryKey": "trait.sparktraits.last_escape.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "隐藏词条：开局你看不到它，直到它救你一命时才会显示。只会出现在杀手身上，每局最多触发一次。"
+            },
+            {
+              "type": "section",
+              "text": "触发",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "你本该死去、而且护盾等其他保护都没挡住时，会免于这次死亡，进入 10 秒逃脱状态。"
+            },
+            {
+              "type": "bullet",
+              "text": "掉下火车、中途退出和少数特殊死亡不会触发。"
+            },
+            {
+              "type": "section",
+              "text": "逃脱状态（10 秒）",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "获得速度 II、隐身和无敌，可以穿过关着的门，也不会和其他玩家碰撞。"
+            },
+            {
+              "type": "bullet",
+              "text": "期间不能攻击、使用物品或与方块互动；疯魔模式会立刻结束。"
+            },
+            {
+              "type": "bullet",
+              "text": "触发时，身上物品的剩余冷却减半（【开锁器】除外）。"
+            },
+            {
+              "type": "bullet",
+              "text": "这段时间里掉下火车仍然会死。"
+            },
+            {
+              "type": "bullet",
+              "text": "10 秒后恢复正常，但你的画面会一直保持半灰白，直到死亡或本局结束。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "触发后别恋战，趁隐身穿门离开，换个地方重新开始。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#AAAAB8",
+      "order": 1120
+    }
+  ]
+}

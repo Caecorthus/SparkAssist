@@ -10,6 +10,7 @@ import java.util.Set;
 public final class GuidebookSessionState {
     private final Set<String> observedRoleIds = new LinkedHashSet<>();
     private final Set<String> observedTraitIds = new LinkedHashSet<>();
+    private final Set<String> expandedNodeIds = new LinkedHashSet<>();
 
     private boolean roundActive;
     private String currentRoleId;
@@ -19,10 +20,25 @@ public final class GuidebookSessionState {
     private int selectedPage;
     private int leftScroll;
     private int rightScroll;
+    private int observationRevision;
+    // Survives clear(): the lobby and title screen keep showing the last round's decorations.
+    // 不随 clear() 重置：大厅与标题界面沿用上一局的点缀。
+    private long roundSeed = 0x5EED;
 
     public void startRound() {
+        startRound(System.nanoTime() ^ (System.currentTimeMillis() << 20));
+    }
+
+    /** A round with a known seed (tests, replays). 指定种子的一局。 */
+    public void startRound(long seed) {
         clear();
         roundActive = true;
+        roundSeed = seed;
+    }
+
+    /** Seed that picks this round's decoration variants; kept after the round ends. 本局点缀的种子，局后保留。 */
+    public long roundSeed() {
+        return roundSeed;
     }
 
     public void endRound() {
@@ -45,17 +61,29 @@ public final class GuidebookSessionState {
         // Empty death/sync observations never erase discoveries from this round.
         // 死亡或同步空档中的空观察不会抹去本局已经发现的内容。
         if (isPresent(roleId)) {
-            observedRoleIds.add(roleId);
+            if (observedRoleIds.add(roleId)) {
+                observationRevision++;
+            }
             if (!roleId.equals(currentRoleId)) {
                 currentRoleId = roleId;
                 pendingRoleAutoSelection = roleId;
             }
         }
         if (ownerVisibleOrRevealedTraitIds != null) {
-            ownerVisibleOrRevealedTraitIds.stream()
-                    .filter(GuidebookSessionState::isPresent)
-                    .forEach(observedTraitIds::add);
+            for (String traitId : ownerVisibleOrRevealedTraitIds) {
+                if (isPresent(traitId) && observedTraitIds.add(traitId)) {
+                    observationRevision++;
+                }
+            }
         }
+    }
+
+    /**
+     * Changes whenever the observed role or trait sets change, so per-frame readers can skip copying them.
+     * 已观察的身份或词条集合发生变化时随之改变，逐帧读取方可据此跳过集合复制。
+     */
+    public int observationRevision() {
+        return observationRevision;
     }
 
     public Set<String> observedRoleIds() {
@@ -102,6 +130,26 @@ public final class GuidebookSessionState {
         return Optional.ofNullable(selectedTab);
     }
 
+    public Set<String> expandedNodeIds() {
+        return immutableSnapshot(expandedNodeIds);
+    }
+
+    public void rememberExpandedNodes(Collection<String> ids) {
+        if (roundActive) {
+            Set<String> snapshot = Set.copyOf(ids);
+            expandedNodeIds.clear();
+            expandedNodeIds.addAll(snapshot);
+        }
+    }
+
+    /** Dismiss the article without resetting the directory. 关闭正文但保留目录位置。 */
+    public void dismissEntry() {
+        selectedTab = null;
+        selectedEntryId = null;
+        selectedPage = 0;
+        rightScroll = 0;
+    }
+
     public Optional<String> selectedEntryId() {
         return Optional.ofNullable(selectedEntryId);
     }
@@ -120,8 +168,12 @@ public final class GuidebookSessionState {
 
     private void clear() {
         roundActive = false;
+        if (!observedRoleIds.isEmpty() || !observedTraitIds.isEmpty()) {
+            observationRevision++;
+        }
         observedRoleIds.clear();
         observedTraitIds.clear();
+        expandedNodeIds.clear();
         currentRoleId = null;
         pendingRoleAutoSelection = null;
         selectedTab = null;

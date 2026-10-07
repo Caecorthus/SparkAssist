@@ -10,17 +10,88 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.curser.0"
+              "type": "paragraph",
+              "text": "魔女阵营冤魂的晋升身份。你在人群中散布诅咒，让周围的人分不清谁是谁，掩护魔女同伴下手。冤魂的共同限制仍然有效，见冤魂页。"
             },
             {
-              "type": "paragraph",
-              "textKey": "guidebook.sparkassist.sparkwitch.curser.1"
+              "type": "section",
+              "text": "能力",
+              "tone": "info"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.curser.2"
+              "runs": [
+                {
+                  "text": "诅咒",
+                  "tone": "info"
+                },
+                {
+                  "text": "（技能键）：晋升 60 秒后可用。让 8 格内所有其他活着的玩家陷入 10 秒混乱，不需要视线；冷却 90 秒。范围内没有人时不会进入冷却。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "混乱中的人不能使用本能，眼里的其他玩家全都变成疯魔皮肤。诅咒不分敌我，魔女同伴也会中招。"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "魔女本能",
+                  "tone": "info"
+                },
+                {
+                  "text": "：按住本能透视键，大魔女、魔化使和共犯显示为各自的身份颜色，其他人显示为绿色。你看不到魔女因子网络。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "魔女阵营成员始终能看到你，并显示紫色描边和名字；其他人看不见你。"
+            },
+            {
+              "type": "bullet",
+              "text": "不受恐惧、障眼和停电影响。"
+            },
+            {
+              "type": "bullet",
+              "text": "语音：附近活着的大魔女、魔化使和共犯（含变体共犯）能听到你说话，其他活人听不到你的近距离语音。"
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "晋升时金币归零，之后每完成一个任务获得 50 金币。商店只有【开锁器】，50 金币，限购 1 个。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "被诅咒的人眼中所有人都是疯魔皮肤，认不出谁是谁。适合在同伴混进人群准备动手时施放，让目击者看不清凶手，也没法用本能。"
+            },
+            {
+              "type": "bullet",
+              "text": "同伴中招时，所有人在他们眼里也是一个样子，提醒他们小心误伤自己人。"
+            },
+            {
+              "type": "bullet",
+              "text": "【开锁器】能打开锁着的门，潜行使用还能把门堵住 1 分钟，可以替同伴开路或困住目标。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "你不算存活玩家：魔女阵营只剩你一个时，其他阵营照样可以获胜；不过魔女阵营获胜时，你也算获胜。"
             }
           ]
         }

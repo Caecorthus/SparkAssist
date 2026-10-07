@@ -1,0 +1,47 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:exhilarated",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.exhilarated.name",
+      "summaryKey": "trait.sparktraits.exhilarated.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "杀人之后跑得飞快。只会出现在杀手身上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "每次击杀后获得 5 秒速度 III；再次击杀会重新计时。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "得手后立刻借着这股速度离开现场，或者追上下一个目标。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#E86B35",
+      "order": 1100
+    }
+  ]
+}

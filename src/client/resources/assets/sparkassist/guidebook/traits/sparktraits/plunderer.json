@@ -10,13 +10,26 @@
         {
           "blocks": [
             {
+              "type": "paragraph",
+              "text": "杀人顺便抢钱。只会出现在杀手身上。"
+            },
+            {
               "type": "section",
-              "text": "掠夺",
+              "text": "效果",
               "tone": "money"
             },
             {
               "type": "bullet",
-              "text": "真实击杀后，偷取死者三分之一的金币，结果向下取整。"
+              "text": "每次击杀后，偷走死者身上三分之一的金币（向下取整）。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "身上没钱的人偷不到东西。有商店、靠做任务攒钱的身份往往存款更多。"
             }
           ]
         }
