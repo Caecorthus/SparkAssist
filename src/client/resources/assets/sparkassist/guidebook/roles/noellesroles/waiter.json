@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.waiter",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.waiter.summary",
       "pages": [
         {
           "blocks": [
@@ -15,7 +15,7 @@
             },
             {
               "type": "paragraph",
-              "text": "好人阵营的支援位。你能多带一份餐点，直接喂给需要的人，帮大家保住理智。"
+              "text": "好人阵营的支援位。你能多带一份餐点，直接喂给需要的人，帮大家保住理智；谁刚做完任务，你也能隔墙看见。"
             },
             {
               "type": "section",
@@ -48,6 +48,30 @@
             },
             {
               "type": "bullet",
+              "runs": [
+                {
+                  "text": "小费",
+                  "tone": "info"
+                },
+                {
+                  "text": "：喂食帮别人完成一次吃东西或喝东西的任务，你额外获得 50 金币。对方没有对应任务、或者你自己吃喝时不算。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "留意客人",
+                  "tone": "info"
+                },
+                {
+                  "text": "：任何人完成一个任务后，接下来 30 秒你都能隔墙看到对方的描边，不用按本能透视键。对方再完成任务会重新计时，不会叠加。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
               "text": "每完成一个任务获得 50 金币。"
             },
             {
@@ -66,11 +90,15 @@
             },
             {
               "type": "bullet",
-              "text": "随身带一份吃的、一份喝的，碰到急着做任务的人就喂一口。"
+              "text": "随身带一份吃的、一份喝的，碰到急着做任务的人就喂一口，顺便赚一笔小费。"
             },
             {
               "type": "bullet",
               "text": "多照顾守在远处、离餐车远的警职，帮他们省下来回跑的时间。"
+            },
+            {
+              "type": "bullet",
+              "text": "留意谁亮起来：命案前后正在做任务的人有不在场证明；一直没亮过的人，说明很久没做任务，值得多看一眼。"
             },
             {
               "type": "section",
@@ -84,6 +112,10 @@
             {
               "type": "bullet",
               "text": "被喂的人会收到“某某递给你一份餐点”的提示，谁喂的一清二楚。"
+            },
+            {
+              "type": "bullet",
+              "text": "看到的服务员不一定是真的：验尸官伪装成服务员时，也能隔墙看到刚做完任务的人。"
             }
           ]
         }
