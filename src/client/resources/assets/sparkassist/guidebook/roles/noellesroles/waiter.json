@@ -5,7 +5,7 @@
       "tab": "ROLE",
       "sourceModId": "noellesroles",
       "nameKey": "announcement.role.waiter",
-      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "summaryKey": "guidebook.sparkassist.noellesroles.waiter.summary",
       "pages": [
         {
           "blocks": [
@@ -46,6 +46,27 @@
             {
               "type": "bullet",
               "text": "专属商店花费 100 金币，可以随机购买一份食物或饮品。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "加强能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "任意玩家完成任务后，服务员可以透视该玩家 30 秒；该透视无需按本能键，并且可以隔墙看到。"
+            },
+            {
+              "type": "bullet",
+              "text": "验尸官伪装成服务员时，也可以使用这项任务透视能力。"
+            },
+            {
+              "type": "bullet",
+              "text": "帮助其他玩家完成一次进食或饮品任务时，服务员额外获得 50 金币。目标没有对应需求或服务员自己使用物品时，不会获得这笔奖励。"
             }
           ]
         }
