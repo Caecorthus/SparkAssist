@@ -1,0 +1,161 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:potion_gunner",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.potion_gunner",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "魔女阵营的特殊共犯，远程火力位。你用反坦克炮筒发射四种药剂炮弹：致盲、拖慢冷却、炸掉金币，或者直接把一片人炸死。"
+            },
+            {
+              "type": "section",
+              "text": "你是怎么来的",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "魔化使完成 2 个任务后晋升时，会从本局还没出现过的聆渊者、隙行者、药炮手中随机抽一个，每种一局最多一个；三种都出现过以后，才会成为普通共犯。晋升前的物品和金币全部保留。"
+            },
+            {
+              "type": "bullet",
+              "text": "你保留普通共犯的全部基础能力（见“共犯”页），但没有魔力。"
+            },
+            {
+              "type": "bullet",
+              "text": "成为药炮手时获得绑定的【反坦克炮筒】，不会掉落，也不能交给别人；拿在手上时别人看得见。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "装填",
+                  "tone": "info"
+                },
+                {
+                  "text": "：打开背包，左键拿起炮弹，右键点炮筒塞进去，一次只能装一发；空手右键炮筒可以退弹。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "开火",
+                  "tone": "info"
+                },
+                {
+                  "text": "：手持炮筒按住右键开镜（带射程刻度），左键发射。炮弹前 50 格笔直飞行，之后才开始下坠；碰到东西就爆炸，什么都没碰到会在 5 秒后空中爆炸。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "命中奖励",
+                  "tone": "info"
+                },
+                {
+                  "text": "：每颗炮弹每炸到一名魔女阵营以外的玩家，你获得 15 金币。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "尾焰",
+                  "tone": "info"
+                },
+                {
+                  "text": "：每次开火，你正后方 4 格内最近的一名玩家会被烧死，不分敌我，护盾能挡下。背后紧贴墙壁时，尾焰会被墙挡住。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "炮弹",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "【GW-DK 弹】75 金币：5×5 范围内的敌人失明并获得缓慢 II，爆心处最长 7 秒，越靠外越短。"
+            },
+            {
+              "type": "bullet",
+              "text": "【GW-AC 弹】125 金币：7×7 范围内的敌人，每项技能和道具冷却追加其正常时长的 20%（爆心处），越靠外越少；没在冷却的也会进入冷却。"
+            },
+            {
+              "type": "bullet",
+              "text": "【GW-MR 弹】150 金币：3×3 范围内的敌人被扣金币，爆心处最多 150，越靠外越少，不会扣成负数。"
+            },
+            {
+              "type": "bullet",
+              "text": "【TR 弹】300 金币：5×5 范围内的所有人都会被炸死，包括你自己和队友；炸死的人算你的击杀。被护盾挡下的人会失明、缓慢 II，并燃烧 3 秒（不掉血）。"
+            },
+            {
+              "type": "bullet",
+              "text": "范围上下也算在内，爆炸会被墙和关着的门挡住。"
+            },
+            {
+              "type": "section",
+              "text": "商店",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "普通共犯的商品去掉【左轮手枪】，再加上四种炮弹：不限购，同种最多叠 8 发，购买时快捷栏要有空位。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "开火前回头看一眼，最好背靠墙壁，别把身后的队友烧死。"
+            },
+            {
+              "type": "bullet",
+              "text": "TR 弹别近距离打，离爆点太近会把自己也炸进去。"
+            },
+            {
+              "type": "bullet",
+              "text": "人群里先打 GW-DK，让同伴趁对方看不见时动手；GW-AC 适合打断义警这类靠道具吃饭的人；GW-MR 能让杀手和有商店的身份买不起东西。"
+            },
+            {
+              "type": "bullet",
+              "text": "炮弹 50 格内不下坠，打远处时用开镜的射程刻度估算落点。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "每打一发都要打开背包重新装填；炮筒拿在手上很显眼，别太早掏出来。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#B45CFF",
+      "order": 516
+    }
+  ]
+}

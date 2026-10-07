@@ -10,55 +10,83 @@
         {
           "blocks": [
             {
-              "type": "section",
-              "tone": "good",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.0"
-            },
-            {
               "type": "paragraph",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.1"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "text": "好人阵营冤魂的晋升身份之一，只在杀死你的人已知、仍存活且不是你自己时才可能出现。你只有一个目标：找到杀死你的凶手，用复仇刀亲手了结对方。冤魂的共同限制仍然有效，见冤魂页。"
+            },
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.2"
+              "text": "能力",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.3"
+              "runs": [
+                {
+                  "text": "锁定凶手",
+                  "tone": "good"
+                },
+                {
+                  "text": "：凶手在 4 格内时会隔墙显示红色描边；此外每隔 30 秒，凶手会被透视 5 秒，右下角有倒计时。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.4"
+              "runs": [
+                {
+                  "text": "冷热感",
+                  "tone": "good"
+                },
+                {
+                  "text": "：你眼中的世界始终是灰的，离凶手越近越灰，1 格内完全变成黑白。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.5"
-            }
-          ]
-        },
-        {
-          "blocks": [
+              "runs": [
+                {
+                  "text": "复仇刀",
+                  "tone": "good"
+                },
+                {
+                  "text": "：晋升时获得【复仇刀】，无法丢弃。按住右键至少 0.5 秒后松开，刺杀 3 格内、看得见的凶手。只对凶手有效；成功击杀一次就用完，被护盾挡下不算用掉，可以再刺。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "其他玩家和尸体在你眼中都是没有名字的默认皮肤，只能靠描边和灰度认出凶手。"
+            },
+            {
+              "type": "bullet",
+              "text": "停电对你无效。你没有商店，也没有金币收入。"
+            },
             {
               "type": "section",
-              "tone": "danger",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.6"
+              "text": "需要注意",
+              "tone": "danger"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.7"
+              "text": "只有你和凶手能互相影响。凶手始终能隔墙看到你（真实外观和橙色描边），也看得见你手里的刀，并且能杀死你；杀死你能让对方获得 200 金币，会用魔力的还会获得 200 魔力。"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.8"
+              "text": "复仇成功、凶手死于别人之手，或者凶手断线超过 30 秒没回来，你都会变回旁观者。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
             },
             {
               "type": "bullet",
-              "textKey": "guidebook.sparkassist.sparkwitch.vendetta.9"
+              "text": "凶手看得见你，正面追过去很容易被反杀。借助每 30 秒一次的透视和灰度变化判断方向，从拐角或背后接近。"
+            },
+            {
+              "type": "bullet",
+              "text": "凶手忙着追杀别人时最顾不上你，是出手的好时机。"
             }
           ]
         }

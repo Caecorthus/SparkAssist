@@ -14,21 +14,55 @@
               "text": "你在水中如鱼得水！"
             },
             {
+              "type": "paragraph",
+              "text": "好人阵营的地图专属身份。一碰到水你就会变得灵活许多，离开水后和普通乘客没有区别。"
+            },
+            {
               "type": "section",
-              "text": "水中天赋",
+              "text": "能力",
               "tone": "info"
             },
             {
               "type": "bullet",
-              "text": "接触水时获得【海豚的恩惠】与【夜视】。"
+              "runs": [
+                {
+                  "text": "如鱼得水",
+                  "tone": "info"
+                },
+                {
+                  "text": "：接触水时获得海豚的恩惠和夜视，游得更快、在水下也看得清。"
+                }
+              ]
             },
             {
               "type": "bullet",
-              "text": "在水中，奔跑体力与氧气的消耗均降低 75%。"
+              "text": "在水中时，疾跑体力和氧气都能撑到平时的 4 倍（消耗降低 75%）。"
             },
             {
               "type": "section",
-              "text": "行动限制",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "被追时往水里跑：你游得更快、憋气更久，追兵很难跟上。"
+            },
+            {
+              "type": "bullet",
+              "text": "水下有夜视，适合躲藏和观察。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "一离开水，所有加成就会消失。"
+            },
+            {
+              "type": "paragraph",
+              "text": "鲛人只在特定地图出现。",
               "tone": "muted"
             }
           ]

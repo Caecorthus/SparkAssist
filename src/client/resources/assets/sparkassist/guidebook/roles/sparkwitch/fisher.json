@@ -1,0 +1,152 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:fisher",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.fisher",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "好人阵营的普通身份。你能在饮料托盘上钓鱼：大多数鱼吃了回理智，运气好能钓到开门的钥匙鱼、一次性的剑鱼，甚至能隐身穿门的灵光鱼。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "钓鱼",
+                  "tone": "good"
+                },
+                {
+                  "text": "：手持【鱼竿】右键放着饮料的托盘，消耗 1 个【鱼饵】钓一次，快捷栏要留一个空位。每次结果：空军 10%，鲑鱼 25%，鳕鱼 15%，小丑鱼 15%，金鱼 10%，钥匙鱼 10%，河豚、剑鱼、灵光鱼各 5%。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "能吃的鱼",
+                  "tone": "good"
+                },
+                {
+                  "text": "：右键立即吃掉。【鲑鱼】回复 10% 理智，【鳕鱼】20%，【小丑鱼】30% 并获得 10 秒速度，【金鱼】20% 并获得 50 金币。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "钥匙鱼",
+                  "tone": "good"
+                },
+                {
+                  "text": "：右键一扇锁着的门或火车门即可打开，用后消失。被【开锁器】堵住的门打不开。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "剑鱼",
+                  "tone": "good"
+                },
+                {
+                  "text": "：和【刀】一样长按右键约半秒蓄力，松手刺杀 3 格内的玩家，只能用一次。刺死好人阵营的人时，你也会死。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "灵光鱼",
+                  "tone": "good"
+                },
+                {
+                  "text": "：吃下后理智回满，7.77 秒内隔墙看见所有人、穿过门、不与玩家碰撞，并且隐身，别人的本能也看不到你。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "河豚",
+                  "tone": "good"
+                },
+                {
+                  "text": "：钓上来后会在托盘上鼓起 10 秒，碰到它的人（包括你）每次失去 10% 理智。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "商店与金币",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局只有一根【鱼竿】，金币为 0；每完成一个任务获得 50 金币。商店只卖【鱼饵】，25 金币一个。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "钓鱼赚不回鱼饵钱，价值在于理智和道具。理智见底又走不开时，钓几条鱼顶一顶。"
+            },
+            {
+              "type": "bullet",
+              "text": "【剑鱼】是你唯一的杀伤手段，留给确认的杀手。命中就会用掉，被护盾挡下也一样。"
+            },
+            {
+              "type": "bullet",
+              "text": "【灵光鱼】能用来逃命，也能穿门进房间查看情况。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "【鱼竿】、【鱼饵】和能吃的鱼拿在手上别人看不见，但【钥匙鱼】和【剑鱼】看得见。"
+            },
+            {
+              "type": "bullet",
+              "text": "吃鱼不算完成进食任务，该吃东西还是得去吃。"
+            },
+            {
+              "type": "section",
+              "text": "词条变化",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "若获得【内鬼】词条：任务金币照拿，用剑鱼刺死好人也不会赔上自己。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#2A9D8F",
+      "order": 252
+    }
+  ]
+}

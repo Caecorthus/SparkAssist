@@ -1,0 +1,168 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:fiend",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.fiend",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "中立阵营里几乎杀不死的身份。你靠挨打攒金币，攒够 200 金币买下魔人时刻，再撑过 2 分钟就能独自获胜。"
+            },
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "买下【魔人时刻】后撑过 2 分钟，你独自获胜。"
+            },
+            {
+              "type": "bullet",
+              "text": "不买魔人时刻就赢不了，你也不会妨碍任何一方获胜。"
+            },
+            {
+              "type": "section",
+              "text": "休眠状态",
+              "tone": "money"
+            },
+            {
+              "type": "paragraph",
+              "text": "买下魔人时刻之前，你处于休眠状态。"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "免疫死亡",
+                  "tone": "money"
+                },
+                {
+                  "text": "：除了掉下或被推下火车，刀、枪、毒、炸弹……任何攻击都杀不死你。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "挨打赚钱",
+                  "tone": "money"
+                },
+                {
+                  "text": "：被枪打中 +50 金币并获得速度 III 5 秒，同时 8 格内的其他人（开枪的人离得近也算）物品冷却至少 20 秒；被刀刺中 +50 金币并获得 4 张【便条】；被【球棒】击打或被【仪礼剑】封喉 +100 金币。没有次数上限。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "转手炸弹",
+                  "tone": "money"
+                },
+                {
+                  "text": "：你把【定时炸弹】直接递给别人，炸弹炸死了接手的人，你获得 50 金币。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "不算存活",
+                  "tone": "money"
+                },
+                {
+                  "text": "：你不计入“只剩谁活着”这类胜利判定（例如魔女阵营、黑警），连环杀手不会选你当目标，饕餮也吞不下你。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "开局 0 金币，没有任务收入，金币只能靠挨打获得。"
+            },
+            {
+              "type": "section",
+              "text": "魔人时刻",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "在商店花 200 金币购买，一局一次。全车都会看到“魔人时刻”的标题和倒计时。"
+            },
+            {
+              "type": "bullet",
+              "text": "你失去免疫，没有护盾，但获得速度 II 和一把【撬棍】：撬门或通风口后只冷却 5 秒。"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "疾驰",
+                  "tone": "danger"
+                },
+                {
+                  "text": "（技能键，默认 G）：只在魔人时刻里能用，时刻一开始就已就绪。使用后获得速度 IV 10 秒，之后回到速度 II；每次使用后冷却 30 秒。被眩晕或大魔女的恐惧封住技能时用不了。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "你能隔墙看到所有活着的玩家，所有人也能隔墙看到你。"
+            },
+            {
+              "type": "bullet",
+              "text": "时刻期间其他所有胜利都会暂停，连列车时间耗尽也不会结束对局。撑满 2 分钟你独自获胜；中途被杀则时刻结束，对局照常继续。"
+            },
+            {
+              "type": "bullet",
+              "text": "魔人时刻中被饕餮吞下，时刻直接结束，你不会获胜。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "往人多的地方凑，被刀和枪打中就是在送钱：4 次枪击或 2 次球棒就够 200 金币。"
+            },
+            {
+              "type": "bullet",
+              "text": "远离火车边缘，掉下去是你唯一的死法；刀的左键推人和各种击退都可能把你送下车。"
+            },
+            {
+              "type": "bullet",
+              "text": "准备好再买魔人时刻：选人少、出口多的位置开启，靠撬棍和加速不停转移；疾驰留到被人贴身追赶时再用。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "只有休眠时挨打才给钱，魔人时刻里不再有任何奖励。"
+            },
+            {
+              "type": "bullet",
+              "text": "魔人时刻里所有人都会来追杀你。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#8E1B3A",
+      "order": 660
+    }
+  ]
+}

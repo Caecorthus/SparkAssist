@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:seasoned",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.seasoned.name",
+      "summaryKey": "trait.sparktraits.seasoned.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "出刀更快。只会出现在商店里卖【刀】的杀手身上（忍者和清道夫除外），与【狭路相逢】不会同时出现。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "【刀】的蓄力时间缩短 20%：按住右键约 0.45 秒就能出刀（平时约 0.55 秒）。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#8C9AA6",
+      "order": 1150
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:witch_factor",
+      "tab": "SKILL",
+      "sourceModId": "sparkwitch",
+      "nameKey": "skill.sparkwitch.witch_factor.name",
+      "summaryKey": "skill.sparkwitch.witch_factor.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "大魔女主技能"
+            },
+            {
+              "type": "paragraph",
+              "text": "把魔女因子散进人群：它会源源不断地为大魔女提供魔力，也让魔女阵营看清持有者的位置。"
+            },
+            {
+              "type": "section",
+              "text": "传播",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "按技能键（默认 G），消耗 50 魔力，把因子传给准心对准的 8 格内一名存活玩家；冷却 20 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "每人最多持有一个因子。一局能新传出的因子总数有限，默认为开局人数的三分之一，这个额度与樱羽艾玛共用。"
+            },
+            {
+              "type": "bullet",
+              "text": "大魔女、魔化使、共犯、巫女、巫毒师和樱羽艾玛不能持有因子。"
+            },
+            {
+              "type": "section",
+              "text": "因子的效果",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "每个因子每 30 秒为存活的大魔女提供 25 魔力；持有者是预备魔女时提供 40，是杀意魔女时提供 60。传出因子的人死了，因子也不会消失。"
+            },
+            {
+              "type": "bullet",
+              "text": "持有者获得因子 20 秒后会收到提示，并接入因子网络：大魔女、魔化使、共犯、樱羽艾玛和其他已接入的持有者，都能看到所有已接入持有者的蓝紫色描边。"
+            },
+            {
+              "type": "bullet",
+              "text": "有理智的持有者每 60 秒失去 10 点理智，预备魔女失去 30 点。"
+            },
+            {
+              "type": "section",
+              "text": "转移",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "持有者被玩家杀死时，因子会转到凶手身上，凶手需要再等 20 秒才接入网络。"
+            },
+            {
+              "type": "bullet",
+              "text": "死于环境伤害，或凶手已经持有因子、不能持有因子时，因子直接消失，额度不会返还。"
+            },
+            {
+              "type": "section",
+              "text": "使用建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "优先传给活得久、常在人群里走动的人：存活越久，给你的魔力越多，网络里的情报也越有用。"
+            },
+            {
+              "type": "bullet",
+              "text": "额度有限，别浪费在马上会死的人身上。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "sparkwitch:grand_witch"
+      ],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#F2DFF7",
+      "order": 80
+    }
+  ]
+}

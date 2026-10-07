@@ -1,0 +1,47 @@
+{
+  "entries": [
+    {
+      "id": "sparktraits:manic",
+      "tab": "TRAIT",
+      "sourceModId": "sparktraits",
+      "nameKey": "trait.sparktraits.manic.name",
+      "summaryKey": "trait.sparktraits.manic.description",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "球棒挥得更快。只会出现在商店里有【疯魔模式】的杀手身上。"
+            },
+            {
+              "type": "section",
+              "text": "效果",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "手持【球棒】时，攻击冷却缩短 20%，更快蓄满力。"
+            },
+            {
+              "type": "section",
+              "text": "建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "疯魔模式里蓄满力的【球棒】一击必杀，冷却越短，连续击杀越快。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "wathe:killer"
+      ],
+      "requiredModIds": [
+        "sparktraits"
+      ],
+      "color": "#D7263D",
+      "order": 1160
+    }
+  ]
+}

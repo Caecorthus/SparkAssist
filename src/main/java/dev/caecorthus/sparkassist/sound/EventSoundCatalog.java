@@ -104,6 +104,14 @@ final class EventSoundCatalog {
                                 "ambient/grand_witch_ceremonial_sword_bgm"
                         )
                 ),
+                // The toll plays vanilla bell audio; only SparkWitch's event id is cataloged so ordinary bells keep their volume.
+                // 丧钟复用原版钟声音频；这里只登记 SparkWitch 的事件 id，普通钟声的音量保持不变。
+                group(EventSoundGroup.BELL_RINGER_TOLL,
+                        eventIds("sparkwitch",
+                                "ambient.bell_ringer_toll"
+                        ),
+                        List.of()
+                ),
                 group(EventSoundGroup.DEPRESSION_PSYCHO_RANGE,
                         eventIds("sparktraits",
                                 "depression.docile_to_rage",

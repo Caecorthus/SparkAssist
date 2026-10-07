@@ -1,0 +1,115 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:judge",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.judge",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "好人阵营的警职。你不查身份，只查“手上有几条人命”：花钱审判一名玩家，只要对方本局杀的人够多，就会被判刑 60 秒，期间杀不了任何人，还会暴露在全车面前。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "审判",
+                  "tone": "info"
+                },
+                {
+                  "text": "（技能键，默认 G）：打开审判界面，从所有存活玩家中选一人再确认，不需要靠近对方。打开和取消免费；每次确认花费 100 金币，判不了刑也不退。没有冷却。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "定罪门槛",
+                  "tone": "info"
+                },
+                {
+                  "text": "：对方本局杀死的人数达到“开局人数 ÷ 6（向下取整）+ 1”才会被判刑，例如 6–11 人局要 2 人、12–17 人局要 3 人。不看对方阵营，好人误杀也算。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "判刑",
+                  "tone": "info"
+                },
+                {
+                  "text": "：获刑者 60 秒内杀不死任何玩家，武器和技能照样能用，只是打不死人。全车会收到“X 被法官判刑 60 秒”的公告，所有存活玩家都能隔墙看到对方的橙色描边。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "刑期内不能再审同一个人，刑满后可以再审。"
+            },
+            {
+              "type": "section",
+              "text": "初始物品与金币",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "开局带【左轮手枪】和【平板电脑】（接入义警频道），金币为 0。每完成一个任务获得 50 金币。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "先做 2 个任务攒够 100 金币。等命案接连发生、门槛可能达到时再出手，别乱花钱。"
+            },
+            {
+              "type": "bullet",
+              "text": "审判失败也是情报：说明对方本局杀的人还不够多。"
+            },
+            {
+              "type": "bullet",
+              "text": "判刑成功后，趁对方 60 秒内杀不了人，招呼义警一起解决，或者亲自开枪。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "判刑只说明对方杀过足够多的人，不说明阵营：打死过杀手的义警同样可能被判刑。"
+            },
+            {
+              "type": "bullet",
+              "text": "你的左轮和义警一样：冷却 10 秒，打死人不掉理智；误杀好人照样受罚。"
+            },
+            {
+              "type": "bullet",
+              "text": "隐身等隐藏效果会让获刑者不显示描边，但判刑照样有效。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#DFA94F",
+      "order": 22
+    }
+  ]
+}
