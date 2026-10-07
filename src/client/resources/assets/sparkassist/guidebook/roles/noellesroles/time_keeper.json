@@ -40,11 +40,87 @@
               "text": "获得内鬼词条后，花费 100 金币会使对局时间增加 45 秒。"
             }
           ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "濒毁怀表",
+              "tone": "item"
+            },
+            {
+              "type": "bullet",
+              "text": "怀表有两种模式：刷新物品冷却，或刷新技能冷却；左键切换模式，右键使用。"
+            },
+            {
+              "type": "bullet",
+              "text": "刷新物品冷却消耗 100 金币，使用后自身冷却 40 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "刷新技能冷却消耗 75 金币，使用后自身冷却 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "物品刷新会清除目标的物品冷却，包括匕首、左轮和扩展职业物品。"
+            },
+            {
+              "type": "bullet",
+              "text": "技能刷新会清除目标的职业技能和 SparkStrength 扩展技能冷却，不会清除平板会议冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "刷新目标与奖励",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "普通计时员可刷新存活好人；拥有善良词条的杀手也按好人处理。"
+            },
+            {
+              "type": "bullet",
+              "text": "普通计时员不能刷新拥有内鬼词条的好人。"
+            },
+            {
+              "type": "bullet",
+              "text": "计时员拥有内鬼词条时，目标反转为非善良杀手和其他内鬼好人，不能刷新普通好人。"
+            },
+            {
+              "type": "bullet",
+              "text": "每当一名玩家因 Wathe 死亡而变为非存活状态，存活的计时员获得 25 金币。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "验尸官伪装",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "验尸官伪装成计时员时，会获得濒毁怀表并可完整使用两种刷新模式。"
+            },
+            {
+              "type": "bullet",
+              "text": "伪装计时员的怀表同样遵循内鬼词条的目标反转规则。"
+            },
+            {
+              "type": "bullet",
+              "text": "切换或解除伪装、死亡和重置时，伪装获得的怀表会被回收。"
+            }
+          ]
         }
       ],
       "ownerRoleIds": [],
       "requiredModIds": [
-        "noellesroles"
+        "noellesroles",
+        "sparkstrength"
       ],
       "color": "#0026FF",
       "order": 120
