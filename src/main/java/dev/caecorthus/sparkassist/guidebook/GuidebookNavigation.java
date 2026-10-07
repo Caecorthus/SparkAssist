@@ -46,7 +46,7 @@ public final class GuidebookNavigation {
                 "scavenger", "bomber", "serial_killer", "silencer", "party_animal", "poisoner", "bandit");
         assign(ROLE_GROUPS, "roles.killer", "sparkwitch",
                 "hunter", "ninja", "kidnapper", "black_raven", "witch_maiden", "saboteur", "bell_ringer",
-                "time_stealer");
+                "time_stealer", "magician");
         assign(ROLE_GROUPS, "roles.witch", "sparkwitch", "grand_witch", "bewitched", "accomplice",
                 "abyss_listener", "riftwalker", "potion_gunner", "curser");
         assign(ROLE_GROUPS, "roles.neutral", "wathe", "loose_end");
