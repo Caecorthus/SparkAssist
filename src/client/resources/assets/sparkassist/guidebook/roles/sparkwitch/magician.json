@@ -1,0 +1,108 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:magician",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.magician",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "quote",
+              "text": "录制，播放，上演玩偶欺诈！"
+            },
+            {
+              "type": "section",
+              "text": "身份与目标",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "魔术师属于杀手阵营，继承杀手的基础能力，拥有无限体力与杀手本能。"
+            },
+            {
+              "type": "bullet",
+              "text": "开局技能冷却 30 秒；与杀手阵营共同胜利。"
+            },
+            {
+              "type": "section",
+              "text": "选择皮套",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "打开背包，在玩家头像栏选择一名在线玩家作为皮套外观，默认选择自己；玩家较多时可翻页。"
+            },
+            {
+              "type": "bullet",
+              "text": "所选玩家只提供皮套外观与名称；选择本身不会改变其身份或能力。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "录制",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "技能准备后按职业技能键（默认 G）开始录制；最多持续 30 秒。"
+            },
+            {
+              "type": "bullet",
+              "text": "会记录移动、视角、姿态、潜行/疾跑、快捷栏切换、装备状态，以及物品和方块/实体交互。"
+            },
+            {
+              "type": "bullet",
+              "text": "录制中再次按技能键可提前结束；结束后进入待播放状态。"
+            },
+            {
+              "type": "section",
+              "text": "播放",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "按技能键开始播放，皮套会以所选玩家的外观重现录制轨迹，并按时间线执行录制的攻击、物品使用和交互。"
+            },
+            {
+              "type": "bullet",
+              "text": "播放使用录制时的物品快照，不消耗魔术师当前背包；皮套的攻击可以正常击杀玩家。"
+            },
+            {
+              "type": "bullet",
+              "text": "播放中再次按技能键可提前结束；自然结束或提前结束后进入 5 秒冷却。"
+            }
+          ]
+        },
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "皮套被击杀",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "text": "皮套可被匕首、左轮等武器击杀，也会被爆炸强制结束；两者都会立即结束播放并生成尸体。"
+            },
+            {
+              "type": "bullet",
+              "text": "皮套由其他玩家用武器击杀时，魔术师获得 50 金币；魔术师自己结束或击杀皮套不获得奖励。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#6B17B0",
+      "order": 400
+    }
+  ]
+}
