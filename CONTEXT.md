@@ -91,6 +91,39 @@ SparkWitch's and SparkTraits' reflective call into SparkAssist's public `Guidebo
 their card draw; a no-op without SparkAssist.
 _Avoid_: dependency, mixin
 
+**Hidden achievement**:
+A local achievement that is invisible until earned: no icon, title, placeholder, count or progress before that.
+Its id is stored in players' saves and must never change once released.
+_Avoid_: advancement (the vanilla server-side system), quest, challenge (a vanilla frame name)
+
+**Achievement save**:
+One account's local file at `config/sparkassist/achievements/<account uuid>.json` with the unlocks in unlock order
+and the **General round stats**. Never sent to a server; offline and bot rounds count the same as online ones.
+_Avoid_: progress, server data
+
+**General round stats**:
+Per-account counts of rounds, wins, deaths and tasks, per role and per faction. Named after play, never after an
+achievement, so the save reveals nothing about what is left to find.
+_Avoid_: achievement progress, counters
+
+**Round settlement**:
+The moment a tracked round becomes inactive after Wathe's round-end result arrived and the player held a role: the
+stats are updated, achievement conditions run and new unlocks toast. `/stop`, disconnects and late spectators never
+settle.
+_Avoid_: round end (the Wathe event), evaluation tick
+
+**Match record**:
+Wathe's server-side event log of a round (deaths with killer and reason, purchases, tasks, poisonings, item and
+skill uses) that SparkFactionAPI hands to clients at round end. Missing on servers without that support, in which
+case record-based achievements cannot be earned that round.
+_Avoid_: replay (the SparkFactionAPI screen), chat replay
+
+**Achievement page**:
+The extra tab SparkAssist adds to the vanilla advancements screen, only in this client's advancement tree. Earned
+achievements sit on a track in unlock order; the tab is never reported to the server and does not exist before the
+first unlock.
+_Avoid_: advancement tab (any server tab), achievement screen
+
 **Safety rule for unrelated roles/talents/sounds**:
 The rule that anything outside the named assist case must keep previous behavior.
 _Avoid_: broad audio suppression, role rebalance, talent patch
