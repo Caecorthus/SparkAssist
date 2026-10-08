@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * Reads only SparkTraits' public, owner-synced active-trait API when that mod is installed.
  * 仅在 SparkTraits 已安装时读取其公开且只同步给本人的生效天赋 API。
  */
-final class SparkTraitsGuideBridge {
+public final class SparkTraitsGuideBridge {
     private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/GuidebookTraits");
     private static boolean resolved;
     private static boolean available;
@@ -26,7 +26,7 @@ final class SparkTraitsGuideBridge {
     private SparkTraitsGuideBridge() {
     }
 
-    static Set<String> ownerVisibleActiveTraitIds(PlayerEntity player) {
+    public static Set<String> ownerVisibleActiveTraitIds(PlayerEntity player) {
         resolve();
         if (!available || player == null) {
             return Set.of();

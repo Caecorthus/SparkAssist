@@ -6,11 +6,15 @@
     "AccessibilityOptionsScreenMixin",
     "ControlsOptionsScreenMixin",
     "GameMenuScreenMixin",
+    "GameRoundEndComponentMixin",
+    "GunDropPayloadMixin",
     "KeyBindingMixin",
     "LimitedInventoryScreenMixin",
     "MinecraftClientMixin",
+    "PoisonOverlayPayloadMixin",
     "SoundOptionsScreenMixin",
-    "SoundSystemMixin"
+    "SoundSystemMixin",
+    "TaskCompletePayloadMixin"
   ],
   "injectors": {
     "defaultRequire": 1
