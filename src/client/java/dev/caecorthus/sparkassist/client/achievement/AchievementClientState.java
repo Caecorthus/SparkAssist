@@ -1,5 +1,9 @@
 package dev.caecorthus.sparkassist.client.achievement;
 
+import dev.caecorthus.sparkassist.achievement.Achievement;
+import dev.caecorthus.sparkassist.achievement.AchievementCatalog;
+import dev.caecorthus.sparkassist.achievement.AchievementContext;
+import dev.caecorthus.sparkassist.achievement.AchievementEvaluator;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
 import dev.caecorthus.sparkassist.achievement.RoundFacts;
 import dev.caecorthus.sparkassist.achievement.RoundObservation;
@@ -21,6 +25,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Follows Wathe rounds on the client and settles each finished one into the local achievement save. Everything it
@@ -28,6 +34,7 @@ import net.minecraft.util.Identifier;
  * 在客户端跟踪 Wathe 对局，并把每局结果结算进本地成就存档。读取的都是已同步到本客户端的数据，从不向服务器发送任何内容。
  */
 public final class AchievementClientState {
+    private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/Achievements");
     // Owner-visible traits are polled once a second; they change rarely. 自身可见词条每秒轮询一次，变化很少。
     private static final int TRAIT_POLL_TICKS = 20;
 
@@ -128,6 +135,12 @@ public final class AchievementClientState {
         }
         AchievementLedger ledger = AchievementStorage.ledger(client);
         ledger.stats().recordRound(facts.roleChain(), facts.factionId(), outcome.won(), facts.died(), facts.tasksCompleted());
+        List<Achievement> earned = AchievementEvaluator.newlyEarned(
+                AchievementCatalog.all(),
+                new AchievementContext(facts, outcome, ledger.stats(), ledger),
+                (achievement, exception) -> LOGGER.warn("Achievement {} failed to evaluate", achievement.id(), exception));
+        long now = System.currentTimeMillis();
+        earned.forEach(achievement -> ledger.unlock(achievement.id(), now));
         AchievementStorage.save();
     }
 
