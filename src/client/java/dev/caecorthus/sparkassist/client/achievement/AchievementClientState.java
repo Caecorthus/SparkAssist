@@ -142,6 +142,7 @@ public final class AchievementClientState {
         long now = System.currentTimeMillis();
         earned.forEach(achievement -> ledger.unlock(achievement.id(), now));
         AchievementStorage.save();
+        AchievementAdvancements.announce(client, earned);
     }
 
     private static RoundOutcome outcome(Scoreboard scoreboard, GameWorldComponent game, UUID self) {
