@@ -11,7 +11,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "给团队钱包多存一点。只会出现在杀手身上。"
+              "text": "给团队钱包多存一点。需要安装 SparkStrength，只会出现在杀手身上。"
             },
             {
               "type": "section",
@@ -28,7 +28,7 @@
             },
             {
               "type": "bullet",
-              "text": "例如开局只有 2 名杀手时，你击杀得到 100 金币，平时会额外存 25 金币进团队钱包，有这个词条则存 30 金币。"
+              "text": "例如开局只有 2 名杀手、没有内鬼时，你击杀得到 100 金币，平时会额外存 25 金币进团队钱包，有这个词条则存 30 金币。"
             },
             {
               "type": "section",
@@ -46,7 +46,8 @@
         "wathe:killer"
       ],
       "requiredModIds": [
-        "sparktraits"
+        "sparktraits",
+        "sparkstrength"
       ],
       "color": "#D6A640",
       "order": 1090
