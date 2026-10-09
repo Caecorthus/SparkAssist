@@ -13,17 +13,20 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 import dev.doctor4t.wathe.block_entity.BeveragePlateBlockEntity;
 import dev.doctor4t.wathe.index.WatheParticles;
 import dev.doctor4t.wathe.index.WatheProperties;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
+import net.createmod.catnip.gui.element.ScreenElement;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.api.scene.Selection;
+import net.createmod.ponder.foundation.PonderScene;
+import net.createmod.ponder.foundation.instruction.TickingInstruction;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ItemStackParticleEffect;
@@ -33,21 +36,23 @@ import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 
 /**
  * Demos for NoellesRoles' civilian roles, opened only from the role's guide page; each needs NoellesRoles. They
  * follow the Spark server stack, as the guide does: SparkStrength retunes the Bartender's drinks and adds the
  * Engineer's power restoration, the Toxicologist's Blue Vitriol (with SparkTraits' blue poison), the Professor's
- * serums, the Bodyguard's vest and shield and the Coroner's body bag and disguise.
+ * serums, the Bodyguard's vest and shield, the Coroner's body bag and disguise, the Detective's magnifier and the
+ * glow on a Noisemaker's killer.
  * NoellesRoles 平民阵营职业的演示，只从该职业的指南页打开；都需要 NoellesRoles。与指南书一致，按 Spark 服务器的实际规则
  * 演示：SparkStrength 调整了酒保的酒效，并加入了工程师的电力恢复系统、毒理学家的蓝矾（配合 SparkTraits 的蓝毒）、
- * 教授的试剂、保镖的防弹衣与盾牌，以及验尸官的采尸袋与伪装。
+ * 教授的试剂、保镖的防弹衣与盾牌、验尸官的采尸袋与伪装、侦探的放大镜，以及杀死大嗓门的人身上的发光。
  */
 final class NoellesCivilianScenes {
     /** The gun of an actor standing at (5.8, 1, 1.2) and facing screen-right. 站在 (5.8, 1, 1.2) 朝屏幕右侧的演员手中枪口的位置。 */
@@ -60,6 +65,15 @@ final class NoellesCivilianScenes {
     private static final int DOORPASSING_INDIGO = 0x4B0082;
     /** A standing player's eye height. 站立玩家的眼睛高度。 */
     private static final double EYE_HEIGHT = 1.62;
+    /** NoellesRoles' shared ability key (default G). NoellesRoles 的通用技能键（默认 G）。 */
+    private static final String ABILITY_KEY = "key.noellesroles.ability";
+    /** The Detective's outline of a player who killed lately (Noellesroles detective handler). 侦探看到的“最近杀过人”描边颜色。 */
+    private static final int DETECTIVE_RED = 0xFF4444;
+    /** Vanilla Glowing's outline for an entity without a team (Entity.getTeamColorValue). 原版发光效果在没有队伍时的描边颜色。 */
+    private static final int GLOWING_WHITE = 0xFFFFFF;
+    /** How far a fallen actor's body reaches from its feet (ActorElement: 2 blocks at the 0.9375 player scale). 倒地演员的身体从脚底伸出的长度。 */
+    private static final double BODY_LENGTH = 1.85;
+    private static final Random RANDOM = Random.create();
 
     private NoellesCivilianScenes() {
     }
@@ -86,6 +100,14 @@ final class NoellesCivilianScenes {
                 scene("wathe/bar", NoellesCivilianScenes::waiter));
         role("sparkassist:roles/noellesroles/coroner", List.of("noellesroles", "sparkstrength"),
                 scene("wathe/aisle", NoellesCivilianScenes::coroner));
+        role("sparkassist:roles/noellesroles/detective", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::detective));
+        role("sparkassist:roles/noellesroles/recaller", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::recaller));
+        role("sparkassist:roles/noellesroles/voodoo", List.of("noellesroles"),
+                scene("wathe/aisle", NoellesCivilianScenes::voodoo));
+        role("sparkassist:roles/noellesroles/noisemaker", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/cabin", NoellesCivilianScenes::noisemaker));
     }
 
     /**
@@ -993,7 +1015,6 @@ final class NoellesCivilianScenes {
         Actors.walk(scene, back, backSpot.subtract(backStart), 15);
         scene.idle(45);
         scene.overlay().showControls(guardSpot.add(0, 2.6, 0), Pointing.DOWN, 40).rightClick().withItem(shield);
-        raiseHeldItem(scene, guard);
         Actors.charge(scene, guard, true);
         scene.overlay().showText(50)
                 .text("主手拿着按住右键举盾，最多举 10 秒")
@@ -1217,6 +1238,346 @@ final class NoellesCivilianScenes {
         scene.markAsFinished();
     }
 
+    /**
+     * Detective (SparkStrength MagnifierItem, DetectiveCaseService, DetectiveCaseRules, HiddenEquipmentHelperMixin;
+     * NoellesRoles Noellesroles DETECTIVE_INVESTIGATE handler, KillHistoryWorldComponent, DetectivePlayerComponent,
+     * NoellesrolesClient highlight and ability key): when a body appears the server notes where every living player
+     * stands. The starting magnifier (hidden in a Detective's hand from other living players; no swing) files the
+     * body's case for free, then on a living player in reach records how far they stood from the victim's death point
+     * at that moment, shown on the action bar (15 s item cooldown per clue, 3 clues per case by default). The ability
+     * key on the player in the crosshair, within 3 blocks and in sight, checks for a kill in the last 2 minutes (not
+     * poison, bomb or assassination): only the Detective sees them outlined red or green for 5 s; 90 s cooldown.
+     * 侦探：尸体出现时，服务端记下每名活人当时站的位置。开局的放大镜（侦探拿着时别的活人看不见；不挥手）右键尸体免费记录
+     * 命案，再右键够得着的活人，提示栏显示对方那一刻离死者倒下处多少格（每记一条线索冷却 15 秒，每起命案默认最多 3 条）。
+     * 技能键对准星对着的、3 格内看得见的玩家查验其 2 分钟内是否杀过人（毒杀、炸弹和刺客猜中不算）：只有侦探看到对方红色或
+     * 绿色描边 5 秒；冷却 90 秒。
+     */
+    private static void detective(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_detective", "侦探：放大镜查案与查验");
+        WatheItemScenes.stage(scene);
+        Vec3d victimSpot = new Vec3d(1.8, 1, 4.4);
+        // 1.4 blocks from the victim, which the clue rounds to 1. 离死者 1.4 格，线索四舍五入为 1 格。
+        Vec3d killerSpot = new Vec3d(2.8, 1, 3.4);
+        Vec3d killerAway = new Vec3d(5.4, 1, 3.0);
+        Vec3d detectiveStart = new Vec3d(1.0, 1, 1.0);
+        Vec3d detectiveSpot = new Vec3d(3.4, 1, 3.8);
+        Vec3d bodyMiddle = new Vec3d(1.2, 1, 5.0);
+        ItemStack magnifier = stack("sparkstrength:magnifier");
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                victimSpot, SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                killerSpot, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("有人遇害的那一刻，每个活人站在哪都会被记下来")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.charge(scene, killer, true);
+        scene.idle(16);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        Actors.fall(scene, victim);
+        scene.idle(44);
+        Actors.hold(scene, killer, ItemStack.EMPTY);
+        Actors.walk(scene, killer, killerAway.subtract(killerSpot), 25);
+        ElementLink<ActorElement> detective = Actors.enter(scene,
+                RoleColors.of("noellesroles:detective", 0x6495ED), Text.literal("侦探"),
+                detectiveStart, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, detective, magnifier);
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .text("侦探开局带着【放大镜】，别的活人看不见你手里的它")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, detective, detectiveSpot.subtract(detectiveStart), 30);
+        scene.idle(32);
+        Actors.turn(scene, detective, facing(detectiveSpot, bodyMiddle));
+        Actors.turn(scene, killer, facing(killerAway, detectiveSpot));
+        scene.idle(10);
+        // The crosshair must rest on the body on the floor. 准星要落在地上的尸体上。
+        Actors.lookPitch(scene, detective, 30);
+        scene.idle(38);
+        // No swing: the magnifier answers CONSUME on the client. 不挥手：放大镜在客户端返回 CONSUME。
+        scene.overlay().showControls(bodyMiddle.add(0, 1, 0), Pointing.DOWN, 30).rightClick().withItem(magnifier);
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .text("先用放大镜右键尸体：把这起命案记进你的文件夹")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(85);
+        Actors.lookPitch(scene, detective, 0);
+        Actors.turn(scene, detective, facing(detectiveSpot, killerAway));
+        scene.idle(8);
+        scene.overlay().showControls(killerAway.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(magnifier);
+        scene.idle(10);
+        scene.overlay().showText(85)
+                .text("再右键身边的人：提示他当时离尸体 1 格，走开了也没用")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(95);
+        scene.overlay().showControls(killerAway.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
+        scene.overlay().showText(45)
+                .text("再按技能键（默认 G）查验 3 格内看得见的人……")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(15);
+        Actors.highlight(scene, killer, DETECTIVE_RED, 100);
+        scene.idle(40);
+        scene.overlay().showText(75)
+                .colored(PonderPalette.RED)
+                .text("……他 2 分钟内杀过人：在你眼里亮红色 5 秒（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(85);
+        scene.overlay().showText(80)
+                .text("没杀过人就亮绿色；杀手最近没动手，也会是绿的")
+                .independent();
+        scene.idle(85);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Recaller (NoellesRoles Noellesroles ability handler, RecallerPlayerComponent, RecallerHudMixin; SparkStrength
+     * RecallerEconomyService, RecallerShopRules): the first ability-key press stores the player's position as an
+     * anchor nobody sees (only the HUD line changes), 10 s cooldown. The next press with at least 100 coins pays 100,
+     * dismounts, plays entity status 46 (portal particles where they stood) and the enderman teleport sound at both
+     * ends, teleports them to the anchor and clears it; 30 s cooldown. Short of 100 coins nothing happens. Onlookers see
+     * the move as a 3-tick position interpolation. A living Recaller earns 5 coins every 10 s.
+     * 回溯者：第一次按技能键把当前位置存为存档点，谁也看不见（只有 HUD 文字变化），冷却 10 秒。之后再按且有至少 100 金币：
+     * 扣 100、下坐骑，播放实体状态 46（原地的下界传送门粒子），两头都响起末影人传送声，传送到存档点并清空它；冷却 30 秒。
+     * 不足 100 金币时按了没反应。旁人看到的是 3 tick 的位置插值。存活的回溯者每 10 秒得 5 金币。
+     */
+    private static void recaller(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_recaller", "回溯者：存档点与回溯");
+        WatheItemScenes.stage(scene);
+        Vec3d anchor = new Vec3d(5.0, 1, 1.8);
+        Vec3d away = new Vec3d(2.2, 1, 4.6);
+        ElementLink<ActorElement> recaller = Actors.enter(scene,
+                RoleColors.of("noellesroles:recaller", 0x9EFFFF), Text.literal("回溯者"),
+                anchor, SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showControls(anchor.add(0, 2.6, 0), Pointing.DOWN, 40).showing(abilityKey());
+        scene.overlay().showText(80)
+                .text("按技能键（默认 G）：在你站的地方设一个存档点（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        // Shown until the recall below clears the anchor. 一直显示到下面回溯时存档点被清空。
+        scene.overlay().chaseBoundingBoxOutline(PonderPalette.BLUE, anchor,
+                new Box(anchor.x - 0.5, anchor.y, anchor.z - 0.5, anchor.x + 0.5, anchor.y + 0.1, anchor.z + 0.5), 192);
+        scene.idle(80);
+        scene.overlay().showText(65)
+                .text("存档点不会显示出来，只有你自己知道")
+                .independent();
+        Actors.walk(scene, recaller, away.subtract(anchor), 35);
+        scene.idle(40);
+        Vec3d killerStart = new Vec3d(0.6, 1, 6.4);
+        Vec3d killerSpot = new Vec3d(1.2, 1, 5.6);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                killerStart, facing(killerStart, away), Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        Actors.walk(scene, killer, killerSpot.subtract(killerStart), 12);
+        scene.idle(25);
+        Actors.turn(scene, killer, facing(killerSpot, away));
+        Actors.turn(scene, recaller, facing(away, killerSpot));
+        scene.overlay().showText(28)
+                .colored(PonderPalette.RED)
+                .text("遇到危险时……")
+                .independent()
+                .attachKeyFrame();
+        Actors.charge(scene, killer, true);
+        scene.idle(25);
+        scene.overlay().showControls(away.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
+        scene.idle(12);
+        teleportParticles(scene, away);
+        // Others see a teleport as a 3-tick position interpolation. 旁人看到的传送是 3 tick 的位置插值。
+        Actors.slide(scene, recaller, anchor.subtract(away), 3);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.GREEN)
+                .text("……再按一次：花 100 金币，瞬间传送回存档点")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(15);
+        // Nobody is left in reach, so the released charge hits nothing. 3 格内已没有人，松开蓄力也刺不到谁。
+        Actors.charge(scene, killer, false);
+        Actors.turn(scene, killer, facing(killerSpot, anchor));
+        scene.idle(75);
+        scene.overlay().showText(80)
+                .text("原地会冒出紫色粒子，两头都会响起传送声")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("存档点用一次就清空，要重新设置；传送后冷却 30 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("钱不够 100 时按了没用；活着每 10 秒自动得 5 金币")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Voodoo (NoellesRoles Noellesroles MORPH_PACKET handler, KillPlayer handlers and shield checks, VoodooPlayerComponent,
+     * VoodoScreenMixin, NoellesRolesConfig.voodooNonKillerDeaths): clicking a player's head in the inventory binds the
+     * curse to them, unnoticed by them, then 30 s ability cooldown. When the Voodoo dies with a killer (by default),
+     * the bound player, if alive and not the Voodoo, gets an action-bar warning every second and is killed after 5 s,
+     * leaving a body (none inside a Taotie); the death reason pierces psycho armour and skips the Iron Man and whiskey
+     * shields and the SparkStrength Bodyguard gear. Skipped when the Voodoo was assassinated and the bound player is an
+     * Assassin. Some targets survive it: SparkWitch's Grand Witch, Witch Maiden, Saint, a dormant Fiend and the Pig God
+     * while frozen, a Jester in stasis, and SparkTraits' Last Escape.
+     * 巫毒师：在背包里点一名玩家的头像就把诅咒绑在对方身上，对方不会察觉，之后技能冷却 30 秒。巫毒师被有凶手的死亡杀死时
+     * （默认），被绑定的人（活着且不是巫毒师自己）每秒收到一次提示栏警告，5 秒后死亡并留下尸体（在饕餮肚子里则没有）；
+     * 这种死亡穿透疯魔护甲，也绕过铁人药剂、威士忌的护盾和 SparkStrength 的保镖装备。巫毒师被刺客猜中身份而死、且绑定的
+     * 是刺客时不触发。少数目标能活下来：SparkWitch 的大魔女、巫女、圣徒、休眠的魔人和冻结中的皮革噶的，静止中的小丑，
+     * 以及 SparkTraits 的绝处逢生。
+     */
+    private static void voodoo(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_voodoo", "巫毒师：同归于尽的诅咒");
+        WatheItemScenes.stage(scene);
+        int voodooColor = RoleColors.of("noellesroles:voodoo", 0x8072FD);
+        Vec3d voodooSpot = new Vec3d(4.6, 1, 2.2);
+        Vec3d suspectSpot = new Vec3d(2.0, 1, 4.8);
+        ElementLink<ActorElement> voodoo = Actors.enter(scene, voodooColor, Text.literal("巫毒师"),
+                voodooSpot, SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        ElementLink<ActorElement> suspect = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                suspectSpot, SCREEN_LEFT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(90)
+                .text("打开背包点一名玩家的头像，把诅咒绑在他身上（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        Actors.highlight(scene, suspect, voodooColor, 160);
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("对方不会察觉；每次绑定后要等 30 秒才能换人")
+                .independent();
+        scene.idle(80);
+        Vec3d stabSpot = new Vec3d(3.4, 1, 3.4);
+        // Turned away, so the body falls clear of the killer. 背对杀手，尸体不会压到杀手身上。
+        Actors.turn(scene, voodoo, SCREEN_LEFT);
+        Actors.hold(scene, suspect, stack("wathe:knife"));
+        Actors.walk(scene, suspect, stabSpot.subtract(suspectSpot), 25);
+        scene.idle(28);
+        Actors.turn(scene, suspect, facing(stabSpot, voodooSpot));
+        scene.idle(5);
+        Actors.charge(scene, suspect, true);
+        scene.idle(16);
+        Actors.charge(scene, suspect, false);
+        Actors.swing(scene, suspect);
+        Actors.fall(scene, voodoo);
+        scene.overlay().showText(30)
+                .colored(PonderPalette.RED)
+                .text("巫毒师被人杀死……")
+                .independent()
+                .attachKeyFrame();
+        // The curse kills 5 s = 100 ticks after the Voodoo's death, shown in real time. 诅咒在 5 秒（100 tick）后发作，按真实时间演示。
+        scene.idle(25);
+        Actors.hold(scene, suspect, ItemStack.EMPTY);
+        Actors.walk(scene, suspect, new Vec3d(-1.2, 0, 1.8), 30);
+        scene.idle(15);
+        scene.overlay().showText(90)
+                .text("……被绑定的人会收到警告，5 秒后一般跟着倒下")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.fall(scene, suspect);
+        scene.idle(40);
+        scene.overlay().showText(75)
+                .colored(PonderPalette.GREEN)
+                .text("绑中了凶手，他杀你一般就等于自杀")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(85);
+        scene.overlay().showText(85)
+                .text("护盾一般挡不住；没有凶手的死亡（比如跳车）默认不触发")
+                .independent();
+        scene.idle(95);
+        scene.overlay().showText(80)
+                .text("绑错了人一般照样会死，哪怕对方是好人")
+                .independent();
+        scene.idle(85);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Noisemaker's death alarm (NoellesRoles NoisemakerKillMixin; SparkStrength NoisemakerGlowService,
+     * NoisemakerGlowConstants and SparkStrengthEvents; vanilla Glowing): when a Noisemaker dies and leaves a body, the
+     * body glows for 60 s and innocents and the dead hear an allay death sound and read a scream line. Separately, a
+     * living player credited with killing a Noisemaker (or a Coroner disguised as one) glows for 15 s. Glowing is
+     * vanilla's outline, white without a team (a viewer whose instinct highlights that entity sees that colour) and seen
+     * through walls unless the viewer's client vetoes it (SparkWitch's Blind, for one). While alive the Noisemaker can
+     * shout (ability key, 10 s heard by everyone) and light someone up for 30 s from the inventory; both are captions.
+     * 大嗓门的死亡警报：大嗓门死亡并留下尸体时，尸体发光 60 秒，好人阵营和死者会听到悦灵死亡声并看到惨叫提示。另外，被算作
+     * 杀死大嗓门（或伪装成大嗓门的验尸官）的活人发光 15 秒。发光是原版的描边，没有队伍时为白色（本能高亮该实体的观察者看到
+     * 本能颜色），除非观察者的客户端否决（比如 SparkWitch 的盲人），都能隔墙看到。大嗓门活着时能大喊（技能键，10 秒内所有人
+     * 都听得到）并在背包里点亮一个人 30 秒；这两项只在字幕里说明。
+     */
+    private static void noisemaker(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_noisemaker", "大嗓门：死后暴露凶手");
+        WatheItemScenes.cabinStage(scene, util);
+        Vec3d noisemakerSpot = new Vec3d(2.6, 1, 1.5);
+        Vec3d passengerSpot = new Vec3d(4.6, 1, 5.6);
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                passengerSpot, NORTH, Direction.DOWN);
+        ElementLink<ActorElement> noisemaker = Actors.enter(scene,
+                RoleColors.of("noellesroles:noisemaker", 0xC8FF00), Text.literal("大嗓门"),
+                noisemakerSpot, WEST, Direction.DOWN);
+        scene.idle(10);
+        Vec3d killerStart = new Vec3d(6.4, 1, 1.5);
+        Vec3d killerSpot = new Vec3d(4.0, 1, 1.5);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                killerStart, WEST, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        scene.overlay().showText(60)
+                .text("杀手在走廊里对大嗓门下手……")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, killer, killerSpot.subtract(killerStart), 30);
+        scene.idle(32);
+        Actors.charge(scene, killer, true);
+        scene.idle(16);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        Actors.fall(scene, noisemaker);
+        scene.idle(10);
+        glowBody(scene, noisemakerSpot, WEST, 420);
+        Actors.highlight(scene, killer, GLOWING_WHITE, 300);
+        scene.idle(14);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("大嗓门被杀倒地：尸体发光 60 秒，凶手发光 15 秒（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        Actors.hold(scene, killer, ItemStack.EMPTY);
+        Actors.walk(scene, killer, new Vec3d(2.0, 0, -0.6), 30);
+        scene.idle(70);
+        Actors.turn(scene, passenger, facing(passengerSpot, killerSpot));
+        scene.overlay().showText(90)
+                .text("发光大家一般都能隔墙看到，凶手很难藏住")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("好人和死者还会听到一声惨叫提示")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("活着时，技能键能大喊让全车听见，背包里能点亮一个人")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
     /** The yaw that faces from {@code from} towards {@code to}. 从 from 面向 to 的朝向。 */
     private static float facing(Vec3d from, Vec3d to) {
         return (float) (MathHelper.atan2(from.x - to.x, to.z - from.z) * MathHelper.DEGREES_PER_RADIAN);
@@ -1247,31 +1608,56 @@ final class NoellesCivilianScenes {
     }
 
     /**
-     * Start using the held item as LivingEntity.setCurrentHand does, so item models keyed on the active item switch
-     * on the actor too (the Democracy Shield's raised "blocking" model, registered in SparkStrength BodyguardClient);
-     * the toolkit's actor player only reports isUsingItem. Call after the actor has held the item for a tick and before
-     * charge(true). The drawn player and held stack are private to ActorElement, hence the reflection.
-     * 像 LivingEntity.setCurrentHand 那样开始使用手持物品，让依赖“正在使用的物品”的模型（SparkStrength BodyguardClient
-     * 注册的民主盾牌举盾模型）在演员身上也能切换；工具包的演员玩家只回报 isUsingItem。须在演员拿着物品至少一 tick 后、
-     * charge(true) 之前调用。绘制用的玩家和手持物品是 ActorElement 的私有成员，所以用反射取得。
+     * A key cap for a control hint, labelled with the key the player has bound to NoellesRoles' ability key (G when that
+     * binding is missing): Ponder's own hints only draw mouse buttons.
+     * 控制提示用的键帽图标，标着玩家给 NoellesRoles 技能键绑定的按键（找不到该按键时用 G）：Ponder 自带的提示只画鼠标按键。
      */
-    private static void raiseHeldItem(SceneBuilder scene, ElementLink<ActorElement> actor) {
-        scene.addInstruction(ponder -> {
-            ActorElement element = ponder.resolve(actor);
-            if (element == null) {
-                return;
-            }
-            try {
-                Method player = ActorElement.class.getDeclaredMethod("player");
-                Field held = ActorElement.class.getDeclaredField("held");
-                player.setAccessible(true);
-                held.setAccessible(true);
-                if (player.invoke(element) instanceof LivingEntity drawn) {
-                    drawn.setStackInHand(Hand.MAIN_HAND, (ItemStack) held.get(element));
-                    drawn.setCurrentHand(Hand.MAIN_HAND);
+    private static ScreenElement abilityKey() {
+        return (graphics, x, y) -> {
+            TextRenderer font = MinecraftClient.getInstance().textRenderer;
+            Text label = Text.literal("G");
+            for (KeyBinding binding : MinecraftClient.getInstance().options.allKeys) {
+                if (binding.getTranslationKey().equals(ABILITY_KEY)) {
+                    label = binding.getBoundKeyLocalizedText();
                 }
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException("ActorElement no longer has player() and held", e);
+            }
+            int width = Math.max(14, font.getWidth(label) + 6);
+            graphics.fill(x + 1, y + 1, x + 1 + width, y + 15, 0xFFA0A0A0);
+            graphics.fill(x + 2, y + 2, x + width, y + 13, 0xFF3A3A3A);
+            graphics.drawText(font, label, x + 1 + (width - font.getWidth(label)) / 2, y + 4, 0xFFFFFFFF, false);
+        };
+    }
+
+    /**
+     * The particles a teleporting player leaves where they stood, as vanilla LivingEntity.handleStatus(46) draws them
+     * for RecallerPlayerComponent.teleport: 128 portal particles scattered through the player's box, barely drifting.
+     * 传送的玩家在原地留下的粒子，与原版 LivingEntity.handleStatus(46) 为 RecallerPlayerComponent.teleport 绘制的一致：
+     * 128 个下界传送门粒子散布在玩家的碰撞箱里，几乎不漂移。
+     */
+    private static void teleportParticles(SceneBuilder scene, Vec3d feet) {
+        scene.effects().emitParticles(feet, (world, x, y, z) -> world.addParticle(ParticleTypes.PORTAL,
+                x + (RANDOM.nextDouble() - 0.5) * 1.2, y + RANDOM.nextDouble() * 1.8, z + (RANDOM.nextDouble() - 0.5) * 1.2,
+                (RANDOM.nextFloat() - 0.5f) * 0.2f, (RANDOM.nextFloat() - 0.5f) * 0.2f, (RANDOM.nextFloat() - 0.5f) * 0.2f),
+                128, 1);
+    }
+
+    /**
+     * Vanilla Glowing on a body (NoisemakerKillMixin) for {@code ticks}: a white box around the body that
+     * ActorElement lays from {@code feet} towards {@code yaw}; it stands in for the outline shader, as
+     * {@link Actors#highlight} does for standing actors.
+     * 尸体上的原版发光效果（NoisemakerKillMixin），持续 ticks：围住 ActorElement 从 feet 朝 yaw 方向放倒的尸体的白色方框；
+     * 与 Actors.highlight 对站立演员的做法一样，用来代替描边着色器。
+     */
+    private static void glowBody(SceneBuilder scene, Vec3d feet, float yaw, int ticks) {
+        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
+        Vec3d head = feet.add(-MathHelper.sin(radians) * BODY_LENGTH, 0.5, MathHelper.cos(radians) * BODY_LENGTH);
+        Box body = new Box(feet, head).expand(0.35, 0, 0.35);
+        Object slot = new Object();
+        scene.addInstruction(new TickingInstruction(false, ticks) {
+            @Override
+            public void tick(PonderScene ponder) {
+                super.tick(ponder);
+                ponder.getOutliner().chaseAABB(slot, body).lineWidth(1 / 16f).colored(GLOWING_WHITE);
             }
         });
     }
