@@ -22,7 +22,6 @@ import net.minecraft.advancement.criterion.ImpossibleCriterion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientAdvancementManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.toast.AdvancementToast;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -43,6 +42,8 @@ public final class AchievementAdvancements {
     // Tiled 16 × 16 GUI pixels by vanilla; the image may be any square size. 原版按 16 × 16 GUI 像素平铺；贴图可为任意正方形尺寸。
     private static final Identifier BACKGROUND = SparkAssist.id("textures/gui/achievements/background.png");
     private static final String CRITERION = "earned";
+    // "Level x · <description>". “Level x · <描述>”。
+    private static final String DESCRIPTION_KEY = "advancements.sparkassist.achievement.description";
 
     private AchievementAdvancements() {
     }
@@ -83,8 +84,8 @@ public final class AchievementAdvancements {
     }
 
     /**
-     * Puts newly earned achievements on the page and shows a vanilla toast for each.
-     * 把新达成的成就放上成就页，并为每个显示原版弹窗。
+     * Puts newly earned achievements on the page and shows a vanilla-style toast headed "Level x 成就达成" for each.
+     * 把新达成的成就放上成就页，并为每个显示原版样式、标题为“Level x 成就达成”的弹窗。
      */
     public static void announce(MinecraftClient client, List<Achievement> earned) {
         if (earned.isEmpty()) {
@@ -94,10 +95,9 @@ public final class AchievementAdvancements {
         if (handler != null) {
             restore(handler.getAdvancementHandler());
         }
-        for (AdvancementEntry entry : entries(AchievementStorage.ledger(client))) {
-            if (earned.stream().anyMatch(achievement -> idFor(achievement.id()).equals(entry.id()))) {
-                client.getToastManager().add(new AdvancementToast(entry));
-            }
+        for (Achievement achievement : earned) {
+            client.getToastManager().add(new AchievementToast(
+                    icon(achievement.icon()), Text.literal(achievement.title()), achievement.level()));
         }
     }
 
@@ -141,7 +141,7 @@ public final class AchievementAdvancements {
         AdvancementDisplay display = new AdvancementDisplay(
                 icon(achievement.icon()),
                 Text.literal(achievement.title()),
-                Text.literal(achievement.description()),
+                Text.translatable(DESCRIPTION_KEY, achievement.level(), achievement.description()),
                 Optional.empty(),
                 switch (achievement.frame()) {
                     case TASK -> AdvancementFrame.TASK;
