@@ -43,6 +43,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/wind_spirit",
+              "text": "演示：用风弹击退杀手"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
