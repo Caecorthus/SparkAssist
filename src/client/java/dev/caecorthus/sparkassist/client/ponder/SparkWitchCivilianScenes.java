@@ -2,6 +2,7 @@ package dev.caecorthus.sparkassist.client.ponder;
 
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
+import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_RIGHT;
@@ -10,7 +11,9 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import net.createmod.catnip.gui.element.ScreenElement;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
@@ -20,14 +23,21 @@ import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
+import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
+import net.fabricmc.fabric.api.client.model.loading.v1.FabricBakedModelManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.TexturedRenderLayers;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
@@ -37,29 +47,55 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.particle.BlockStateParticleEffect;
+import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
- * Demos for SparkWitch's civilian and police roles, opened only from the role's guide page; each needs SparkWitch.
+ * Demos for SparkWitch's civilian and police roles and the neutral Insider, opened only from the role's guide page;
+ * each needs SparkWitch.
  * What onlookers cannot see (an outline only the role itself sees, the Taser's hit, a bullet's path) is drawn as boxes
  * or lines, and the captions call them illustrations.
- * SparkWitch 平民阵营与警职职业的演示，只从该职业的指南页打开；都需要 SparkWitch。旁观者看不到的东西（只有本人看得到的
+ * SparkWitch 平民阵营、警职职业与中立内应的演示，只从该职业的指南页打开；都需要 SparkWitch。旁观者看不到的东西（只有本人看得到的
  * 轮廓、电击枪的命中、子弹的弹道）用方框或线条表示，字幕注明是示意。
  */
 final class SparkWitchCivilianScenes {
     /** NoellesRoles' shared ability key, which SparkWitch skills reuse. SparkWitch 技能沿用的 NoellesRoles 技能键。 */
     private static final String ABILITY_KEY = "key.noellesroles.ability";
+    /** SparkWitch's secondary skill key (default N). SparkWitch 的第二技能键（默认 N）。 */
+    private static final String SECONDARY_KEY = "key.sparkwitch.secondary_skill";
+    /** The driven Seeker car's speed, blocks a tick (SeekerRules.CAR_SPEED). 被驾驶的搜寻小车速度，格每 tick。 */
+    private static final double CAR_SPEED = 0.375;
+    /** The breaker mark's colour (SeekerRules.MARK_COLOR). 损坏者标记的颜色。 */
+    private static final int MARK_RED = 0xFF4D4D;
+    /** Bone Setting's potion swirl (BoneSettingEffect colour 0xB7E07A, particles shown). 正骨的药水漩涡粒子。 */
+    private static final EntityEffectParticleEffect BONE_SETTING_SWIRL =
+            EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, 0xFFB7E07A);
+    /** Vanilla Speed's potion swirl (colour 0x33EBFF). 原版速度效果的药水漩涡粒子。 */
+    private static final EntityEffectParticleEffect SPEED_SWIRL =
+            EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, 0xFF33EBFF);
+    /** Gold dust for an illustrated area edge. 用于示意范围边界的金色粉尘。 */
+    private static final DustParticleEffect EDGE_DUST = new DustParticleEffect(new Vector3f(1.0f, 0.8f, 0.15f), 1.5f);
     /** A standing actor's eyes above the feet. 站立演员的眼睛离脚底的高度。 */
     private static final double EYES = 1.62;
     /** A crack or flight runs until the scene ends; long enough for any scene. 裂痕或飞行持续到场景结束；对任何场景都足够长。 */
     private static final int UNTIL_STOPPED = 20 * 60 * 10;
+    /** The stages' plate width. 舞台底板的边长。 */
+    private static final double PLATE = 7;
+    /** Points around a full illustrated edge circle. 示意边界整圆上的点数。 */
+    private static final int EDGE_POINTS = 240;
 
     private SparkWitchCivilianScenes() {
     }
@@ -73,6 +109,14 @@ final class SparkWitchCivilianScenes {
                 scene("sparkwitch/civ_sniper_wall", SparkWitchCivilianScenes::usec));
         role("sparkassist:roles/sparkwitch/control_expert", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchCivilianScenes::controlExpert));
+        role("sparkassist:roles/sparkwitch/seeker", List.of("sparkwitch"),
+                scene("wathe/cabin", SparkWitchCivilianScenes::seeker));
+        role("sparkassist:roles/sparkwitch/insider", List.of("sparkwitch", "noellesroles"),
+                scene("sparkwitch/civ_train_cabin", SparkWitchCivilianScenes::insider));
+        role("sparkassist:roles/sparkwitch/saint", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchCivilianScenes::saint));
+        role("sparkassist:roles/sparkwitch/orthopedist", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchCivilianScenes::orthopedist));
     }
 
     /**
@@ -516,6 +560,418 @@ final class SparkWitchCivilianScenes {
     }
 
     /**
+     * Seeker (SeekerRules, SeekerCameraItem, SeekerCarItem, SeekerDeviceService, SeekerPlacementRules,
+     * SeekerQuickConnectHandler, SeekerCarUseRules, SeekerCameraEntity, SeekerCameraLookRules, SeekerDeviceHits,
+     * SeekerMarkService; client SeekerCarEntityRenderer, SeekerCameraEntityRenderer, SeekerMarkClientHooks): a camera
+     * from the shop is mounted with a right-click on a full block face within 4.5 blocks, never within a block of a
+     * door, bed, seat or other interactive block; the car the role starts with is set down at the feet or up to 3
+     * blocks ahead. Neither swings the arm (CONSUME), and the camera, the car and the tablet are hidden in hand from
+     * other living players. The secondary skill key (N) or the tablet connects to a device and the body then stands
+     * still. The car drives at 7.5 blocks a second; its own right-click toggles a door, gate, button or lever ahead
+     * like an empty hand (key-locked and jammed doors refuse, and train doors during a round). Viewing a camera turns
+     * its head with the Seeker's look and lights its LED, which everyone sees. One hit (any melee, a gun, a blast)
+     * breaks a device, with a sound and no particles; the breaker then wears a red outline for 10 s that only the
+     * Seeker sees, provided a tablet is in his inventory. The devices are drawn with their own placed models, as the
+     * entity renderers draw them; the outline is a box.
+     * 搜寻者：商店买的摄像头右键装在 4.5 格内的完整方块面上，不能装在门、床、座位等可交互方块 1 格之内；身份自带的小车放在
+     * 脚下或前方 3 格内。两者都不挥手（CONSUME），摄像头、小车和平板拿在手上时其他活着的玩家都看不见。第二技能键（N）或
+     * 平板连上设备后，本体站着不动。小车每秒跑 7.5 格；它自己的右键像空手一样开关前方的门、栅栏门、按钮或拉杆（要钥匙的门、
+     * 被卡住的门打不开，对局中的列车门也打不开）。观看摄像头时，它的机头跟着搜寻者的视角转动、指示灯亮起，人人可见。
+     * 设备挨一下（任何近战、枪、爆炸）就坏，有声音、没有粒子；损坏者随后被红色描边 10 秒，只有搜寻者本人看得到，前提是
+     * 他背包里有平板。设备用它们自己的放置模型绘制，与实体渲染器相同；描边用方框表示。
+     */
+    private static void seeker(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_seeker", "搜寻者：遥控小车与摄像头");
+        WatheItemScenes.cabinStage(scene, util);
+        BlockPos door = util.grid().at(3, 1, 3);
+        ItemStack cameraItem = stack("sparkwitch:seeker_camera");
+        ItemStack carItem = stack("sparkwitch:seeker_car");
+        ElementLink<ActorElement> seeker = Actors.enter(scene, RoleColors.of("sparkwitch:seeker", 0x5C9EFF),
+                Text.literal("搜寻者"), new Vec3d(1.5, 1, 1.0), SOUTH, Direction.DOWN);
+        Actors.hold(scene, seeker, cameraItem);
+        scene.idle(15);
+        // The mount spot; the caption points there, as the 0.3-block camera is small. 安装位置；摄像头只有 0.3 格，字幕指向那里。
+        Vec3d mountSpot = new Vec3d(1.5, 2.5, 2.85);
+        scene.overlay().showText(80)
+                .text("搜寻者在商店买摄像头，对着 4.5 格内的墙面右键装上")
+                .pointAt(mountSpot)
+                .placeNearTarget()
+                .attachKeyFrame();
+        scene.idle(40);
+        scene.overlay().showControls(new Vec3d(1.5, 3.1, 2.9), Pointing.DOWN, 30).rightClick().withItem(cameraItem);
+        scene.idle(10);
+        // SeekerPlacementRules.cameraEntityPos: the 0.3 cube against the wall's north face, centred on the aim.
+        // 0.3 的立方体贴着墙的北面，以准星为中心。
+        ElementLink<Gadget> camera = gadget(scene, new Gadget(cameraItem, new Vec3d(1.5, 2.35, 2.85), NORTH,
+                Direction.NORTH));
+        Actors.hold(scene, seeker, ItemStack.EMPTY);
+        scene.idle(40);
+        Actors.walk(scene, seeker, new Vec3d(4.0, 0, 0.3), 30);
+        scene.idle(32);
+        Actors.turn(scene, seeker, WEST);
+        Actors.hold(scene, seeker, carItem);
+        scene.idle(10);
+        Vec3d overHead = new Vec3d(5.5, 3.6, 1.3);
+        scene.overlay().showText(80)
+                .text("自带的小车开局冷却 60 秒；右键放到脚下或前方 3 格内")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(carItem);
+        scene.idle(10);
+        // SeekerPlacementRules.fallbackCarOrigin: 0.8 ahead of the feet, facing the owner's way.
+        // 脚前 0.8 格处，朝向与放置者相同。
+        ElementLink<Gadget> car = gadget(scene, new Gadget(carItem, new Vec3d(4.7, 1, 1.3), WEST, null));
+        scene.idle(50);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).showing(key(SECONDARY_KEY, "N"));
+        scene.overlay().showText(90)
+                .text("按第二技能键（默认 N）或右键平板连上小车，本体站着不动")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        scene.idle(drive(scene, car, new Vec3d(-1.2, 0, 0)) + 2);
+        steer(scene, car, SOUTH, 4);
+        scene.idle(6);
+        scene.idle(drive(scene, car, new Vec3d(0, 0, 0.9)) + 6);
+        scene.overlay().showControls(new Vec3d(3.5, 1.7, 2.2), Pointing.DOWN, 25).rightClick();
+        scene.idle(8);
+        WatheItemScenes.openDoor(scene, door, true);
+        scene.overlay().showText(90)
+                .text("小车跑得快，右键能开关门（上锁、卡住的门和列车门开不了）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        scene.idle(drive(scene, car, new Vec3d(0, 0, 2.6)) + 4);
+        steer(scene, car, -60, 6);
+        scene.idle(66);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).showing(key(SECONDARY_KEY, "N"));
+        scene.idle(8);
+        lightUp(scene, camera, true);
+        scene.overlay().showText(90)
+                .text("再按 N 切到摄像头：别人看得到它跟着转、指示灯变亮")
+                .pointAt(mountSpot)
+                .placeNearTarget()
+                .attachKeyFrame();
+        aim(scene, camera, 140, 10);
+        // Doors close by themselves 5 s after opening. 门打开 5 秒后自动关上。
+        scene.idle(5);
+        WatheItemScenes.openDoor(scene, door, false);
+        scene.idle(25);
+        aim(scene, camera, 220, 5);
+        scene.idle(30);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(0.5, 1, 0.4), -40, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        // The head follows the Seeker's look onto the newcomer. 机头随搜寻者的视线转向来人。
+        aim(scene, camera, 158, 5);
+        scene.idle(25);
+        Actors.walk(scene, killer, new Vec3d(1.0, 0, 1.2), 14);
+        aim(scene, camera, 180, 10);
+        scene.idle(16);
+        Actors.turn(scene, killer, SOUTH);
+        scene.idle(6);
+        scene.overlay().showControls(new Vec3d(1.5, 3.4, 2.85), Pointing.DOWN, 25).leftClick();
+        scene.idle(8);
+        Actors.swing(scene, killer);
+        removeGadget(scene, camera);
+        Actors.highlight(scene, killer, MARK_RED, 200);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("别人一般一下就能打坏设备，打坏的人被红框标记 10 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("红框只有你看得到（背包里要有平板）；手里的设备别人也看不见")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Insider (InsiderEquipmentService, InsiderDoorService, InsiderDoorRules, InsiderRules; NoellesRoles
+     * HiddenEquipmentHelper, Wathe SmallDoorBlock and TrainDoorBlock; client InsiderCohortRules): the role is dealt a
+     * neutral master key, hidden in hand from other living players. Right-clicked on a closed train door or a
+     * key-locked room door it opens the door (a swing) and then cools down 10 s; while it cools the door refuses
+     * without a swing. Jammed doors refuse it. Doors close by themselves 5 s after opening. With the crosshair on the
+     * other within 2 blocks, the Insider and the Corrupt Cop see a gold "嘉豪同伙" under Wathe's name display (hidden in
+     * a blackout); once only Team Jiahao members are alive, the whole team wins, dead members too.
+     * 内应：身份自带一把中立万能钥匙，拿在手上时其他活着的玩家看不见。右键关着的列车门或上锁的房门，门会打开（挥手），之后
+     * 钥匙冷却 10 秒；冷却期间门没有反应，也不挥手。被卡住的门打不开。门打开 5 秒后自动关上。内应和黑警在 2 格内准星对着对方时，
+     * Wathe 的名字显示下方出现金色的“嘉豪同伙”（停电时不显示）；只剩嘉豪阵营成员活着时全队获胜，已死的成员也算。
+     */
+    private static void insider(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_insider", "内应：中立万能钥匙");
+        WatheItemScenes.setStage(scene, util);
+        BlockPos trainDoor = util.grid().at(5, 1, 3);
+        BlockPos cabinDoor = util.grid().at(2, 1, 3);
+        ItemStack key = stack("noellesroles:neutral_master_key");
+        ElementLink<ActorElement> insider = Actors.enter(scene, RoleColors.of("sparkwitch:insider", 0x00FFD0),
+                Text.literal("内应"), new Vec3d(3.5, 1, 1.4), SOUTH, Direction.DOWN);
+        Actors.hold(scene, insider, key);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("内应开局拿到一把中立万能钥匙，别人看不见你手里的它")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.walk(scene, insider, new Vec3d(2.0, 0, 0.2), 20);
+        scene.idle(22);
+        Actors.turn(scene, insider, SOUTH);
+        scene.idle(8);
+        scene.overlay().showControls(new Vec3d(5.5, 3.6, 1.6), Pointing.DOWN, 30).rightClick().withItem(key);
+        scene.idle(10);
+        Actors.swing(scene, insider);
+        WatheItemScenes.openDoor(scene, trainDoor, true);
+        scene.overlay().showText(80)
+                .text("右键列车门或上锁的房门就能打开（被卡住的门不行）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.walk(scene, insider, new Vec3d(-3.0, 0, 0), 24);
+        scene.idle(26);
+        Actors.turn(scene, insider, SOUTH);
+        scene.idle(8);
+        scene.overlay().showControls(new Vec3d(2.5, 3.6, 1.6), Pointing.DOWN, 30).rightClick().withItem(key);
+        scene.idle(10);
+        // The key cools down: DoorInteraction answers DENY, so nothing happens and the arm stays still.
+        // 钥匙冷却中：DoorInteraction 返回 DENY，什么都不发生，手也不挥。
+        scene.overlay().showOutline(PonderPalette.RED, "door", util.select().fromTo(2, 1, 3, 2, 2, 3), 80);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("开门后钥匙冷却 10 秒，这期间再开就没反应")
+                .independent()
+                .attachKeyFrame();
+        // Doors close by themselves 5 s after opening. 门打开 5 秒后自动关上。
+        scene.idle(16);
+        WatheItemScenes.openDoor(scene, trainDoor, false);
+        scene.idle(74);
+        scene.overlay().showText(80)
+                .text("10 秒冷却过后，上锁的房门也一样能开")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        scene.overlay().showControls(new Vec3d(2.5, 3.6, 1.6), Pointing.DOWN, 30).rightClick().withItem(key);
+        scene.idle(10);
+        Actors.swing(scene, insider);
+        WatheItemScenes.openDoor(scene, cabinDoor, true);
+        scene.idle(60);
+        ElementLink<ActorElement> cop = Actors.enter(scene, RoleColors.of("noellesroles:corrupt_cop", 0x193264),
+                Text.literal("黑警"), new Vec3d(0.4, 1, 0.9), EAST, Direction.DOWN);
+        scene.idle(10);
+        Actors.walk(scene, cop, new Vec3d(0.8, 0, 0.3), 12);
+        scene.idle(10);
+        Actors.turn(scene, insider, WEST);
+        scene.idle(20);
+        WatheItemScenes.openDoor(scene, cabinDoor, false);
+        scene.overlay().showText(90)
+                .text("你和黑警互为同伙：2 格内准星对着对方时显示金色“嘉豪同伙”")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("只剩嘉豪阵营（你和黑警）的人活着时，全队一起获胜")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Saint (SaintRules, SaintFeatureService, GameFunctionsSaintProtectionMixin, SaintAbilityService,
+     * SaintKarmaService, HolyFlashItem, HolyFlashEntity, HolyFlashRules, HolyFlashTargeting; Wathe GunShootPayload): a
+     * kill by a player of the effective civilian faction is cancelled at Wathe's kill entry (a few forced kills and the
+     * Ceremonial Sword pierce it, and an Impostor is no civilian). The shot itself still happens: muzzle flash, and
+     * Wathe's innocent-shot punishment runs 4 ticks later (default: the revolver drops and the shooter dies). Hellfire
+     * costs 100 coins on the ability key and runs 15 s, shown only on the Saint's HUD; a non-civilian (not the Grand
+     * Witch) who kills him then gains Karma: every later kill puts all their items on a 5 s cooldown (20 s for the
+     * Bomber). The Holy Flash (visible in hand) is thrown like Wathe's grenade with a swing; it bursts on its first
+     * block or player (big explosion, 40 end rods, 24 firework sparks) and blacks out the screen of every affectable
+     * player whose body is within 6 blocks and who has a line of sight to it, the thrower too: 10 s at the burst down
+     * to 3 s at the edge, x0.75 facing away. Only the flashed players see it; nobody else sees a change. All Holy
+     * Flashes share a 15 s cooldown. The gold arc marks the 6-block edge.
+     * 圣徒：实际阵营为好人的玩家造成的击杀会在 Wathe 的击杀入口被取消（少数强制击杀与仪礼剑例外，内鬼也不算好人）。开枪本身
+     * 照常发生：有枪口火光，Wathe 的误杀惩罚在 4 tick 后执行（默认丢枪并处死开枪者）。业火：按技能键花 100 金币，持续 15 秒，
+     * 只显示在圣徒自己的屏幕上；此时杀死他的非好人（大魔女除外）背上业障：之后每次杀人，身上所有物品冷却 5 秒（炸弹客 20 秒）。
+     * 圣光弹（拿在手上别人看得到）像 Wathe 手雷一样挥手扔出，碰到第一个方块或玩家就爆开（大爆炸、40 颗末地烛光点、24 颗烟花
+     * 火花），让身体在 6 格内、与爆点之间没有遮挡的可影响玩家黑屏，投掷者本人也算：爆点处 10 秒，边缘 3 秒，背对 ×0.75。
+     * 只有被闪的人自己看得到，旁人看不出变化。所有圣光弹共用 15 秒冷却。金色弧线示意 6 格边界。
+     */
+    private static void saint(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_saint", "圣徒：好人一般杀不死你");
+        WatheItemScenes.stage(scene);
+        ItemStack revolver = stack("wathe:revolver");
+        ItemStack flash = stack("sparkwitch:holy_flash");
+        ElementLink<ActorElement> saint = Actors.enter(scene, RoleColors.of("sparkwitch:saint", 0xEEBC78),
+                Text.literal("圣徒"), new Vec3d(3.2, 1, 3.8), SCREEN_LEFT, Direction.DOWN);
+        Vec3d shooterFeet = new Vec3d(5.8, 1, 1.2);
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                shooterFeet, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, vigilante, revolver);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("好人阵营的人一般杀不死圣徒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        scene.overlay().showControls(shooterFeet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(revolver);
+        scene.idle(10);
+        // The muzzle of a levelled revolver held by an actor at (5.8, 1, 1.2) facing screen-right, as in
+        // controlExpert; RevolverItem kicks the view up 4 degrees. 与 controlExpert 相同的端平左轮枪口；开枪时视角上抬 4 度。
+        gunshotFlash(scene, new Vec3d(5.2, 2.05, 1.8));
+        Actors.lookPitch(scene, vigilante, -4);
+        scene.idle(3);
+        Actors.lookPitch(scene, vigilante, 0);
+        scene.idle(1);
+        // GunShootPayload: 4 ticks later the revolver drops ahead and the shooter dies (SHOT_INNOCENT).
+        // 4 tick 后左轮掉在前方，开枪者死亡。
+        Actors.hold(scene, vigilante, ItemStack.EMPTY);
+        ElementLink<ThrownElement> dropped = Actors.toss(scene, revolver, new Vec3d(5.4, 2.0, 1.6),
+                new Vec3d(4.6, 1.05, 2.4), 8, 0.3, true, ThrownElement.Flight.SPIN);
+        Actors.fall(scene, vigilante);
+        scene.overlay().showText(100)
+                .colored(PonderPalette.RED)
+                .text("好人朝你开枪你不会死，开枪的人照样受罚（默认丢枪并死亡）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(110);
+        Actors.leave(scene, vigilante, Direction.UP);
+        Actors.remove(scene, dropped);
+        scene.idle(10);
+        Actors.walk(scene, saint, new Vec3d(3.3, 0, -3.3), 30);
+        scene.idle(32);
+        Vec3d overHead = new Vec3d(6.5, 3.6, 0.5);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(90)
+                .text("花 100 金币按技能键点燃业火：持续 15 秒，别人看不出来")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("业火中杀你的人一般会背上业障，此后每次行凶都会被缴械几秒")
+                .independent();
+        scene.idle(60);
+        Actors.turn(scene, saint, SCREEN_RIGHT);
+        Actors.hold(scene, saint, flash);
+        scene.idle(30);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(0.4, 1, 6.6), SCREEN_LEFT, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        Actors.walk(scene, killer, new Vec3d(0.8, 0, -0.8), 16);
+        scene.overlay().showText(70)
+                .text("被人追时，把圣光弹扔到追兵面前")
+                .independent()
+                .attachKeyFrame();
+        // Thrown 10 degrees up at 0.5 blocks a tick (gravity 0.03, drag 0.99), it comes down about 6.5 blocks away,
+        // just ahead of him, after about 15 ticks. 以每 tick 0.5 格向上 10 度扔出（重力 0.03、阻力 0.99），约 15 tick 后
+        // 落在约 6.5 格外、他的面前。
+        Actors.lookPitch(scene, saint, -10);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 25).rightClick().withItem(flash);
+        scene.idle(8);
+        Actors.swing(scene, saint);
+        Actors.hold(scene, saint, ItemStack.EMPTY);
+        Vec3d burst = new Vec3d(1.8, 1.1, 5.2);
+        throwSprite(scene, new SpriteFlight(flash, new Vec3d(6.2, 2.5, 0.8), burst.add(0, -0.1, 0), 15, 0.8, null));
+        scene.idle(15);
+        // HolyFlashEntity.burst, 0.1 above the floor it hit. 在被击中的地面上方 0.1 处爆开。
+        spawnParticles(scene, WatheParticles.BIG_EXPLOSION, burst, 1, Vec3d.ZERO, 0);
+        spawnParticles(scene, ParticleTypes.END_ROD, burst, 40, new Vec3d(0.4, 0.4, 0.4), 0.25);
+        spawnParticles(scene, ParticleTypes.FIREWORK, burst, 24, new Vec3d(0.4, 0.4, 0.4), 0.25);
+        edge(scene, burst.add(0, -0.05, 0), 6, 90);
+        Actors.lookPitch(scene, saint, 0);
+        scene.idle(10);
+        scene.overlay().showText(90)
+                .text("6 格内的人一般都会眼前一黑、耳鸣（金色弧线示意 6 格）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("你自己在 6 格内也会被闪；所有圣光弹共用 15 秒冷却")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Orthopedist (OrthopedistSkillService, OrthopedistTargeting, OrthopedistRules, BoneSettingEffect; client
+     * OrthopedistClientHooks; Hunter HunterTrapEntity, HunterPlayerComponent, HunterInjuryState, HunterRules): the
+     * ability key, aimed at a visible living player within 3 blocks (no swing), gives 20 s of Bone Setting and 5 s of
+     * Speed I, both with particles everyone sees (one swirl every fourth tick from a random running effect), and starts
+     * a 60 s cooldown (30 s at round start). The Orthopedist alone sees Bone Set players in his colour while in sight.
+     * A Hunter trap, drawn for only a few roles (the item lies in for it), still roots its victim 3 s amid 8 crits
+     * and is used up, but Bone Setting is consumed instead of a fracture layer. On a fractured player the skill heals
+     * one layer instead.
+     * 骨科大夫：对准 3 格内看得见的活人按技能键（不挥手），给对方 20 秒正骨和 5 秒速度 I，两者的粒子人人可见（约每 4 tick
+     * 从正在生效的效果中随机冒出一颗），随后冷却 60 秒（开局 30 秒）。只有骨科大夫本人能看到视线内正骨中的人以他的颜色高亮。
+     * 猎人的捕兽夹只对少数身份绘制（用物品代替），照样把人定身 3 秒、冒出 8 颗暴击粒子并消失，但消耗的是正骨，而不是叠一层
+     * 骨折。对已骨折的人使用则改为治好一层骨折。
+     */
+    private static void orthopedist(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_orthopedist", "骨科大夫：正骨抵掉捕兽夹骨折");
+        WatheItemScenes.stage(scene);
+        int olive = RoleColors.of("sparkwitch:orthopedist", 0x90B358);
+        Vec3d feet = new Vec3d(5.2, 1, 1.6);
+        Actors.enter(scene, olive, Text.literal("骨科大夫"), feet, SCREEN_RIGHT, Direction.DOWN);
+        // A plain civilian: Vigilantes, Veterans, Corrupt Cops and Engineers see a trap in sight (HunterRules).
+        // 普通平民：义警、老兵、黑警和工程师看得见视线内的捕兽夹。
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(3.3, 1, 3.5), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("骨科大夫对准 3 格内的人按技能键（默认 G）正骨")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
+        scene.idle(10);
+        Swirls swirls = swirls(scene, passenger, new Swirl(BONE_SETTING_SWIRL, 20 * 20),
+                new Swirl(SPEED_SWIRL, 5 * 20));
+        scene.idle(30);
+        scene.overlay().showText(90)
+                .text("对方得到 20 秒正骨和 5 秒速度，冒出人人可见的药水粒子")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        // The Orthopedist's own Bone Setting outline, shown with its caption, lasts until the trap consumes the effect.
+        // 骨科大夫自己看到的正骨高亮随字幕出现，持续到捕兽夹消耗掉效果为止。
+        Actors.highlight(scene, passenger, olive, 174);
+        scene.overlay().showText(80)
+                .text("正骨中的人在你眼里高亮（绿框示意，只有你看得到）")
+                .independent();
+        scene.idle(90);
+        Vec3d trapAt = new Vec3d(3.3, 1.0, 5.8);
+        ElementLink<ThrownElement> trap = Actors.toss(scene, stack("sparkwitch:hunter_trap"), trapAt.add(0, 0.3, 0),
+                trapAt, 2, 0, true, ThrownElement.Flight.LIES_FLAT);
+        scene.overlay().showText(90)
+                .text("猎人的捕兽夹一般只有杀手等少数人看得见（这里用物品代替）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.turn(scene, passenger, SOUTH);
+        scene.idle(10);
+        // Walking straight at the trap, his box meets its trigger box (the trap's 0.5 box grown 0.35 a side) with the
+        // feet 0.9 short of its centre. 径直走向夹子时，脚离夹子中心 0.9 格处他的碰撞箱就碰到触发箱（夹子 0.5 的碰撞箱每边扩 0.35）。
+        Actors.walk(scene, passenger, new Vec3d(0, 0, 1.4), 14);
+        scene.idle(14);
+        spawnParticles(scene, ParticleTypes.CRIT, trapAt.add(0, 0.05, 0), 8, new Vec3d(0.2, 0.05, 0.2), 0.05);
+        Actors.remove(scene, trap);
+        unswirl(scene, swirls);
+        scene.overlay().showText(100)
+                .colored(PonderPalette.GREEN)
+                .text("正骨抵掉了这次骨折，但 3 秒的禁锢照样发生")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.walk(scene, passenger, new Vec3d(0, 0, 0.9), 10);
+        scene.idle(50);
+        scene.overlay().showText(90)
+                .text("对已骨折的人用则治好 1 层骨折；用后冷却 60 秒")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
      * The demo's AXMC: an FMJ chambered and a magazine of FMJ under AP, so it fires FMJ, AP, FMJ; the fitted magazine
      * also shows on the held model (UsecModelPredicates). 演示用的 AXMC：膛内一发 FMJ，弹匣里 FMJ 上压着 AP，所以依次打出
      * FMJ、AP、FMJ；装上的弹匣也会显示在手持模型上（UsecModelPredicates）。
@@ -605,12 +1061,107 @@ final class SparkWitchCivilianScenes {
      * 电击装置的飞行：像原版 FlyingItemEntityRenderer 绘制投掷物那样始终朝向镜头的物品图片，沿平抛弧线飞行，落地即消失。
      */
     private static void throwShockDevice(SceneBuilder scene, ItemStack device, Vec3d from, Vec3d to, int ticks) {
-        ShockDeviceFlight flight = new ShockDeviceFlight(device, from, to, ticks);
+        throwSprite(scene,
+                new SpriteFlight(device, from, to, ticks, (from.y - to.y) / 4, ParticleTypes.ELECTRIC_SPARK));
+    }
+
+    /**
+     * A thrown item's flight as a camera-facing sprite (vanilla's FlyingItemEntityRenderer), gone on landing.
+     * 投掷物的飞行：始终朝向镜头的物品图片（原版 FlyingItemEntityRenderer），落地即消失。
+     */
+    private static void throwSprite(SceneBuilder scene, SpriteFlight flight) {
         scene.addInstruction(ponder -> {
             flight.setVisible(true);
             flight.setFade(1);
             ponder.addElement(flight);
         });
+    }
+
+    /** Put a Seeker device into the scene. 把一台搜寻者设备放进场景。 */
+    private static ElementLink<Gadget> gadget(SceneBuilder scene, Gadget gadget) {
+        ElementLink<Gadget> link = new ElementLinkImpl<>(Gadget.class);
+        scene.addInstruction(ponder -> {
+            gadget.setVisible(true);
+            gadget.setFade(1);
+            ponder.addElement(gadget);
+            ponder.linkElement(gadget, link);
+        });
+        return link;
+    }
+
+    /** A broken device: gone at once, with no particles (SeekerDeviceService.breakDevice). 设备被打坏：立刻消失，没有粒子。 */
+    private static void removeGadget(SceneBuilder scene, ElementLink<Gadget> device) {
+        changeGadget(scene, device, gadget -> gadget.setVisible(false));
+    }
+
+    /**
+     * Drive the car by {@code delta} at its real speed, facing the way; returns the ticks it takes.
+     * 以真实速度把小车开过 delta，并朝向前进方向；返回所需 tick 数。
+     */
+    private static int drive(SceneBuilder scene, ElementLink<Gadget> car, Vec3d delta) {
+        int ticks = Math.max(1, (int) Math.ceil(delta.length() / CAR_SPEED));
+        float heading = (float) (MathHelper.atan2(-delta.x, delta.z) * MathHelper.DEGREES_PER_RADIAN);
+        scene.addInstruction(new Drive(car, delta, heading, ticks, true));
+        return ticks;
+    }
+
+    /** Turn the car on the spot to {@code yaw} over {@code ticks}. 在 ticks 内原地把小车转向 yaw。 */
+    private static void steer(SceneBuilder scene, ElementLink<Gadget> car, float yaw, int ticks) {
+        scene.addInstruction(new Drive(car, Vec3d.ZERO, yaw, ticks, false));
+    }
+
+    /**
+     * The look the Seeker views a camera with; its head eases towards it. 搜寻者观看摄像头时的视角；机头逐渐转向它。
+     */
+    private static void aim(SceneBuilder scene, ElementLink<Gadget> camera, float yaw, float pitch) {
+        changeGadget(scene, camera, gadget -> gadget.aim(yaw, pitch));
+    }
+
+    /** The camera's LED: bright while the Seeker views it, dim otherwise. 摄像头指示灯：搜寻者观看时变亮，否则变暗。 */
+    private static void lightUp(SceneBuilder scene, ElementLink<Gadget> camera, boolean viewed) {
+        changeGadget(scene, camera, gadget -> gadget.lit = viewed);
+    }
+
+    private static void changeGadget(SceneBuilder scene, ElementLink<Gadget> device, Consumer<Gadget> change) {
+        scene.addInstruction(ponder -> {
+            Gadget gadget = ponder.resolve(device);
+            if (gadget != null) {
+                change.accept(gadget);
+            }
+        });
+    }
+
+    /**
+     * Start potion swirls on {@code actor}, each effect for its own ticks, until they run out or {@link #unswirl}.
+     * 在 actor 身上开始药水漩涡粒子，每种效果各自持续其 tick 数，直到用完或 unswirl。
+     */
+    private static Swirls swirls(SceneBuilder scene, ElementLink<ActorElement> actor, Swirl... effects) {
+        Swirls swirls = new Swirls(actor, effects);
+        scene.addInstruction(swirls);
+        return swirls;
+    }
+
+    /** The effects are removed: no more swirls. 效果被移除：不再冒漩涡粒子。 */
+    private static void unswirl(SceneBuilder scene, Swirls swirls) {
+        scene.addInstruction(ponder -> swirls.stopped = true);
+    }
+
+    /**
+     * An illustrated edge: an arc of gold dust on the floor {@code radius} blocks around {@code centre}, drawn only
+     * over the plate, for {@code ticks}. 示意边界：以 centre 为圆心、半径 radius 格的金色粉尘弧线，只画在底板范围内，持续
+     * ticks。
+     */
+    private static void edge(SceneBuilder scene, Vec3d centre, double radius, int ticks) {
+        scene.effects().emitParticles(centre, (world, x, y, z) -> {
+            for (int i = 0; i < EDGE_POINTS; i++) {
+                double angle = i * MathHelper.TAU / EDGE_POINTS;
+                double px = x + Math.cos(angle) * radius;
+                double pz = z + Math.sin(angle) * radius;
+                if (px >= 0 && px <= PLATE && pz >= 0 && pz <= PLATE && world.random.nextInt(3) == 0) {
+                    world.addParticle(EDGE_DUST, px, y, pz, 0, 0, 0);
+                }
+            }
+        }, 1, ticks);
     }
 
     /**
@@ -695,27 +1246,33 @@ final class SparkWitchCivilianScenes {
     }
 
     /**
-     * A thrown Shock Device in flight: the item drawn facing the camera on a fixed arc, with ShockDeviceEntity's
-     * client trail (an electric spark on about 30% of ticks); scripted, so every replay lands in the same spot.
-     * 飞行中的电击装置：沿固定弧线、始终朝向镜头绘制的物品，带有 ShockDeviceEntity 的客户端拖尾（约 30% 的 tick 冒一颗
-     * 电火花）；轨迹由脚本决定，每次重播都落在同一处。
+     * A thrown item in flight (a Shock Device, a Holy Flash): the item drawn facing the camera on a fixed arc, with an
+     * optional client trail (ShockDeviceEntity's electric spark on about 30% of ticks); scripted, so every replay lands
+     * in the same spot.
+     * 飞行中的投掷物（电击装置、圣光弹）：沿固定弧线、始终朝向镜头绘制的物品，可带客户端拖尾（ShockDeviceEntity 约 30% 的
+     * tick 冒一颗电火花）；轨迹由脚本决定，每次重播都落在同一处。
      */
-    private static final class ShockDeviceFlight extends AnimatedSceneElementBase {
+    private static final class SpriteFlight extends AnimatedSceneElementBase {
         private static final float TRAIL_CHANCE = 0.3f;
         private final ItemStack stack;
         private final Vec3d from;
         private final Vec3d to;
         private final int ticks;
-        /** The arc's rise over the straight line at mid-flight: a level throw. 弧线中点高出直线的高度：平抛。 */
+        /** The arc's rise over the straight line at mid-flight. 弧线中点高出直线的高度。 */
         private final double arc;
+        @Nullable
+        private final ParticleEffect trail;
         private int age;
 
-        private ShockDeviceFlight(ItemStack stack, Vec3d from, Vec3d to, int ticks) {
+        /** @param trail the trail particle, or null for none / 拖尾粒子，没有则为 null */
+        private SpriteFlight(ItemStack stack, Vec3d from, Vec3d to, int ticks, double arc,
+                             @Nullable ParticleEffect trail) {
             this.stack = stack.copy();
             this.from = from;
             this.to = to;
             this.ticks = Math.max(1, ticks);
-            this.arc = (from.y - to.y) / 4;
+            this.arc = arc;
+            this.trail = trail;
         }
 
         @Override
@@ -726,9 +1283,9 @@ final class SparkWitchCivilianScenes {
         @Override
         public void tick(PonderScene scene) {
             age++;
-            if (age < ticks && scene.getWorld().random.nextFloat() < TRAIL_CHANCE) {
+            if (trail != null && age < ticks && scene.getWorld().random.nextFloat() < TRAIL_CHANCE) {
                 Vec3d at = at(age);
-                scene.getWorld().addParticle(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 0, 0, 0);
+                scene.getWorld().addParticle(trail, at.x, at.y, at.z, 0, 0, 0);
             }
         }
 
@@ -760,6 +1317,265 @@ final class SparkWitchCivilianScenes {
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND,
                     lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
             ms.pop();
+        }
+    }
+
+    /**
+     * A placed Seeker device drawn with its own baked models, as SeekerCarEntityRenderer and
+     * SeekerCameraEntityRenderer draw the entities. The car (no mount): the placed car model, front at model north,
+     * turned to its yaw and resting on the floor. A wall camera: the static mount against the wall face, the head
+     * pivoting at its housing centre towards the look (closing half the remaining angle a tick,
+     * SeekerCameraLookRules.RENDER_SMOOTHING) and the LED on the head, full-bright while viewed and dimmed to 0.3
+     * otherwise. Scripted, so every replay is the same.
+     * 用搜寻者设备自己的烘焙模型绘制放置后的设备，与 SeekerCarEntityRenderer、SeekerCameraEntityRenderer 绘制实体的方式相同。
+     * 小车（没有安装面）：放置的小车模型，模型北侧为车头，转到其朝向并贴着地面。墙面摄像头：静态底座贴着墙面，机头以外壳中心
+     * 为轴转向视角（每 tick 追上剩余角度的一半），指示灯在机头上，被观看时全亮，否则变暗到 0.3。由脚本驱动，每次重播都相同。
+     */
+    private static final class Gadget extends AnimatedSceneElementBase {
+        private static final Identifier CAR_MODEL = Identifier.of("sparkwitch", "item/seeker_car_placed");
+        private static final Identifier MOUNT_MODEL = Identifier.of("sparkwitch", "item/seeker_camera_placed");
+        private static final Identifier HEAD_MODEL = Identifier.of("sparkwitch", "item/seeker_camera_placed_head");
+        private static final Identifier LED_MODEL = Identifier.of("sparkwitch", "item/seeker_camera_placed_led");
+        /** Lifts the centred car model onto its feet (SeekerCarEntityRenderer). 把居中的小车模型抬到脚底。 */
+        private static final double CAR_MODEL_LIFT = 0.5;
+        /** The camera cube's size (SeekerRules.CAMERA_SIZE). 摄像头立方体的边长。 */
+        private static final double CAMERA_SIZE = 0.3;
+        /** The head's pivot from the model centre (SeekerCameraEntityRenderer.HEAD_PIVOT). 机头转轴相对模型中心的位置。 */
+        private static final Vector3f HEAD_PIVOT = new Vector3f(0.0f, 0.125f / 16.0f, -0.5f / 16.0f);
+        private static final float LED_DIM = 0.3f;
+        private static final float LOOK_SMOOTHING = 0.5f;
+        private static final Direction[] QUAD_SIDES = {Direction.DOWN, Direction.UP, Direction.NORTH,
+                Direction.SOUTH, Direction.WEST, Direction.EAST, null};
+        private final ItemStack stack;
+        /** The wall face a camera hangs on; null for the car. 摄像头所依附的墙面；小车为 null。 */
+        @Nullable
+        private final Direction mount;
+        private final Vec3d startPosition;
+        private final float startYaw;
+        private final Random quadRandom = Random.create();
+        private Vec3d position;
+        private Vec3d previousPosition;
+        /** The car's heading, or the camera's look yaw. 小车的朝向，或摄像头视角的偏航。 */
+        private float yaw;
+        private float previousYaw;
+        private float pitch;
+        private float headYaw;
+        private float previousHeadYaw;
+        private float headPitch;
+        private float previousHeadPitch;
+        private boolean lit;
+
+        /** @param mount the wall face of a camera, or null for the car / 摄像头的依附墙面，小车为 null */
+        private Gadget(ItemStack stack, Vec3d position, float yaw, @Nullable Direction mount) {
+            this.stack = stack.copy();
+            this.startPosition = position;
+            this.startYaw = yaw;
+            this.mount = mount;
+            reset(null);
+        }
+
+        @Override
+        public void reset(@Nullable PonderScene scene) {
+            position = startPosition;
+            previousPosition = startPosition;
+            yaw = startYaw;
+            previousYaw = startYaw;
+            pitch = 0;
+            headYaw = startYaw;
+            previousHeadYaw = startYaw;
+            headPitch = 0;
+            previousHeadPitch = 0;
+            lit = false;
+        }
+
+        private void aim(float yaw, float pitch) {
+            this.yaw = yaw;
+            this.pitch = pitch;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            previousPosition = position;
+            previousYaw = yaw;
+            previousHeadYaw = headYaw;
+            previousHeadPitch = headPitch;
+            headYaw += MathHelper.wrapDegrees(yaw - headYaw) * LOOK_SMOOTHING;
+            headPitch += (pitch - headPitch) * LOOK_SMOOTHING;
+        }
+
+        @Override
+        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
+                                  float pt) {
+            if (fade <= 0.01f) {
+                return;
+            }
+            MatrixStack ms = graphics.getMatrices();
+            Vec3d at = previousPosition.lerp(position, pt);
+            int light = lightCoordsFromFade(fade);
+            ms.push();
+            ms.translate(at.x, at.y, at.z);
+            if (mount == null) {
+                ms.translate(0, CAR_MODEL_LIFT, 0);
+                ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(
+                        180 - MathHelper.lerpAngleDegrees(pt, previousYaw, yaw)));
+                renderPart(ms, buffer, light, CAR_MODEL);
+            } else {
+                ms.translate(0, CAMERA_SIZE / 2, 0);
+                Quaternionf wall = RotationAxis.POSITIVE_Y.rotationDegrees(180 - mount.asRotation());
+                ms.push();
+                ms.multiply(wall);
+                renderPart(ms, buffer, light, MOUNT_MODEL);
+                ms.pop();
+                Vector3f pivot = wall.transform(new Vector3f(HEAD_PIVOT));
+                ms.translate(pivot.x, pivot.y, pivot.z);
+                ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(
+                        180 - MathHelper.lerpAngleDegrees(pt, previousHeadYaw, headYaw)));
+                ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
+                        -MathHelper.lerp(pt, previousHeadPitch, headPitch)));
+                ms.translate(-HEAD_PIVOT.x, -HEAD_PIVOT.y, -HEAD_PIVOT.z);
+                renderPart(ms, buffer, light, HEAD_MODEL);
+                renderLed(ms, buffer, light);
+            }
+            ms.pop();
+        }
+
+        private void renderPart(MatrixStack ms, VertexConsumerProvider buffer, int light, Identifier model) {
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, ms,
+                    buffer, light, OverlayTexture.DEFAULT_UV, model(model));
+        }
+
+        /** SeekerCameraEntityRenderer.renderLed. */
+        private void renderLed(MatrixStack ms, VertexConsumerProvider buffer, int light) {
+            float shade = lit ? 1 : LED_DIM;
+            int ledLight = lit ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light;
+            VertexConsumer consumer = buffer.getBuffer(TexturedRenderLayers.getEntityCutout());
+            BakedModel model = model(LED_MODEL);
+            ms.push();
+            ms.translate(-0.5f, -0.5f, -0.5f);
+            MatrixStack.Entry entry = ms.peek();
+            for (Direction side : QUAD_SIDES) {
+                quadRandom.setSeed(42L);
+                for (BakedQuad quad : model.getQuads(null, side, quadRandom)) {
+                    consumer.quad(entry, quad, shade, shade, shade, 1, ledLight, OverlayTexture.DEFAULT_UV);
+                }
+            }
+            ms.pop();
+        }
+
+        /** A model SparkWitch loads through ModelLoadingPlugin (SeekerModels). SparkWitch 通过插件加载的模型。 */
+        private static BakedModel model(Identifier id) {
+            return ((FabricBakedModelManager) MinecraftClient.getInstance().getBakedModelManager()).getModel(id);
+        }
+    }
+
+    /**
+     * Moves a device by {@code delta} over {@code ticks}, turning it to {@code yaw}: at once when driving (the car
+     * faces the way it is driven), step by step when steering on the spot.
+     * 在 ticks 内把设备移动 delta，并转向 yaw：行驶时立刻朝向前进方向，原地转向时逐步转过去。
+     */
+    private static final class Drive extends TickingInstruction {
+        private final ElementLink<Gadget> link;
+        private final Vec3d step;
+        private final float targetYaw;
+        private final boolean faceAtOnce;
+        @Nullable
+        private Gadget gadget;
+        private float startYaw;
+
+        private Drive(ElementLink<Gadget> link, Vec3d delta, float yaw, int ticks, boolean faceAtOnce) {
+            super(false, ticks);
+            this.link = link;
+            this.step = delta.multiply(1.0 / ticks);
+            this.targetYaw = yaw;
+            this.faceAtOnce = faceAtOnce;
+        }
+
+        @Override
+        protected void firstTick(PonderScene scene) {
+            super.firstTick(scene);
+            gadget = scene.resolve(link);
+            if (gadget != null) {
+                startYaw = gadget.yaw;
+                if (faceAtOnce) {
+                    gadget.yaw = targetYaw;
+                }
+            }
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            if (gadget == null) {
+                return;
+            }
+            gadget.position = gadget.position.add(step);
+            if (!faceAtOnce) {
+                float progress = 1 - remainingTicks / (float) totalTicks;
+                gadget.yaw = startYaw + MathHelper.wrapDegrees(targetYaw - startYaw) * progress;
+            }
+        }
+    }
+
+    /** One status effect's swirls and how long the effect runs. 一种状态效果的漩涡粒子及其持续时间。 */
+    private record Swirl(ParticleEffect particle, int ticks) {
+    }
+
+    /**
+     * Potion swirls on an actor while their effects run, as LivingEntity.tickStatusEffects shows a visible effect to
+     * everyone: on about one tick in four, one swirl of a random running effect somewhere on the body.
+     * 演员身上效果生效期间的药水漩涡粒子，与 LivingEntity.tickStatusEffects 向所有人显示可见效果相同：约每 4 tick 一次，
+     * 在身上某处冒出一颗正在生效的效果中随机一种的漩涡。
+     */
+    private static final class Swirls extends TickingInstruction {
+        private static final int ONE_IN = 4;
+        private static final double HALF_WIDTH = 0.3;
+        private static final double HEIGHT = 1.8;
+        private final ElementLink<ActorElement> link;
+        private final Swirl[] effects;
+        private final List<ParticleEffect> running = new ArrayList<>();
+        private int age;
+        private boolean stopped;
+
+        private Swirls(ElementLink<ActorElement> link, Swirl[] effects) {
+            super(false, UNTIL_STOPPED);
+            this.link = link;
+            this.effects = effects.clone();
+        }
+
+        @Override
+        public void reset(PonderScene scene) {
+            super.reset(scene);
+            age = 0;
+            stopped = false;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            age++;
+            running.clear();
+            for (Swirl effect : effects) {
+                if (age <= effect.ticks()) {
+                    running.add(effect.particle());
+                }
+            }
+            if (running.isEmpty()) {
+                stopped = true;
+            }
+            ActorElement actor = scene.resolve(link);
+            PonderLevel world = scene.getWorld();
+            if (stopped || actor == null || world.random.nextInt(ONE_IN) != 0) {
+                return;
+            }
+            Vec3d at = actor.position();
+            world.addParticle(running.get(world.random.nextInt(running.size())),
+                    at.x + (world.random.nextDouble() * 2 - 1) * HALF_WIDTH, at.y + world.random.nextDouble() * HEIGHT,
+                    at.z + (world.random.nextDouble() * 2 - 1) * HALF_WIDTH, 1, 1, 1);
+        }
+
+        @Override
+        public boolean isComplete() {
+            return stopped || super.isComplete();
         }
     }
 }

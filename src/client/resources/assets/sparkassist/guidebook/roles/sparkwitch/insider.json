@@ -60,6 +60,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/insider",
+              "text": "演示：中立万能钥匙"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
