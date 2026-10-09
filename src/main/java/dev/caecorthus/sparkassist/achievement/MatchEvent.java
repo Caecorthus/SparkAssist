@@ -25,7 +25,11 @@ public record MatchEvent(String type, int tick, UUID actor, UUID target, Map<Str
     public static final String TASK_COMPLETE = "task_complete";
     public static final String PLAYER_POISONED = "player_poisoned";
     public static final String ITEM_USE = "item_use";
+    public static final String ITEM_PICKUP = "item_pickup";
     public static final String SKILL_USE = "skill_use";
+    /** A mod's own named event; its id is in {@code event}. 模组自定义的具名事件，id 在 {@code event} 中。 */
+    public static final String GLOBAL_EVENT = "global_event";
+    public static final String SHIELD_BLOCKED = "shield_blocked";
     /** Wathe's opening role snapshot: {@code player.uuid}, {@code player.role}, … Wathe 开局身份快照。 */
     public static final String ROLE_ASSIGNED = "role_assigned";
     /** A role change: {@code player}, {@code from}, {@code to}, {@code cause}, {@code source}. 身份变化。 */
