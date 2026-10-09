@@ -31,6 +31,7 @@ import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
 import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.OverlayTexture;
@@ -48,6 +49,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleEffect;
@@ -114,6 +116,16 @@ final class NoellesKillerScenes {
         role("sparkassist:roles/noellesroles/morphling", NOELLES,
                 scene("wathe/aisle", NoellesKillerScenes::morph),
                 scene("wathe/aisle", NoellesKillerScenes::corpseMode));
+        role("sparkassist:roles/noellesroles/phantom", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::phantom));
+        role("sparkassist:roles/noellesroles/scavenger", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::scavenger));
+        role("sparkassist:roles/noellesroles/corrupt_cop", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::corruptCop));
+        role("sparkassist:roles/noellesroles/shadow_jester", NOELLES_STRENGTH,
+                scene("wathe/aisle", NoellesKillerScenes::shadowJester));
+        role("sparkassist:roles/noellesroles/pathogen", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::pathogen));
     }
 
     /**
@@ -1806,5 +1818,420 @@ final class NoellesKillerScenes {
                     lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
             ms.pop();
         }
+    }
+
+    /**
+     * Phantom (NoellesRoles ability packet, PhantomHudMixin, MorphlingRoleNameRendererMixin; Wathe KnifeItem,
+     * WatheClient.getInstinctHighlight): the ability key gives the Phantom 30 s of vanilla Invisibility without
+     * particles and starts a 90 s cooldown at once (30 s opening cooldown by default). Others no longer see the body,
+     * nor the name under the crosshair, but held items still render, sprinting still kicks up the floor's particles and
+     * the hitbox stays, so the Phantom can be bumped into, stabbed and shot. The knife still needs its charge, with the
+     * raise sound nearby players hear; nothing ends the invisibility early. Fellow killers holding the instinct key
+     * usually still see the Phantom outlined.
+     * 幽灵：技能键给自己 30 秒原版隐身（无粒子），90 秒冷却同时开始计算（开局默认冷却 30 秒）。别人看不见他的身体，准星
+     * 对着也不显示名字，但手持物品照常显示，疾跑仍会踢起地面粒子，碰撞箱也还在，所以会被撞到、刺中和枪击。用刀仍要蓄力，
+     * 附近的人听得到举刀声；隐身不会提前结束。杀手同伴按住本能键一般仍能看到他的轮廓。
+     */
+    private static void phantom(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_phantom", "幽灵：隐身摸到人身后");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:phantom", 0x500505);
+        ItemStack knife = stack("wathe:knife");
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(2.2, 1, 4.8), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        ElementLink<ActorElement> phantom = Actors.enter(scene, color, Text.literal("幽灵"),
+                new Vec3d(6.4, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, phantom, knife);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("幽灵（杀手）：按技能键（默认 G）隐身 30 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        Actors.invisible(scene, phantom, true);
+        scene.idle(40);
+        scene.overlay().showText(90)
+                .text("别人看不见你的身体和名字，手里的刀却照样看得见")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.walk(scene, phantom, new Vec3d(-2.2, 0, 2.2), 13);
+        sprintDust(scene, phantom, 13);
+        scene.overlay().showText(80)
+                .text("疾跑照样会踢起脚下的粒子；靠近目标时最好慢慢走")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(15);
+        Actors.walk(scene, phantom, new Vec3d(-0.8, 0, 0.8), 20);
+        scene.idle(75);
+        scene.overlay().showControls(new Vec3d(3.4, 3.6, 3.6), Pointing.DOWN, 30).rightClick().withItem(knife);
+        Actors.charge(scene, phantom, true);
+        scene.idle(20);
+        Actors.charge(scene, phantom, false);
+        Actors.swing(scene, phantom);
+        Actors.fall(scene, victim);
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("出刀照样要蓄力、有举刀声；得手后你还隐着身")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, phantom, new Vec3d(2.0, 0, -2.0), 30);
+        scene.idle(32);
+        Actors.turn(scene, phantom, SCREEN_RIGHT);
+        scene.idle(58);
+        scene.overlay().showText(80)
+                .text("身体还在：照样会被人撞到、被刀刺中、被枪打中")
+                .independent();
+        scene.idle(90);
+        // A killer holding the instinct key sees fellow killers in hsvToRgb(0, 1, 0.6) (WatheClient).
+        // 杀手按住本能键时，杀手同伴显示为 hsvToRgb(0, 1, 0.6) 的颜色。
+        Actors.highlight(scene, phantom, 0x990000, 80);
+        scene.overlay().showText(80)
+                .text("杀手同伴按住本能键一般仍看得到你（方框为示意）")
+                .independent();
+        scene.idle(90);
+        Actors.invisible(scene, phantom, false);
+        scene.overlay().showText(80)
+                .text("30 秒后现形（演示缩短了）；冷却 90 秒从隐身时算起")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Scavenger (NoellesRoles ScavengerInstantKnifeMixin, ScavengerKnifeSoundMixin, ScavengerKnifeStabSoundMixin,
+     * ScavengerBodyHideMixin, ScavengerBodyCanHitMixin, HiddenBodiesWorldComponent, ScavengerShopHandler; Wathe
+     * KnifeStabPayload): a single right-click with the knife stabs the player in front within 3 blocks at once; on a
+     * hit there is no charge pose and neither the raise nor the stab sound; the Scavenger swings as after any stab, and
+     * the knife cooldown still applies (the shop sells a reset, 150 coins by default). The body of anyone it kills with
+     * the knife, a Noisemaker excepted, is not drawn for living players outside the killer and neutral factions, so to
+     * them the victim simply drops out of sight; the dead still see it.
+     * 清道夫：拿刀右键一下即刺中正前方 3 格内的人；刺中时没有蓄力姿势，也没有举刀声和刺杀声；出刀后照常挥一下手，刀的冷
+     * 却照常（商店可买重置，默认 150 金币）。被他用刀杀死的人（大嗓门除外），尸体不会绘制给杀手与中立阵营以外的活人，所
+     * 以在他们眼里被害者就这么不见了；死者仍看得到尸体。
+     */
+    private static void scavenger(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_scavenger", "清道夫：无声瞬刺，尸体藏起来");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:scavenger", 0x654321);
+        ItemStack knife = stack("wathe:knife");
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(2.2, 1, 4.6), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        ElementLink<ActorElement> scavenger = Actors.enter(scene, color, Text.literal("清道夫"),
+                new Vec3d(5.8, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, scavenger, knife);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("清道夫（杀手）：拿着刀右键点一下就出刀")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.walk(scene, scavenger, new Vec3d(-2.2, 0, 2.2), 26);
+        scene.idle(50);
+        scene.overlay().showControls(new Vec3d(3.6, 3.6, 3.2), Pointing.DOWN, 20).rightClick().withItem(knife);
+        scene.idle(10);
+        Actors.swing(scene, scavenger);
+        Actors.fall(scene, victim);
+        scene.idle(10);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("不用按住蓄力，也没有举刀声和刺杀声")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("刀杀的人，尸体一般只有杀手、中立和死者看得见")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, scavenger, new Vec3d(2.0, 0, -2.0), 28);
+        scene.idle(30);
+        Actors.turn(scene, scavenger, SCREEN_RIGHT);
+        scene.idle(70);
+        // From here on the stage shows what a civilian sees. 此后舞台展示的是平民看到的画面。
+        Actors.vanish(scene, victim);
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(0.4, 1, 6.4), SCREEN_LEFT, Direction.DOWN);
+        scene.overlay().showText(90)
+                .text("而在好人眼里（示意），这里什么都没有")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, passenger, new Vec3d(2.4, 0, -2.4), 40);
+        scene.idle(80);
+        scene.overlay().showText(80)
+                .text("大嗓门的尸体藏不住；不是用刀杀的也照常留尸体")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("商店默认 150 金币就能立刻清空刀的冷却")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Corrupt Cop (NoellesRoles start items, ShouldPunishGunShooter listener, win check; Wathe GunShootPayload,
+     * GameConstants): the Corrupt Cop starts with a revolver (and the neutral master key, hidden in hand). Its shots
+     * kill whoever they hit, unless a shield or psycho armour stops them, without any of an innocent shooter's
+     * penalties: no gun drop, no ban on picking guns up, no death, no backfire; the revolver's 10 s cooldown applies (2
+     * s in the Corrupt Cop moment). While it lives neither the passengers nor the killers can win early; it usually
+     * wins as the last one alive and not swallowed (SparkWitch's Insider team and the Shadow Jester finale aside).
+     * 黑警：开局自带左轮手枪（还有手持时别人看不见的中立万能钥匙）。他开枪打中谁就打死谁（护盾或疯魔护甲挡下的除外），
+     * 没有好人误杀的惩罚：不掉枪、不禁止捡枪、不赔命、不走火；左轮冷却 10 秒（处决时刻 2 秒）。他活着时好人和杀手都无法
+     * 提前获胜；他一般在成为最后一名没被吞下的活人时获胜（SparkWitch 内应同伙与双影谢幕除外）。
+     */
+    private static void corruptCop(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_corrupt_cop", "黑警：打谁都不受罚的左轮");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:corrupt_cop", 0x193264);
+        ItemStack revolver = stack("wathe:revolver");
+        ElementLink<ActorElement> cop = Actors.enter(scene, color, Text.literal("黑警"), new Vec3d(5.8, 1, 1.2),
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, cop, revolver);
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("黑警（中立）：开局自带一把左轮手枪")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(1.2, 1, 5.8), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(10);
+        Actors.walk(scene, passenger, new Vec3d(0.8, 0, -0.8), 20);
+        scene.idle(25);
+        scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick().withItem(revolver);
+        scene.idle(15);
+        WatheItemScenes.shoot(scene, cop, new Vec3d(5.2, 2.05, 1.8), new Vec3d(2.0, 1.9, 5.0));
+        Actors.fall(scene, passenger);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("打死好人也不受罚：不掉枪，也不会赔命")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(4.6, 1, 6.4), NORTH, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.overlay().showText(80)
+                .text("每开一枪冷却 10 秒（处决时刻 2 秒，演示缩短了）")
+                .independent();
+        scene.idle(30);
+        Actors.walk(scene, killer, new Vec3d(0.4, 0, -1.8), 30);
+        // Facing the killer's stop at (5.0, 1, 4.6). 面向杀手停下的位置 (5.0, 1, 4.6)。
+        Actors.turn(scene, cop, 13);
+        scene.idle(30);
+        Actors.charge(scene, killer, true);
+        scene.idle(10);
+        WatheItemScenes.shoot(scene, cop, new Vec3d(5.6, 2.05, 2.03), new Vec3d(5.0, 1.9, 4.6));
+        Actors.fall(scene, killer);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("杀手也照打不误：好人、杀手都可以是你的目标")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("一般要杀到车上只剩你一人才赢，所以两边都会来找你")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Shadow Jester pact (NoellesRoles SHADOW_ALLY receiver and client ability key, TaskComplete listener,
+     * ShadowJesterPlayerComponent, ShadowJesterKnifeMixin, death listener; SparkStrength ShadowJesterAllianceMixin,
+     * ShadowJesterShowdownService.enhanceAlliance): the two Shadow Jesters always see each other outlined. Each gets a
+     * knife on its 4th task, which kills only the partner. Once both have their knife, one aims at the partner within 3
+     * blocks and presses the ability key; the partner presses it back: the proposer becomes the Seer (knife taken, a
+     * lockpick added to the inventory), the accepter the Blade (the knife now kills anyone, a derringer added), both
+     * usually see the living through walls with the instinct key, and from then on when one dies the other dies too. No
+     * particle or sound; onlookers only see the Seer's knife go. Unallied, a Shadow Jester whose partner dies becomes a
+     * Jester.
+     * 影子小丑结盟：两名影子小丑始终能看到彼此的轮廓。各自做完第 4 个任务得到一把刀，只能杀搭档。两人都拿到刀后，一方准
+     * 星对准 3 格内的搭档按技能键，搭档回按一次：发起者成为影瞳（刀被收走，背包里多一把开锁器），同意者成为影刃（刀能杀
+     * 任何人，背包里多一把德林加手枪），两人按住本能键一般都能隔墙看见活人，此后一人死另一人也死。没有粒子和声音，旁人
+     * 只看得到影瞳手里的刀没了。未结盟时搭档一死，影子小丑就变成小丑。
+     */
+    private static void shadowJester(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_shadow_jester", "影子小丑：结下影誓");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:shadow_jester", 0xBE1E5A);
+        ItemStack knife = stack("wathe:knife");
+        Text shadowJester = Text.literal("影子小丑");
+        ElementLink<ActorElement> partner = Actors.enter(scene, color, shadowJester, new Vec3d(2.0, 1, 5.0),
+                SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        ElementLink<ActorElement> proposer = Actors.enter(scene, color, shadowJester, new Vec3d(5.8, 1, 1.2),
+                SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(15);
+        Actors.highlight(scene, partner, color, 80);
+        Actors.highlight(scene, proposer, color, 80);
+        scene.overlay().showText(80)
+                .text("影子小丑两人一对，能隔墙看见彼此（只在你们屏幕上）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(85);
+        Actors.hold(scene, partner, knife);
+        Actors.hold(scene, proposer, knife);
+        scene.overlay().showText(75)
+                .text("各自做满 4 个任务得到一把刀：这把刀只能杀搭档")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(80);
+        Actors.walk(scene, proposer, new Vec3d(-2.0, 0, 2.0), 26);
+        scene.idle(28);
+        scene.overlay().showText(75)
+                .text("准星对准 3 格内的搭档按技能键（默认 G），发起影誓")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(55);
+        Actors.turn(scene, partner, SCREEN_LEFT);
+        scene.idle(25);
+        scene.overlay().showText(60)
+                .text("搭档也对你按一次技能键，同盟就结成了")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(45);
+        // The pact lands: the proposer's knife is taken and the accepter's turns real.
+        // 结盟生效：发起者的刀被收走，同意者的刀变成真刀。
+        Actors.hold(scene, proposer, ItemStack.EMPTY);
+        Actors.retint(scene, proposer, color, Text.literal("影瞳"));
+        Actors.retint(scene, partner, color, Text.literal("影刃"));
+        scene.idle(15);
+        scene.overlay().showText(85)
+                .text("发起的你成为影瞳：刀被收走，背包里多了把开锁器")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(45);
+        // He takes out the lockpick, which landed in a free slot. 他拿出放进空槽位的开锁器。
+        Actors.hold(scene, proposer, stack("wathe:lockpick"));
+        scene.idle(45);
+        scene.overlay().showText(85)
+                .text("同意的搭档成为影刃：刀能杀任何人，背包里多一把德林加")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(85)
+                .text("两人都能按住本能键隔墙看见活人；此后一人死，另一人也会死")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(85)
+                .colored(PonderPalette.RED)
+                .text("没结盟时搭档一死（比如被你杀了），你就变成小丑")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Pathogen infection (NoellesRoles ability packet, PathogenPlayerComponent, InfectedPlayerComponent,
+     * NoellesrolesClient highlight; SparkStrength PathogenClientHooks): the ability key needs no aim; it infects the
+     * nearest living, uninfected player within 3 blocks in line of sight, with nothing to see or hear. The Pathogen
+     * sees infected players it has in sight outlined in its own colour (Virus carriers darker), never through walls. 10
+     * s opening cooldown, then 20, 15, 10 or 7 s by starting player count. 10-30 s after the infection the victim
+     * sneezes, a sound only (panda sneeze, volume 2) with no particles, and is told they feel unwell. Killers count
+     * too: the Pathogen wins once every other living player is infected (unless the Shadow Jester finale is running).
+     * 病原体感染：技能键不用瞄准，感染 3 格内、视线可及、离得最近的一名未感染活人，看不到也听不到任何动静。病原体能看到
+     * 视线内已感染者身上自己颜色的轮廓（带毒者颜色更深），隔墙不显示。开局冷却 10 秒，之后按开局人数为 20、15、10 或 7
+     * 秒。感染后 10～30 秒被感染者打一个喷嚏，只有声音（熊猫喷嚏声，音量 2），没有粒子，并收到身体不适的提示。杀手也要
+     * 感染：其他活人全部感染时病原体获胜（双影谢幕期间除外）。
+     */
+    private static void pathogen(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_pathogen", "病原体：悄悄感染");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:pathogen", 0x7FFF00);
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                new Vec3d(3.0, 1, 2.0), SCREEN_LEFT, Direction.DOWN);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(1.4, 1, 4.6), FACING_CAMERA, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> pathogen = Actors.enter(scene, color, Text.literal("病原体"),
+                new Vec3d(6.2, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("病原体（中立）：一般把其他活人全部感染就能获胜")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.walk(scene, pathogen, new Vec3d(-1.8, 0, 0.8), 26);
+        scene.idle(50);
+        scene.overlay().showText(70)
+                .text("走到 3 格内按技能键（默认 G），自动感染最近的未感染者")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        // The outline lasts as long as the Pathogen has the vigilante in sight. 只要病原体看得见义警，轮廓就一直在。
+        Actors.highlight(scene, vigilante, color, 480);
+        scene.idle(30);
+        scene.overlay().showText(90)
+                .text("不用瞄准，对方毫无察觉；你看得到他的绿色轮廓（隔墙不显示）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("冷却 7～20 秒（开局人越多越短，演示缩短了）；杀手也得感染")
+                .independent();
+        Actors.walk(scene, pathogen, new Vec3d(-1.8, 0, 2.0), 30);
+        scene.idle(60);
+        Actors.highlight(scene, killer, color, 250);
+        scene.idle(30);
+        scene.overlay().showText(40)
+                .text("阿嚏！")
+                .pointAt(new Vec3d(3.0, 2.9, 2.0))
+                .placeNearTarget();
+        scene.overlay().showText(90)
+                .text("10～30 秒后他会打个喷嚏，附近都听得到（演示缩短了）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("喷嚏只有声音；他还会收到“身体不太舒服”的提示")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Sprinting's floor particles as Entity.spawnSprintingParticles adds them every tick, which still runs for an
+     * invisible player: one particle of the block under the feet, kicked back against the movement.
+     * 疾跑的地面粒子，与 Entity.spawnSprintingParticles 每 tick 添加的一致（隐身的玩家照样有）：脚下方块的一个粒子，
+     * 朝移动的反方向踢起。
+     */
+    private static void sprintDust(SceneBuilder scene, ElementLink<ActorElement> link, int ticks) {
+        scene.addInstruction(new TickingInstruction(false, ticks) {
+            @Nullable
+            private Vec3d last;
+
+            @Override
+            protected void firstTick(PonderScene ponder) {
+                super.firstTick(ponder);
+                last = null;
+            }
+
+            @Override
+            public void tick(PonderScene ponder) {
+                super.tick(ponder);
+                ActorElement actor = ponder.resolve(link);
+                if (actor == null) {
+                    return;
+                }
+                Vec3d at = actor.position();
+                Vec3d velocity = last == null ? Vec3d.ZERO : at.subtract(last);
+                last = at;
+                BlockState floor = ponder.getWorld().getBlockState(BlockPos.ofFloored(at).down());
+                if (floor.isAir()) {
+                    return;
+                }
+                ponder.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, floor),
+                        at.x + (RANDOM.nextDouble() - 0.5) * 0.6, at.y + 0.1, at.z + (RANDOM.nextDouble() - 0.5) * 0.6,
+                        velocity.x * -4, 1.5, velocity.z * -4);
+            }
+        });
     }
 }

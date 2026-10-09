@@ -47,6 +47,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/scavenger",
+              "text": "演示：无声瞬刺与藏尸"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"
