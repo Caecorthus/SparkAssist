@@ -3,12 +3,15 @@ package dev.caecorthus.sparkassist.client.ponder;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
+import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_RIGHT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
+import dev.doctor4t.wathe.index.WatheParticles;
+import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -20,23 +23,39 @@ import java.util.Set;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
 import net.createmod.ponder.api.element.ElementLink;
+import net.createmod.ponder.api.element.EntityElement;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
+import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
+import net.minecraft.client.render.entity.model.EntityModelLayers;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.model.SkullEntityModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.data.TrackedData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -58,6 +77,8 @@ import org.joml.Vector3f;
  */
 final class NoellesKillerScenes {
     private static final List<String> NOELLES = List.of("noellesroles");
+    /** Scenes that also use SparkStrength's items or entities. 还用到 SparkStrength 物品或实体的场景。 */
+    private static final List<String> NOELLES_STRENGTH = List.of("noellesroles", "sparkstrength");
     private static final Random RANDOM = Random.create();
     /** Facing the camera: towards the plate's (0, 0) corner. 面向镜头：朝底板的 (0, 0) 角。 */
     private static final float FACING_CAMERA = 135;
@@ -80,6 +101,19 @@ final class NoellesKillerScenes {
         role("sparkassist:roles/noellesroles/bandit", NOELLES,
                 scene("noellesroles/axe_wall", NoellesKillerScenes::throwingAxe));
         item("noellesroles:throwing_axe", NOELLES, scene("noellesroles/axe_wall", NoellesKillerScenes::throwingAxe));
+        role("sparkassist:roles/noellesroles/bomber", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::timedBomb));
+        item("noellesroles:timed_bomb", NOELLES, scene("wathe/aisle", NoellesKillerScenes::timedBomb));
+        item("sparkstrength:grenade_drone", NOELLES_STRENGTH,
+                scene("noellesroles/wide_aisle", NoellesKillerScenes::grenadeDrone));
+        role("sparkassist:roles/noellesroles/jester", NOELLES_STRENGTH,
+                scene("wathe/aisle", NoellesKillerScenes::jesterFakeDeath),
+                scene("wathe/aisle", NoellesKillerScenes::jesterMoment));
+        role("sparkassist:roles/noellesroles/taotie", NOELLES_STRENGTH,
+                scene("wathe/aisle", NoellesKillerScenes::taotie));
+        role("sparkassist:roles/noellesroles/morphling", NOELLES,
+                scene("wathe/aisle", NoellesKillerScenes::morph),
+                scene("wathe/aisle", NoellesKillerScenes::corpseMode));
     }
 
     /**
@@ -506,6 +540,656 @@ final class NoellesKillerScenes {
     }
 
     /**
+     * Timed bomb (TimedBombItem, BomberPlayerComponent, BomberShopHandler, HiddenEquipmentHelper; NoellesrolesClient
+     * instinct highlight): the Bomber's shop sells it for 100; it cannot be planted in the first 45 s. Right-clicking
+     * a living player plants it on them and uses it up; the Bomber sees bomb carriers outlined through walls. For
+     * 10 s nothing happens; then the bomb item lands in a free slot of the carrier's, it beeps every 6 ticks for 15 s
+     * (everyone near hears it) and the carrier sees a countdown. A beeping carrier holding it may pass it on by
+     * right-clicking someone (the receiver cannot pass for 3 s, a little less under cooldown-cutting effects; nobody
+     * can take a second bomb). Planting and passing succeed on the server only, so no arm swing shows. At zero it
+     * blows up with a big explosion, smoke and bomb fragments and usually kills only its carrier (a swallowed carrier's
+     * Taotie instead; a SparkTraits Conscience Bomber's planted or passed bomb does not kill). The Bomber's held bomb
+     * is hidden from other living players while he carries none himself; a carrier's is not.
+     * 定时炸弹：炸弹客商店 100 金币，开局 45 秒内放不了。右键一名活人即把炸弹放到他身上，炸弹随即用掉；炸弹客能隔墙
+     * 看到带炸弹的人的轮廓。前 10 秒毫无动静；之后炸弹进到携带者背包的空槽位，每 6 tick 滴一声，持续 15 秒（附近的人都听得到），
+     * 携带者还能看到倒计时。滴滴响的携带者拿着炸弹右键别人即可传过去（接到的人 3 秒内传不出去，有缩短冷却的效果时略短；已带
+     * 炸弹的人接不了）。放置与传递只在服务端成功，所以看不到挥手。归零时发生大爆炸，冒烟并飞出炸弹碎片，一般只炸死携带者
+     * （携带者被饕餮吞下时炸死饕餮；SparkTraits 善良炸弹客直接放出或传出的炸弹不致命）。炸弹客自己没带炸弹时，手里的炸弹对
+     * 其他活人隐藏；携带者手里的不隐藏。
+     */
+    private static void timedBomb(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_bomber", "炸弹客：定时炸弹");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:bomber", 0x323232);
+        ItemStack bomb = stack("noellesroles:timed_bomb");
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> first = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(3.0, 1, 3.4), SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> second = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(1.0, 1, 5.6), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> bomber = Actors.enter(scene, color, Text.literal("炸弹客"),
+                new Vec3d(6.2, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, bomber, bomb);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("炸弹客：把【定时炸弹】悄悄放到别人身上")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(55)
+                .text("商店一般 100 金币一颗；拿在手里时别的活人一般看不见")
+                .independent();
+        scene.idle(20);
+        Actors.walk(scene, bomber, new Vec3d(-2.3, 0, 1.9), 30);
+        scene.idle(32);
+        Actors.turn(scene, bomber, SCREEN_RIGHT);
+        scene.idle(6);
+        scene.overlay().showControls(new Vec3d(3.0, 3.6, 3.4), Pointing.DOWN, 30).rightClick().withItem(bomb);
+        scene.idle(10);
+        // Planting and passing succeed on the server only, so no arm swing shows. 放置与传递只在服务端成功，所以不挥手。
+        Actors.hold(scene, bomber, ItemStack.EMPTY);
+        // The outline lasts until the bomb is passed on. 轮廓持续到炸弹被传走。
+        Actors.highlight(scene, first, color, 296);
+        scene.overlay().showText(90)
+                .text("右键身边的人：炸弹悄悄放到他身上，你手里这颗用掉")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("带着炸弹的人你一般能隔墙看到（只在你屏幕上）")
+                .independent();
+        Actors.walk(scene, bomber, new Vec3d(2.6, 0, -1.9), 30);
+        scene.idle(32);
+        Actors.turn(scene, bomber, SCREEN_RIGHT);
+        scene.idle(68);
+        // 10 s after the plant, in real time. 放置 10 秒后（真实时间）。
+        scene.overlay().showText(90)
+                .text("10 秒后开始滴滴作响，炸弹出现在他背包里：15 秒后爆炸")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        // The bomb lands in a free slot; he picks it before passing it. 炸弹进到空槽位；他先选中再传。
+        Actors.hold(scene, first, bomb);
+        scene.idle(10);
+        Actors.walk(scene, first, new Vec3d(-1.2, 0, 1.2), 24);
+        scene.idle(26);
+        scene.overlay().showControls(new Vec3d(1.0, 3.6, 5.6), Pointing.DOWN, 30).rightClick().withItem(bomb);
+        scene.idle(10);
+        Actors.hold(scene, first, ItemStack.EMPTY);
+        Actors.highlight(scene, second, color, 204);
+        scene.overlay().showText(90)
+                .text("滴滴声附近都听得到；持有者右键别人就能把炸弹传过去")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("刚接到的人一般 3 秒内传不出去；带着炸弹的人接不了")
+                .independent();
+        Actors.walk(scene, first, new Vec3d(2.0, 0, -2.0), 30);
+        scene.idle(30);
+        Actors.walk(scene, second, new Vec3d(0.6, 0, -0.6), 12);
+        scene.idle(74);
+        Vec3d blast = new Vec3d(1.6, 1.5, 5.0);
+        // BomberPlayerComponent.explode: one big explosion, 100 smoke and 100 bomb fragments at the carrier.
+        // 与 explode 一致：在携带者处 1 个大爆炸、100 个烟雾和 100 个炸弹碎片粒子。
+        Effects.burst(scene, WatheParticles.BIG_EXPLOSION, blast, 1, 0);
+        spray(scene, ParticleTypes.SMOKE, blast, 100, 0, 0.2);
+        spray(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, bomb), blast, 100, 0, 1.0);
+        Actors.fall(scene, second);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("时间到就爆炸：一般只炸死当时带着炸弹的人")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("炸死谁都算你的，传回你身上也会炸死你；开局 45 秒内放不了")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Grenade drone (SparkStrength DroneItem, DroneEntity, DronePilotService, DroneCombatService, DroneRules,
+     * M67GrenadeEntity, M67Client, HiddenEquipmentHelperMixin): the Bomber starts with one; an M67 is bound onto it in
+     * the inventory. Both placing and piloting wait out the 90 s opening lock. Right-clicking the floor sets it down;
+     * with the tablet in the main hand the Bomber connects from the tablet's drone section and flies it (0.5 blocks a
+     * tick sideways, 0.4 up) from its own view while the body stands still. Held drones and tablets are hidden from
+     * other living players; the drone itself is seen by all. A left click drops the M67 (straight down while
+     * hovering): 5 s later it blows up and usually kills within 5 blocks by path (walls and closed doors shield),
+     * breaking drones caught in it too; meanwhile each viewer sees the grenade outlined red within 5 blocks of it and
+     * yellow within 7. A right click disconnects and leaves the drone hovering; the owner right-clicks it to put it
+     * back in a free hotbar slot. Flying drains 2% a second, hovering 1%.
+     * 投弹无人机：炸弹客开局自带一架，在背包里把 M67 挂到它上面。放置和驾驶都要等开局 90 秒。右键地面放下；主手拿平板在
+     * “无人机”分区连接，即以无人机视角飞行（横向每 tick 0.5 格、上升 0.4 格），本体站着不动。手里的无人机和平板对其他活人
+     * 隐藏；无人机本身人人可见。左键投下 M67（悬停时竖直落下）：5 秒后爆炸，沿路径一般炸死 5 格内的人（墙与关着的门能挡），
+     * 范围内的无人机也会被炸坏；其间每名观察者离手雷 5 格内看到红色描边，7 格内黄色。右键断开连接，无人机原地悬停；主人右键
+     * 它即可收回到快捷栏空位。飞行每秒耗电 2%，悬停 1%。
+     */
+    private static void grenadeDrone(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("sparkstrength_grenade_drone", "投弹无人机：从空中投弹");
+        wideStage(scene);
+        int color = RoleColors.of("noellesroles:bomber", 0x323232);
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> stays = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(2.6, 1, 7.2), SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> runs = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(4.2, 1, 7.0), WEST, Direction.DOWN);
+        ElementLink<ActorElement> flees = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(1.6, 1, 6.4), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> bomber = Actors.enter(scene, color, Text.literal("炸弹客"),
+                new Vec3d(8.0, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, bomber, stack("sparkstrength:grenade_drone"));
+        scene.idle(15);
+        scene.overlay().showText(90)
+                .text("炸弹客开局自带【投弹无人机】，开局 90 秒后才能用")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.lookPitch(scene, bomber, 55);
+        scene.overlay().showControls(new Vec3d(7.3, 1.3, 1.9), Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkstrength:grenade_drone"));
+        scene.idle(10);
+        Actors.swing(scene, bomber);
+        Actors.hold(scene, bomber, ItemStack.EMPTY);
+        ElementLink<EntityElement> drone = placeDrone(scene, new Vec3d(7.3, 1, 1.9), SCREEN_RIGHT);
+        scene.idle(15);
+        Actors.lookPitch(scene, bomber, 0);
+        scene.overlay().showText(80)
+                .text("背包里给它挂一颗 M67，右键地面放下（手里的其他活人看不见）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        Actors.hold(scene, bomber, stack("sparkstrength:tablet"));
+        scene.overlay().showText(90)
+                .text("主手拿【平板电脑】，在“无人机”分区里连接")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        flyDrone(scene, drone, new Vec3d(0, 1.6, 0), 4);
+        scene.idle(70);
+        scene.overlay().showText(90)
+                .text("画面切到无人机；本体站着不动，手里的平板其他活人看不见")
+                .independent()
+                .attachKeyFrame();
+        flyDrone(scene, drone, new Vec3d(-4.3, 0, 4.3), 12);
+        scene.idle(100);
+        Vec3d drop = new Vec3d(3.0, 1.0, 6.2);
+        scene.overlay().showControls(new Vec3d(3.0, 3.3, 6.2), Pointing.DOWN, 20).leftClick();
+        scene.idle(10);
+        // DroneCombatService.fire: the armed M67 leaves from under the hull and falls straight down.
+        // fire：拉了环的 M67 从机腹下方离开，竖直落下。
+        scene.world().modifyEntity(drone, entity -> droneData(entity, "PAYLOAD", false));
+        ElementLink<ThrownElement> grenade = Actors.toss(scene, armedM67(), new Vec3d(3.0, 2.33, 6.2), drop, 7, 0,
+                true, ThrownElement.Flight.UPRIGHT);
+        scene.overlay().showText(50)
+                .text("左键投下 M67：5 秒后爆炸")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(7);
+        // The warning outline lasts the whole fuse. 警示描边持续整个引信时间。
+        scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, grenade,
+                new Box(2.8, 1.0, 6.0, 3.2, 1.3, 6.4), 93);
+        scene.idle(5);
+        flyDrone(scene, drone, new Vec3d(4.0, 0, -4.0), 12);
+        scene.idle(38);
+        scene.overlay().showText(85)
+                .text("附近的人看得到它的描边：5 格内红色，7 格内黄色")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, runs, new Vec3d(4.4, 0, 1.6), 24);
+        Actors.walk(scene, flees, new Vec3d(4.6, 0, -5.8), 28);
+        scene.idle(50);
+        // The M67 went off 100 ticks after the drop. M67 在投下 100 tick 后爆炸。
+        Actors.remove(scene, grenade);
+        Vec3d burst = drop.add(0, 0.1, 0);
+        Effects.burst(scene, WatheParticles.BIG_EXPLOSION, burst, 1, 0);
+        spray(scene, ParticleTypes.SMOKE, burst, 100, 0, 0.2);
+        spray(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, armedM67()), burst, 100, 0, 1.0);
+        Actors.fall(scene, stays);
+        blastRing(scene, drop, 5, 9, 150);
+        scene.idle(40);
+        scene.overlay().showText(100)
+                .colored(PonderPalette.RED)
+                .text("红圈内（5 格）的人一般被炸死；无人机离太近也会被炸坏")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(110);
+        scene.overlay().showControls(new Vec3d(8.0, 3.4, 1.2), Pointing.DOWN, 25).rightClick();
+        scene.overlay().showText(90)
+                .text("右键断开连接，无人机原地悬停；右键它就能收回")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(45);
+        scene.overlay().showControls(new Vec3d(7.0, 3.2, 2.2), Pointing.DOWN, 25).rightClick();
+        scene.idle(10);
+        Actors.swing(scene, bomber);
+        // Back into a free hotbar slot; the tablet stays in hand. 回到快捷栏空位；平板仍在手上。
+        scene.world().modifyEntity(drone, Entity::discard);
+        scene.idle(45);
+        scene.overlay().showText(80)
+                .text("飞行每秒耗电 2%，悬停 1%；收回后会慢慢充电")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Jester, fake death (NoellesRoles Jester trigger, JesterPlayerComponent; SparkStrength JesterMomentService,
+     * JesterMomentRules, JesterMomentClientStasisMixin): shot by an innocent role's gun (not the Demon Hunter's), the
+     * Jester does not die. A body falls where it stood (spawned there, so it lies a block further back than a kill's)
+     * and everyone else alive is frozen for 5 s: no moving, turning or using anything, with nothing to see. The Jester
+     * then revives at its spot: every living player not swallowed by a Taotie, the Jester included, is moved to
+     * another's spot and facing (no one keeps their own), and in the same tick a laugh plays to every player. The
+     * others are freed and told to run; the Jester is held for 3 s, giving off glow particles. From then on, to every other living player, everyone wears the Jester's
+     * psycho look and holds a bat, and names read as scrambled text.
+     * 小丑假死：被好人阵营的枪（猎魔人的除外）打中时，小丑不会死。原地倒下一具尸体（尸体就生成在他站的地方，所以比击杀
+     * 留下的尸体靠后一格），其余活人被定住 5 秒：不能动、不能转头、不能用任何东西，外表看不出来。随后小丑在原地复活，
+     * 没被饕餮吞下的活人（含小丑）都被换到别人的位置与朝向（没人留在原位），同一 tick 里所有玩家都听到笑声。其他人解除定身并
+     * 收到逃跑提示；小丑被定住 3 秒，身上冒出发光粒子。此后在其他活人眼里，人人都是小丑的疯魔模样、拿着球棒，名字显示为乱码。
+     */
+    private static void jesterFakeDeath(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_jester", "小丑：骗好人开枪");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:jester", 0xF8C8DC);
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> jester = Actors.enter(scene, color, Text.literal("小丑"),
+                new Vec3d(2.6, 1, 4.4), SCREEN_LEFT, Direction.DOWN);
+        ElementLink<ActorElement> first = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(0.8, 1, 2.6), EAST, Direction.DOWN);
+        ElementLink<ActorElement> second = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(5.4, 1, 5.6), NORTH, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, vigilante, stack("wathe:revolver"));
+        // The Jester after its revival, waiting unseen on the spot the shuffle sends it to.
+        // 复活后的小丑，先隐身等在打乱后要去的位置。
+        ElementLink<ActorElement> revived = Actors.enter(scene, color, scrambled(), new Vec3d(5.8, 1, 1.2),
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.vanish(scene, revived);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("小丑是中立阵营：想办法让好人开枪打你")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.walk(scene, jester, new Vec3d(0.6, 0, -0.6), 14);
+        scene.idle(50);
+        WatheItemScenes.shoot(scene, vigilante, new Vec3d(5.2, 2.05, 1.8), new Vec3d(3.2, 2.2, 3.8));
+        fakeBody(scene, jester);
+        scene.idle(10);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("被好人开枪打中时不会死，只留下假尸体；其他活人被定住 5 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(87);
+        Actors.vanish(scene, jester);
+        // A single cycle, as JesterMomentRules.shuffleSpots draws it: each takes the next one's spot and facing.
+        // 与 shuffleSpots 一样的单一循环：每人拿到下一个人的位置与朝向。
+        relocate(scene, List.of(vigilante, first, second), List.of(new Vec3d(0.8, 1, 2.6), new Vec3d(5.4, 1, 5.6),
+                new Vec3d(3.2, 1, 3.8)), new float[] {EAST, NORTH, SCREEN_LEFT});
+        reveal(scene, revived);
+        for (ElementLink<ActorElement> other : List.of(vigilante, first, second)) {
+            Actors.retint(scene, other, 0xFFFFFF, scrambled());
+            Actors.psycho(scene, other, true);
+            Actors.hold(scene, other, stack("wathe:bat"));
+        }
+        Actors.psycho(scene, revived, true);
+        glow(scene, new Vec3d(5.8, 2, 1.2), 200);
+        // The others are free at once and told to run. 其他人立刻解除定身，并被提示快跑。
+        Actors.leave(scene, vigilante, Direction.WEST);
+        Actors.walk(scene, first, new Vec3d(-1.6, 0, 0.6), 20);
+        Actors.walk(scene, second, new Vec3d(-1.2, 0, 1.6), 20);
+        scene.overlay().showText(90)
+                .text("5 秒后你复活：活人（被吞的除外）被随机换到别人的位置")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("你在新位置定住 3 秒、冒着光（演示放慢）；全车都听到笑声")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.hold(scene, revived, stack("wathe:bat"));
+        scene.overlay().showText(100)
+                .text("此后在其他活人眼里，人人都是你的疯魔模样、拿着球棒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(110);
+        Actors.highlight(scene, revived, color, 190);
+        scene.overlay().showText(90)
+                .text("名字也都成了乱码；方框标出的才是真小丑（仅为示意）")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("注意：只有好人的枪才触发假死，被杀手或猎魔人打中就是真死")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Jester moment (JesterPlayerComponent.startJesterPsychoMode, registerKill; Wathe PlayerPsychoComponent; SparkStrength
+     * JesterMomentRules), seen by a living non-Jester: everyone wears the Jester's psycho look with a bat, so the box
+     * marking the real Jester is only a guide. The Jester is in psycho mode for 60 s, plus 30 s and its shield topped
+     * up per kill; a fully charged bat swing usually kills; sprint never runs out and any door that is not jammed opens.
+     * Killing everyone else alive wins; running out of time kills the Jester. Each kill greys the Jester's own screen
+     * by 10%, up to 50%, and it can neither speak nor hear voice chat.
+     * 小丑时刻（从一名非小丑活人的视角看）：人人都是小丑的疯魔模样、拿着球棒，所以标出真小丑的方框只是示意。小丑进入
+     * 疯魔 60 秒，每杀一人加 30 秒并补回护盾；蓄满力的一棒一般能打死人；体力无限，没被堵住的门都能打开。杀光其他活人即获胜；
+     * 时间耗尽小丑会死。每杀一人小丑自己的画面变灰 10%（最多 50%），也既不能说话也听不到语音。
+     */
+    private static void jesterMoment(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_jester_moment", "小丑时刻：疯魔追杀");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:jester", 0xF8C8DC);
+        ItemStack bat = stack("wathe:bat");
+        ElementLink<ActorElement> jester = Actors.enter(scene, color, scrambled(), new Vec3d(5.6, 1, 1.4),
+                SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> victim = Actors.enter(scene, 0xFFFFFF, scrambled(), new Vec3d(3.4, 1, 3.2),
+                SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> first = Actors.enter(scene, 0xFFFFFF, scrambled(), new Vec3d(1.2, 1, 5.0),
+                SCREEN_LEFT, Direction.DOWN);
+        ElementLink<ActorElement> second = Actors.enter(scene, 0xFFFFFF, scrambled(), new Vec3d(4.2, 1, 5.6),
+                NORTH, Direction.DOWN);
+        for (ElementLink<ActorElement> actor : List.of(jester, victim, first, second)) {
+            Actors.psycho(scene, actor, true);
+            Actors.hold(scene, actor, bat);
+        }
+        Actors.highlight(scene, jester, color, 640);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .text("小丑时刻：你拿着球棒追杀所有人（方框为示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.walk(scene, jester, new Vec3d(-1.2, 0, 1.0), 16);
+        scene.idle(30);
+        Actors.swing(scene, jester);
+        // The body is drawn with the victim's own skin. 尸体按死者本人的皮肤绘制。
+        Actors.retint(scene, victim, RoleColors.CIVILIAN, null);
+        Actors.fall(scene, victim);
+        scene.idle(10);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("蓄满力的一棒一般能打死人；每杀一人加 30 秒、补回护盾")
+                .independent()
+                .attachKeyFrame();
+        Actors.walk(scene, first, new Vec3d(-0.4, 0, 1.0), 18);
+        Actors.walk(scene, second, new Vec3d(1.6, 0, 0.6), 18);
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("疯魔限时 60 秒：体力无限，没被堵住的门都能打开")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("杀光其他所有人就赢；倒计时耗尽你就会死")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("每杀一人画面变灰 10%（最多 50%），也听不到任何人说话")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Taotie (NoellesRoles swallow packet, TaotiePlayerComponent, SwallowedPlayerComponent; SparkStrength TaotieHeadService,
+     * TaotieHeadRules, TaotieHeadEntity, TaotieHeadEntityRenderer): the ability key swallows the player under the
+     * crosshair within 3 blocks and in sight, with no sound or effect and no body; they live on inside, seeing through
+     * the Taotie's eyes and heard only by it and the others inside. With anyone alive inside, the second ability key
+     * spits one head per living swallowed player, each wearing that player's face; it homes on someone ahead within
+     * 8 blocks at 1 block a tick, trailing brown dust and smoke. A hit blinds and slows (Slowness V) for 3 s and locks
+     * items and skills, but never kills. A dead Taotie releases everyone inside where it fell.
+     * 饕餮：技能键吞下准星对着、3 格内且看得见的人，没有声音和特效，也不留尸体；被吞的人在肚子里活着，只能透过饕餮的眼睛看，
+     * 说话只有饕餮和肚子里的人听得到。肚子里有活人时，第二技能键为每个被吞的活人吐出一颗长着他的脸的头颅，追向前方 8 格内
+     * 的人，每 tick 飞 1 格，拖着棕色粉尘和烟。砸中的人失明、缓慢 V 3 秒，用不了物品和技能，但不会被砸死。饕餮死亡时，
+     * 肚子里的人会在原地全部放出来。
+     */
+    private static void taotie(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_taotie", "饕餮：吞人与吐头颅");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:taotie", 0x8B4513);
+        ElementLink<ActorElement> meal = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(3.6, 1, 3.2), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> taotie = Actors.enter(scene, color, Text.literal("饕餮"),
+                new Vec3d(5.8, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("饕餮是中立阵营：把人一个个吞进肚子")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        Actors.walk(scene, taotie, new Vec3d(-1.0, 0, 1.0), 16);
+        scene.idle(60);
+        scene.overlay().showText(70)
+                .text("准星对准 3 格内看得见的人，按技能键（默认 G）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        Actors.vanish(scene, meal);
+        scene.idle(30);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("他当场消失：没有声音和特效，也不留尸体")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("他没死，只能透过你的眼睛看；说话只有你和肚子里的人听得到")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("吞完要冷却 20～50 秒（开局人越多越短）；演示省略了等待")
+                .independent();
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                new Vec3d(0.8, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
+        Actors.hold(scene, vigilante, stack("wathe:revolver"));
+        scene.idle(40);
+        Actors.walk(scene, vigilante, new Vec3d(1.2, 0, -1.2), 24);
+        scene.idle(60);
+        scene.overlay().showText(90)
+                .text("第二技能键（默认 N）吐出头颅：肚子里每个活人一颗")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(85)
+                .text("头颅长着被吞者的脸，追向前方 8 格内的人（演示放慢）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        // From 0.6 ahead of the eyes to the vigilante's face: about 3 game ticks, slowed down here.
+        // 从眼前 0.6 格飞到义警脸上：游戏中约 3 tick，这里放慢了。
+        Vec3d hit = new Vec3d(2.4, 2.62, 4.4);
+        spitHead(scene, ActorSkins.of(RoleColors.CIVILIAN), new Vec3d(4.38, 2.62, 2.42), hit, 16);
+        scene.idle(16);
+        spray(scene, ParticleTypes.POOF, hit, 12, 0.2, 0.02);
+        // The swallow lands well inside the 3 s daze. 吞噬发生在 3 秒眩晕之内。
+        scene.idle(20);
+        Actors.walk(scene, taotie, new Vec3d(-1.8, 0, 1.8), 18);
+        scene.idle(19);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("砸中的人 3 秒内失明、走不快，也用不了物品和技能")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(11);
+        Actors.vanish(scene, vigilante);
+        scene.idle(89);
+        scene.overlay().showText(80)
+                .text("趁他还不了手，上前把他也吞掉")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("头颅砸不死人，还会亮出你吞了谁；你一死，肚子里的人全放出来")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Morph (NoellesRoles MorphlingScreenMixin, MorphlingPlayerWidget, morph packet, MorphlingPlayerComponent and the
+     * morphling renderer mixins): the inventory lists every other player's head, the dead included; clicking one
+     * makes the Morphling look like that player to everyone for 35 s (skin, and the name shown under the crosshair
+     * within 2 blocks), with no particle or sound; the voice stays its own and fellow killers' instinct still shows it
+     * as a killer. 20 s cooldown after it ends; nothing for the first 30 s of a round by default.
+     * 变形：背包里列出其他所有玩家的头像（死人也在内）；点一个，35 秒内在所有人眼里都是那名玩家的样子（皮肤，以及准星对着
+     * 2 格内时显示的名字），没有粒子和声音；声音仍是自己的，杀手同伴的本能仍显示他是杀手。结束后冷却 20 秒；开局默认 30 秒
+     * 内不能用。
+     */
+    private static void morph(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_morphling", "变形者：变成别人的样子");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:morphling", 0xAA023D);
+        ItemStack head = stack("minecraft:player_head");
+        ItemStack knife = stack("wathe:knife");
+        Text ming = Text.literal("阿明");
+        ElementLink<ActorElement> real = Actors.enter(scene, RoleColors.CIVILIAN, ming, new Vec3d(1.4, 1, 6.2),
+                SCREEN_LEFT, Direction.DOWN);
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("小红"),
+                new Vec3d(2.4, 1, 3.4), SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> witness = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("阿杰"),
+                new Vec3d(6.2, 1, 3.4), WEST, Direction.DOWN);
+        scene.idle(10);
+        ElementLink<ActorElement> morphling = Actors.enter(scene, color, Text.literal("变形者"),
+                new Vec3d(5.8, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, morphling, knife);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("变形者（杀手）：能变成本局其他玩家的样子")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showControls(new Vec3d(1.4, 3.6, 6.2), Pointing.DOWN, 40).leftClick().withItem(head);
+        scene.overlay().showText(80)
+                .text("按 E 打开背包，点一名玩家的头像（死人也能选）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        Actors.retint(scene, morphling, RoleColors.CIVILIAN, ming);
+        scene.idle(40);
+        scene.overlay().showText(90)
+                .text("35 秒内，别人看到的你就是阿明：样子和名字，没有任何特效")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.walk(scene, morphling, new Vec3d(-2.4, 0, 1.8), 30);
+        scene.idle(32);
+        Actors.charge(scene, morphling, true);
+        scene.idle(20);
+        Actors.charge(scene, morphling, false);
+        Actors.swing(scene, morphling);
+        Actors.fall(scene, victim);
+        scene.idle(10);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("在阿杰看来，动手的就是“阿明”")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.highlight(scene, real, 0xFFFFFF, 100);
+        scene.overlay().showText(90)
+                .text("破绽：真阿明还在别处（方框为示意）；声音也还是你的")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("杀手同伴开本能时，仍能认出你是自己人")
+                .independent();
+        Actors.walk(scene, morphling, new Vec3d(2.4, 0, -1.8), 30);
+        scene.idle(90);
+        Actors.retint(scene, morphling, color, Text.literal("变形者"));
+        scene.overlay().showText(70)
+                .text("35 秒后（演示缩短了）变回原样")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(80);
+        scene.overlay().showText(80)
+                .text("之后冷却 20 秒；开局默认 30 秒内不能变形")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Corpse mode (NoellesRoles corpse toggle packet, MorphlingPlayerComponent, MorphlingCorpseRendererMixin and the
+     * collision mixins): the ability key toggles it, with no cooldown. The Morphling is drawn at once as Wathe draws a
+     * body (no fall, a block back from where it stands, face down) with no name, at Slowness III, and can still act;
+     * like a body it can be walked through. A held item still shows in its hand, and fellow killers holding the
+     * instinct key see it outlined.
+     * 尸体伪装：技能键开关，没有冷却。变形者立刻按 Wathe 尸体的样子绘制（没有倒下动画，比站立处靠后一格，脸朝下），不显示
+     * 名字，带缓慢 III，仍能行动；和尸体一样能被人穿过。手里拿着的东西仍会显示，杀手同伴按住本能键能看到他的轮廓。
+     */
+    private static void corpseMode(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_morphling_corpse", "变形者：装成尸体");
+        WatheItemScenes.stage(scene);
+        int color = RoleColors.of("noellesroles:morphling", 0xAA023D);
+        ItemStack knife = stack("wathe:knife");
+        Vec3d spot = new Vec3d(3.6, 1, 3.0);
+        ElementLink<ActorElement> morphling = Actors.enter(scene, color, Text.literal("变形者"), spot,
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, morphling, knife);
+        scene.idle(15);
+        scene.overlay().showText(90)
+                .text("技能键（默认 G）开关尸体伪装，没有冷却")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        Actors.hold(scene, morphling, ItemStack.EMPTY);
+        scene.idle(10);
+        ElementLink<Corpse> corpse = playDead(scene, morphling, color, spot, SCREEN_RIGHT);
+        scene.idle(30);
+        scene.overlay().showText(90)
+                .text("你立刻躺倒、不显示名字，看起来就像一具尸体")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("躺着时移动变慢，但其他动作照常")
+                .independent();
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(0.4, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(30);
+        Actors.walk(scene, passenger, new Vec3d(1.0, 0, -1.2), 30);
+        scene.idle(60);
+        scene.overlay().showText(70)
+                .text("有人走近查看时……")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        getUp(scene, morphling, corpse);
+        Actors.hold(scene, morphling, knife);
+        scene.idle(10);
+        Actors.charge(scene, morphling, true);
+        scene.idle(15);
+        Actors.charge(scene, morphling, false);
+        Actors.swing(scene, morphling);
+        Actors.fall(scene, passenger);
+        scene.idle(35);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("……再按一次 G 起身出刀")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("注意：手里拿着东西会露馅；杀手同伴按住本能键看得到你")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("可以先变成已死的人再躺下，装得更像")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
      * Swap two actors at once, position and yaw alike, with the portal particles entity status 46 plays at each spot.
      * They are hidden for the one tick in which they move, so neither streaks across the stage.
      * 立即互换两名演员的位置与朝向，并在两处播放实体状态 46 的传送粒子。移动的那一 tick 先隐藏，避免拖影划过舞台。
@@ -678,6 +1362,375 @@ final class NoellesKillerScenes {
         @Override
         public boolean isComplete() {
             return stopped || super.isComplete();
+        }
+    }
+
+    /**
+     * The 9-wide aisle, slightly further out than the 7-wide one so the M67's 5-block reach fits on it.
+     * 9 格宽的走廊，比 7 格的稍远一些，让 M67 的 5 格范围放得下。
+     */
+    private static void wideStage(SceneBuilder scene) {
+        scene.configureBasePlate(0, 0, 9);
+        scene.scaleSceneView(1.2f);
+        scene.showBasePlate();
+        scene.idle(10);
+    }
+
+    /**
+     * SparkStrength's grenade drone entity, drawn by its own renderer, set down at {@code at} facing {@code yaw} with
+     * an M67 bound (as DroneItem.useOnBlock places it). 由 SparkStrength 自己的渲染器绘制的投弹无人机实体，像
+     * DroneItem.useOnBlock 那样挂着 M67、朝 yaw 放在 at 处。
+     */
+    private static ElementLink<EntityElement> placeDrone(SceneBuilder scene, Vec3d at, float yaw) {
+        return scene.world().createEntity(world -> {
+            Entity drone = Registries.ENTITY_TYPE.get(Identifier.of("sparkstrength", "grenade_drone")).create(world);
+            drone.refreshPositionAndAngles(at.x, at.y, at.z, yaw, 0);
+            droneData(drone, "PAYLOAD", true);
+            return drone;
+        });
+    }
+
+    /**
+     * Set one of DroneEntity's synced fields (STATE: 0 grounded, 1 hovering, 2 flying; PAYLOAD) as the server would.
+     * SparkAssist does not build against SparkStrength, so the field is looked up by name; if it is missing the drone
+     * simply keeps its default look.
+     * 像服务端那样设置 DroneEntity 的同步字段（STATE：0 停放、1 悬停、2 飞行；PAYLOAD 挂载）。SparkAssist 不依赖
+     * SparkStrength 编译，所以按名字查找字段；找不到时无人机保持默认外观。
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> void droneData(Entity drone, String field, T value) {
+        try {
+            Field data = drone.getClass().getDeclaredField(field);
+            data.setAccessible(true);
+            drone.getDataTracker().set((TrackedData<T>) data.get(null), value);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+            // Another SparkStrength version: keep the default look. 其他版本的 SparkStrength：保持默认外观。
+        }
+    }
+
+    /** Fly the drone by {@code delta} over {@code ticks}; it hovers once there. 在 ticks 内让无人机飞过 delta，到达后悬停。 */
+    private static void flyDrone(SceneBuilder scene, ElementLink<EntityElement> drone, Vec3d delta, int ticks) {
+        scene.addInstruction(new DroneFlight(drone, delta, ticks));
+    }
+
+    /** The M67 as a dropped one looks: the armed model (custom model data 1). 投下的 M67 的样子：已拉环的模型。 */
+    private static ItemStack armedM67() {
+        ItemStack m67 = stack("sparkstrength:m67");
+        m67.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(1));
+        return m67;
+    }
+
+    /** A {@code radius} ring on the floor around {@code center}, kept on a {@code size} plate. 地面上以 center 为圆心、半径 radius 的圆圈，只画在 size 大小的底板内。 */
+    private static void blastRing(SceneBuilder scene, Vec3d center, double radius, int size, int ticks) {
+        int segments = 64;
+        for (int i = 0; i < segments; i++) {
+            double a = MathHelper.TAU * i / segments;
+            double b = MathHelper.TAU * (i + 1) / segments;
+            Vec3d from = center.add(Math.cos(a) * radius, 0.02, Math.sin(a) * radius);
+            Vec3d to = center.add(Math.cos(b) * radius, 0.02, Math.sin(b) * radius);
+            if (onPlate(from, size) && onPlate(to, size)) {
+                scene.overlay().showLine(PonderPalette.RED, from, to, ticks);
+            }
+        }
+    }
+
+    private static boolean onPlate(Vec3d point, int size) {
+        return point.x >= 0 && point.x <= size && point.z >= 0 && point.z <= size;
+    }
+
+    /**
+     * A piloted drone's flight: an even step every tick, turning to face the way when it moves sideways; its rotors run
+     * (flying while it moves sideways, hovering otherwise) and it hovers once there. Ponder's world does not reset an
+     * entity's previous position, so it is set here for the renderer's banking.
+     * 驾驶中的无人机飞行：每 tick 匀速前进，横向移动时转向前进方向；旋翼转动（横移时为飞行，否则为悬停），到达后悬停。
+     * Ponder 的世界不会重置实体的上一位置，所以在这里设置，供渲染器计算倾斜。
+     */
+    private static final class DroneFlight extends TickingInstruction {
+        private static final byte HOVERING = 1;
+        private static final byte FLYING = 2;
+        private final ElementLink<EntityElement> link;
+        private final Vec3d step;
+        private final boolean sideways;
+        private final float heading;
+
+        private DroneFlight(ElementLink<EntityElement> link, Vec3d delta, int ticks) {
+            super(false, ticks);
+            this.link = link;
+            this.step = delta.multiply(1.0 / ticks);
+            this.sideways = delta.horizontalLengthSquared() > 1.0E-6;
+            this.heading = (float) (MathHelper.atan2(-delta.x, delta.z) * MathHelper.DEGREES_PER_RADIAN);
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            EntityElement element = scene.resolve(link);
+            if (element == null) {
+                return;
+            }
+            element.ifPresent(drone -> {
+                droneData(drone, "STATE", remainingTicks > 0 ? FLYING : HOVERING);
+                drone.prevX = drone.getX();
+                drone.prevY = drone.getY();
+                drone.prevZ = drone.getZ();
+                if (sideways) {
+                    drone.setYaw(heading);
+                }
+                drone.setPosition(drone.getPos().add(step));
+            });
+        }
+    }
+
+    /**
+     * The name under the crosshair during the Jester moment (NoellesRoles MorphlingRoleNameRendererMixin): scrambled.
+     * 小丑时刻里准星下显示的名字（MorphlingRoleNameRendererMixin）：乱码。
+     */
+    private static Text scrambled() {
+        return Text.literal("??!?!").formatted(Formatting.OBFUSCATED);
+    }
+
+    /**
+     * The Jester's fake body: spawned where the Jester stands (JesterPlayerComponent.beginFakeDeath), not a block
+     * ahead as a kill's is (GameFunctions.killPlayer), so with Wathe's body renderer it lies a block further back.
+     * 小丑的假尸体：生成在小丑站立处（beginFakeDeath），而不是像击杀那样生成在前方一格（killPlayer），所以按 Wathe 的
+     * 尸体渲染会比击杀的尸体靠后一格。
+     */
+    private static void fakeBody(SceneBuilder scene, ElementLink<ActorElement> jester) {
+        scene.addInstruction(ponder -> {
+            ActorElement actor = ponder.resolve(jester);
+            if (actor != null) {
+                float radians = actor.yaw() * MathHelper.RADIANS_PER_DEGREE;
+                actor.moveTo(actor.position().add(MathHelper.sin(radians), 0, -MathHelper.cos(radians)));
+                actor.setVisible(false);
+            }
+        });
+        scene.idle(1);
+        reveal(scene, jester);
+        Actors.fall(scene, jester);
+    }
+
+    /**
+     * Move each actor at once to its spot and facing, hidden for the tick in which they move so none streaks across
+     * the stage (a server teleport). 立即把每名演员移到各自的位置与朝向；移动的那一 tick 先隐藏，避免拖影（服务端传送）。
+     */
+    private static void relocate(SceneBuilder scene, List<ElementLink<ActorElement>> actors, List<Vec3d> spots,
+                                 float[] yaws) {
+        scene.addInstruction(ponder -> {
+            for (int i = 0; i < actors.size(); i++) {
+                ActorElement actor = ponder.resolve(actors.get(i));
+                if (actor != null) {
+                    actor.moveTo(spots.get(i));
+                    actor.setYaw(yaws[i]);
+                    actor.setVisible(false);
+                }
+            }
+        });
+        scene.idle(1);
+        for (ElementLink<ActorElement> actor : actors) {
+            reveal(scene, actor);
+        }
+    }
+
+    /** Show a hidden actor again where it is. 让隐藏的演员在原处重新出现。 */
+    private static void reveal(SceneBuilder scene, ElementLink<ActorElement> link) {
+        scene.addInstruction(ponder -> {
+            ActorElement actor = ponder.resolve(link);
+            if (actor != null) {
+                actor.setVisible(true);
+            }
+        });
+    }
+
+    /**
+     * The Jester's stasis: 5 glow particles a tick around its middle (JesterPlayerComponent.serverTick: offset 0.5,
+     * speed 0.02), seen by everyone near. 小丑的禁锢：每 tick 在身体中部放出 5 个发光粒子（偏移 0.5、速度 0.02），附近的人都看得见。
+     */
+    private static void glow(SceneBuilder scene, Vec3d at, int ticks) {
+        scene.addInstruction(new TickingInstruction(false, ticks) {
+            @Override
+            public void tick(PonderScene ponder) {
+                super.tick(ponder);
+                for (int i = 0; i < 5; i++) {
+                    ponder.getWorld().addParticle(ParticleTypes.GLOW, at.x + RANDOM.nextGaussian() * 0.5,
+                            at.y + RANDOM.nextGaussian() * 0.5, at.z + RANDOM.nextGaussian() * 0.5,
+                            RANDOM.nextGaussian() * 0.02, RANDOM.nextGaussian() * 0.02, RANDOM.nextGaussian() * 0.02);
+                }
+            }
+        });
+    }
+
+    /** Spit one Taotie head from {@code from} to {@code to}, box centres. 把一颗饕餮头颅从 from 吐到 to（碰撞箱中心）。 */
+    private static void spitHead(SceneBuilder scene, Identifier skin, Vec3d from, Vec3d to, int ticks) {
+        TaotieHead head = new TaotieHead(skin, from, to, ticks);
+        scene.addInstruction(ponder -> {
+            head.reset(ponder);
+            head.setVisible(true);
+            head.setFade(1);
+            ponder.addElement(head);
+        });
+    }
+
+    /**
+     * Turn corpse mode on: the standing actor is hidden and a lying one takes its place.
+     * 开启尸体伪装：隐藏站立的演员，换成躺着的样子。
+     */
+    private static ElementLink<Corpse> playDead(SceneBuilder scene, ElementLink<ActorElement> actor, int color,
+                                                Vec3d feet, float yaw) {
+        Corpse corpse = new Corpse(color, feet, yaw);
+        ElementLink<Corpse> link = new ElementLinkImpl<>(Corpse.class);
+        Actors.vanish(scene, actor);
+        scene.addInstruction(ponder -> {
+            corpse.setVisible(true);
+            corpse.setFade(1);
+            ponder.addElement(corpse);
+            ponder.linkElement(corpse, link);
+        });
+        return link;
+    }
+
+    /** Turn corpse mode off: standing again at once. 关闭尸体伪装：立刻重新站起。 */
+    private static void getUp(SceneBuilder scene, ElementLink<ActorElement> actor, ElementLink<Corpse> corpse) {
+        scene.addInstruction(ponder -> {
+            Corpse lying = ponder.resolve(corpse);
+            if (lying != null) {
+                lying.setVisible(false);
+            }
+        });
+        reveal(scene, actor);
+    }
+
+    /**
+     * A Taotie head as TaotieHeadEntityRenderer draws it: a vanilla player skull at its natural size wearing the
+     * swallowed player's skin, its face leading along the flight; each tick it leaves 2 brown dust particles and
+     * 1 smoke (TaotieHeadEntity.spawnTrail). It is gone once it reaches {@code to} (the hit).
+     * 按 TaotieHeadEntityRenderer 绘制的饕餮头颅：原版大小的玩家头颅，穿着被吞者的皮肤，脸朝飞行方向；每 tick 留下 2 个棕色粉尘
+     * 和 1 个烟雾粒子（spawnTrail）。到达 to（命中）后消失。
+     */
+    private static final class TaotieHead extends AnimatedSceneElementBase {
+        private static final DustParticleEffect TRAIL = new DustParticleEffect(new Vector3f(0x8B / 255f,
+                0x45 / 255f, 0x13 / 255f), 1.0f);
+        @Nullable
+        private static SkullEntityModel model;
+        private final Identifier skin;
+        private final Vec3d from;
+        private final Vec3d to;
+        private final int ticks;
+        private final float yaw;
+        private final float pitch;
+        private int age;
+
+        private TaotieHead(Identifier skin, Vec3d from, Vec3d to, int ticks) {
+            this.skin = skin;
+            this.from = from;
+            this.to = to;
+            this.ticks = ticks;
+            Vec3d heading = to.subtract(from);
+            this.yaw = (float) (MathHelper.atan2(heading.x, heading.z) * MathHelper.DEGREES_PER_RADIAN);
+            this.pitch = (float) (MathHelper.atan2(heading.y, heading.horizontalLength())
+                    * MathHelper.DEGREES_PER_RADIAN);
+        }
+
+        @Override
+        public void reset(@Nullable PonderScene scene) {
+            age = 0;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            age++;
+            if (age > ticks) {
+                return;
+            }
+            Vec3d at = from.lerp(to, age / (float) ticks);
+            for (int i = 0; i < 2; i++) {
+                scene.getWorld().addParticle(TRAIL, at.x + (RANDOM.nextDouble() - 0.5) * 0.2,
+                        at.y + (RANDOM.nextDouble() - 0.5) * 0.2, at.z + (RANDOM.nextDouble() - 0.5) * 0.2, 0, 0, 0);
+            }
+            scene.getWorld().addParticle(ParticleTypes.SMOKE, at.x + (RANDOM.nextDouble() - 0.5) * 0.15,
+                    at.y + (RANDOM.nextDouble() - 0.5) * 0.15, at.z + (RANDOM.nextDouble() - 0.5) * 0.15, 0, 0, 0);
+        }
+
+        @Override
+        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
+                                  float pt) {
+            float time = age + pt;
+            if (fade <= 0.01f || time >= ticks) {
+                return;
+            }
+            if (model == null) {
+                model = new SkullEntityModel(MinecraftClient.getInstance().getEntityModelLoader()
+                        .getModelPart(EntityModelLayers.PLAYER_HEAD));
+            }
+            Vec3d at = from.lerp(to, time / ticks);
+            MatrixStack ms = graphics.getMatrices();
+            ms.push();
+            ms.translate(at.x, at.y, at.z);
+            ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(yaw + 180));
+            ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(pitch));
+            ms.translate(0, -0.25, 0);
+            ms.scale(-1, -1, 1);
+            model.setHeadRotation(0, 0, 0);
+            model.render(ms, buffer.getBuffer(RenderLayer.getEntityTranslucent(skin)), lightCoordsFromFade(fade),
+                    OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+            ms.pop();
+        }
+    }
+
+    /**
+     * A Morphling in corpse mode as MorphlingCorpseRendererMixin draws it: Wathe's body transforms at full tilt (no
+     * fall), so face down towards {@code yaw} with the feet a block behind where it stands, and no name.
+     * 尸体伪装中的变形者，按 MorphlingCorpseRendererMixin 绘制：直接套用 Wathe 尸体的变换（没有倒下动画），朝 yaw 脸朝下，
+     * 脚在站立处后方一格，不显示名字。
+     */
+    private static final class Corpse extends AnimatedSceneElementBase {
+        @Nullable
+        private static PlayerEntityModel<LivingEntity> model;
+        private final int color;
+        private final Vec3d feet;
+        private final float yaw;
+
+        private Corpse(int color, Vec3d standing, float yaw) {
+            this.color = color;
+            this.yaw = yaw;
+            float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
+            this.feet = standing.add(MathHelper.sin(radians), 0, -MathHelper.cos(radians));
+        }
+
+        @Override
+        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
+                                  float pt) {
+            if (fade <= 0.01f) {
+                return;
+            }
+            if (model == null) {
+                model = new PlayerEntityModel<>(MinecraftClient.getInstance().getEntityModelLoader()
+                        .getModelPart(EntityModelLayers.PLAYER), false);
+            }
+            MatrixStack ms = graphics.getMatrices();
+            ms.push();
+            ms.translate(feet.x, feet.y, feet.z);
+            ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - yaw));
+            ms.translate(0, 0.15, 0);
+            ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
+            ms.scale(-0.9375f, -0.9375f, 0.9375f);
+            ms.translate(0, -1.501, 0);
+            model.setVisible(true);
+            model.child = false;
+            model.riding = false;
+            model.sneaking = false;
+            model.handSwingProgress = 0;
+            model.leftArmPose = BipedEntityModel.ArmPose.EMPTY;
+            model.rightArmPose = BipedEntityModel.ArmPose.EMPTY;
+            model.getHead().resetTransform();
+            model.body.resetTransform();
+            model.rightArm.resetTransform();
+            model.leftArm.resetTransform();
+            model.rightLeg.resetTransform();
+            model.leftLeg.resetTransform();
+            model.hat.copyTransform(model.head);
+            model.render(ms, buffer.getBuffer(RenderLayer.getEntityCutoutNoCull(ActorSkins.of(color))),
+                    lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+            ms.pop();
         }
     }
 
