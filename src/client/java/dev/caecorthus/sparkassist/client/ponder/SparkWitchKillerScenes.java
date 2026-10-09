@@ -7,9 +7,13 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_RIGHT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SOUTH;
+import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
+import dev.doctor4t.wathe.index.WatheParticles;
 import dev.doctor4t.wathe.index.WatheProperties;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import net.createmod.catnip.gui.element.ScreenElement;
 import net.createmod.catnip.math.Pointing;
@@ -24,10 +28,13 @@ import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
 import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.SculkShriekerBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -38,10 +45,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.EntityEffectParticleEffect;
 import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.SculkChargeParticleEffect;
+import net.minecraft.particle.ShriekParticleEffect;
+import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -98,6 +111,23 @@ final class SparkWitchKillerScenes {
     private static final double DRAGGED_FEET = 1.0 + BODY_PIVOT;
     /** A tether or chain runs until stopped; long enough for any scene. 拴绳或铁链运行到被停止为止；对任何场景都足够长。 */
     private static final int UNTIL_STOPPED = 20 * 60 * 10;
+    /** The TR shell's trail: its colour 0xD8432F as dust of scale 1 (PotionShellEntity.spawnTrail). TR 弹的烟迹：本色 0xD8432F 的粉尘，大小 1。 */
+    private static final DustParticleEffect SHELL_TRAIL =
+            new DustParticleEffect(new Vector3f(0xD8 / 255f, 0x43 / 255f, 0x2F / 255f), 1.0f);
+    /** Half the TR shell's 5-block blast cube (PotionShellType.TR, PotionBlastRings.half). TR 弹 5 格爆炸立方体的一半。 */
+    private static final double TR_HALF = 2.5;
+    /** The backblast lane and its particle spacing (PotionGunnerRules, PotionBackblastService). 尾焰通道长度与粒子间距。 */
+    private static final double BACKBLAST_LENGTH = 4.0;
+    private static final double BACKBLAST_STEP = 0.25;
+    /** The Shriek Gun's push on an enemy, blocks a tick (AbyssListenerRules.GUN_ENEMY_KNOCKBACK / LIFT). 啸音铳对敌人的推力（每 tick 格数）。 */
+    private static final double GUN_PUSH = 2.0;
+    private static final double GUN_LIFT = 0.45;
+    /** The spore_cabin stage: plate size, the wall's z and the door's x. spore_cabin 舞台：底板大小、墙的 z 与门的 x。 */
+    private static final int SPORE_STAGE_SIZE = 7;
+    private static final int SPORE_WALL_Z = 3;
+    private static final int SPORE_DOOR_X = 3;
+    /** Sculk charge events played as a zone appears (DeepDarkZoneCues.SPREAD_EVENTS_PER_TICK). 领域出现时的幽匿充能事件数。 */
+    private static final int ZONE_CHARGE_SAMPLES = 12;
 
     private SparkWitchKillerScenes() {
     }
@@ -119,6 +149,14 @@ final class SparkWitchKillerScenes {
                 scene("wathe/aisle", SparkWitchKillerScenes::hunter));
         role("sparkassist:roles/sparkwitch/kidnapper", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchKillerScenes::kidnapper));
+        role("sparkassist:roles/sparkwitch/grand_witch", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::grandWitch));
+        role("sparkassist:roles/sparkwitch/potion_gunner", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::potionGunner));
+        role("sparkassist:roles/sparkwitch/abyss_listener", List.of("sparkwitch"),
+                scene("sparkwitch/spore_cabin", SparkWitchKillerScenes::abyssListener));
+        role("sparkassist:roles/sparkwitch/riftwalker", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::riftwalker));
     }
 
     /**
@@ -924,6 +962,453 @@ final class SparkWitchKillerScenes {
     }
 
     /**
+     * Grand Witch's Ceremonial Sword (GrandWitchActiveSkillService, CeremonialSwordItem, CeremonialSwordCombatService,
+     * CeremonialSwordDashService, GrandWitchRules): handed out free on the second completed task and not hidden in hand;
+     * held in either hand it adds 40% move speed. A left-click swings (a vanilla attack) and, with the 0.5 s attack
+     * charge full and the target inside the sword's +2 reach, kills through most shields. A right-click swings (the
+     * client returns success) and dashes 6 blocks along the level look at 1.5 blocks a tick; the first player the swept
+     * box touches is killed, ally or not, and the dash stops there or before a wall; 5 s item cooldown. Both kills share
+     * a 30 s kill cooldown, during which the dash only moves.
+     * 大魔女的仪礼剑：完成第 2 个任务时免费发放，手持不隐藏；主手或副手拿着时移速提高 40%。左键挥剑（原版攻击），攻击蓄力
+     * 0.5 秒满、目标在 +2 格的攻击距离内即击杀，能穿透大部分护盾。右键挥手（客户端返回成功）并沿水平视线以每 tick 1.5 格
+     * 冲刺 6 格；扫过的碰撞箱碰到的第一名玩家被击杀，不分敌我，冲刺在那里或撞墙前停下；物品冷却 5 秒。两种击杀共用 30 秒
+     * 击杀冷却，冷却期间冲刺只能位移。
+     */
+    private static void grandWitch(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_grand_witch", "大魔女：仪礼剑");
+        WatheItemScenes.stage(scene);
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> slashed = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(3.9, 1, 3.1), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(5);
+        Vec3d feet = new Vec3d(6.0, 1, 1.0);
+        ElementLink<ActorElement> witch = Actors.enter(scene, RoleColors.of("sparkwitch:grand_witch", 0xF2DFF7),
+                Text.literal("大魔女"), feet, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, witch, stack("sparkwitch:ceremonial_sword"));
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("完成 2 个任务后，大魔女免费获得仪礼剑，别人看得见")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("左键斩击：比平时远 2 格，蓄力约 0.5 秒再出手")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 30).leftClick()
+                .withItem(stack("sparkwitch:ceremonial_sword"));
+        scene.idle(10);
+        Actors.swing(scene, witch);
+        Actors.fall(scene, slashed);
+        scene.idle(50);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("命中一般当场倒下，还能穿透大部分护盾")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        // The dash runs along the diagonal behind the first body, so the body lying in front hides no one.
+        // 冲刺沿第一具尸体后方的对角线进行，躺在前面的尸体不会挡住任何人。
+        Vec3d dashFrom = new Vec3d(6.4, 1, 2.4);
+        Actors.walk(scene, witch, dashFrom.subtract(feet), 20);
+        ElementLink<ActorElement> fleeing = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(3.8, 1, 5.0), SCREEN_RIGHT, Direction.DOWN);
+        scene.overlay().showText(90)
+                .text("拿着剑移速提高 40%%；斩击和冲刺击杀共用 30 秒冷却")
+                .independent();
+        scene.idle(22);
+        Actors.turn(scene, witch, SCREEN_RIGHT);
+        Actors.walk(scene, fleeing, new Vec3d(-0.6, 0, 0.6), 30);
+        scene.idle(78);
+        scene.overlay().showText(40)
+                .text("……30 秒后（演示缩短了时间）")
+                .independent();
+        scene.idle(45);
+        scene.overlay().showControls(dashFrom.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:ceremonial_sword"));
+        scene.idle(10);
+        Actors.swing(scene, witch);
+        // The dash moves in 0.25-block steps, 1.5 blocks a tick, each step first sweeping the box (0.15 wider on every
+        // side) over the next step: after 13 steps (3.25 blocks, early in the third tick) the sweep touches the fleeing
+        // player and the dash stops there. 冲刺以 0.25 格为一步、每 tick 1.5 格前进，每一步先把碰撞箱（每边宽 0.15）扫过
+        // 下一步：走完 13 步（3.25 格，第三个 tick 刚开始）时扫到逃跑的人，冲刺就此停下。
+        Actors.slide(scene, witch, new Vec3d(-2.3, 0, 2.3), 3);
+        scene.idle(3);
+        Actors.fall(scene, fleeing);
+        scene.idle(30);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("右键向前冲刺约 6 格：碰到的第一个人一般当场倒下")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("冲刺不分敌我：撞上的是共犯，共犯也会死；撞墙就停")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("冲刺本身冷却 5 秒；击杀冷却中冲刺只能赶路，杀不了人")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Potion Gunner's Anti-Tank Launcher (PotionLauncherItem, PotionLauncherArmPoseMixin, PotionLauncherFireService,
+     * PotionShellEntity, PotionBlastService, PotionBlastResolver, PotionBackblastService, PotionShellType): bound and
+     * not hidden in hand, carried two-handed (CROSSBOW_HOLD) whether scoped or not. One shell is loaded in the inventory
+     * screen. Holding right-click only scopes (the zoom is the gunner's own screen). A left-click fires with no swing: the
+     * shell leaves 0.1 below the eyes at 2.5 blocks a tick, straight for 50 blocks, trailing dust in its colour and
+     * smoke, and bursts on the first block or living player (allies too) with Wathe's big flash, smoke and shell
+     * debris. TR kills everyone whose feet lie in the 5 x 5 x 5 cube with a line of sight (ordinary kills: shields
+     * hold), the gunner and allies included; DK, AC and MR only touch non-allies. Every shot vents flame and smoke
+     * 4 blocks straight back from the eyes (cut at the first block) and makes one ordinary kill on the nearest player
+     * there, any faction.
+     * 药炮手的反坦克炮筒：绑定，手持不隐藏，开不开镜都是双手扛着（CROSSBOW_HOLD）。在背包界面装填一发炮弹。按住右键只是开镜
+     * （放大只发生在药炮手自己的画面里）。左键开火，不挥手：炮弹从眼睛下方 0.1 处以每 tick 2.5 格射出，50 格内笔直飞行，拖着
+     * 本色粉尘与烟，撞上第一个方块或存活玩家（含队友）就爆炸，伴随 Wathe 的大闪光、烟雾和炮弹碎片。TR 弹击杀脚下位于
+     * 5 × 5 × 5 立方体内且视线可达的所有人（普通击杀，护盾能挡），药炮手本人与队友也不例外；DK、AC、MR 弹只影响非队友。每次
+     * 开火都会从眼睛向正后方喷出 4 格火焰与烟（遇方块截断），对其中最近的一名玩家进行一次普通击杀，不分阵营。
+     */
+    private static void potionGunner(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_potion_gunner", "药炮手：反坦克炮筒");
+        WatheItemScenes.stage(scene);
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> struck = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(2.6, 1, 4.4), SCREEN_LEFT, Direction.DOWN);
+        ElementLink<ActorElement> beside = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(1.6, 1, 5.4), EAST, Direction.DOWN);
+        ElementLink<ActorElement> behind = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(4.6, 1, 4.6), EAST, Direction.DOWN);
+        ElementLink<ActorElement> ally = Actors.enter(scene, RoleColors.of("sparkwitch:accomplice", 0x6B338A),
+                Text.literal("共犯"), new Vec3d(6.6, 1, 0.4), WEST, Direction.DOWN);
+        scene.idle(10);
+        Vec3d feet = new Vec3d(5.6, 1, 1.4);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ElementLink<ActorElement> gunner = Actors.enter(scene, RoleColors.of("sparkwitch:potion_gunner", 0xB45CFF),
+                Text.literal("药炮手"), feet, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, gunner, stack("sparkwitch:anti_tank_launcher"));
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("药炮手双手扛着反坦克炮筒，拿在手上别人看得见")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 70).withItem(stack("sparkwitch:tr_shell"));
+        scene.overlay().showText(80)
+                .text("炮弹要在背包里装进炮筒，一次只能装一发")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).rightClick()
+                .withItem(stack("sparkwitch:anti_tank_launcher"));
+        Actors.charge(scene, gunner, true);
+        scene.overlay().showText(70)
+                .text("按住右键开镜：只有你自己的画面会放大")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(80);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick()
+                .withItem(stack("sparkwitch:anti_tank_launcher"));
+        scene.idle(10);
+        // Level aim along the diagonal: the shell meets the first passenger's box (grown 0.3, as vanilla collision does)
+        // after about 3.8 blocks and bursts on his body. 沿对角线水平瞄准：炮弹飞约 3.8 格碰到第一个乘客的碰撞箱（与原版碰撞一样
+        // 扩大 0.3），在他身上爆炸。
+        Vec3d muzzle = feet.add(0, EYES - 0.1, 0);
+        Vec3d impact = new Vec3d(2.9, muzzle.y, 4.1);
+        ItemStack shell = stack("sparkwitch:tr_shell");
+        sprite(scene, Sprite.item(shell, muzzle, impact, 2, false));
+        trail(scene, SHELL_TRAIL, muzzle, impact, 2, 0, 4, 1);
+        trail(scene, ParticleTypes.SMOKE, muzzle, impact, 2, 0, 1, 0.5f);
+        backblast(scene, feet.add(0, EYES, 0), SCREEN_RIGHT);
+        Actors.fall(scene, ally);
+        scene.idle(2);
+        shellBlast(scene, impact, shell);
+        Actors.fall(scene, struck);
+        Actors.fall(scene, beside);
+        Actors.fall(scene, behind);
+        blastSquare(scene, impact, TR_HALF, 110);
+        scene.idle(20);
+        scene.overlay().showText(70)
+                .text("左键发射：炮弹笔直飞出，撞上人或墙就爆炸")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(80);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("TR 弹：5×5 范围内的人一般都会被炸死（红框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        Actors.charge(scene, gunner, false);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("开火时正后方 4 格内最近的人一般会被尾焰烧死，不分敌我")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("爆炸和尾焰都会被墙挡住，开火前最好背靠墙")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("TR 弹连你和队友也炸；另外三种只影响魔女阵营以外的人")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("GW-DK 致盲减速，GW-AC 拖长冷却，GW-MR 扣金币")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Abyss Listener (WardensShriekService, AbyssSuppression, ShriekGunItem, ShriekGunService, ShriekGunRules,
+     * DeepDarkSporeFlaskItem / DeepDarkSporeFlaskEntity, DeepDarkZoneShape, DeepDarkZoneEligibility, DeepDarkZoneCues,
+     * DeepDarkZoneSchedule, DeepDarkZoneStandingService). The ability key spends 75 mana on the Warden's Shriek: every
+     * non-witch-faction participant within 8 blocks (feet to feet, through walls) gets hidden Slowness II for 5 s,
+     * cooldowns floored at 5 s and, with real sanity, -40 sanity; all anyone sees is vanilla's shrieker rings at the
+     * caster's block. The Shriek Gun (bound, hidden in hand; the client returns success, so the arm swings) hits the
+     * first eligible player within 12 blocks (blocks cut it) with a sonic boom ring every block: an enemy is pushed
+     * 2.0 blocks a tick with 0.45 lift (with real sanity also -60 sanity, Blindness and Slowness II 2 s, cooldowns
+     * floored at 2 s), an ally 3.0 with 0.2 lift and Speed III; 30 s cooldown, misses included. The Spore Flask (shop,
+     * visible) is tossed at 0.5 blocks a tick with sculk charge pops; where it lands, shriek rings and sculk souls rise
+     * and every solid block next to the air it reaches within 10 blocks turns into a fake sculk (floors) or deepslate
+     * mix at once, closed doors and walls stopping it; enemies standing on it get Slowness III and the x15 sanity
+     * drain, witch-faction allies and the thrower Speed III. It holds 15 s, then restores outermost first over 5 s.
+     * 聆渊者。技能键消耗 75 魔力施放监守之啸：8 格内（脚到脚，可隔墙）所有魔女阵营以外的参与者获得隐藏粒子的缓慢 II 5 秒，
+     * 冷却抬高到至少 5 秒，有真实理智的再掉 40 理智；旁人只看到施放者所在方块上原版尖啸体的波纹。啸音铳（绑定，手持隐藏；
+     * 客户端返回成功，所以会挥手）命中 12 格内（方块会截断）第一个符合条件的玩家，每格一个音爆圈：敌人以每 tick 2.0 格、
+     * 0.45 抬升被推开（有真实理智的另掉 60 理智、失明与缓慢 II 2 秒、冷却至少 2 秒），队友 3.0 格、0.2 抬升并获得速度 III；
+     * 冷却 30 秒，打空也算。深暗孢瓶（商店购买，可见）以每 tick 0.5 格抛出，伴随幽匿充能爆裂；落地处升起尖啸波纹与幽匿之魂，
+     * 它在 10 格内触及的空气旁的每个实心方块立即变成假的幽匿块（地面）或深板岩混合外观，墙与关着的门会挡住它；站在上面的敌人
+     * 获得缓慢 III 与 15 倍理智下降，魔女阵营队友和投掷者获得速度 III。领域保持 15 秒，再用 5 秒由外向内恢复。
+     */
+    private static void abyssListener(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_abyss_listener", "聆渊者：尖啸、啸音铳与深暗孢瓶");
+        WatheItemScenes.setStage(scene, util);
+        Text civilian = Text.literal("平民");
+        ElementLink<ActorElement> corridor = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(2.9, 1, 1.5), EAST, Direction.DOWN);
+        ElementLink<ActorElement> cabin = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(4.5, 1, 5.0), NORTH, Direction.DOWN);
+        scene.idle(5);
+        int listenerColor = RoleColors.of("sparkwitch:abyss_listener", 0x0B5E78);
+        Vec3d feet = new Vec3d(6.6, 1, 1.5);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ElementLink<ActorElement> listener = Actors.enter(scene, listenerColor, Text.literal("聆渊者"), feet, WEST,
+                Direction.DOWN);
+        scene.idle(20);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(70)
+                .text("监守之啸：按技能键（默认 G），消耗 75 魔力")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(15);
+        shriek(scene, BlockPos.ofFloored(feet));
+        scene.idle(60);
+        Actors.highlight(scene, corridor, listenerColor, 80);
+        Actors.highlight(scene, cabin, listenerColor, 80);
+        scene.overlay().showText(80)
+                .text("8 格内魔女阵营以外的人一般都会中招，隔墙也一样（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("缓慢 II 5 秒、道具和技能至少冷却 5 秒，有理智的还掉 40 理智")
+                .independent();
+        scene.idle(90);
+        Actors.hold(scene, listener, stack("sparkwitch:shriek_gun"));
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .text("啸音铳（其他活人看不见）：右键击中 12 格内的第一个人")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:shriek_gun"));
+        scene.idle(10);
+        Actors.swing(scene, listener);
+        // The beam meets the passenger's box (grown 0.2) 3.2 blocks from the eyes: three rings, at 1, 2 and 3 blocks.
+        // 射线在离眼睛 3.2 格处碰到乘客的碰撞箱（扩大 0.2）：三个音爆圈，分别在 1、2、3 格处。
+        sonicBeam(scene, feet.add(0, EYES, 0), new Vec3d(-1, 0, 0), 3.2);
+        fling(scene, corridor, new Vec3d(-GUN_PUSH, GUN_LIFT, 0), 1, 3);
+        scene.idle(3);
+        Actors.leave(scene, corridor, Direction.WEST);
+        scene.idle(22);
+        scene.overlay().showText(80)
+                .text("被打中的人被猛地击飞；有理智的敌人还会失明、缓慢 2 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(70)
+                .text("推下火车算你的击杀；冷却 30 秒，打空也算")
+                .independent();
+        scene.idle(80);
+        Actors.hold(scene, listener, stack("sparkwitch:deep_dark_spore_flask"));
+        Actors.lookPitch(scene, listener, 20);
+        scene.overlay().showText(80)
+                .text("深暗孢瓶：右键扔出，落点周围瞬间变成深暗领域")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:deep_dark_spore_flask"));
+        scene.idle(10);
+        Actors.swing(scene, listener);
+        Actors.hold(scene, listener, ItemStack.EMPTY);
+        // Thrown 20 degrees down at 0.5 blocks a tick (drag 0.99, gravity 0.03), the flask drops 1.5 blocks in about 6
+        // ticks and breaks on the floor 2.85 blocks ahead; the zone grows from the air cell above. 向下 20 度、每 tick
+        // 0.5 格抛出（阻力 0.99、重力 0.03），孢瓶约 6 tick 下落 1.5 格，碎在前方 2.85 格的地面上；领域从其上方的空气格开始。
+        Vec3d flaskFrom = feet.add(0, EYES - 0.1, 0);
+        Vec3d landing = new Vec3d(3.75, 1.0, 1.5);
+        Actors.toss(scene, stack("sparkwitch:deep_dark_spore_flask"), flaskFrom, landing, 6, 0.1, false,
+                ThrownElement.Flight.UPRIGHT);
+        trail(scene, ParticleTypes.SCULK_CHARGE_POP, flaskFrom, landing, 6, 0.1, 1, 0.3f);
+        scene.idle(6);
+        BlockPos landingCell = BlockPos.ofFloored(landing);
+        sporeLanding(scene, landingCell);
+        sporeZone(scene, landingCell, true, 0, Double.MAX_VALUE);
+        Actors.lookPitch(scene, listener, 0);
+        scene.idle(50);
+        Actors.highlight(scene, cabin, 0x7AE04F, 80);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.GREEN)
+                .text("墙和关着的门会挡住它，门后的房间不受影响")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        ElementLink<ActorElement> walker = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(0.5, 1, 0.7), EAST, Direction.DOWN);
+        scene.idle(10);
+        // Slowness III takes 45% off an enemy's pace, Speed III adds 60% to the listener's.
+        // 缓慢 III 让敌人步速降低 45%，速度 III 让聆渊者步速提高 60%。
+        Actors.walk(scene, walker, new Vec3d(2.0, 0, 0), 45);
+        Actors.walk(scene, listener, new Vec3d(-2.4, 0, 0), 18);
+        scene.overlay().showText(80)
+                .text("站上去的敌人缓慢 III，有理智的狂掉理智；你和队友反而加速")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(70)
+                .text("……约 15 秒后，领域由外向内退去（演示缩短了时间）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        // Restored outermost first, as DeepDarkZoneSchedule.restoreOffset orders them. 按 restoreOffset 由外向内恢复。
+        sporeZone(scene, landingCell, false, 3.0, Double.MAX_VALUE);
+        scene.idle(6);
+        sporeZone(scene, landingCell, false, 2.0, 3.0);
+        scene.idle(6);
+        sporeZone(scene, landingCell, false, 0, 2.0);
+        scene.idle(50);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Riftwalker's Rift Gates (RiftGateItem, RiftGatePlacementService / RiftGatePlacementRules, RiftGateEntityRenderer,
+     * RiftGateClientEffects, RiftSessionService, RiftSessionBody, RiftExitSearch, RiftSessionClient, RiftwalkerRules):
+     * the gate item is bought for 50 mana and hidden in hand; a right-click places a gate at the feet (no swing: both
+     * sides answer CONSUME), its front facing the look, its width centred on the block, with a burst of portal and witch
+     * particles; everyone sees the gate. A right-click on a gate within 3 blocks takes a witch-faction user inside: a
+     * reverse-portal puff and the body turns spectator (gone for everyone else). A/D hop silently between gates; Shift
+     * leaves one block in front of the current gate, keeping the look, with another puff. Stay: 30 s for the
+     * Riftwalker, 20 s for the witch faction, 15 s / 10 s for the Murderous / Apprentice Witch; re-entry waits 30 s /
+     * 45 s.
+     * 隙行者的裂隙门：门以 50 魔力购买，手持隐藏；右键把门放在脚下（不挥手：两端都返回 CONSUME），正面朝视线方向，宽度方向
+     * 对齐方块中心，伴随传送门与女巫粒子；所有人都看得见门。对 3 格内的门右键，魔女阵营的使用者即进入门内：一团反向传送门
+     * 粒子，本体变为旁观模式（其他人都看不见）。A/D 无声地在门之间跳转；Shift 从当前这扇门正前方一格出来，保持视线方向，
+     * 同样有一团粒子。停留上限：隙行者 30 秒，魔女阵营 20 秒，杀意 / 预备魔女 15 / 10 秒；再次进门要等 30 / 45 秒。
+     */
+    private static void riftwalker(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_riftwalker", "隙行者：裂隙门");
+        WatheItemScenes.stage(scene);
+        int walkerColor = RoleColors.of("sparkwitch:riftwalker", 0x5B6CFF);
+        Vec3d firstGate = new Vec3d(5.6, 1, 1.5);
+        Vec3d secondGate = new Vec3d(2.6, 1, 4.5);
+        ElementLink<ActorElement> walker = Actors.enter(scene, walkerColor, Text.literal("隙行者"), firstGate, WEST,
+                Direction.DOWN);
+        Actors.hold(scene, walker, stack("sparkwitch:rift_gate"));
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("裂隙门在商店用 50 魔力买；其他活人看不见你手里的门")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(60);
+        scene.overlay().showControls(firstGate.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:rift_gate"));
+        scene.idle(10);
+        riftGate(scene, firstGate, Direction.WEST, walkerColor);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .text("右键把门放在脚下，正面朝你看的方向；旁人也看得见门")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(50);
+        Actors.walk(scene, walker, secondGate.subtract(firstGate), 40);
+        scene.idle(42);
+        Actors.turn(scene, walker, WEST);
+        scene.idle(8);
+        scene.overlay().showControls(secondGate.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:rift_gate"));
+        scene.idle(10);
+        riftGate(scene, secondGate, Direction.WEST, walkerColor);
+        Actors.hold(scene, walker, ItemStack.EMPTY);
+        scene.overlay().showText(80)
+                .text("走开几步再放一扇：门与门至少相隔 3 格")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.walk(scene, walker, new Vec3d(-1.0, 0, 0), 15);
+        scene.idle(17);
+        Actors.turn(scene, walker, EAST);
+        scene.idle(10);
+        scene.overlay().showControls(secondGate.add(0, 2.4, 0), Pointing.DOWN, 30).rightClick();
+        scene.idle(10);
+        Actors.vanish(scene, walker);
+        gatePuff(scene, secondGate);
+        scene.overlay().showText(90)
+                .text("右键 3 格内的门进门：你从众人眼前消失，刀枪伤不到你")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(secondGate.add(0, 2.6, 0), Pointing.DOWN, 40)
+                .showing(keyCaps("key.left", "A", "key.right", "D"));
+        gateOutline(scene, secondGate, Direction.WEST, walkerColor, 40);
+        scene.idle(40);
+        gateOutline(scene, firstGate, Direction.WEST, walkerColor, 80);
+        scene.overlay().showText(90)
+                .text("门内按 A/D 跳到另一扇门，没有任何动静（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(firstGate.add(0, 2.6, 0), Pointing.DOWN, 30)
+                .showing(keyCaps("key.sneak", "Shift"));
+        scene.idle(10);
+        // The first exit candidate: one block out in front of the gate, keeping the gate-facing look the hop set.
+        // 第一个出门候选：门正前方一格，保持跳门时设定的、与门同向的视线。
+        reappear(scene, walker, firstGate.add(-1.0, 0, 0), WEST);
+        gatePuff(scene, firstGate);
+        scene.overlay().showText(80)
+                .text("按 Shift 从这扇门的正前方出来")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("最长停留：你 30 秒，魔女阵营队友 20 秒，时间到会被弹出")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("出门后再进门要等：你 30 秒，其他人 45 秒")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
      * The Death Ray's red dust line from {@code eyes} to where a block stops it, laid out as
      * MurderousWitchDeathRayService.spawnRayParticles does. 死亡射线从 eyes 到被方块挡住处的红色粉尘线，排布与
      * MurderousWitchDeathRayService.spawnRayParticles 相同。
@@ -1331,6 +1816,528 @@ final class SparkWitchKillerScenes {
                     .overlay(OverlayTexture.DEFAULT_UV)
                     .light(light)
                     .normal(entry, 0, 1, 0);
+        }
+    }
+
+    /**
+     * Particles as ServerWorld.spawnParticles sends them and the client spreads them (ClientPlayNetworkHandler
+     * .onParticle): each of {@code count} at a gaussian offset scaled by {@code dx}/{@code dy}/{@code dz}, moving at a
+     * gaussian speed scaled by {@code speed} on every axis.
+     * 与 ServerWorld.spawnParticles 发出、客户端展开的粒子相同：count 个粒子各自按 dx/dy/dz 缩放的高斯偏移放置，每轴按 speed
+     * 缩放的高斯速度运动。
+     */
+    private static void serverParticles(SceneBuilder scene, ParticleEffect particle, Vec3d at, int count, double dx,
+                                        double dy, double dz, double speed) {
+        scene.effects().emitParticles(at, (world, x, y, z) -> world.addParticle(particle,
+                x + world.random.nextGaussian() * dx, y + world.random.nextGaussian() * dy,
+                z + world.random.nextGaussian() * dz, world.random.nextGaussian() * speed,
+                world.random.nextGaussian() * speed, world.random.nextGaussian() * speed), count, 1);
+    }
+
+    /**
+     * A trail left by something flying from {@code from} to {@code to} over {@code ticks} on the same arc as
+     * {@link ThrownElement}: each tick, {@code perTick} particles spread along that tick's stretch, each kept with
+     * {@code chance}.
+     * 从 from 飞到 to、用时 ticks、弧线与 ThrownElement 相同的物体留下的轨迹：每 tick 沿这一段均匀放出 perTick 个粒子，每个按
+     * chance 的概率保留。
+     */
+    private static void trail(SceneBuilder scene, ParticleEffect particle, Vec3d from, Vec3d to, int ticks, double arc,
+                              int perTick, float chance) {
+        scene.addInstruction(new Trail(particle, from, to, ticks, arc, perTick, chance));
+    }
+
+    /**
+     * The launcher's backblast as PotionBackblastService.present lays it out: from the eyes straight back (yaw only)
+     * every 0.25 block for 4 blocks, two flames and one large smoke at each point.
+     * 炮筒尾焰，排布与 PotionBackblastService.present 相同：从眼睛沿正后方（只看偏航角）每 0.25 格一点，共 4 格，每点两团火焰、
+     * 一团大烟。
+     */
+    private static void backblast(SceneBuilder scene, Vec3d eyes, float yaw) {
+        Vec3d backwards = forward(yaw).multiply(-1);
+        scene.effects().emitParticles(eyes, (world, x, y, z) -> {
+            for (double travelled = BACKBLAST_STEP; travelled <= BACKBLAST_LENGTH; travelled += BACKBLAST_STEP) {
+                Vec3d point = eyes.add(backwards.multiply(travelled));
+                for (int flame = 0; flame < 2; flame++) {
+                    world.addParticle(ParticleTypes.FLAME, point.x + world.random.nextGaussian() * 0.08,
+                            point.y + world.random.nextGaussian() * 0.08, point.z + world.random.nextGaussian() * 0.08,
+                            world.random.nextGaussian() * 0.02, world.random.nextGaussian() * 0.02,
+                            world.random.nextGaussian() * 0.02);
+                }
+                world.addParticle(ParticleTypes.LARGE_SMOKE, point.x + world.random.nextGaussian() * 0.12,
+                        point.y + world.random.nextGaussian() * 0.12, point.z + world.random.nextGaussian() * 0.12,
+                        world.random.nextGaussian() * 0.01, world.random.nextGaussian() * 0.01,
+                        world.random.nextGaussian() * 0.01);
+            }
+        }, 1, 1);
+    }
+
+    /**
+     * A potion shell bursting, as PotionBlastService.present shows it to everyone: Wathe's big explosion flash, 100
+     * smoke puffs and 100 shards of the shell item, 0.1 above the centre.
+     * 药剂炮弹爆炸，与 PotionBlastService.present 展示给所有人的相同：Wathe 的大爆炸闪光、100 团烟和 100 片炮弹碎片，位于爆心
+     * 上方 0.1 处。
+     */
+    private static void shellBlast(SceneBuilder scene, Vec3d center, ItemStack shell) {
+        Vec3d at = center.add(0, 0.1, 0);
+        serverParticles(scene, WatheParticles.BIG_EXPLOSION, at, 1, 0, 0, 0, 0);
+        serverParticles(scene, ParticleTypes.SMOKE, at, 100, 0, 0, 0, 0.2);
+        serverParticles(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, shell), at, 100, 0, 0, 0, 1.0);
+    }
+
+    /** The blast cube's footprint as a red square on the floor. 爆炸立方体在地面上的范围，画成红色方框。 */
+    private static void blastSquare(SceneBuilder scene, Vec3d center, double half, int ticks) {
+        double y = 1.02;
+        Vec3d a = new Vec3d(center.x - half, y, center.z - half);
+        Vec3d b = new Vec3d(center.x + half, y, center.z - half);
+        Vec3d c = new Vec3d(center.x + half, y, center.z + half);
+        Vec3d d = new Vec3d(center.x - half, y, center.z + half);
+        scene.overlay().showLine(PonderPalette.RED, a, b, ticks);
+        scene.overlay().showLine(PonderPalette.RED, b, c, ticks);
+        scene.overlay().showLine(PonderPalette.RED, c, d, ticks);
+        scene.overlay().showLine(PonderPalette.RED, d, a, ticks);
+    }
+
+    /**
+     * Vanilla's sculk shrieker event (WorldEvents.SCULK_SHRIEKS, as WorldRenderer plays it): ten shriek rings, each 5
+     * ticks after the last, rising from the top of a shrieker standing in {@code block}.
+     * 原版幽匿尖啸体事件（WorldEvents.SCULK_SHRIEKS，与 WorldRenderer 的播放相同）：十个尖啸波纹，依次间隔 5 tick，从位于 block
+     * 的尖啸体顶部升起。
+     */
+    private static void shriek(SceneBuilder scene, BlockPos block) {
+        Vec3d at = new Vec3d(block.getX() + 0.5, block.getY() + SculkShriekerBlock.TOP, block.getZ() + 0.5);
+        scene.effects().emitParticles(at, (world, x, y, z) -> {
+            for (int ring = 0; ring < 10; ring++) {
+                world.addParticle(new ShriekParticleEffect(ring * 5), x, y, z, 0, 0, 0);
+            }
+        }, 1, 1);
+    }
+
+    /**
+     * The Shriek Gun's beam (ShriekGunService.spawnBeam, ShriekGunRules.particleDistances): one sonic boom ring every
+     * block from the eyes up to where it hit.
+     * 啸音铳的射线：从眼睛起每格一个音爆圈，直到命中处。
+     */
+    private static void sonicBeam(SceneBuilder scene, Vec3d eyes, Vec3d direction, double cut) {
+        Vec3d unit = direction.normalize();
+        for (int step = 1; step <= Math.floor(cut); step++) {
+            serverParticles(scene, ParticleTypes.SONIC_BOOM, eyes.add(unit.multiply(step)), 1, 0, 0, 0, 0);
+        }
+    }
+
+    /**
+     * Knock a standing actor back with {@code launch} (blocks a tick), flying as LivingEntity.travel moves a player
+     * with no input, its feet stopping at {@code floor}, for {@code ticks}.
+     * 以 launch（每 tick 格数）把站立的演员击飞，按 LivingEntity.travel 对无输入玩家的移动方式飞行 ticks，脚落在 floor 高度。
+     */
+    private static void fling(SceneBuilder scene, ElementLink<ActorElement> actor, Vec3d launch, double floor,
+                              int ticks) {
+        scene.addInstruction(new Fling(actor, launch, floor, ticks));
+    }
+
+    /**
+     * A spore flask breaking in {@code cell} (DeepDarkZoneCues.landing): the shrieker rings and six sculk souls.
+     * 孢瓶在 cell 碎裂（DeepDarkZoneCues.landing）：尖啸波纹与六个幽匿之魂。
+     */
+    private static void sporeLanding(SceneBuilder scene, BlockPos cell) {
+        shriek(scene, cell);
+        serverParticles(scene, ParticleTypes.SCULK_SOUL, new Vec3d(cell.getX() + 0.5, cell.getY() + 0.15,
+                cell.getZ() + 0.5), 6, 0.3, 0.1, 0.3, 0.02);
+    }
+
+    /**
+     * Turn the spore_cabin corridor into the Deep Dark Zone ({@code convert}) or back, for the cells whose distance
+     * from {@code landing} lies in [{@code nearest}, {@code farthest}). The zone floods the corridor's air, so it
+     * converts the corridor floor (sculk, as an upward-open floor always is) and the corridor face of the wall
+     * (DeepDarkZoneEligibility.look); the closed door and everything behind it stay. The 2-high wall stands for a
+     * carriage wall up to the ceiling, so the zone neither climbs over it nor counts its top as a floor. Converting
+     * plays DeepDarkZoneCues.spread's twelve sculk charges, one in each equal slice of the cells nearest first;
+     * restoring pops sculk charges on a few of the blocks, as DeepDarkZoneCues.restore samples them.
+     * 把 spore_cabin 的走廊变成深暗领域（convert）或恢复原样，只处理到 landing 的距离位于 [nearest, farthest) 的格子。领域填满
+     * 走廊的空气，因此转换走廊地面（朝上外露的地面总是幽匿块）和墙朝走廊的一面（DeepDarkZoneEligibility.look）；关着的门及其
+     * 后面的一切保持原样。2 格高的墙代表一直顶到车顶的车厢墙，所以领域不会翻过墙，墙顶也不算地面。转换时播放
+     * DeepDarkZoneCues.spread 的十二次幽匿充能（按由近及远的顺序等分，每段一次）；恢复时在少数方块上爆出幽匿充能，与
+     * DeepDarkZoneCues.restore 的抽样相同。
+     */
+    private static void sporeZone(SceneBuilder scene, BlockPos landing, boolean convert, double nearest,
+                                  double farthest) {
+        BlockState floorTile = block("wathe:marble_tiles");
+        BlockState wall = block("wathe:anthracite_steel");
+        List<BlockPos> cells = new ArrayList<>();
+        for (int x = 0; x < SPORE_STAGE_SIZE; x++) {
+            for (int y = 0; y <= 2; y++) {
+                for (int z = 0; z <= SPORE_WALL_Z; z++) {
+                    boolean floor = y == 0 && z < SPORE_WALL_Z;
+                    boolean wallFace = y > 0 && z == SPORE_WALL_Z && x != SPORE_DOOR_X;
+                    BlockPos pos = new BlockPos(x, y, z);
+                    double distance = Math.sqrt(pos.getSquaredDistance(landing));
+                    if ((floor || wallFace) && distance >= nearest && distance < farthest) {
+                        cells.add(pos);
+                    }
+                }
+            }
+        }
+        cells.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(landing)));
+        for (int i = 0; i < cells.size(); i++) {
+            BlockPos pos = cells.get(i);
+            boolean floor = pos.getY() == 0;
+            scene.world().setBlock(pos, convert ? deepDarkLook(pos, floor) : floor ? floorTile : wall, false);
+            if (!convert && i % 4 == 0) {
+                chargePop(scene, pos);
+            }
+        }
+        int samples = Math.min(ZONE_CHARGE_SAMPLES, cells.size());
+        for (int sample = 0; convert && sample < samples; sample++) {
+            BlockPos pos = cells.get((int) ((sample + 0.5) * cells.size() / samples));
+            zoneCharge(scene, pos, pos.getY() == 0 ? Direction.UP : Direction.NORTH);
+        }
+    }
+
+    /**
+     * Vanilla's sculk charge event of charge 2 on one open face of a converted block (WorldRenderer,
+     * WorldEvents.SCULK_CHARGE, ParticleUtil.spawnParticle): up to two charges 0.35 from the block centre towards that
+     * face, scattered across it, drifting at most 0.005 a tick; turned upside down on an upward face.
+     * 原版在已转换方块的一个外露面上的 2 级幽匿充能事件：至多两个充能粒子，位于方块中心朝该面 0.35 处、散布在面上，以至多每 tick
+     * 0.005 漂移；朝上的面上粒子倒转。
+     */
+    private static void zoneCharge(SceneBuilder scene, BlockPos pos, Direction face) {
+        SculkChargeParticleEffect charge = new SculkChargeParticleEffect(face == Direction.UP ? MathHelper.PI : 0);
+        scene.effects().emitParticles(Vec3d.ofCenter(pos), (world, x, y, z) -> {
+            int count = world.random.nextInt(3);
+            for (int i = 0; i < count; i++) {
+                world.addParticle(charge,
+                        x + (face.getOffsetX() == 0 ? world.random.nextDouble() - 0.5 : face.getOffsetX() * 0.35),
+                        y + (face.getOffsetY() == 0 ? world.random.nextDouble() - 0.5 : face.getOffsetY() * 0.35),
+                        z + (face.getOffsetZ() == 0 ? world.random.nextDouble() - 0.5 : face.getOffsetZ() * 0.35),
+                        (world.random.nextDouble() - 0.5) * 0.01, (world.random.nextDouble() - 0.5) * 0.01,
+                        (world.random.nextDouble() - 0.5) * 0.01);
+            }
+        }, 1, 1);
+    }
+
+    /**
+     * DeepDarkZoneEligibility.look: an upward-open floor is sculk; any other face hashes its position (SplitMix64) into
+     * 15 buckets, 9 sculk and 2 each of deepslate tiles, deepslate bricks and cobbled deepslate.
+     * DeepDarkZoneEligibility.look：朝上外露的地面是幽匿块；其他面按位置哈希（SplitMix64）分进 15 个桶，9 个幽匿块，深板岩瓦、
+     * 深板岩砖、深板岩圆石各 2 个。
+     */
+    private static BlockState deepDarkLook(BlockPos pos, boolean floor) {
+        if (floor) {
+            return Blocks.SCULK.getDefaultState();
+        }
+        long z = pos.asLong() + 0x9E3779B97F4A7C15L;
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        int bucket = (int) Long.remainderUnsigned(z ^ (z >>> 31), 15);
+        if (bucket < 9) {
+            return Blocks.SCULK.getDefaultState();
+        }
+        if (bucket < 11) {
+            return Blocks.DEEPSLATE_TILES.getDefaultState();
+        }
+        return bucket < 13 ? Blocks.DEEPSLATE_BRICKS.getDefaultState() : Blocks.COBBLED_DEEPSLATE.getDefaultState();
+    }
+
+    /**
+     * Vanilla's charge-0 sculk charge event on a full block (WorldRenderer, WorldEvents.SCULK_CHARGE): 40 charge pops
+     * inside the block drifting out at up to 0.07 a tick.
+     * 原版在完整方块上的 0 级幽匿充能事件：方块内 40 个充能爆裂粒子，以至多每 tick 0.07 向外飘出。
+     */
+    private static void chargePop(SceneBuilder scene, BlockPos pos) {
+        scene.effects().emitParticles(Vec3d.ofCenter(pos), (world, x, y, z) -> {
+            float ox = 2 * world.random.nextFloat() - 1;
+            float oy = 2 * world.random.nextFloat() - 1;
+            float oz = 2 * world.random.nextFloat() - 1;
+            world.addParticle(ParticleTypes.SCULK_CHARGE_POP, x + ox * 0.45, y + oy * 0.45, z + oz * 0.45,
+                    ox * 0.07, oy * 0.07, oz * 0.07);
+        }, 40, 1);
+    }
+
+    private static BlockState block(String id) {
+        return Registries.BLOCK.get(Identifier.of(id)).getDefaultState();
+    }
+
+    /**
+     * Place a Rift Gate at {@code pos} facing {@code facing}, with RiftGatePlacementService.playPlacementCue's burst:
+     * 24 portal and 6 witch particles around its centre, one block up.
+     * 在 pos 放下朝向 facing 的裂隙门，并放出 RiftGatePlacementService.playPlacementCue 的粒子：门中心（上方一格）周围 24 个
+     * 传送门粒子与 6 个女巫粒子。
+     */
+    private static void riftGate(SceneBuilder scene, Vec3d pos, Direction facing, int color) {
+        RiftGate gate = new RiftGate(pos, facing, color);
+        scene.addInstruction(ponder -> {
+            gate.setVisible(true);
+            gate.setFade(1);
+            ponder.addElement(gate);
+        });
+        Vec3d centre = pos.add(0, 1, 0);
+        serverParticles(scene, ParticleTypes.PORTAL, centre, 24, 0.3, 0.7, 0.3, 0.4);
+        serverParticles(scene, ParticleTypes.WITCH, centre, 6, 0.3, 0.6, 0.3, 0);
+    }
+
+    /**
+     * The puff at a gate when someone goes in or comes out (RiftSessionBody.cue): 24 reverse-portal particles around
+     * its centre.
+     * 有人进门或出门时门上的一团粒子（RiftSessionBody.cue）：门中心周围 24 个反向传送门粒子。
+     */
+    private static void gatePuff(SceneBuilder scene, Vec3d pos) {
+        serverParticles(scene, ParticleTypes.REVERSE_PORTAL, pos.add(0, 1, 0), 24, 0.3, 0.7, 0.3, 0.02);
+    }
+
+    /** A box around a gate for {@code ticks}: which gate the occupant is at. 门周围 ticks 的方框：门内的人在哪扇门。 */
+    private static void gateOutline(SceneBuilder scene, Vec3d pos, Direction facing, int color, int ticks) {
+        double halfX = facing.getAxis() == Direction.Axis.X ? 0.3 : 0.6;
+        double halfZ = facing.getAxis() == Direction.Axis.Z ? 0.3 : 0.6;
+        Box box = new Box(pos.x - halfX, pos.y, pos.z - halfZ, pos.x + halfX, pos.y + 2.3, pos.z + halfZ);
+        Object slot = new Object();
+        scene.addInstruction(new TickingInstruction(false, ticks) {
+            @Override
+            public void tick(PonderScene ponder) {
+                super.tick(ponder);
+                ponder.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
+            }
+        });
+    }
+
+    /**
+     * A vanished actor shows again at {@code feet} facing {@code yaw}, with no fade, as a player leaving spectator
+     * mode does; it is moved a tick before it shows so it never streaks across the stage.
+     * 消失的演员在 feet 处、朝向 yaw 重新出现，没有淡入，与玩家离开旁观模式相同；先移动、下一 tick 再显示，免得一路拖影。
+     */
+    private static void reappear(SceneBuilder scene, ElementLink<ActorElement> actor, Vec3d feet, float yaw) {
+        scene.addInstruction(ponder -> {
+            ActorElement element = ponder.resolve(actor);
+            if (element != null) {
+                element.moveTo(feet);
+                element.setYaw(yaw);
+            }
+        });
+        scene.idle(1);
+        scene.addInstruction(ponder -> {
+            ActorElement element = ponder.resolve(actor);
+            if (element != null) {
+                element.setVisible(true);
+            }
+        });
+    }
+
+    /**
+     * Key caps side by side for pairs of (binding id, fallback label), shrunk to fit the 24-pixel icon slot of a
+     * control hint; drawn like {@link #key}.
+     * 若干键帽并排显示，参数为（按键 id，备用标签）成对给出，缩小到控制提示 24 像素宽的图标位里；画法与 key 相同。
+     */
+    private static ScreenElement keyCaps(String... idsAndFallbacks) {
+        return (graphics, x, y) -> {
+            TextRenderer font = MinecraftClient.getInstance().textRenderer;
+            int caps = idsAndFallbacks.length / 2;
+            Text[] labels = new Text[caps];
+            int[] widths = new int[caps];
+            int total = 0;
+            for (int cap = 0; cap < caps; cap++) {
+                labels[cap] = boundKey(idsAndFallbacks[2 * cap], idsAndFallbacks[2 * cap + 1]);
+                widths[cap] = Math.max(14, font.getWidth(labels[cap]) + 6);
+                total += widths[cap] + (cap > 0 ? 2 : 0);
+            }
+            float scale = Math.min(1, 22f / total);
+            MatrixStack ms = graphics.getMatrices();
+            ms.push();
+            ms.translate(x + 1, y + 1 + 14 * (1 - scale) / 2, 0);
+            ms.scale(scale, scale, 1);
+            int left = 0;
+            for (int cap = 0; cap < caps; cap++) {
+                graphics.fill(left, 0, left + widths[cap], 14, 0xFFA0A0A0);
+                graphics.fill(left + 1, 1, left + widths[cap] - 1, 12, 0xFF3A3A3A);
+                graphics.drawText(font, labels[cap], left + (widths[cap] - font.getWidth(labels[cap])) / 2, 3,
+                        0xFFFFFFFF, false);
+                left += widths[cap] + 2;
+            }
+            ms.pop();
+        };
+    }
+
+    private static final class Trail extends TickingInstruction {
+        private final ParticleEffect particle;
+        private final Vec3d from;
+        private final Vec3d to;
+        private final int flight;
+        private final double arc;
+        private final int perTick;
+        private final float chance;
+        private int age;
+
+        Trail(ParticleEffect particle, Vec3d from, Vec3d to, int flight, double arc, int perTick, float chance) {
+            super(false, flight);
+            this.particle = particle;
+            this.from = from;
+            this.to = to;
+            this.flight = flight;
+            this.arc = arc;
+            this.perTick = perTick;
+            this.chance = chance;
+        }
+
+        @Override
+        protected void firstTick(PonderScene scene) {
+            super.firstTick(scene);
+            age = 0;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            PonderLevel world = scene.getWorld();
+            for (int step = 0; step < perTick; step++) {
+                if (world.random.nextFloat() >= chance) {
+                    continue;
+                }
+                double t = (age + step / (double) perTick) / flight;
+                Vec3d point = from.lerp(to, t).add(0, arc * 4 * t * (1 - t), 0);
+                world.addParticle(particle, point.x, point.y, point.z, 0, 0, 0);
+            }
+            age++;
+        }
+    }
+
+    /**
+     * A standing player knocked back with no input (LivingEntity.travel): it moves by its velocity, then the
+     * horizontal speed keeps 0.6 x 0.91 if it stood on a floor before that move (so the first tick too), 0.91 if it was
+     * in the air, and the vertical one loses 0.08 and keeps 0.98.
+     * 无输入的站立玩家被击退（LivingEntity.travel）：先按速度移动；若这一步之前站在地面上（第一 tick 也是），水平速度保留
+     * 0.6 × 0.91，之前在空中则保留 0.91；竖直速度减去 0.08 后保留 0.98。
+     */
+    private static final class Fling extends TickingInstruction {
+        private final ElementLink<ActorElement> link;
+        private final Vec3d launch;
+        private final double floor;
+        private Vec3d at = Vec3d.ZERO;
+        private Vec3d velocity = Vec3d.ZERO;
+        private boolean grounded;
+
+        Fling(ElementLink<ActorElement> link, Vec3d launch, double floor, int ticks) {
+            super(false, ticks);
+            this.link = link;
+            this.launch = launch;
+            this.floor = floor;
+        }
+
+        @Override
+        protected void firstTick(PonderScene scene) {
+            super.firstTick(scene);
+            ActorElement actor = scene.resolve(link);
+            at = actor == null ? Vec3d.ZERO : actor.position();
+            velocity = launch;
+            grounded = true;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            ActorElement actor = scene.resolve(link);
+            if (actor == null) {
+                return;
+            }
+            double drag = grounded ? 0.6 * 0.91 : 0.91;
+            at = at.add(velocity);
+            grounded = at.y <= floor;
+            if (grounded) {
+                at = new Vec3d(at.x, floor, at.z);
+            }
+            velocity = new Vec3d(velocity.x * drag, grounded ? 0 : (velocity.y - 0.08) * 0.98, velocity.z * drag);
+            actor.moveTo(at);
+        }
+    }
+
+    /**
+     * A placed Rift Gate as RiftGateEntityRenderer draws it: the standalone model sparkwitch:item/rift_gate_placed
+     * through the item renderer's FIXED transform, full-bright, lifted 0.75 and turned so its front faces
+     * {@code facing}; each tick it adds RiftGateClientEffects' sparse ambient particles (portal drawn into the swirl,
+     * role-colour dust and rare witch sparks on the rune ring).
+     * 已放置的裂隙门，画法与 RiftGateEntityRenderer 相同：独立模型 sparkwitch:item/rift_gate_placed 经物品渲染器 FIXED 变换、
+     * 全亮度绘制，上移 0.75 并转到正面朝向 facing；每 tick 加上 RiftGateClientEffects 的少量环境粒子（吸入旋涡的传送门粒子、
+     * 符文环上的职业色尘与偶尔的女巫火花）。
+     */
+    private static final class RiftGate extends AnimatedSceneElementBase {
+        private static final Identifier MODEL = Identifier.of("sparkwitch", "item/rift_gate_placed");
+        /** Model y -4 lifted onto the gate base (RiftGatePresentationRules.MODEL_LIFT). 把模型 y -4 抬到门底。 */
+        private static final double MODEL_LIFT = 0.75;
+        /** RiftGatePresentationRules: swirl centre, rune ring and swirl target sizes. 旋涡中心、符文环与旋涡内区的尺寸。 */
+        private static final double SWIRL_UP = 18 / 16.0;
+        private static final double RING_HALF_WIDTH = 6.5 / 16.0;
+        private static final double RING_HALF_HEIGHT = 13.25 / 16.0;
+        private static final double RING_HALF_DEPTH = 1.5 / 16.0;
+        private static final double SWIRL_HALF_WIDTH = 0.25;
+        private static final double SWIRL_HALF_HEIGHT = 0.7;
+        private final Vec3d pos;
+        private final Direction facing;
+        private final DustParticleEffect dust;
+        private final ItemStack stack = stack("sparkwitch:rift_gate");
+
+        RiftGate(Vec3d pos, Direction facing, int color) {
+            this.pos = pos;
+            this.facing = facing;
+            this.dust = new DustParticleEffect(new Vector3f((color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f,
+                    (color & 0xFF) / 255f), 0.9f);
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            if (!isVisible()) {
+                return;
+            }
+            PonderLevel world = scene.getWorld();
+            if (world.random.nextDouble() < 0.5) {
+                double[] start = ringPoint(world.random.nextFloat() * MathHelper.TAU);
+                double depth = (world.random.nextBoolean() ? 1 : -1) * (0.25 + world.random.nextDouble() * 0.35);
+                Vec3d from = local(start[0] * 1.1, start[1], depth);
+                Vec3d to = local(SWIRL_HALF_WIDTH * (world.random.nextDouble() * 2 - 1),
+                        SWIRL_UP + SWIRL_HALF_HEIGHT * (world.random.nextDouble() * 2 - 1), 0);
+                world.addParticle(ParticleTypes.PORTAL, to.x, to.y, to.z, from.x - to.x, from.y - to.y - 1,
+                        from.z - to.z);
+            }
+            if (world.random.nextDouble() < 0.25) {
+                ring(world, dust, 0);
+            }
+            if (world.random.nextDouble() < 1 / 40.0) {
+                ring(world, ParticleTypes.WITCH, 0.02);
+            }
+        }
+
+        private void ring(PonderLevel world, ParticleEffect particle, double upwards) {
+            double[] point = ringPoint(world.random.nextFloat() * MathHelper.TAU);
+            Vec3d at = local(point[0], point[1], (world.random.nextDouble() * 2 - 1) * RING_HALF_DEPTH * 2);
+            world.addParticle(particle, at.x, at.y, at.z, 0, upwards, 0);
+        }
+
+        /** A point on the rune ring, {side, up} (a superellipse of exponent 4). 符文环上的点 {横向, 高度}（指数 4 的超椭圆）。 */
+        private static double[] ringPoint(double t) {
+            double cos = Math.cos(t);
+            double sin = Math.sin(t);
+            return new double[]{RING_HALF_WIDTH * Math.signum(cos) * Math.sqrt(Math.abs(cos)),
+                    SWIRL_UP + RING_HALF_HEIGHT * Math.signum(sin) * Math.sqrt(Math.abs(sin))};
+        }
+
+        /** Gate-local (side, up, forward) to the scene. 门局部坐标（横向、高度、前方）转为场景坐标。 */
+        private Vec3d local(double side, double up, double ahead) {
+            double forwardX = facing.getOffsetX();
+            double forwardZ = facing.getOffsetZ();
+            return new Vec3d(pos.x - forwardZ * side + forwardX * ahead, pos.y + up,
+                    pos.z + forwardX * side + forwardZ * ahead);
+        }
+
+        @Override
+        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
+                                  float pt) {
+            if (fade <= 0.01f) {
+                return;
+            }
+            MinecraftClient client = MinecraftClient.getInstance();
+            MatrixStack ms = graphics.getMatrices();
+            ms.push();
+            ms.translate(pos.x, pos.y + MODEL_LIFT, pos.z);
+            ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - facing.asRotation()));
+            client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, ms, buffer,
+                    LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV,
+                    client.getBakedModelManager().getModel(MODEL));
+            ms.pop();
         }
     }
 }
