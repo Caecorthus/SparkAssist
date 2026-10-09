@@ -55,6 +55,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/bell_ringer",
+              "text": "演示：丧钟与回响"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

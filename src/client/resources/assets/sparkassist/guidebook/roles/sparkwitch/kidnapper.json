@@ -79,6 +79,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/kidnapper",
+              "text": "演示：迷药、拖尸与扔尸"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

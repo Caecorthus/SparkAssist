@@ -64,6 +64,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/grand_witch",
+              "text": "演示：仪礼剑的斩击与冲刺"
+            },
+            {
               "type": "section",
               "text": "同伴",
               "tone": "info"
@@ -144,7 +149,7 @@
             },
             {
               "type": "bullet",
-              "text": "商店：【左轮手枪】300 金币，【开锁器】50 金币，【毒药瓶】和【蝎子】各 100 金币。"
+              "text": "商店：【左轮手枪】300 金币，【开锁器】50 金币（限购 1 次），【毒药瓶】和【蝎子】各 100 金币。"
             },
             {
               "type": "bullet",
