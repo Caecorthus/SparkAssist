@@ -85,6 +85,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/apprentice_witch",
+              "text": "演示：巨力一拳击飞凶手"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

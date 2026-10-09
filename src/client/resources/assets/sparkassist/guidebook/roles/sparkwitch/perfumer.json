@@ -43,6 +43,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/perfumer",
+              "text": "演示：香精标记与血腥气味"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
