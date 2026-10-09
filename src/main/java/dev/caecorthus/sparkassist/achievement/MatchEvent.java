@@ -38,6 +38,11 @@ public record MatchEvent(String type, int tick, UUID actor, UUID target, Map<Str
     public static final String PSYCHO = "sparkfactionapi:psycho";
     /** {@code actor} finished eating or drinking {@code item}; {@code kind} is food or drink. 吃完或喝完一样东西。 */
     public static final String CONSUME = "sparkfactionapi:consume";
+    /**
+     * {@code actor}'s total coins gained this match ({@code amount}), written once at match end.
+     * {@code actor} 本局获得的金币总数（{@code amount}），在对局结束时写入一次。
+     */
+    public static final String INCOME = "sparkfactionapi:income";
 
     public MatchEvent {
         values = values == null ? Map.of() : Map.copyOf(values);

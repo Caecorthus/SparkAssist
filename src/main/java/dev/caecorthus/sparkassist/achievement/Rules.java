@@ -132,4 +132,13 @@ final class Rules {
         return traits.changes().stream().anyMatch(change -> change.tick() > from && change.tick() <= to
                 && change.traitIds().containsAll(wanted));
     }
+
+    /**
+     * Whether I held all of {@code traitIds} at the same moment at some point this round.
+     * 本局是否曾在同一时刻同时持有全部词条。
+     */
+    static boolean heldTogetherSometime(AchievementContext context, String... traitIds) {
+        Set<String> wanted = Set.of(traitIds);
+        return context.facts().traits().changes().stream().anyMatch(change -> change.traitIds().containsAll(wanted));
+    }
 }
