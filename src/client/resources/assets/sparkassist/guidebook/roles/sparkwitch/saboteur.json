@@ -31,6 +31,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/saboteur",
+              "text": "演示：熄灭列车灯"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
