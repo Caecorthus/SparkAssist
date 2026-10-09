@@ -6,6 +6,7 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.util.SkinTextures;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
 /**
@@ -47,6 +48,12 @@ final class ActorPlayer extends OtherClientPlayerEntity {
     @Override
     public int getItemUseTimeLeft() {
         return charging ? getMainHandStack().getMaxUseTime(this) : 0;
+    }
+
+    /** Item models that check the item in use (a raised shield, a drawn bow) see the main-hand stack. 检查使用中物品的物品模型（举起的盾、拉开的弓）会看到主手物品。 */
+    @Override
+    public ItemStack getActiveItem() {
+        return charging ? getMainHandStack() : ItemStack.EMPTY;
     }
 
     /** Hides the vanilla name tag; the actor draws its own in the role colour. 隐藏原版名牌；演员自己绘制身份色名牌。 */
