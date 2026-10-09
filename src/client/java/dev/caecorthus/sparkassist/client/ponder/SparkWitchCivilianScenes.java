@@ -49,11 +49,13 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.EntityEffectParticleEffect;
+import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -96,6 +98,18 @@ final class SparkWitchCivilianScenes {
     private static final double PLATE = 7;
     /** Points around a full illustrated edge circle. 示意边界整圆上的点数。 */
     private static final int EDGE_POINTS = 240;
+    /** A mature Witch Factor holder's outline (WitchFactorOutlineRules.FACTOR_COLOR). 成熟魔女因子持有者的描边颜色。 */
+    private static final int FACTOR_PURPLE = 0x8B70DB;
+    /** A marked player after a kill (PerfumerRules.BLOODY_OUTLINE_COLOR). 被标记者杀人后的描边颜色。 */
+    private static final int BLOODY_RED = 0xC13838;
+    /** A body the Perfumer smells (PerfumerRules.CORPSE_OUTLINE_COLOR). 调香师闻到的尸体的描边颜色。 */
+    private static final int CORPSE_GREY = 0xD8D8D8;
+    /** Cooling Oil's mist (SparkStrength CoolingOilService.MINT_MIST). 风油精的雾气。 */
+    private static final DustParticleEffect MINT_MIST = new DustParticleEffect(new Vector3f(0.55f, 0.95f, 0.75f), 1.3f);
+    /** Cooling Oil's mist core (CoolingOilService.MINT_CORE). 风油精雾气的核心。 */
+    private static final DustParticleEffect MINT_CORE = new DustParticleEffect(new Vector3f(0.80f, 1.0f, 0.90f), 1.0f);
+    /** A lying body's length from the feet, as ActorElement draws it. ActorElement 绘制的尸体从脚到头的长度。 */
+    private static final double BODY_LENGTH = 1.75;
 
     private SparkWitchCivilianScenes() {
     }
@@ -117,6 +131,14 @@ final class SparkWitchCivilianScenes {
                 scene("wathe/aisle", SparkWitchCivilianScenes::saint));
         role("sparkassist:roles/sparkwitch/orthopedist", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchCivilianScenes::orthopedist));
+        role("sparkassist:roles/sparkwitch/apprentice_witch", List.of("sparkwitch"),
+                scene("wathe/lit_carriage", SparkWitchCivilianScenes::apprenticeWitch));
+        role("sparkassist:roles/sparkwitch/emma", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchCivilianScenes::emma));
+        role("sparkassist:roles/sparkwitch/perfumer", List.of("sparkwitch", "sparkstrength"),
+                scene("wathe/aisle", SparkWitchCivilianScenes::perfumer));
+        role("sparkassist:roles/sparkwitch/fiend", List.of("sparkwitch"),
+                scene("wathe/cabin", SparkWitchCivilianScenes::fiend));
     }
 
     /**
@@ -972,6 +994,392 @@ final class SparkWitchCivilianScenes {
     }
 
     /**
+     * Apprentice Witch (WitchSkillAssignmentService, ApprenticeAbilityCatalog, MightyForceAbility,
+     * MightyForceCombatService, ApprenticeRules, ApprenticeFeatureService, PurifyAbility; Wathe GameFunctions.killPlayer,
+     * PlayerBodyEntity): at role assignment she draws one of five skills at random (Mighty Force, Swift Step, Murder
+     * Sense, Healing, Clairvoyance), used on the ability key. Mighty Force costs 60 mana and opens a 10 s window in
+     * which an empty-hand left-click on a player (the swing everyone sees) kills them (not forced, so a shield still
+     * blocks) and launches the body: an impulse of 10 blocks a tick away from her plus 0.35 up, so in a carriage it
+     * flies until a wall stops it, here within the tick; knockback sound. Killing an effective civilian follows Wathe's
+     * innocent-shot punishment (default: she dies too). 45 s cooldown from the punch (or from the window running out).
+     * After two tasks she graduates and the secondary key (N) purifies a Witch Factor (the aimed player within 6 blocks,
+     * else herself if she holds one). The killer faces her, so his body lies face down towards her; in game its hitbox
+     * stops at the wall and the drawn feet sink half a block into it, here they rest against it.
+     * 预备魔女：分配身份时从五种技能中随机得到一种（巨力、滑步、杀意感知、疗愈、千里眼），用技能键发动。巨力花 60 魔力，
+     * 打开 10 秒窗口，期间空手左键一名玩家（人人看得到挥手）即可击杀（非强制，护盾仍能挡下）并把尸体击飞：沿远离她的方向
+     * 每 tick 10 格、向上 0.35 的冲量，所以在车厢里会一直飞到被墙挡住，这里在同一 tick 内就撞到墙；有击退音效。打死实际
+     * 阵营为好人的人按 Wathe 的误杀惩罚处理（默认她也会死）。冷却 45 秒，从出拳（或窗口用完）时算起。做完 2 个任务出师后，
+     * 第二技能键（N）可净化魔女因子（准心 6 格内的玩家，否则是持有因子的她自己）。杀手面朝她，所以尸体脸朝她扑倒；游戏里
+     * 尸体的碰撞箱停在墙前，画出来的脚会陷进墙里半格，这里让脚抵着墙。
+     */
+    private static void apprenticeWitch(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_apprentice_witch", "预备魔女：巨力一拳击飞凶手");
+        WatheItemScenes.setStage(scene, util);
+        Vec3d feet = new Vec3d(1.2, 1, 2.8);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ElementLink<ActorElement> apprentice = Actors.enter(scene,
+                RoleColors.of("sparkwitch:apprentice_witch", 0x75EDFA), Text.literal("预备魔女"), feet, EAST,
+                Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("预备魔女开局一般随机得到五种技能之一，用技能键（默认 G）发动")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(5.2, 1, 2.8), WEST, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(80)
+                .text("这局抽到巨力：花 60 魔力，之后 10 秒内空手左键一名玩家")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, killer, new Vec3d(-2.4, 0, 0), 36);
+        scene.idle(38);
+        Actors.charge(scene, killer, true);
+        scene.idle(16);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick();
+        scene.idle(8);
+        Actors.swing(scene, apprentice);
+        Actors.fall(scene, killer);
+        // The body flies at 10 blocks a tick until the wall at x = 6 stops it; its feet end against the wall.
+        // 尸体以每 tick 10 格的速度飞出，直到 x = 6 的墙挡住它；脚抵着墙。
+        Actors.slide(scene, killer, new Vec3d(3.15, 0, 0), 2);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("对方一般当场死亡，尸体被一拳打飞出去")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("打死好人阵营的人会受罚，默认你也会死；巨力冷却 45 秒")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("另外四种技能是滑步、杀意感知、疗愈和千里眼，详见指南")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(SECONDARY_KEY, "N"));
+        scene.overlay().showText(90)
+                .text("做完 2 个任务出师后，第二技能键（默认 N）能净化魔女因子")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Emma (EmmaRules, EmmaSkillService, EmmaGunService, EmmaLifecycle; WitchFactorService, WitchFactorState,
+     * WitchFactorWorldComponent, GrandWitchTargeting; client WitchFactorClientHooks, WitchFactorOutlineRules): the
+     * ability key spends 100 mana to plant a Witch Factor on the player aimed at within 8 blocks (20 s cooldown), with
+     * nothing to see. 20 s later the holder joins the network: Emma sees him outlined in blue-purple through walls (as do
+     * the Grand Witch's side and other mature holders), and he in turn sees Emma's pink outline. When a holder is
+     * killed, the factor passes to an eligible killer, who joins the network 20 s later. A revolver kill of a holder
+     * cuts that shot's cooldown by 90% and gives 2 s of Speed III. Planting one on the Grand Witch, a Bewitched, an
+     * Accomplice or the Witch Maiden kills Emma 20 s later. The outlines are boxes; the factor's 20 s waits are
+     * shortened, and Wathe draws no bullet line, only the muzzle flash.
+     * 樱羽艾玛：技能键花 100 魔力，给准心对准的 8 格内玩家种下魔女因子（冷却 20 秒），没有任何可见效果。20 秒后持有者
+     * 接入网络：艾玛能隔墙看到他的蓝紫色描边（大魔女一方和其他成熟持有者也能），他也能看到艾玛的粉色描边。持有者被杀时，
+     * 因子转到符合条件的凶手身上，凶手 20 秒后接入网络。用左轮打死持有者，这一枪冷却缩短 90%，并获得 2 秒速度 III。
+     * 种给大魔女、魔化使、共犯或巫女，艾玛 20 秒后死亡。描边用方框表示；因子的 20 秒等待被缩短，Wathe 不画弹道线，
+     * 只有枪口火光。
+     */
+    private static void emma(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_emma", "樱羽艾玛：魔女因子追踪凶手");
+        WatheItemScenes.stage(scene);
+        int pink = RoleColors.of("sparkwitch:emma", 0xF29BC3);
+        Vec3d feet = new Vec3d(5.8, 1, 1.2);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ItemStack revolver = stack("wathe:revolver");
+        ElementLink<ActorElement> emma = Actors.enter(scene, pink, Text.literal("樱羽艾玛"), feet, SCREEN_RIGHT,
+                Direction.DOWN);
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(3.3, 1, 3.7), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("准心对准 8 格内的人按技能键（默认 G），花 100 魔力种下魔女因子")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
+        scene.idle(50);
+        // His outline lasts until he is stabbed. 他的描边持续到他被刺为止。
+        Actors.highlight(scene, passenger, FACTOR_PURPLE, 148);
+        scene.overlay().showText(90)
+                .text("20 秒后（演示缩短），他一般会隔墙对你显示蓝紫色描边（框为示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(1.0, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        Actors.walk(scene, killer, new Vec3d(1.2, 0, -1.2), 24);
+        scene.idle(26);
+        Actors.charge(scene, killer, true);
+        scene.idle(12);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        Actors.fall(scene, passenger);
+        scene.overlay().showText(80)
+                .text("持有者被人杀死时，因子一般会转到凶手身上")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, killer, new Vec3d(-0.6, 0, 0.6), 12);
+        scene.idle(70);
+        // Both outlines last until the killer is shot: then no mature holder is left. 两个描边都持续到杀手中枪：此后没有成熟持有者了。
+        Actors.highlight(scene, killer, FACTOR_PURPLE, 123);
+        Actors.highlight(scene, emma, pink, 123);
+        scene.overlay().showText(90)
+                .text("再过 20 秒（演示缩短），凶手也会显形；他同样能看到你（粉框）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.hold(scene, emma, revolver);
+        scene.idle(10);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(revolver);
+        scene.idle(10);
+        // The levelled revolver's muzzle, as in controlExpert; RevolverItem kicks the view up 4 degrees.
+        // 与 controlExpert 相同的端平左轮枪口；开枪时视角上抬 4 度。
+        gunshotFlash(scene, new Vec3d(5.2, 2.05, 1.8));
+        Actors.lookPitch(scene, emma, -4);
+        scene.idle(3);
+        Actors.lookPitch(scene, emma, 0);
+        Actors.fall(scene, killer);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("用左轮打死持有者：这一枪冷却缩短 90%%，还能加速 2 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("别种给大魔女、魔化使、共犯或巫女：20 秒后你会死于反噬")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Perfumer (PerfumeEssenceItem, PerfumerRules, PerfumerState, PerfumerRuntime, PerfumerFeatureService, CologneItem;
+     * SparkStrength CoolingOilItem, CoolingOilEntity, CoolingOilService, PerfumerKitService, HiddenEquipmentHelperMixin):
+     * right-clicking another living player with Perfume Essence (a swing; the essence is used up and hidden in hand from
+     * other living players) marks them for the Perfumer alone: pink while in sight within 12 blocks. After the marked
+     * player kills someone (an attributed kill), the outline turns red and also shows through walls within 4 blocks.
+     * Bodies show grey (4 blocks through walls, 12 in sight; hidden ones excepted). Cooling Oil is thrown like a
+     * splash potion (a swing, the vial visible in flight) and shatters on the first block or player: mint mist and
+     * glass bits; every player but the thrower and Perfumers within 2.5 blocks (cover permitting) gets 5 s of blurred
+     * vision and no instinct. Any kill credited to the marked player counts (poison and bombs too). The outlines are
+     * boxes; the corpse outline shows from the kill.
+     * 调香师：用香精右键另一名活人（会挥手；香精用掉，手持时其他活人看不见）只给调香师自己做记号：12 格内看得见时显示粉色。
+     * 被标记者之后杀了人（有记名的击杀），描边变红，4 格内隔墙也能看到。尸体显示灰色（4 格内隔墙、12 格内需视线；被藏起的
+     * 除外）。风油精像喷溅药水一样扔出（会挥手，飞行中的药瓶看得见），碰到第一个方块或玩家就碎：薄荷色雾气和玻璃碎片；
+     * 2.5 格内（受遮挡判定）除投掷者和调香师外的人 5 秒内视野模糊、不能用本能。记在被标记者名下的击杀都算（下毒、炸弹也算）。
+     * 描边用方框表示；尸体描边从击杀起就出现。
+     */
+    private static void perfumer(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_perfumer", "调香师：香精标记与血腥气味");
+        WatheItemScenes.stage(scene);
+        ItemStack essence = stack("sparkwitch:perfume_essence");
+        ItemStack oil = stack("sparkstrength:cooling_oil");
+        int rose = RoleColors.of("sparkwitch:perfumer", 0xF2A4A4);
+        ElementLink<ActorElement> perfumer = Actors.enter(scene, rose, Text.literal("调香师"), new Vec3d(5.6, 1, 1.4),
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, perfumer, essence);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(3.8, 1, 3.2), SCREEN_LEFT, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("用香精右键一名活人做记号；其他活人看不见你手里的香精")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, perfumer, new Vec3d(-0.8, 0, 0.8), 14);
+        scene.idle(16);
+        Vec3d overHead = new Vec3d(4.8, 3.6, 2.2);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(essence);
+        scene.idle(10);
+        Actors.swing(scene, perfumer);
+        Actors.hold(scene, perfumer, ItemStack.EMPTY);
+        // Pink until his kill turns it red. 粉色持续到他杀人后变红。
+        Actors.highlight(scene, killer, rose, 182);
+        scene.idle(40);
+        scene.overlay().showText(90)
+                .text("粉框示意：他在 12 格内、你看得见他时，只有你能看到这层描边")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Vec3d victimFeet = new Vec3d(1.0, 1, 4.6);
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), victimFeet,
+                SOUTH, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        Actors.walk(scene, killer, new Vec3d(-1.4, 0, 0.7), 18);
+        scene.idle(20);
+        Actors.charge(scene, killer, true);
+        scene.idle(12);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        Actors.fall(scene, victim);
+        Actors.highlight(scene, killer, BLOODY_RED, 406);
+        bodyOutline(scene, victimFeet, SOUTH, CORPSE_GREY, 406);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("他之后杀了人（下毒、炸死也算），描边变红，4 格内隔墙也看得到")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("尸体一般也会对你高亮（灰框示意）")
+                .independent();
+        scene.idle(90);
+        Actors.hold(scene, perfumer, oil);
+        Actors.walk(scene, killer, new Vec3d(1.0, 0, -0.7), 14);
+        scene.idle(16);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 25).rightClick().withItem(oil);
+        scene.idle(8);
+        Actors.swing(scene, perfumer);
+        Actors.hold(scene, perfumer, ItemStack.EMPTY);
+        // Thrown at 1.5 blocks a tick, the vial meets him within a tick: it breaks where its path enters his box grown
+        // 0.3 a side, pulled 0.2 back (PerfumerKitService.impactPoint), and the mist settles onto the floor below.
+        // 以每 tick 1.5 格扔出，药瓶一 tick 内就砸中他：在路径进入他每边扩 0.3 的碰撞箱处、再后退 0.2 碎裂，雾气落到下方地面。
+        Vec3d impact = new Vec3d(4.15, 2.25, 2.7);
+        throwSprite(scene, new SpriteFlight(oil, new Vec3d(4.5, 2.4, 2.45), impact, 2, 0, null));
+        scene.idle(2);
+        coolingOilBurst(scene, oil, impact, new Vec3d(impact.x, 1.2, impact.z));
+        scene.overlay().showText(90)
+                .text("风油精一碰就碎：溅到的人 5 秒内视野模糊、不能用本能")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("调香师自己不受风油精影响；古龙水等其他香料见指南")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Fiend (FiendRules, FiendImmunityService, FiendReactionService, FiendCooldownAura, FiendShopService,
+     * FiendMomentService, FiendMomentEffects, FiendMomentCrowbar, FiendDashService, FiendDashRules; client
+     * FiendMomentHighlightRules, WatheClientFiendHighlightMixin; Wathe CrowbarItem, DoorBlockEntity.blast): every kill
+     * on the dormant Fiend is cancelled except falling off the train (and a disconnect or /kill): the attacker's stab or
+     * shot happens, the Fiend stays standing. A knife stab pays 50 coins and 4 notes, a gunshot 50 coins and 5 s of
+     * Speed III (no particles) and raises the items of everyone else within 8 blocks to a 20 s cooldown. The 200-coin
+     * Fiend Moment (one per round) ends the immunity and gives Speed II and a crowbar; for its 2 minutes the Fiend sees
+     * every living player outlined in his colour through walls and everyone sees him (not while Cooling Oil blinds the
+     * viewer, nor hidden Wraiths). The door's own right-click runs first, so the crowbar reaches a locked or jammed
+     * door (any door on a sneaking right-click) and blasts it open for good unless an Engineer repairs it (a swing and a
+     * loud pry), then cools down 5 s. Dash (ability key, moment only): 10 s of
+     * Speed IV, 30 s cooldown. Surviving the moment wins alone. Wathe draws no bullet line, only the muzzle flash; the
+     * outlines are boxes.
+     * 魔人：休眠时针对他的击杀全部被取消，只有掉下火车（以及断线、/kill）例外：对方照常出刀或开枪，魔人站着不倒。挨刀得
+     * 50 金币和 4 张便条，中枪得 50 金币和 5 秒速度 III（无粒子），并让 8 格内其他人的物品冷却提升到 20 秒。花 200 金币
+     * 买下魔人时刻（每局一次）会失去免疫，获得速度 II 和一把撬棍；时刻持续 2 分钟，期间魔人隔墙看到所有活人以他的颜色
+     * 描边，所有人也看得到他（被风油精糊眼的人和隐藏的冤魂除外）。门自己的右键先生效，所以撬棍只作用于上锁或卡住的门（潜行
+     * 右键时任何门都行），把门撬开且不再关上，除非工程师修好它（挥手，撬门声很响），之后冷却 5 秒。疾驰（技能键，仅限时刻中）：
+     * 10 秒速度 IV，冷却 30 秒。撑过时刻即独自获胜。Wathe 不画弹道线，只有枪口火光；描边用方框表示。
+     */
+    private static void fiend(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_fiend", "魔人：挨打攒钱，买下魔人时刻");
+        WatheItemScenes.cabinStage(scene, util);
+        BlockPos door = util.grid().at(3, 1, 3);
+        int crimson = RoleColors.of("sparkwitch:fiend", 0x8E1B3A);
+        ItemStack knife = stack("wathe:knife");
+        ItemStack revolver = stack("wathe:revolver");
+        ItemStack crowbar = stack("wathe:crowbar");
+        ElementLink<ActorElement> fiend = Actors.enter(scene, crimson, Text.literal("魔人"), new Vec3d(3.0, 1, 1.5),
+                EAST, Direction.DOWN);
+        Vec3d shooterFeet = new Vec3d(0.6, 1, 1.5);
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                shooterFeet, EAST, Direction.DOWN);
+        Actors.hold(scene, vigilante, revolver);
+        scene.idle(5);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(6.2, 1, 1.5), WEST, Direction.DOWN);
+        Actors.hold(scene, killer, knife);
+        scene.idle(15);
+        scene.overlay().showText(80)
+                .text("休眠的魔人几乎杀不死：除了掉下火车，刀枪一般都要不了命")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        Actors.walk(scene, killer, new Vec3d(-1.8, 0, 0), 20);
+        scene.idle(22);
+        scene.overlay().showControls(new Vec3d(4.4, 3.6, 1.5), Pointing.DOWN, 30).rightClick().withItem(knife);
+        Actors.charge(scene, killer, true);
+        scene.idle(14);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        scene.idle(30);
+        scene.overlay().showControls(shooterFeet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(revolver);
+        scene.idle(10);
+        // A levelled revolver's muzzle 0.85 ahead of an actor facing east, as REVOLVER_MUZZLE sits for one facing
+        // screen-right. 面朝东的演员手中端平左轮的枪口，在身前 0.85 格，与朝屏幕右侧时 REVOLVER_MUZZLE 的位置相同。
+        gunshotFlash(scene, new Vec3d(1.45, 2.05, 1.6));
+        Actors.lookPitch(scene, vigilante, -4);
+        scene.idle(3);
+        Actors.lookPitch(scene, vigilante, 0);
+        scene.idle(17);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("挨一刀 +50 金币和 4 张便条；中一枪 +50 金币并加速 5 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(30);
+        // The killer backs off, clearing the door for the moment. 杀手退开，给时刻让出门前的位置。
+        Actors.walk(scene, killer, new Vec3d(1.5, 0, -0.3), 18);
+        scene.idle(20);
+        Actors.turn(scene, killer, WEST);
+        scene.idle(50);
+        Actors.hold(scene, fiend, crowbar);
+        // The moment's two-way outline lasts to the end. 时刻的双向描边一直持续到结束。
+        Actors.highlight(scene, fiend, crimson, 436);
+        Actors.highlight(scene, killer, crimson, 436);
+        Actors.highlight(scene, vigilante, crimson, 436);
+        scene.overlay().showText(90)
+                .text("攒够 200 金币买下魔人时刻：你和活人一般互相隔墙可见（框为示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.walk(scene, fiend, new Vec3d(0.5, 0, 0.2), 6);
+        scene.idle(8);
+        Actors.turn(scene, fiend, SOUTH);
+        scene.idle(8);
+        Vec3d overHead = new Vec3d(3.5, 3.6, 1.7);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(crowbar);
+        scene.idle(10);
+        Actors.swing(scene, fiend);
+        WatheItemScenes.openDoor(scene, door, true);
+        scene.overlay().showText(90)
+                .text("撬棍右键锁着的门就能撬开，门一般不会再关上；冷却 5 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
+        scene.idle(10);
+        // Speed IV: about twice the walking pace. 速度 IV：大约是步行速度的两倍。
+        Actors.walk(scene, fiend, new Vec3d(0, 0, 3.6), 9);
+        scene.overlay().showText(90)
+                .text("疾驰（默认 G）：10 秒速度 IV，每次用后冷却 30 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("撑满 2 分钟你就独自获胜；可此时没有免疫，被杀就结束")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
      * The demo's AXMC: an FMJ chambered and a magazine of FMJ under AP, so it fires FMJ, AP, FMJ; the fitted magazine
      * also shows on the held model (UsecModelPredicates). 演示用的 AXMC：膛内一发 FMJ，弹匣里 FMJ 上压着 AP，所以依次打出
      * FMJ、AP、FMJ；装上的弹匣也会显示在手持模型上（UsecModelPredicates）。
@@ -1162,6 +1570,31 @@ final class SparkWitchCivilianScenes {
                 }
             }
         }, 1, ticks);
+    }
+
+    /**
+     * An illustrated outline over a whole body lying face down from {@code feet} towards {@code yaw}, for
+     * {@code ticks}; Actors.highlight centres a body's box on its feet.
+     * 示意的尸体描边：覆盖从 feet 朝 yaw 方向脸朝下躺着的整具尸体，持续 ticks；Actors.highlight 的尸体方框以脚为中心。
+     */
+    private static void bodyOutline(SceneBuilder scene, Vec3d feet, float yaw, int color, int ticks) {
+        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
+        Vec3d head = feet.add(-MathHelper.sin(radians) * BODY_LENGTH, 0, MathHelper.cos(radians) * BODY_LENGTH);
+        scene.addInstruction(new Outline(new Box(feet.x, feet.y, feet.z, head.x, feet.y + 0.4, head.z)
+                .expand(0.35, 0, 0.35), color, ticks));
+    }
+
+    /**
+     * A Cooling Oil vial shattering (SparkStrength CoolingOilService.playBurst): 48 mint and 16 pale mist puffs filling
+     * the body-height space 0.9 above the floor point, and 10 glass bits where it broke.
+     * 风油精药瓶碎裂：薄荷色雾气 48 团、浅色核心 16 团，充满地面点上方 0.9 处一人高的空间；碎裂处飞出 10 片玻璃碎片。
+     */
+    private static void coolingOilBurst(SceneBuilder scene, ItemStack vial, Vec3d impact, Vec3d floor) {
+        Vec3d mist = floor.add(0, 0.9, 0);
+        spawnParticles(scene, MINT_MIST, mist, 48, new Vec3d(1.0, 0.6, 1.0), 0);
+        spawnParticles(scene, MINT_CORE, mist, 16, new Vec3d(0.4, 0.3, 0.4), 0);
+        spawnParticles(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, vial), impact, 10,
+                new Vec3d(0.05, 0.05, 0.05), 0.12);
     }
 
     /**
@@ -1576,6 +2009,28 @@ final class SparkWitchCivilianScenes {
         @Override
         public boolean isComplete() {
             return stopped || super.isComplete();
+        }
+    }
+
+    /**
+     * A fixed illustrated outline box in {@code color} for {@code ticks}, drawn like Actors.highlight's.
+     * 固定位置的示意描边方框，颜色为 color，持续 ticks，画法与 Actors.highlight 相同。
+     */
+    private static final class Outline extends TickingInstruction {
+        private final Box box;
+        private final int color;
+        private final Object slot = new Object();
+
+        private Outline(Box box, int color, int ticks) {
+            super(false, ticks);
+            this.box = box;
+            this.color = color;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
     }
 }
