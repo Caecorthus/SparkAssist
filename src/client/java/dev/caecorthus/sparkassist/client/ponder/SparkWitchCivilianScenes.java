@@ -12,6 +12,7 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import net.createmod.catnip.gui.element.ScreenElement;
@@ -110,6 +111,40 @@ final class SparkWitchCivilianScenes {
     private static final DustParticleEffect MINT_CORE = new DustParticleEffect(new Vector3f(0.80f, 1.0f, 0.90f), 1.0f);
     /** A lying body's length from the feet, as ActorElement draws it. ActorElement 绘制的尸体从脚到头的长度。 */
     private static final double BODY_LENGTH = 1.75;
+    /** The Blind's line art: white on black (sparkwitch_blind_echo.fsh). 盲人画面的线稿：黑底白线。 */
+    private static final int ECHO_WHITE = 0xFFFFFF;
+    /**
+     * The faint band a sound front sweeps over surfaces (wave * 0.3 in the shader), lifted so it reads on the dimmed
+     * floor. 声波前沿扫过表面的淡淡光带（着色器中的 wave * 0.3），提亮一些以便在调暗的地面上看清。
+     */
+    private static final int ECHO_WAVE_GREY = 0xA8A8A8;
+    /** Blocks a sound lights up around its source (BlindRules.SOUND_REVEAL_RADIUS). 声音照亮声源周围的格数。 */
+    private static final double SOUND_REVEAL_RADIUS = 4;
+    /** A sound pulse and a sounding player last 1.5 s (BlindRules.SOUND_PULSE_TICKS). 声音脉冲与发声玩家持续 1.5 秒。 */
+    private static final int SOUND_PULSE_TICKS = 30;
+    /** A sound front reaches its radius in 0.25 s (BlindEchoUniforms.WAVE_EXPAND_SECONDS). 声波 0.25 秒扩张到半径。 */
+    private static final int SOUND_EXPAND_TICKS = 5;
+    /** At most one pulse per emitter in this window (BlindRules.EMITTER_THROTTLE_TICKS). 同一发声者在此窗口内至多一个脉冲。 */
+    private static final int EMITTER_THROTTLE_TICKS = 10;
+    /**
+     * Blocks walked between two footsteps: vanilla adds 0.6 per block to the distance travelled and steps once per
+     * unit (Entity.move). 两次脚步之间走过的格数：原版每走一格累计 0.6，每满 1 响一次脚步（Entity.move）。
+     */
+    private static final double STEP_DISTANCE = 1 / 0.6;
+    /** The cane's lit environment radius (BlindRules.CANE_ENVIRONMENT_RADIUS). 盲杖照亮环境的半径。 */
+    private static final double CANE_ENVIRONMENT_RADIUS = 15;
+    /** Players within this many blocks show during the cane window (BlindRules.CANE_PLAYER_RADIUS). 盲杖显示的玩家半径。 */
+    private static final double CANE_PLAYER_RADIUS = 5;
+    /** The cane window, 5 s (BlindRules.CANE_ACTIVE_TICKS). 盲杖窗口 5 秒。 */
+    private static final int CANE_ACTIVE_TICKS = 100;
+    /** The cane sweep expands over 0.6 s (BlindEchoUniforms.CANE_EXPAND_SECONDS). 盲杖扫描 0.6 秒扩张完。 */
+    private static final int CANE_EXPAND_TICKS = 12;
+    /** Ponder's outliner fades an outline over 8 ticks once it is no longer kept. 不再保持后，描边在 8 tick 内淡出。 */
+    private static final int OUTLINE_FADE_TICKS = 8;
+    /** A standing player's box height, as Actors.highlight draws it. 站立玩家方框的高度，与 Actors.highlight 相同。 */
+    private static final double STANDING_BOX_HEIGHT = 1.95;
+    /** A crouching player is 1.5 tall instead of 1.8. 潜行的玩家高 1.5 而不是 1.8。 */
+    private static final double CROUCHING_BOX_HEIGHT = 1.65;
 
     private SparkWitchCivilianScenes() {
     }
@@ -139,6 +174,8 @@ final class SparkWitchCivilianScenes {
                 scene("wathe/aisle", SparkWitchCivilianScenes::perfumer));
         role("sparkassist:roles/sparkwitch/fiend", List.of("sparkwitch"),
                 scene("wathe/cabin", SparkWitchCivilianScenes::fiend));
+        role("sparkassist:roles/sparkwitch/blind", List.of("sparkwitch"),
+                scene("sparkwitch/civ_blind_carriage", SparkWitchCivilianScenes::blind));
     }
 
     /**
@@ -1380,6 +1417,112 @@ final class SparkWitchCivilianScenes {
     }
 
     /**
+     * Blind (BlindRules, BlindSoundRules, BlindSoundPerception, BlindSoundAttribution, BlindPulseFanout,
+     * BlindCaneService, BlindKitRules, BlindAttuneService, WhiteCaneItem, ComTacItem; client BlindView, BlindEchoView,
+     * BlindEchoUniforms, BlindPerceptionClientState, BlindGateRules, BlindComTacHeadVisibility,
+     * sparkwitch_blind_echo.fsh; vanilla PlayerEntity.getMoveEffect; Wathe PlayerEntityMixin; NoellesRoles
+     * HiddenEquipmentHelper): the Blind's screen is black. A public sound within the Blind's range (10 blocks, x3 with a
+     * worn ComTac, x5 while Attuned; a whisper counts half, the USEC rifle double or half) sends a pulse: as its front
+     * sweeps out over 0.25 s, the depth edges the Blind can see within 4 blocks of the source light up as white lines,
+     * fading from 0.6 s to 1.5 s. A player who made it is perceived for 1.5 s and drawn as white line art (a silhouette
+     * and ripple through walls) with no name, held item or armour; object sounds (doors, non-player entities) light only
+     * the environment. Unperceived players are not drawn at all; a sneaking player on the ground makes no footsteps (nor
+     * does a Cautious one). The White Cane's right-click (CONSUME: no swing) sweeps 15 blocks over 0.6 s, its lines
+     * fading from 2 s to 5 s, and shows every player within 5 blocks for the 5 s window, sneaking or invisible (not
+     * active Wraiths or swallowed players); its tap is a public sound. Attune (ability key) multiplies the range by 5 for
+     * 10 s. A bought ComTac goes straight onto an empty head and is drawn on no head during a round; the cane and the
+     * ComTac are hidden in hand from other living players, so onlookers see an empty hand. Wathe walks at about
+     * 3 blocks a second and sneaks at about 0.9. The stage is dimmed to stand for the black screen; the white boxes,
+     * block outlines and the grey ring stand in for the line art.
+     * 盲人：屏幕一片漆黑。盲人感知范围内（10 格，戴 ComTac ×3，凝神时 ×5；悄悄话按一半算，USEC 步枪按两倍或一半）的公开
+     * 声音会发来一个脉冲：波前在 0.25 秒内扩散开，声源 4 格内盲人能看到的深度边缘随之亮成白线，从 0.6 秒淡出到 1.5 秒。发出
+     * 声音的玩家被感知 1.5 秒，画成白色线稿（隔墙为人形轮廓和涟漪），没有名字、手持物和护甲；物体声（门、非玩家实体）只照亮
+     * 环境。未被感知的玩家完全不画；在地面潜行的玩家没有脚步声（“小心翼翼”词条也一样）。盲杖右键（CONSUME：不挥手）在 0.6 秒
+     * 内扫开 15 格，线条从 2 秒淡出到 5 秒，并在 5 秒窗口内显示 5 格内的所有玩家，潜行或隐身的也算（激活的冤魂与被吞者
+     * 除外）；敲击声是公开的。凝神（技能键）10 秒内感知距离 ×5。买到的 ComTac 在头部槽空着时直接戴上，对局中不会画在任何人
+     * 头上；盲杖和 ComTac 拿在手上时其他活着的玩家看不见，旁人只看到空手。Wathe 中步行约每秒 3 格，潜行约每秒 0.9 格。
+     * 舞台调暗代表黑屏；白框、方块白色轮廓线和灰色圆圈代表线稿。
+     */
+    private static void blind(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_blind", "盲人：听声辨位与盲杖");
+        WatheItemScenes.setStage(scene, util);
+        ItemStack cane = stack("sparkwitch:white_cane");
+        Vec3d feet = new Vec3d(4.6, 1, 1.4);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ElementLink<ActorElement> blind = Actors.enter(scene, RoleColors.of("sparkwitch:blind", 0xB8C7D9),
+                Text.literal("盲人"), feet, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, blind, cane);
+        ElementLink<ActorElement> civilian = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                new Vec3d(0.9, 1, 4.3), EAST, Direction.DOWN);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(0.7, 1, 0.9), EAST, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(15);
+        scene.overlay().showText(70)
+                .text("盲人看不见：屏幕一片漆黑，主要靠声音感知周围")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(75);
+        StageLights.lights(scene, false);
+        scene.overlay().showText(80)
+                .text("切到盲人眼中（示意）：舞台调暗代表黑屏，安静时一片漆黑")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(85);
+        // Wathe's walking pace, about 3 blocks a second. Wathe 的步行速度，约每秒 3 格。
+        loudWalk(scene, civilian, new Vec3d(3.4, 0, 0), 24);
+        scene.overlay().showText(90)
+                .text("一般 10 格内的脚步、说话或枪声，会让声源周围 4 格亮起白线")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(24);
+        loudWalk(scene, civilian, new Vec3d(0, 0, -1.3), 9);
+        scene.idle(71);
+        loudWalk(scene, civilian, new Vec3d(-3.3, 0, 0), 23);
+        scene.overlay().showText(90)
+                .text("出声的人短暂显示成白色人影（白框示意），没有名字、手持物和护甲")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(95);
+        Actors.sneak(scene, killer, true);
+        // Wathe's sneaking pace, about 0.9 blocks a second. Wathe 的潜行速度，约每秒 0.9 格。
+        Actors.walk(scene, killer, new Vec3d(2.2, 0, 0.3), 48);
+        scene.overlay().showText(90)
+                .text("潜行走路没有脚步声：他不出声摸到你身边，你也感知不到")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(95);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(cane);
+        scene.idle(10);
+        // CONSUME: no arm swing. 返回 CONSUME：不挥手。
+        caneSweep(scene, feet, List.of(new Revealed(killer, CROUCHING_BOX_HEIGHT),
+                new Revealed(civilian, STANDING_BOX_HEIGHT)));
+        scene.overlay().showText(100)
+                .colored(PonderPalette.GREEN)
+                .text("右键盲杖：5 秒内照亮周围 15 格，5 格内的人一般都会显形")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(105);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(90)
+                .text("凝神（默认 G）：10 秒内感知范围 ×5；商店的耳机戴上 ×3")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(45);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).withItem(stack("sparkwitch:comtac_viii"));
+        scene.idle(50);
+        StageLights.lights(scene, true);
+        // Back to the onlookers' view: the cane is hidden in hand. 回到旁人视角：手里的盲杖被隐藏。
+        Actors.hold(scene, blind, ItemStack.EMPTY);
+        scene.overlay().showText(90)
+                .text("其他活人看不见你的盲杖和耳机，敲杖不会挥手，但附近的人听得到")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
      * The demo's AXMC: an FMJ chambered and a magazine of FMJ under AP, so it fires FMJ, AP, FMJ; the fitted magazine
      * also shows on the held model (UsecModelPredicates). 演示用的 AXMC：膛内一发 FMJ，弹匣里 FMJ 上压着 AP，所以依次打出
      * FMJ、AP、FMJ；装上的弹匣也会显示在手持模型上（UsecModelPredicates）。
@@ -1595,6 +1738,30 @@ final class SparkWitchCivilianScenes {
         spawnParticles(scene, MINT_CORE, mist, 16, new Vec3d(0.4, 0.3, 0.4), 0);
         spawnParticles(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, vial), impact, 10,
                 new Vec3d(0.05, 0.05, 0.05), 0.12);
+    }
+
+    /**
+     * Walk by {@code delta} over {@code ticks} with footsteps the Blind perceives: a sound pulse at the feet on every
+     * step (a vanilla step every {@link #STEP_DISTANCE} blocks, at most one pulse per throttle window), and the walker
+     * drawn as a white box while perceived.
+     * 在 ticks 内走过 delta，并发出盲人能感知的脚步：每一步在脚下产生一个声音脉冲（原版每走 STEP_DISTANCE 格响一步，节流窗口
+     * 内至多一个脉冲），被感知期间行走者显示为白框。
+     */
+    private static void loudWalk(SceneBuilder scene, ElementLink<ActorElement> walker, Vec3d delta, int ticks) {
+        Actors.walk(scene, walker, delta, ticks);
+        int stepTicks = Math.max(EMITTER_THROTTLE_TICKS, (int) Math.round(STEP_DISTANCE * ticks / delta.length()));
+        scene.addInstruction(new Footsteps(walker, ticks, stepTicks));
+    }
+
+    /**
+     * A White Cane tap at the Blind's {@code feet} (BlindCaneService.use): the 15-block sweep held for the 5 s window,
+     * and each of {@code players} shown as a white box from the moment it is within 5 blocks to the window's end (the
+     * server re-scans for entrants every 10 ticks).
+     * 盲人在 feet 处敲击盲杖：15 格扫描保持 5 秒窗口；players 中每个人从进入 5 格内起显示为白框，直到窗口结束（服务端每
+     * 10 tick 补扫新进入者）。
+     */
+    private static void caneSweep(SceneBuilder scene, Vec3d feet, List<Revealed> players) {
+        scene.addInstruction(new CaneSweep(feet, players));
     }
 
     /**
@@ -2032,5 +2199,238 @@ final class SparkWitchCivilianScenes {
             super.tick(scene);
             scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
+    }
+
+    /**
+     * One pulse of the Blind's echo view, as sparkwitch_blind_echo.fsh draws it: as the front grows to {@code radius}
+     * over {@code expandTicks} (the shader's ease-out), every solid block above the floor it reaches joins one white
+     * cluster outline (its creases and corners are the depth edges the shader lights; a flat floor has none), which
+     * fades from max(expand, 40%) of {@code ticks} to the end; a faint ring on the floor marks the front and fades
+     * over 0.3 s after it stops.
+     * 盲人回声视图的一个脉冲，与 sparkwitch_blind_echo.fsh 的画法对应：波前在 expandTicks 内按着色器的缓出曲线扩张到 radius，
+     * 它扫到的地面以上实心方块并入同一个白色整体描边（折角与棱角就是着色器点亮的深度边缘；平坦地面没有边缘），描边从
+     * ticks 的 max(扩张, 40%) 处淡出到结束；地面上一圈淡淡的环标出波前，停止扩张后 0.3 秒内淡出。
+     */
+    private static final class EchoPulse {
+        private static final int RING_SEGMENTS = 64;
+        /** The front's sweep fades over 0.3 s after the expansion (the shader's sweep). 波前在扩张后 0.3 秒内淡出。 */
+        private static final int SWEEP_FADE_TICKS = 6;
+        /** The lines start fading at this share of the pulse (the shader's duration * 0.4). 线条从脉冲时长的该比例处开始淡出。 */
+        private static final float FADE_FROM_SHARE = 0.4f;
+        private static final int TOP = 3;
+        private final Vec3d centre;
+        private final double radius;
+        private final int expandTicks;
+        private final int ticks;
+        private final Object cluster = new Object();
+        private final Object[] ring = new Object[RING_SEGMENTS];
+        private final List<BlockPos> lit = new ArrayList<>();
+        private int age;
+
+        private EchoPulse(Vec3d centre, double radius, int expandTicks, int ticks) {
+            this.centre = centre;
+            this.radius = radius;
+            this.expandTicks = expandTicks;
+            this.ticks = ticks;
+            for (int i = 0; i < RING_SEGMENTS; i++) {
+                ring[i] = new Object();
+            }
+        }
+
+        /** Returns whether the pulse still draws anything. 返回脉冲是否仍在绘制。 */
+        private boolean tick(PonderScene scene) {
+            age++;
+            float grow = Math.min(1, age / (float) expandTicks);
+            double front = radius * (1 - (1 - grow) * (1 - grow));
+            float fade = 1 - smoothstep(Math.max(expandTicks, ticks * FADE_FROM_SHARE), ticks, age);
+            if (age <= ticks) {
+                outlineWithin(scene, front, grey(ECHO_WHITE, fade));
+            }
+            float sweep = 1 - smoothstep(expandTicks, expandTicks + SWEEP_FADE_TICKS, age);
+            if (sweep > 0) {
+                ring(scene, front, grey(ECHO_WAVE_GREY, sweep * fade));
+            }
+            return age < ticks;
+        }
+
+        /** The cluster of solid blocks whose centre the front has reached. 波前已扫到其中心的实心方块整体。 */
+        private void outlineWithin(PonderScene scene, double front, int color) {
+            int before = lit.size();
+            lit.clear();
+            PonderLevel world = scene.getWorld();
+            for (int x = 0; x < PLATE; x++) {
+                for (int y = 1; y <= TOP; y++) {
+                    for (int z = 0; z < PLATE; z++) {
+                        BlockPos pos = new BlockPos(x, y, z);
+                        if (!world.getBlockState(pos).isAir() && Vec3d.ofCenter(pos).isInRange(centre, front)) {
+                            lit.add(pos);
+                        }
+                    }
+                }
+            }
+            if (lit.isEmpty()) {
+                return;
+            }
+            if (lit.size() != before) {
+                scene.getOutliner().showCluster(cluster, List.copyOf(lit)).lineWidth(1 / 16f).colored(color);
+            } else {
+                scene.getOutliner().edit(cluster).ifPresent(params -> params.colored(color));
+            }
+        }
+
+        /** The front on the open floor: segments over the plate and outside blocks only. 开阔地面上的波前：只画底板上方、方块外的线段。 */
+        private void ring(PonderScene scene, double front, int color) {
+            // Just above the floor under the source. 声源下方地面的稍上方。
+            double y = Math.floor(centre.y) + 0.02;
+            for (int i = 0; i < RING_SEGMENTS; i++) {
+                double a0 = i * MathHelper.TAU / RING_SEGMENTS;
+                double a1 = (i + 1) * MathHelper.TAU / RING_SEGMENTS;
+                Vec3d from = new Vec3d(centre.x + Math.cos(a0) * front, y, centre.z + Math.sin(a0) * front);
+                Vec3d to = new Vec3d(centre.x + Math.cos(a1) * front, y, centre.z + Math.sin(a1) * front);
+                if (!onFloor(scene, from) || !onFloor(scene, to)) {
+                    continue;
+                }
+                scene.getOutliner().showLine(ring[i], from, to).lineWidth(1 / 32f).colored(color);
+            }
+        }
+
+        private static boolean onFloor(PonderScene scene, Vec3d at) {
+            return at.x >= 0 && at.x <= PLATE && at.z >= 0 && at.z <= PLATE
+                    && scene.getWorld().getBlockState(BlockPos.ofFloored(at.x, at.y, at.z)).isAir();
+        }
+
+        /** GLSL smoothstep. GLSL 的 smoothstep。 */
+        private static float smoothstep(float edge0, float edge1, float x) {
+            float t = MathHelper.clamp((x - edge0) / (edge1 - edge0), 0, 1);
+            return t * t * (3 - 2 * t);
+        }
+
+        /** {@code rgb} dimmed to {@code level} (0..1) on black. 把 rgb 在黑底上调暗到 level（0..1）。 */
+        private static int grey(int rgb, float level) {
+            return ActorSkins.scale(rgb, MathHelper.clamp(level, 0, 1));
+        }
+    }
+
+    /**
+     * A walker's footsteps as the Blind perceives them (BlindPulseFanout, BlindPerceptionClientState): a 4-block
+     * pulse at the feet every {@code stepTicks} while walking, and the walker drawn as a white box while perceived,
+     * 1.5 s from the last step (the outliner's own fade included).
+     * 盲人感知到的行走者脚步：行走期间每 stepTicks 在脚下产生一个 4 格脉冲；被感知期间（最后一步后 1.5 秒，含描边自身的
+     * 淡出）行走者显示为白框。
+     */
+    private static final class Footsteps extends TickingInstruction {
+        /** The first step lands a little after setting off. 起步后稍等片刻才响第一步。 */
+        private static final int FIRST_STEP = 2;
+        private static final int NEVER = Integer.MIN_VALUE / 2;
+        private final ElementLink<ActorElement> link;
+        private final int walkTicks;
+        private final int stepTicks;
+        private final List<EchoPulse> pulses = new ArrayList<>();
+        private final Object body = new Object();
+        private int age;
+        private int lastStep = NEVER;
+
+        private Footsteps(ElementLink<ActorElement> link, int walkTicks, int stepTicks) {
+            super(false, walkTicks + SOUND_PULSE_TICKS);
+            this.link = link;
+            this.walkTicks = walkTicks;
+            this.stepTicks = stepTicks;
+        }
+
+        @Override
+        public void reset(PonderScene scene) {
+            super.reset(scene);
+            pulses.clear();
+            age = 0;
+            lastStep = NEVER;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            ActorElement actor = scene.resolve(link);
+            if (actor != null && age < walkTicks && age % stepTicks == FIRST_STEP) {
+                pulses.add(new EchoPulse(actor.position(), SOUND_REVEAL_RADIUS, SOUND_EXPAND_TICKS,
+                        SOUND_PULSE_TICKS));
+                lastStep = age;
+            }
+            pulses.removeIf(pulse -> !pulse.tick(scene));
+            if (actor != null && age - lastStep < SOUND_PULSE_TICKS - OUTLINE_FADE_TICKS) {
+                scene.getOutliner().chaseAABB(body, actorBox(actor.position(), STANDING_BOX_HEIGHT))
+                        .lineWidth(1 / 16f).colored(ECHO_WHITE);
+            }
+            age++;
+        }
+    }
+
+    /** A player the cane may reveal, with the height of the box drawn for them. 盲杖可能显示的玩家及其方框高度。 */
+    private record Revealed(ElementLink<ActorElement> actor, double boxHeight) {
+    }
+
+    /**
+     * A White Cane window (BlindCaneService, BlindKitRules.isCaneTarget): one 15-block pulse from the Blind's body
+     * centre for the 5 s window, and each player drawn as a white box once within 5 blocks of the Blind, to the
+     * window's end (the outliner's own fade included).
+     * 盲杖窗口：从盲人身体中心发出一个 15 格脉冲，持续 5 秒窗口；每名玩家一旦进入盲人 5 格内就显示为白框，直到窗口结束
+     * （含描边自身的淡出）。
+     */
+    private static final class CaneSweep extends TickingInstruction {
+        private final Vec3d feet;
+        private final List<Revealed> players;
+        private final List<Object> boxes = new ArrayList<>();
+        private final boolean[] revealed;
+        @Nullable
+        private EchoPulse pulse;
+
+        private CaneSweep(Vec3d feet, List<Revealed> players) {
+            super(false, CANE_ACTIVE_TICKS);
+            this.feet = feet;
+            this.players = List.copyOf(players);
+            this.revealed = new boolean[players.size()];
+            for (int i = 0; i < players.size(); i++) {
+                boxes.add(new Object());
+            }
+        }
+
+        @Override
+        public void reset(PonderScene scene) {
+            super.reset(scene);
+            pulse = null;
+            Arrays.fill(revealed, false);
+        }
+
+        @Override
+        protected void firstTick(PonderScene scene) {
+            super.firstTick(scene);
+            pulse = new EchoPulse(feet.add(0, 0.9, 0), CANE_ENVIRONMENT_RADIUS, CANE_EXPAND_TICKS, CANE_ACTIVE_TICKS);
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
+            if (pulse != null) {
+                pulse.tick(scene);
+            }
+            if (remainingTicks <= OUTLINE_FADE_TICKS) {
+                return;
+            }
+            for (int i = 0; i < players.size(); i++) {
+                Revealed player = players.get(i);
+                ActorElement actor = scene.resolve(player.actor());
+                if (actor == null || actor.isDown()) {
+                    continue;
+                }
+                revealed[i] |= actor.position().isInRange(feet, CANE_PLAYER_RADIUS);
+                if (revealed[i]) {
+                    scene.getOutliner().chaseAABB(boxes.get(i), actorBox(actor.position(), player.boxHeight()))
+                            .lineWidth(1 / 16f).colored(ECHO_WHITE);
+                }
+            }
+        }
+    }
+
+    /** An actor's box of {@code height}, as wide as Actors.highlight draws it. 高 height、宽度与 Actors.highlight 相同的演员方框。 */
+    private static Box actorBox(Vec3d feet, double height) {
+        return new Box(feet.x - 0.4, feet.y, feet.z - 0.4, feet.x + 0.4, feet.y + height, feet.z + 0.4);
     }
 }
