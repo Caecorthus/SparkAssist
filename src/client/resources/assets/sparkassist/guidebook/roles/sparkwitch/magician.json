@@ -78,6 +78,11 @@
               "text": "播放中再次按技能键可提前结束；自然结束、提前结束或皮套被打掉后都进入 15 秒冷却。"
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/magician",
+              "text": "演示：录制、播放与皮套"
+            },
+            {
               "type": "section",
               "text": "操作面板",
               "tone": "info"

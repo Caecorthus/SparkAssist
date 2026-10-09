@@ -41,6 +41,7 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.EntityEffectParticleEffect;
@@ -128,6 +129,14 @@ final class SparkWitchKillerScenes {
     private static final int SPORE_DOOR_X = 3;
     /** Sculk charge events played as a zone appears (DeepDarkZoneCues.SPREAD_EVENTS_PER_TICK). 领域出现时的幽匿充能事件数。 */
     private static final int ZONE_CHARGE_SAMPLES = 12;
+    /**
+     * A levelled revolver's muzzle for a player's feet: this far ahead and this high, as WatheItemScenes places the
+     * revolver's. 端平左轮的枪口相对玩家脚底的位置：前方这么远、这么高，与 WatheItemScenes 放置左轮枪口的方式相同。
+     */
+    private static final double GUN_REACH = 0.85;
+    private static final double GUN_HEIGHT = 1.05;
+    /** The boxes marking players whose sanity is below 0. 标出理智低于 0 的玩家的方框颜色。 */
+    private static final int LOW_SANITY_BOX = 0xE03C3C;
 
     private SparkWitchKillerScenes() {
     }
@@ -157,6 +166,12 @@ final class SparkWitchKillerScenes {
                 scene("sparkwitch/spore_cabin", SparkWitchKillerScenes::abyssListener));
         role("sparkassist:roles/sparkwitch/riftwalker", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchKillerScenes::riftwalker));
+        role("sparkassist:roles/sparkwitch/magician", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::magician));
+        role("sparkassist:roles/sparkwitch/bell_ringer", List.of("sparkwitch"),
+                scene("sparkwitch/ray_wall", SparkWitchKillerScenes::bellRinger));
+        role("sparkassist:roles/sparkwitch/curser", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::curser));
     }
 
     /**
@@ -1409,6 +1424,343 @@ final class SparkWitchKillerScenes {
     }
 
     /**
+     * Magician (MagicianAbility, MagicianPlayerComponent, MagicianPlaybackManager, MagicianReplayFrame,
+     * MagicianPlaybackActionExecutor, MagicianGunShootPayloadReceiverMixin, MagicianPuppetHits, MagicianConstants):
+     * the disguise is any player of the round's roster, picked in the inventory (the Magician by default). The ability
+     * key steps IDLE -> RECORDING (at most 30 s; 30 s cooldown at round start) -> READY_PLAYBACK -> PLAYING. Recording
+     * captures every tick's position, look, pose and inventory, and the actions the server accepted: a revolver shot
+     * counts even as a miss. Playback spawns the puppet at the first frame with the disguise's skin and name; it
+     * replays the frames, and a recorded shot kills the first player on its line within 30 blocks (an ordinary kill,
+     * credited to the Magician). The puppet carries the revolver levelled like a player (Wathe's BipedEntityModelMixin
+     * poses any living entity). A revolver hit by anyone else ends it: a decoy body of the disguise stays (its role
+     * reads Civilian to whoever can see body roles, such as spectators and the Coroner) and the Magician earns 50
+     * coins. Playback that ends, is stopped or is shot down starts a 15 s cooldown.
+     * 魔术师：皮套是本局名单中的任意玩家，在背包里选（默认是魔术师自己）。技能键依次推进 空闲 -> 录制（最多 30 秒；开局冷却
+     * 30 秒）-> 待播放 -> 播放。录制记下每 tick 的位置、视角、姿态和背包，以及服务端接受的动作：左轮开枪即使没打中也算。
+     * 播放时皮套以所选玩家的皮肤和名字出现在第一帧的位置，重演这些帧；录下的那一枪击杀弹道上 30 格内的第一名玩家（普通击杀，
+     * 记在魔术师名下）。皮套和玩家一样端平左轮（Wathe 的 BipedEntityModelMixin 作用于所有生物）。别人用左轮打中皮套即结束
+     * 播放：原地留下一具所选玩家模样的诱饵尸体（能看尸体身份的人，如旁观者和验尸官，只会看到平民），魔术师得 50 金币。播放
+     * 结束、被停止或皮套被打掉都进入 15 秒冷却。
+     */
+    private static void magician(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_magician", "魔术师：录制与播放");
+        WatheItemScenes.stage(scene);
+        int magicianColor = RoleColors.of("sparkwitch:magician", 0x6B17B0);
+        Text veteranName = Text.literal("老兵");
+        ElementLink<ActorElement> veteran = Actors.enter(scene, RoleColors.VETERAN, veteranName,
+                new Vec3d(1.6, 1, 5.4), TO_CAMERA, Direction.DOWN);
+        scene.idle(5);
+        Vec3d start = new Vec3d(6.0, 1, 1.0);
+        Vec3d shotFrom = new Vec3d(4.6, 1, 2.4);
+        ItemStack revolver = stack("wathe:revolver");
+        ElementLink<ActorElement> magician = Actors.enter(scene, magicianColor, Text.literal("魔术师"), start,
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, magician, revolver);
+        scene.idle(20);
+        Actors.highlight(scene, veteran, magicianColor, 80);
+        scene.overlay().showText(80)
+                .text("先在背包里选一名本局玩家当皮套，默认是你自己（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        Actors.leave(scene, veteran, Direction.UP);
+        // Recording runs from this key press; the playback below repeats its timings tick for tick.
+        // 录制从这次按键开始；下面的播放逐 tick 重复这里的时间。
+        scene.overlay().showControls(start.add(0, 2.6, 0), Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(80)
+                .text("开局 30 秒后，按技能键（默认 G）开始录制，最多 30 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, magician, shotFrom.subtract(start), 28);
+        scene.idle(70);
+        scene.overlay().showControls(shotFrom.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(revolver);
+        scene.overlay().showText(90)
+                .text("录制时你是真的在走、在开枪，这些都会录下（红线示意弹道）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        // A miss: the line runs on along the diagonal past where a passenger will stand.
+        // 打空的一枪：弹道沿对角线穿过稍后会有乘客站着的位置。
+        WatheItemScenes.shoot(scene, magician, muzzle(shotFrom, SCREEN_RIGHT), new Vec3d(1.4, 2.0, 5.6));
+        scene.idle(37);
+        Actors.turn(scene, magician, TO_CAMERA);
+        scene.idle(60);
+        Vec3d alibi = new Vec3d(2.0, 1, 6.6);
+        Vec3d guardFeet = new Vec3d(0.4, 1, 3.4);
+        float guardAim = yawTowards(guardFeet, shotFrom);
+        scene.overlay().showControls(shotFrom.add(0, 2.6, 0), Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(70)
+                .text("再按一次技能键结束录制，然后走开")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        Actors.walk(scene, magician, alibi.subtract(shotFrom), 45);
+        // The passenger stops on the line of the recorded shot. 乘客停在录下那一枪的弹道上。
+        Vec3d passengerFrom = new Vec3d(1.4, 1, 2.6);
+        Vec3d onTheLine = new Vec3d(2.6, 1, 4.4);
+        ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
+                passengerFrom, yawTowards(passengerFrom, onTheLine), Direction.DOWN);
+        ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
+                guardFeet, guardAim, Direction.DOWN);
+        Actors.hold(scene, vigilante, revolver);
+        scene.idle(30);
+        Actors.walk(scene, passenger, onTheLine.subtract(passengerFrom), 25);
+        scene.idle(17);
+        Actors.turn(scene, magician, yawTowards(alibi, shotFrom));
+        scene.idle(10);
+        Actors.turn(scene, passenger, SCREEN_LEFT);
+        scene.idle(10);
+        scene.overlay().showControls(alibi.add(0, 2.6, 0), Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        ElementLink<ActorElement> puppet = appear(scene, RoleColors.VETERAN, veteranName, start, SCREEN_RIGHT);
+        Actors.hold(scene, puppet, revolver);
+        scene.overlay().showText(90)
+                .text("在别处按技能键播放：皮套顶着所选玩家的样子，从起点重走一遍")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, puppet, shotFrom.subtract(start), 28);
+        scene.idle(80);
+        WatheItemScenes.shoot(scene, puppet, muzzle(shotFrom, SCREEN_RIGHT), onTheLine.add(0, 0.95, 0));
+        Actors.fall(scene, passenger);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("录像里的那一枪照样打出：弹道上的人一般当场死亡")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(37);
+        Actors.turn(scene, puppet, TO_CAMERA);
+        scene.idle(38);
+        scene.overlay().showControls(guardFeet.add(0, 2.6, 0), Pointing.DOWN, 25).rightClick().withItem(revolver);
+        scene.idle(10);
+        // Still within the recording: it was stopped 100 ticks after the shot. 仍在录像之内：录制在开枪 100 tick 后才停止。
+        WatheItemScenes.shoot(scene, vigilante, muzzle(guardFeet, guardAim), shotFrom.add(0, 0.9, 0));
+        Actors.fall(scene, puppet);
+        scene.idle(25);
+        scene.overlay().showText(80)
+                .text("皮套被打掉：原地留下老兵模样的尸体，验身份只会看到平民")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("别人打掉皮套你得 50 金币；播完、停播或被打掉都冷却 15 秒")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Bell Ringer (TollBellItem, BellTollService, TollBellGlint, BellRingerLoadoutService, BellRingerEchoService,
+     * BellRingerEchoTargeting, BellRingerEchoRuntime, BellRingerRules): the bell comes with the role, is hidden in hand
+     * (NoellesHiddenEquipment) and glints only on its owner's screen while any target exists. A right-click (the client
+     * returns success, so the arm swings) kills at once every other participant whose Wathe mood is below 0, anywhere
+     * on the train (forced, a SparkTraits-terminal reason: shields and revives do not stop it); roles without real
+     * mood read 1 and are never claimed. 30 s cooldown; with no target nothing happens and no cooldown starts. The
+     * Echo (ability key) costs 45 s of round time and tolls for every player; every participant with real sanity on
+     * the civilian side loses all tasks for one random task due in 60 s (drain x1.5; missing it costs 0.5 mood).
+     * 敲钟人：钟随职业发放，手持隐藏（NoellesHiddenEquipment），只要存在目标，钟只在持有者自己的画面里发光。右键（客户端返回
+     * 成功，所以会挥手）立即击杀全车所有 Wathe 理智低于 0 的其他参与者，不论远近（强制击杀，SparkTraits 终结死因：护盾和复活
+     * 都挡不住）；没有真实理智的职业读数为 1，永远不会被敲死。冷却 30 秒；没有目标时什么也不发生，也不进入冷却。回响（技能键）
+     * 消耗 45 秒对局时间，向所有玩家敲响钟声；所有有真实理智的平民阵营参与者失去全部任务，换成一项 60 秒内完成的随机任务
+     * （理智下降 ×1.5；超时扣 0.5 理智）。
+     */
+    private static void bellRinger(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_bell_ringer", "敲钟人：丧钟与回响");
+        WatheItemScenes.setStage(scene, util);
+        Text civilian = Text.literal("平民");
+        // Spread across the screen (x - z) so no one stands in front of another or of a body.
+        // 在屏幕上左右错开（x - z），没有人挡在别人或尸体前面。
+        ElementLink<ActorElement> near = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(4.2, 1, 2.4), TO_CAMERA, Direction.DOWN);
+        ElementLink<ActorElement> sheltered = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(0.5, 1, 4.9), NORTH, Direction.DOWN);
+        ElementLink<ActorElement> far = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(6.0, 1, 3.6), SCREEN_RIGHT, Direction.DOWN);
+        ElementLink<ActorElement> calm = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(0.8, 1, 0.4), TO_CAMERA, Direction.DOWN);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                new Vec3d(6.6, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(10);
+        Vec3d feet = new Vec3d(4.6, 1, 0.6);
+        Vec3d overHead = feet.add(0, 2.6, 0);
+        ElementLink<ActorElement> ringer = Actors.enter(scene, RoleColors.of("sparkwitch:bell_ringer", 0x8C6D3F),
+                Text.literal("敲钟人"), feet, SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, ringer, glowing(stack("sparkwitch:toll_bell")));
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("敲钟人开局自带一口钟，其他活人看不见你手里的钟")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        // The boxes end a few ticks before the bodies fall, so their fade-out does not take the lying shape.
+        // 方框在倒地前几 tick 结束，免得淡出时变成躺倒的形状。
+        Actors.highlight(scene, near, LOW_SANITY_BOX, 106);
+        Actors.highlight(scene, sheltered, LOW_SANITY_BOX, 106);
+        Actors.highlight(scene, far, LOW_SANITY_BOX, 106);
+        scene.overlay().showText(90)
+                .text("红框示意理智低于 0 的人；有他们在，钟就会发光（只有你看得见）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick()
+                .withItem(stack("sparkwitch:toll_bell"));
+        scene.idle(10);
+        Actors.swing(scene, ringer);
+        // No target is left, so the glow goes out. 已经没有目标，钟不再发光。
+        Actors.hold(scene, ringer, stack("sparkwitch:toll_bell"));
+        Actors.fall(scene, near);
+        Actors.fall(scene, sheltered);
+        Actors.fall(scene, far);
+        scene.idle(20);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("右键敲钟：理智低于 0 的其他人一齐倒下，离多远、隔不隔墙都一样")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        Actors.highlight(scene, calm, 0x7AE04F, 80);
+        Actors.highlight(scene, killer, 0x7AE04F, 80);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.GREEN)
+                .text("理智没跌破 0 的人没事，杀手一般也不受影响（绿框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(80)
+                .text("护盾和保护一般挡不住；敲完冷却 30 秒，没有目标时不进冷却")
+                .independent();
+        scene.idle(90);
+        scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(90)
+                .text("回响（技能键，默认 G）：花掉 45 秒对局时间，全车都听到钟声")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(80)
+                .text("有理智的好人任务全被换成一项随机任务，限 60 秒完成")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(20);
+        Actors.walk(scene, calm, new Vec3d(0.8, 0, 0.8), 20);
+        scene.idle(22);
+        Actors.leave(scene, calm, Direction.UP);
+        scene.idle(48);
+        scene.overlay().showText(80)
+                .text("超时理智直接掉 50%%，更容易跌破 0，正好再敲钟")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Curser (CurserFeatureService, CurserRules, CurserPlayerComponent, CurserConfusionSkinMixin,
+     * CurserInstinctGateMixin, WraithPromotionRoles, WraithEntityInvisibilityMixin, WraithViewerRules,
+     * WraithViewerGates): a witch-faction Wraith's promotion. It stays invisible to the living except witch-faction
+     * roles (and SparkStrength's Spiritualist, through the viewer gate); Wathe-dead spectators see it too. The ability
+     * key, 60 s after promotion and then every 90 s, confuses for 10 s every other living, non-spectator player whose
+     * feet are within 8 blocks, allies included, no line of sight needed and with no sound or particle; with nobody in
+     * range nothing happens and no cooldown starts. A confused player's own client draws every other player with
+     * Wathe's psycho skin (bodies keep theirs) and refuses instinct. Here the curse's victims stand in for that view.
+     * 诅咒者：魔女阵营冤魂的晋升身份。活人看不见它，魔女阵营身份除外（SparkStrength 的灵界行者经观察者闸门也能看见）；
+     * Wathe 判定已死亡的旁观者同样看得见。技能键在晋升 60 秒后可用，之后每 90 秒一次：让脚下位置 8 格内所有其他活着、非旁观的
+     * 玩家混乱 10 秒，同伴也不例外，不需要视线，也没有任何声音或粒子；范围内没人时什么也不发生，也不进入冷却。混乱的玩家自己的
+     * 客户端把其他所有玩家画成 Wathe 的疯魔皮肤（尸体不变），并且不能开本能。这里由中招的人代表那样的画面。
+     */
+    private static void curser(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_curser", "诅咒者：诅咒");
+        WatheItemScenes.stage(scene);
+        Text civilian = Text.literal("平民");
+        Text witchName = Text.literal("大魔女");
+        int witchColor = RoleColors.of("sparkwitch:grand_witch", 0xF2DFF7);
+        // The sword reaches the victim 2.8 blocks ahead along the diagonal; the others stand apart on screen.
+        // 仪礼剑够到对角线前方 2.8 格的受害者；其他人在屏幕上分开站。
+        Vec3d witchFeet = new Vec3d(4.8, 1, 1.2);
+        Vec3d witnessFeet = new Vec3d(0.4, 1, 3.4);
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(2.8, 1, 3.2), TO_CAMERA, Direction.DOWN);
+        ElementLink<ActorElement> witness = Actors.enter(scene, RoleColors.CIVILIAN, civilian, witnessFeet,
+                yawTowards(witnessFeet, witchFeet), Direction.DOWN);
+        ElementLink<ActorElement> bystander = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
+                new Vec3d(2.3, 1, 6.7), TO_CAMERA, Direction.DOWN);
+        ItemStack sword = stack("sparkwitch:ceremonial_sword");
+        ElementLink<ActorElement> witch = Actors.enter(scene, witchColor, witchName, witchFeet, SCREEN_RIGHT,
+                Direction.DOWN);
+        Actors.hold(scene, witch, sword);
+        scene.idle(10);
+        int curserColor = RoleColors.of("sparkwitch:curser", 0xA968D5);
+        Vec3d feet = new Vec3d(6.2, 1, 5.0);
+        Actors.enter(scene, curserColor, Text.literal("诅咒者"), feet, TO_CAMERA, Direction.DOWN);
+        scene.idle(20);
+        scene.overlay().showText(80)
+                .text("魔女阵营的冤魂晋升后，就成了诅咒者")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(90)
+                .text("演示里看得到你，活人一般看不见你（魔女阵营和灵界行者除外）")
+                .independent();
+        scene.idle(100);
+        scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
+        scene.overlay().showText(80)
+                .text("晋升 60 秒后按技能键（默认 G）施放诅咒，没有任何声光")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        Actors.highlight(scene, victim, curserColor, 90);
+        Actors.highlight(scene, witness, curserColor, 90);
+        Actors.highlight(scene, bystander, curserColor, 90);
+        Actors.highlight(scene, witch, curserColor, 90);
+        scene.overlay().showText(90)
+                .text("8 格内其他活着的人一般都会中招，同伴也不例外（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        // What the cursed see: everyone else in Wathe's psycho skin; the role tags go too, as nobody can be told apart.
+        // 中招的人看到的画面：其他人都是 Wathe 的疯魔皮肤；身份名牌也去掉，因为谁也分辨不出来。
+        Actors.psycho(scene, victim, true);
+        Actors.psycho(scene, witness, true);
+        Actors.psycho(scene, bystander, true);
+        Actors.psycho(scene, witch, true);
+        Actors.retint(scene, victim, RoleColors.CIVILIAN, null);
+        Actors.retint(scene, witness, RoleColors.CIVILIAN, null);
+        Actors.retint(scene, bystander, RoleColors.CIVILIAN, null);
+        Actors.retint(scene, witch, witchColor, null);
+        scene.overlay().showText(90)
+                .text("示意：10 秒内他们眼里别人一般都是疯魔皮肤，也开不了本能")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showControls(witchFeet.add(0, 2.6, 0), Pointing.DOWN, 30).leftClick().withItem(sword);
+        scene.idle(10);
+        Actors.swing(scene, witch);
+        Actors.fall(scene, victim);
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("同伴趁乱下手：目击者只见疯魔皮肤，凑近对准才看得到名字")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        Actors.psycho(scene, victim, false);
+        Actors.psycho(scene, witness, false);
+        Actors.psycho(scene, bystander, false);
+        Actors.psycho(scene, witch, false);
+        Actors.retint(scene, victim, RoleColors.CIVILIAN, civilian);
+        Actors.retint(scene, witness, RoleColors.CIVILIAN, civilian);
+        Actors.retint(scene, bystander, RoleColors.CIVILIAN, civilian);
+        Actors.retint(scene, witch, witchColor, witchName);
+        scene.overlay().showText(45)
+                .text("……10 秒后混乱结束，一切恢复原样")
+                .independent();
+        scene.idle(50);
+        scene.overlay().showText(80)
+                .text("诅咒冷却 90 秒；8 格内没有别人时不进冷却")
+                .independent();
+        scene.idle(90);
+        scene.markAsFinished();
+    }
+
+    /**
      * The Death Ray's red dust line from {@code eyes} to where a block stops it, laid out as
      * MurderousWitchDeathRayService.spawnRayParticles does. 死亡射线从 eyes 到被方块挡住处的红色粉尘线，排布与
      * MurderousWitchDeathRayService.spawnRayParticles 相同。
@@ -2339,5 +2691,37 @@ final class SparkWitchKillerScenes {
                     client.getBakedModelManager().getModel(MODEL));
             ms.pop();
         }
+    }
+
+    /**
+     * An actor that is simply there from one tick to the next, with no fade or drop, as an entity spawned mid-round
+     * appears (the Magician's puppet, MagicianPlaybackManager.startPlayback).
+     * 从这一 tick 到下一 tick 直接出现的演员，没有淡入或落下，与对局中途生成的实体相同（魔术师的皮套）。
+     */
+    private static ElementLink<ActorElement> appear(SceneBuilder scene, int color, Text name, Vec3d feet, float yaw) {
+        ActorElement actor = new ActorElement(color, name, feet, yaw);
+        ElementLink<ActorElement> link = new ElementLinkImpl<>(ActorElement.class);
+        scene.addInstruction(ponder -> {
+            actor.setVisible(true);
+            actor.setFade(1);
+            ponder.addElement(actor);
+            ponder.linkElement(actor, link);
+        });
+        return link;
+    }
+
+    /**
+     * {@code stack} with its enchantment glint forced on: the lit Toll Bell as its owner sees it (TollBellGlint reads
+     * a flag only a confirmed SparkWitch server sends). 强制带附魔光效的物品：持有者眼中发光的钟（TollBellGlint 读取的标记
+     * 只有确认的 SparkWitch 服务器才会发送）。
+     */
+    private static ItemStack glowing(ItemStack stack) {
+        stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+        return stack;
+    }
+
+    /** A levelled revolver's muzzle for a player at {@code feet} facing {@code yaw}. 站在 feet、朝向 yaw 的玩家端平左轮的枪口。 */
+    private static Vec3d muzzle(Vec3d feet, float yaw) {
+        return feet.add(forward(yaw).multiply(GUN_REACH)).add(0, GUN_HEIGHT, 0);
     }
 }
