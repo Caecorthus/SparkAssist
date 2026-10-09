@@ -59,6 +59,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/bartender",
+              "text": "演示：调酒和上酒"
+            },
+            {
               "type": "bullet",
               "text": "开局 0 金币，每完成一个任务获得 50 金币。"
             },

@@ -36,7 +36,7 @@
             },
             {
               "type": "bullet",
-              "text": "锁住的门钥匙和【开锁器】都打不开，只有【撬棍】能强行破门。"
+              "text": "锁住的门钥匙和【开锁器】都打不开，但【撬棍】等破门手段仍能强行撬开。"
             },
             {
               "type": "bullet",
@@ -49,6 +49,11 @@
                   "text": "：任何一扇门被撬坏或被堵住时，你会收到提示，那扇门会隔墙红色高亮 5 秒。"
                 }
               ]
+            },
+            {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/engineer",
+              "text": "演示：维修工具和电力恢复系统"
             },
             {
               "type": "bullet",

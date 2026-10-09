@@ -35,6 +35,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/recaller",
+              "text": "演示：设存档点和回溯"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
