@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Role skills and items, from the events the server mods write when they really happen. "As role X" is my role at
- * that event.
- * 身份技能与道具，依据服务端模组在其真正生效时写下的事件。“以 X 身份”指该事件发生时我的身份。
+ * Role skills and items (and the killer team purse), from the events the server mods write when they really happen.
+ * "As role X" is my role at that event.
+ * 身份技能与道具（以及杀手团队经济），依据服务端模组在其真正生效时写下的事件。“以 X 身份”指该事件发生时我的身份。
  */
 final class RoleSkillRules {
     static final String REVOLVER = "wathe:revolver";
@@ -21,6 +21,7 @@ final class RoleSkillRules {
     static final String PROFESSOR = "noellesroles:professor";
     static final String BARTENDER = "noellesroles:bartender";
     static final String CORONER = "noellesroles:coroner";
+    static final String SURVIVAL_MASTER = "noellesroles:survival_master";
 
     static final String GUARDIAN_SKILL = "sparkwitch:guardian";
     static final String WAITER_SKILL = "noellesroles:waiter";
@@ -48,9 +49,20 @@ final class RoleSkillRules {
     static final String SPIRIT_POSSESSION_STARTED = "sparkstrength:spirit_possession_started";
     static final String IRON_MAN_ACTIVATED = "iron_man_activated";
     static final String DEMOCRACY_SHIELD = "sparkstrength:democracy_shield";
+    static final String TEAM_CONTRIBUTION = "sparkstrength:team_contribution";
+    static final String SURVIVAL_MOMENT_START = "noellesroles:survival_moment_start";
+    static final String SURVIVAL_MOMENT_END = "noellesroles:survival_moment_end";
+    /** Wathe's win status when the passengers win. 乘客获胜时 Wathe 的胜利状态。 */
+    static final String PASSENGERS = "PASSENGERS";
 
     /** 10 seconds. 10 秒。 */
     static final int SHORT_SPAN_TICKS = 200;
+    static final int TEAM_COINS = 200;
+    /**
+     * The Survival Moment countdown, 120 s, for a start without {@code duration_ticks}.
+     * 生存时刻倒计时 120 秒，用于没有 {@code duration_ticks} 的开始事件。
+     */
+    static final int SURVIVAL_MOMENT_TICKS = 2400;
 
     private RoleSkillRules() {
     }
@@ -237,5 +249,50 @@ final class RoleSkillRules {
             }
         }
         return false;
+    }
+
+    /**
+     * 团队至上: my income raised the killer team purse by 200 coins in total this round. Only killer-team members
+     * contribute, so no faction check is needed.
+     * 本局我的收入共为杀手团队经济增加了 200 金币。只有杀手团队成员能贡献，所以无需检查阵营。
+     */
+    static boolean contributedToKillerTeam(AchievementContext context) {
+        long total = context.myEvents(TEAM_CONTRIBUTION).stream()
+                .mapToLong(contribution -> Math.max(0, contribution.intValue("amount", 0)))
+                .sum();
+        return total >= TEAM_COINS;
+    }
+
+    /**
+     * 你已疾苦: as the Survival Master, start the Survival Moment and win by its countdown: the passengers won, I never
+     * died, the moment was never ended after that start, and the round was decided no earlier than the countdown's
+     * end (a plain Wathe {@code PASSENGERS} win, so an earlier wipe of the killers does not count).
+     * 以生存大师身份触发生存时刻并靠倒计时获胜：乘客获胜、我从未死亡、该次开始之后生存时刻没有被结束，且胜负判定不早于倒计时结束
+     * （这是普通的 Wathe {@code PASSENGERS} 胜利，所以提前消灭杀手不算）。
+     */
+    static boolean outlastedSurvivalMoment(AchievementContext context) {
+        if (!context.won() || !PASSENGERS.equals(context.outcome().winStatus()) || RoundRules.died(context)) {
+            return false;
+        }
+        List<MatchEvent> mine = context.myEvents(MatchEvent.GLOBAL_EVENT);
+        for (int i = 0; i < mine.size(); i++) {
+            MatchEvent start = mine.get(i);
+            if (SURVIVAL_MOMENT_START.equals(start.value("event")) && Rules.iWas(context, start, SURVIVAL_MASTER)
+                    && Rules.withValue(mine.subList(i + 1, mine.size()), "event", SURVIVAL_MOMENT_END).isEmpty()
+                    && decidedByCountdown(context, start)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether the round was decided only once the countdown that began at {@code start} ran out. The round clock and
+     * the record clock may differ by {@link RoundFacts#RECORD_TICK_TOLERANCE}.
+     * 胜负判定时，{@code start} 开始的倒计时是否已经结束。对局时钟与记录时钟可能相差 {@link RoundFacts#RECORD_TICK_TOLERANCE}。
+     */
+    private static boolean decidedByCountdown(AchievementContext context, MatchEvent start) {
+        long countdownEnd = (long) start.tick() + Math.max(0, start.intValue("duration_ticks", SURVIVAL_MOMENT_TICKS));
+        return context.facts().durationTicks() >= countdownEnd - RoundFacts.RECORD_TICK_TOLERANCE;
     }
 }

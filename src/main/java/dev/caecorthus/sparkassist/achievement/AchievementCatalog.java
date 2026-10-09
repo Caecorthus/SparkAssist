@@ -191,7 +191,19 @@ public final class AchievementCatalog {
                     TraitRules::parriedVeteran),
             new Achievement("not_undercover", 2, "sparkstrength:coroner_body_bag", "我不是卧底",
                     "以验尸官身份伪装成杀手并击杀一名玩家",
-                    RoleSkillRules::killDisguisedAsKiller)
+                    RoleSkillRules::killDisguisedAsKiller),
+            new Achievement("team_first", 3, "minecraft:emerald", "团队至上",
+                    "以杀手身份在单局内为团队经济贡献 200 金币",
+                    RoleSkillRules::contributedToKillerTeam),
+            new Achievement("turncoat", 2, "minecraft:carved_pumpkin", "叛无所依",
+                    "拥有内鬼词条时在单局内击杀 4 名非杀手玩家",
+                    TraitRules::impostorKilledFourNonKillers),
+            new Achievement("fortune", 2, "minecraft:gold_nugget", "来财",
+                    "以好人身份在单局内同时拥有摇钱树和任务大师，并获得 200 金币",
+                    TraitRules::civilianFortune),
+            new Achievement("outlasted", 2, "minecraft:golden_apple", "你已疾苦",
+                    "作为生存大师触发生存时刻并通过倒计时结束胜利",
+                    RoleSkillRules::outlastedSurvivalMoment)
     );
     private static final Map<String, Achievement> BY_ID = index(ALL);
 

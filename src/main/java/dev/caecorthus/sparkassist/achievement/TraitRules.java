@@ -12,12 +12,17 @@ final class TraitRules {
     static final String NIKO = "sparktraits:niko";
     static final String LAST_STAND_TRIGGERED = "sparktraits:last_stand_triggered";
     static final String CLOSE_QUARTERS_PARRY = "sparktraits:close_quarters_parry";
+    static final String IMPOSTOR = "sparktraits:impostor";
+    static final String MONEY_TREE = "sparktraits:money_tree";
+    static final String TASK_MASTER = "sparktraits:task_master";
     static final String REVOLVER = "wathe:revolver";
     static final String VETERAN = "wathe:veteran";
     /** 60 seconds. 60 秒。 */
     static final int RECENT_KILL_TICKS = 1200;
     static final double LONG_SHOT_BLOCKS = 35;
     static final int MANY_OPPONENTS = 4;
+    static final int TURNCOAT_KILLS = 4;
+    static final int FORTUNE_COINS = 200;
 
     private TraitRules() {
     }
@@ -71,5 +76,31 @@ final class TraitRules {
     static boolean parriedVeteran(AchievementContext context) {
         return context.myEvents(CLOSE_QUARTERS_PARRY).stream().anyMatch(parry -> VETERAN.equals(
                 parry.value("attacker_role", parry.target() == null ? null : context.roleAt(parry.target(), parry))));
+    }
+
+    /**
+     * 叛无所依: 4 kills, each while holding Impostor, of players whose faction at death is known and is not the killer
+     * faction (好人, neutrals and witches all count; {@link Factions#NONE} is no faction).
+     * 每次都在持有内鬼时，击杀 4 名死亡时阵营已知且不是杀手阵营的玩家（好人、中立、魔女都算；{@link Factions#NONE} 不算阵营）。
+     */
+    static boolean impostorKilledFourNonKillers(AchievementContext context) {
+        return Rules.myKills(context, kill -> victimNonKiller(context, kill)
+                && context.hadTraitAround(IMPOSTOR, kill.tick())).size() >= TURNCOAT_KILLS;
+    }
+
+    private static boolean victimNonKiller(AchievementContext context, MatchEvent kill) {
+        String faction = context.timeline().victimFaction(kill);
+        return (Factions.isCivilian(faction) || Factions.isNonCivilian(faction)) && !Factions.KILLER.equals(faction);
+    }
+
+    /**
+     * 来财: a 好人 who held Money Tree and Task Master at the same moment and gained 200 coins this round.
+     * 本局作为好人，曾同时持有摇钱树与任务大师，并获得 200 金币。
+     */
+    static boolean civilianFortune(AchievementContext context) {
+        return Factions.isCivilian(context.faction())
+                && Rules.heldTogetherSometime(context, MONEY_TREE, TASK_MASTER)
+                && context.myEvents(MatchEvent.INCOME).stream()
+                        .anyMatch(income -> income.intValue("amount", 0) >= FORTUNE_COINS);
     }
 }
