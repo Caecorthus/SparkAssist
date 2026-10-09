@@ -30,7 +30,9 @@ final class SparkPonderDemos {
 
     static {
         WatheItemScenes.register();
-        RoleScenes.register();
+        WatheShopScenes.register();
+        WatheRoleScenes.register();
+        NoellesCivilianScenes.register();
     }
 
     private SparkPonderDemos() {
@@ -40,16 +42,24 @@ final class SparkPonderDemos {
     record Scene(String stage, PonderStoryBoard board) {
     }
 
-    /** @param requiredMod the mod that must be loaded for the demo to exist, or null / 演示存在所需的模组，或 null */
-    private record Demo(Identifier icon, List<Scene> scenes, boolean indexed, @Nullable String requiredMod) {
+    /** @param requiredMods the mods that must all be loaded for the demo to exist / 演示存在所需的全部模组 */
+    private record Demo(Identifier icon, List<Scene> scenes, boolean indexed, List<String> requiredMods) {
+        boolean available() {
+            return requiredMods.stream().allMatch(FabricLoader.getInstance()::isModLoaded);
+        }
     }
 
     static void item(String itemId, Scene... scenes) {
-        DEMOS.put(itemId, new Demo(Identifier.of(itemId), List.of(scenes), true, null));
+        DEMOS.put(itemId, new Demo(Identifier.of(itemId), List.of(scenes), true, List.of()));
     }
 
-    static void role(String roleDemoId, @Nullable String requiredMod, Scene... scenes) {
-        DEMOS.put(roleDemoId, new Demo(ROLE_ICON, List.of(scenes), false, requiredMod));
+    /** A demo for an item another mod adds; only exists while those mods are loaded. 其他模组物品的演示；仅在这些模组都已加载时存在。 */
+    static void item(String itemId, List<String> requiredMods, Scene... scenes) {
+        DEMOS.put(itemId, new Demo(Identifier.of(itemId), List.of(scenes), true, requiredMods));
+    }
+
+    static void role(String roleDemoId, List<String> requiredMods, Scene... scenes) {
+        DEMOS.put(roleDemoId, new Demo(ROLE_ICON, List.of(scenes), false, requiredMods));
     }
 
     static Scene scene(String stage, PonderStoryBoard board) {
@@ -58,7 +68,7 @@ final class SparkPonderDemos {
 
     static boolean has(String id) {
         Demo demo = DEMOS.get(id);
-        return demo != null && (demo.requiredMod() == null || FabricLoader.getInstance().isModLoaded(demo.requiredMod()));
+        return demo != null && demo.available();
     }
 
     static void open(String id, @Nullable Screen returnTo) {
@@ -78,7 +88,7 @@ final class SparkPonderDemos {
 
     /** Item demos join Ponder's own index and the hold-W hint. 物品演示加入 Ponder 自己的索引与按住 W 提示。 */
     static void registerIndexed(PonderSceneRegistrationHelper<Identifier> helper) {
-        DEMOS.values().stream().filter(Demo::indexed).forEach(demo -> {
+        DEMOS.values().stream().filter(demo -> demo.indexed() && demo.available()).forEach(demo -> {
             for (Scene scene : demo.scenes()) {
                 helper.addStoryBoard(demo.icon(), scene.stage(), scene.board());
             }

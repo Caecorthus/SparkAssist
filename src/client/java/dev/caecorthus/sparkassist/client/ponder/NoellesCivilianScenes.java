@@ -8,26 +8,28 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SOUTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
+import java.util.List;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * Role demos, opened only from the role's guide page. Each needs the mod that owns the role.
- * 职业演示，只从该职业的指南页打开。每个演示都需要该职业所属的模组。
+ * Demos for NoellesRoles' civilian roles, opened only from the role's guide page; each needs NoellesRoles.
+ * NoellesRoles 平民阵营职业的演示，只从该职业的指南页打开；都需要 NoellesRoles。
  */
-final class RoleScenes {
-    private RoleScenes() {
+final class NoellesCivilianScenes {
+    private NoellesCivilianScenes() {
     }
 
     static void register() {
-        role("sparkassist:roles/noellesroles/conductor", "noellesroles",
-                scene("wathe/cabin", RoleScenes::conductor));
+        role("sparkassist:roles/noellesroles/conductor", List.of("noellesroles"),
+                scene("wathe/cabin", NoellesCivilianScenes::conductor));
     }
 
     /**
@@ -67,11 +69,14 @@ final class RoleScenes {
         Actors.swing(scene, conductor);
         WatheItemScenes.openDoor(scene, door, true);
         scene.overlay().showText(70)
-                .text("万能钥匙能打开车上任何一扇锁着的门，包括别人的房间，没有冷却")
+                .text("万能钥匙能打开车上锁着的门，包括别人的房间和车厢门，没有冷却")
                 .independent()
                 .attachKeyFrame();
         scene.idle(10);
+        // Switching items cancels a charge; releasing it would stab the passenger in reach.
+        // 换手会取消蓄力；直接松开会刺中身边的乘客。
         Actors.charge(scene, killer, false);
+        Actors.hold(scene, killer, ItemStack.EMPTY);
         Actors.turn(scene, killer, NORTH);
         scene.idle(70);
         scene.overlay().showText(70)

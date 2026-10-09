@@ -80,12 +80,32 @@
               "text": "武器：【刀】100 金币（限购 1 把），【左轮手枪】300 金币，【手雷】350 金币，【M67 手雷】25 金币（开局 90 秒后才能用，投掷后冷却 10 秒），【疯魔模式】350 金币。"
             },
             {
+              "type": "demo",
+              "scene": "wathe:grenade",
+              "text": "演示：手雷怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:psycho_mode",
+              "text": "演示：疯魔模式"
+            },
+            {
               "type": "bullet",
               "text": "用【左轮手枪】打死好人后，这把枪会直接消失，想再开枪就得再买一把。"
             },
             {
               "type": "bullet",
               "text": "毒物：【毒药瓶】和【蝎子】各 75 金币。"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:poison_vial",
+              "text": "演示：毒药瓶怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:scorpion",
+              "text": "演示：蝎子怎么用"
             },
             {
               "type": "bullet",
@@ -95,6 +115,26 @@
               "type": "demo",
               "scene": "wathe:lockpick",
               "text": "演示：开锁器怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:crowbar",
+              "text": "演示：撬棍怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:body_bag",
+              "text": "演示：裹尸袋怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:firecracker",
+              "text": "演示：爆竹怎么用"
+            },
+            {
+              "type": "demo",
+              "scene": "wathe:blackout",
+              "text": "演示：停电"
             },
             {
               "type": "section",

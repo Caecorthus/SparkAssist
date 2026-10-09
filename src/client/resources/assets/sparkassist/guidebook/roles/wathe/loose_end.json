@@ -50,9 +50,14 @@
                   "tone": "danger"
                 },
                 {
-                  "text": "：只有一发子弹。亲手杀死任何人（用刀也算）后会自动重新装填。"
+                  "text": "：射程只有 7 格，只有一发子弹，打空后只会“咔哒”一声。亲手杀死任何人（用刀也算）后会自动重新装填。"
                 }
               ]
+            },
+            {
+              "type": "demo",
+              "scene": "sparkassist:roles/wathe/loose_end",
+              "text": "演示：德林加与生还模式"
             },
             {
               "type": "section",

@@ -35,6 +35,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/wathe/veteran",
+              "text": "演示：老兵怎么用刀"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
