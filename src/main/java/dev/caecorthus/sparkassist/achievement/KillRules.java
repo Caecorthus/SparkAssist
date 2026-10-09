@@ -210,7 +210,7 @@ final class KillRules {
                 context.timeline().psychoWindows(context.self())) >= 8;
     }
 
-    /** 野猪冲撞: the Pig God kills 3 非好人 in one chase. 皮革嘎在一次追击中击杀 3 名非好人。 */
+    /** 野猪冲撞: the Pig God kills 3 非好人 in one chase. 皮革噶在一次追击中击杀 3 名非好人。 */
     static boolean pigGodChaseTriple(AchievementContext context) {
         return Rules.mostInOneWindow(
                 Rules.myKills(context, kill -> Rules.killedAs(context, kill, PIG_GOD) && Rules.victimNonCivilian(context, kill)),

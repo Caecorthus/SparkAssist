@@ -109,7 +109,7 @@ public final class AchievementCatalog {
                     "以杀手身份在疯魔状态下一次性击杀 8 名玩家",
                     KillRules::killerPsychoOctuple),
             new Achievement("boar_charge", 3, "minecraft:porkchop", "野猪冲撞",
-                    "以皮革嘎的身份在皮革追击状态下一次性击杀 3 名非好人",
+                    "以皮革噶的身份在皮革追击状态下一次性击杀 3 名非好人",
                     KillRules::pigGodChaseTriple),
             new Achievement("it_works", 2, "noellesroles:iron_man_vial", "我的药剂是有效的",
                     "以教授身份使用铁人药剂成功为其他玩家抵挡两次伤害",
