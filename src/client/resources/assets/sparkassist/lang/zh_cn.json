@@ -253,5 +253,7 @@
   "hud.sparkwitch.emma.factor.transfer": "向 %s 传递魔女因子",
   "hud.sparkwitch.emma.factor.cooldown": "魔女因子：%s秒",
   "message.sparkwitch.emma.invalid_target": "范围内里没有玩家",
-  "message.sparkwitch.emma.no_capacity": "本局共用因子首传额度已用尽。"
+  "message.sparkwitch.emma.no_capacity": "本局共用因子首传额度已用尽。",
+  "toast.sparkassist.achievement.title": "Level %s 成就达成",
+  "advancements.sparkassist.achievement.description": "Level %s · %s"
 }

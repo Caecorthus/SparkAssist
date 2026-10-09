@@ -5,9 +5,11 @@ import dev.caecorthus.sparkassist.achievement.AchievementCatalog;
 import dev.caecorthus.sparkassist.achievement.AchievementContext;
 import dev.caecorthus.sparkassist.achievement.AchievementEvaluator;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
+import dev.caecorthus.sparkassist.achievement.MatchTimeline;
 import dev.caecorthus.sparkassist.achievement.RoundFacts;
 import dev.caecorthus.sparkassist.achievement.RoundObservation;
 import dev.caecorthus.sparkassist.achievement.RoundOutcome;
+import dev.caecorthus.sparkassist.achievement.RoundStatsRecorder;
 import dev.caecorthus.sparkassist.achievement.RoundTracker;
 import dev.caecorthus.sparkassist.client.guidebook.SparkTraitsGuideBridge;
 import dev.doctor4t.wathe.api.Role;
@@ -65,6 +67,7 @@ public final class AchievementClientState {
         if (!TRACKER.active()) {
             TRACKER.start(player.getUuid());
             recordAtStart = MatchRecordBridge.latest();
+            traits = Set.of();
             traitPollCountdown = 0;
         }
 
@@ -76,7 +79,16 @@ public final class AchievementClientState {
         boolean dead = game.isPlayerDead(self);
         if (--traitPollCountdown <= 0) {
             traitPollCountdown = TRAIT_POLL_TICKS;
-            traits = dead || player.isSpectator() ? Set.of() : SparkTraitsGuideBridge.ownerVisibleActiveTraitIds(player);
+            if (dead) {
+                traits = Set.of();
+            } else if (!player.isSpectator()) {
+                traits = SparkTraitsGuideBridge.ownerVisibleActiveTraitIds(player);
+            }
+            // A living spectator is in a fake death (e.g. Depression): keep the last traits rather than read what
+            // spectators are sent. 存活的旁观者处于假死（例如抑郁）：沿用上次的词条，不读取发给旁观者的数据。
+        }
+        if (!dead) {
+            TRACKER.onDepressionAttacker(SparkTraitsAchievementBridge.depressionPsychoAttacker(player));
         }
         long worldTime = client.world.getTime();
         TRACKER.observe(new RoundObservation(
@@ -133,11 +145,18 @@ public final class AchievementClientState {
             // Wathe 的结算里没有我们（例如分配角色后才加入）：这不是我们的对局。
             return;
         }
+        MatchTimeline timeline = MatchTimeline.of(outcome.events(), SparkFactionAchievementBridge::baseFaction);
         AchievementLedger ledger = AchievementStorage.ledger(client);
-        ledger.stats().recordRound(facts.roleChain(), facts.factionId(), outcome.won(), facts.died(), facts.tasksCompleted());
+        try {
+            RoundStatsRecorder.record(ledger.stats(), facts, outcome, timeline);
+        } catch (RuntimeException exception) {
+            // Unexpected record data must never break the game; this round's stats may be partly counted.
+            // 意外的记录数据绝不能影响游戏；本局统计可能只计入了一部分。
+            LOGGER.warn("Could not count this round's stats", exception);
+        }
         List<Achievement> earned = AchievementEvaluator.newlyEarned(
                 AchievementCatalog.all(),
-                new AchievementContext(facts, outcome, ledger.stats(), ledger),
+                new AchievementContext(facts, outcome, timeline, ledger.stats(), ledger),
                 (achievement, exception) -> LOGGER.warn("Achievement {} failed to evaluate", achievement.id(), exception));
         long now = System.currentTimeMillis();
         earned.forEach(achievement -> ledger.unlock(achievement.id(), now));

@@ -253,5 +253,7 @@
   "hud.sparkwitch.emma.factor.transfer": "Transfer Witch Factor to %s",
   "hud.sparkwitch.emma.factor.cooldown": "Witch Factor: %ss",
   "message.sparkwitch.emma.invalid_target": "No player within range",
-  "message.sparkwitch.emma.no_capacity": "The shared first-spread quota is exhausted for this round."
+  "message.sparkwitch.emma.no_capacity": "The shared first-spread quota is exhausted for this round.",
+  "toast.sparkassist.achievement.title": "Level %s Achievement Unlocked",
+  "advancements.sparkassist.achievement.description": "Level %s · %s"
 }

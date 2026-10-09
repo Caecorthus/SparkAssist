@@ -2,6 +2,7 @@ package dev.caecorthus.sparkassist.client.achievement;
 
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
+import dev.doctor4t.wathe.api.WatheRoles;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,6 +27,8 @@ final class SparkFactionAchievementBridge {
     private static boolean resolved;
     private static boolean available;
     private static Method resolveEffectiveFaction;
+    // Optional: older SparkFactionAPI builds may lack it. 可选：旧版 SparkFactionAPI 可能没有。
+    private static Method resolveBaseFaction;
     private static ComponentKey<?> roundEndKey;
     private static Method winningFaction;
 
@@ -46,6 +49,33 @@ final class SparkFactionAchievementBridge {
                 }
             } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
                 disable("faction lookup", exception);
+            }
+        }
+        return "wathe:" + Faction.fromRole(role).name().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * The base faction of a role id (no player context, so no trait flips), or null when this client does not know
+     * the role. SparkFactionAPI names custom factions such as {@code sparkwitch:witch}; without it, Wathe's base
+     * factions are used.
+     * 身份 id 的基础阵营（没有玩家上下文，因此不含词条翻转）；本客户端不认识该身份时为 null。
+     * SparkFactionAPI 能给出 {@code sparkwitch:witch} 等自定义阵营；没有它时使用 Wathe 的基础阵营。
+     */
+    static String baseFaction(String roleId) {
+        Identifier id = roleId == null ? null : Identifier.tryParse(roleId);
+        Role role = id == null ? null : WatheRoles.getRole(id);
+        if (role == null) {
+            return null;
+        }
+        resolve();
+        if (available && resolveBaseFaction != null) {
+            try {
+                Object faction = resolveBaseFaction.invoke(null, role);
+                if (faction instanceof Identifier factionId) {
+                    return factionId.toString();
+                }
+            } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
+                disable("base faction lookup", exception);
             }
         }
         return "wathe:" + Faction.fromRole(role).name().toLowerCase(Locale.ROOT);
@@ -82,6 +112,11 @@ final class SparkFactionAchievementBridge {
         try {
             Class<?> api = Class.forName("dev.caecorthus.sparkfactionapi.api.SparkFactionApi");
             resolveEffectiveFaction = api.getMethod("resolveEffectiveFaction", PlayerEntity.class, GameWorldComponent.class);
+            try {
+                resolveBaseFaction = api.getMethod("resolveBaseFaction", Role.class);
+            } catch (NoSuchMethodException missing) {
+                resolveBaseFaction = null;
+            }
             Class<?> roundEnd = Class.forName("dev.caecorthus.sparkfactionapi.component.SparkFactionRoundEndComponent");
             Field key = roundEnd.getField("KEY");
             roundEndKey = (ComponentKey<?>) key.get(null);

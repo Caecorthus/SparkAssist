@@ -96,15 +96,27 @@ A local achievement that is invisible until earned: no icon, title, placeholder,
 Its id is stored in players' saves and must never change once released.
 _Avoid_: advancement (the vanilla server-side system), quest, challenge (a vanilla frame name)
 
+**Achievement level**:
+An achievement's difficulty, Level 1 to 5. It picks the frame (1–2 task, 3–4 goal, 5 challenge) and is shown as
+"Level x" before the description and in the toast heading ("Level x 成就达成").
+_Avoid_: frame (derived from the level), tier, rarity
+
 **Achievement save**:
 One account's local file at `config/sparkassist/achievements/<account uuid>.json` with the unlocks in unlock order
 and the **General round stats**. Never sent to a server; offline and bot rounds count the same as online ones.
 _Avoid_: progress, server data
 
 **General round stats**:
-Per-account counts of rounds, wins, deaths and tasks, per role and per faction. Named after play, never after an
+Per-account counts of rounds, wins, deaths and tasks, per role and per faction, food and drink finished, and the
+roles killed per **Kill group** (for ever, and since the last death in that group). Named after play, never after an
 achievement, so the save reveals nothing about what is left to find.
 _Avoid_: achievement progress, counters
+
+**Kill group**:
+Which side a kill was made from, judged by the killer's role and effective faction at that moment: police (one of
+the seven police roles while civilian), killer (effective killer faction) or Grand Witch. Police and killer keep a
+streak set that lasts one life across rounds and is emptied when the player dies in that group.
+_Avoid_: faction (a kill group is narrower), kill count
 
 **Round settlement**:
 The moment a tracked round becomes inactive after Wathe's round-end result arrived and the player held a role: the
@@ -115,8 +127,15 @@ _Avoid_: round end (the Wathe event), evaluation tick
 **Match record**:
 Wathe's server-side event log of a round (deaths with killer and reason, purchases, tasks, poisonings, item and
 skill uses) that SparkFactionAPI hands to clients at round end. Missing on servers without that support, in which
-case record-based achievements cannot be earned that round.
+case record-based achievements cannot be earned that round. Its ticks are record ticks, counted from the server's
+match start; what the client saw itself counts round ticks from the first live tick it saw, and the two agree to
+within network latency.
 _Avoid_: replay (the SparkFactionAPI screen), chat replay
+
+**Match timeline**:
+The queries rules use over one round's **Match record**: the role and effective faction a player had when an event
+happened, kills (never dying by your own hand), deaths and psycho windows.
+_Avoid_: final role (Wathe's round-end result, which is only the last role)
 
 **Achievement page**:
 The extra tab SparkAssist adds to the vanilla advancements screen, only in this client's advancement tree. Earned

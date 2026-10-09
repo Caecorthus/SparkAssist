@@ -1,20 +1,14 @@
 package dev.caecorthus.sparkassist.client.achievement;
 
 import dev.caecorthus.sparkassist.achievement.MatchEvent;
+import dev.caecorthus.sparkassist.achievement.RecordFlattener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtIntArray;
-import net.minecraft.nbt.NbtString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +49,10 @@ final class MatchRecordBridge {
         }
     }
 
+    /**
+     * The record's events in record order, each with its NBT flattened by {@link RecordFlattener}.
+     * 记录中的事件，按记录顺序排列，每条的 NBT 都由 {@link RecordFlattener} 展开。
+     */
     static List<MatchEvent> events(Object record) {
         if (record == null || !available) {
             return List.of();
@@ -68,7 +66,7 @@ final class MatchRecordBridge {
                         (int) eventTick.invoke(event),
                         uuid(data, "actor"),
                         uuid(data, "target"),
-                        values(data)));
+                        RecordFlattener.flatten(data)));
             }
             return List.copyOf(list);
         } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
@@ -79,20 +77,6 @@ final class MatchRecordBridge {
 
     private static UUID uuid(NbtCompound data, String key) {
         return data.containsUuid(key) ? data.getUuid(key) : null;
-    }
-
-    /** Flattens primitive fields to strings; UUID int arrays become UUID text. 把基础字段转成字符串；UUID 整数数组转成 UUID 文本。 */
-    private static Map<String, String> values(NbtCompound data) {
-        Map<String, String> values = new HashMap<>();
-        for (String key : data.getKeys()) {
-            NbtElement element = data.get(key);
-            if (element instanceof NbtString || element instanceof AbstractNbtNumber) {
-                values.put(key, element.asString());
-            } else if (element instanceof NbtIntArray array && array.size() == 4) {
-                values.put(key, NbtHelper.toUuid(array).toString());
-            }
-        }
-        return values;
     }
 
     private static synchronized void resolve() {
