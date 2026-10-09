@@ -36,7 +36,12 @@
             },
             {
               "type": "bullet",
-              "text": "飞斧会贯穿路线上的每一个人，碰到就一击毙命，每穿过一个人只损失少量速度；撞上方块会插在上面，捡不回来。"
+              "text": "飞斧会贯穿路线上的每一个人，碰到一般就一击毙命，每穿过一个人只损失少量速度；撞上方块会插在上面，捡不回来。"
+            },
+            {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/bandit",
+              "text": "演示：飞斧怎么用"
             },
             {
               "type": "section",
