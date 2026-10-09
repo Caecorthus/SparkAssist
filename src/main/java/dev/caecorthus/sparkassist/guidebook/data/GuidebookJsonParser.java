@@ -22,6 +22,9 @@ import java.util.Optional;
  * 解析指南书 JSON，并让目录模型与具体存储格式保持解耦。
  */
 public final class GuidebookJsonParser {
+    /** Button label of a demo block that gives no text. 未写文字的演示块所用的按钮文字。 */
+    public static final String DEMO_LABEL_KEY = "guidebook.sparkassist.demo.watch";
+
     private GuidebookJsonParser() {
     }
 
@@ -121,6 +124,14 @@ public final class GuidebookJsonParser {
         );
         if (type == GuidebookBlockType.SPACER) {
             return new GuidebookBlock(type, List.of());
+        }
+        if (type == GuidebookBlockType.DEMO) {
+            if (!json.has("scene")) {
+                throw new IllegalArgumentException("GuideBook demo block must name its scene");
+            }
+            GuidebookRun label = json.has("text") || json.has("textKey") ? parseRun(json)
+                    : GuidebookRun.translated(DEMO_LABEL_KEY, false, false, GuidebookTone.DEFAULT);
+            return new GuidebookBlock(type, List.of(label), json.get("scene").getAsString());
         }
 
         if (json.has("text") || json.has("textKey")) {

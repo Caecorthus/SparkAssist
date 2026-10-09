@@ -35,6 +35,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "wathe:revolver",
+              "text": "演示：左轮手枪怎么用"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

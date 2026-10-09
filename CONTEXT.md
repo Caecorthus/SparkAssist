@@ -143,6 +143,29 @@ achievements sit on a track in unlock order; the tab is never reported to the se
 first unlock.
 _Avoid_: advancement tab (any server tab), achievement screen
 
+**Demo**:
+A short animated scene played by the optional Ponder (思索) mod, opened from a guide page's **Demo button**. An
+**Item demo** is keyed to the item's id, so Ponder also plays it when the player holds W over that item; a **Role demo**
+(`sparkassist:roles/<namespace>/<role>`) is opened only from the guide and needs the mod that owns the role. Demos need
+a loaded world, so the guide hides demo buttons on the title screen and whenever Ponder is missing.
+_Avoid_: video, tutorial clip, cutscene
+
+**Demo button**:
+A full-width brass row on a guide page (`{"type": "demo", "scene": ..., "text": ...}`) that opens a **Demo**; it takes
+no space when the demo cannot play.
+_Avoid_: link, play icon
+
+**Actor**:
+A player figure in a **Demo**, every face a shade of its role's own colour (`Role.color()`), with a name tag in that
+colour. Standing actors are drawn by the vanilla player renderer, so Wathe's arm poses and held items look as in a
+round; a killed actor becomes Wathe's body, face down where it faced.
+_Avoid_: NPC, mannequin, armor stand
+
+**Stage**:
+The structure a **Demo** plays on (`assets/sparkassist/ponder/**.nbt`, y = 0 is Ponder's base plate), built from
+Wathe blocks by a local generator script.
+_Avoid_: map, schematic world
+
 **Safety rule for unrelated roles/talents/sounds**:
 The rule that anything outside the named assist case must keep previous behavior.
 _Avoid_: broad audio suppression, role rebalance, talent patch

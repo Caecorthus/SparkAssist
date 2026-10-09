@@ -32,6 +32,21 @@ repositories {
         name = "Simple Voice Chat"
         url = "https://maven.maxhenkel.de/repository/public"
     }
+    maven {
+        name = "Create Mod"
+        url = "https://maven.createmod.net"
+        content {
+            includeGroup "net.createmod.ponder"
+            includeGroup "dev.engine-room.flywheel"
+        }
+    }
+    maven {
+        name = "Fuzs Mod Resources"
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        content {
+            includeGroup "fuzs.forgeconfigapiport"
+        }
+    }
 }
 
 loom {
@@ -62,6 +77,17 @@ dependencies {
     }
     modRuntimeOnly "dev.upcraft.datasync:datasync-minecraft-1.21.1-fabric:0.10.2"
     modCompileOnly "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
+    // Ponder is optional: the pack ships it with Flywheel, and SparkAssist only loads its scenes when it is present.
+    // Ponder 为可选依赖：整合包自带它和 Flywheel，SparkAssist 只在它存在时加载演示场景。
+    modCompileOnly("net.createmod.ponder:ponder-fabric:${project.ponder_version}") { transitive = false }
+    modCompileOnly("dev.engine-room.flywheel:flywheel-fabric-api-1.21.1:${project.flywheel_version}") { transitive = false }
+    modLocalRuntime("net.createmod.ponder:ponder-fabric:${project.ponder_version}") { transitive = false }
+    modLocalRuntime("dev.engine-room.flywheel:flywheel-fabric-1.21.1:${project.flywheel_version}") { transitive = false }
+    // Bundled inside the released Ponder jar, but Loom does not unpack nested jars for the dev runtime.
+    // 正式版 Ponder jar 内已打包，但 Loom 开发运行环境不会解开内嵌 jar。
+    modLocalRuntime("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:21.1.3") { transitive = false }
+    localRuntime "com.electronwill.night-config:core:3.8.0"
+    localRuntime "com.electronwill.night-config:toml:3.8.0"
     modRuntimeOnly "maven.modrinth:simple-voice-chat:fabric-${project.voicechat_version}"
 
     testImplementation "org.junit.jupiter:junit-jupiter:5.10.3"
@@ -234,6 +260,9 @@ tasks.register("verifyArchitecture") {
                 throw new GradleException("Catalog provider ${optionalModId} must be declared in fabric.mod.json suggests")
             }
         }
+        if (metadata.depends?.containsKey("ponder") || metadata.suggests?.get("ponder") != "*") {
+            throw new GradleException("Ponder must stay an optional suggestion, never a hard dependency")
+        }
 
         def notices = file("THIRD_PARTY_NOTICES.md").getText("UTF-8")
         if (!notices.replace("\r\n", "\n").contains(requiredWatheNotice)) {
@@ -310,6 +339,8 @@ tasks.register("verifyDistributionMetadata") {
 
             def copiedUpstreamClass = zipFile.entries().find { entry ->
                 entry.name.startsWith("cat/rezelyn/") || entry.name.startsWith("dev/doctor4t/")
+                        || entry.name.startsWith("net/createmod/") || entry.name.startsWith("dev/engine_room/")
+                        || entry.name.startsWith("META-INF/jars/")
             }
             if (copiedUpstreamClass != null) {
                 throw new GradleException("Upstream class unexpectedly bundled in ${jarFile.name}: ${copiedUpstreamClass.name}")

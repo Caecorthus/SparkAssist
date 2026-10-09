@@ -1,10 +1,15 @@
 package dev.caecorthus.sparkassist.client.guidebook.ui;
 
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.BRASS;
+import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.BODY;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.BRASS_HI;
+import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.BRASS_LO;
+import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.BUTTON_HOVER;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.COIN;
+import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.DEMO_WASH;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.EDGE;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.FAINT;
+import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.GILT_LEAF;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.HEADING;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.ICON_HOVER;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.INK;
@@ -334,11 +339,18 @@ public final class ReaderPainter {
      *              before this), so the header and body start lower / 扉画占据内容最上方 PLATE_BLOCK 像素，页眉与正文下移 */
     public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
                                GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot, boolean plate) {
+        content(c, f, s, header, body, scroll, thumbHot, plate, null);
+    }
+
+    /** @param hoveredDemo the demo button under the pointer, drawn lit / 指针下的演示按钮，以点亮状态绘制 */
+    public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
+                               GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot, boolean plate,
+                               @Nullable GuidebookContentRenderer.Demo hoveredDemo) {
         Region view = s.viewport();
         int originY = view.y() - scroll;
         c.enableScissor(view.x(), view.y(), view.right(), view.bottom());
         pageHeader(c, f, header, s.textLeft(), s.textRight(), originY + (plate ? PLATE_BLOCK : 0));
-        body(c, f, body, s.textLeft(), originY + headerHeight(plate), view.y(), view.bottom());
+        body(c, f, body, s.textLeft(), originY + headerHeight(plate), view.y(), view.bottom(), hoveredDemo);
         c.disableScissor();
         int total = contentHeight(body, plate);
         if (total <= view.height()) {
@@ -386,12 +398,19 @@ public final class ReaderPainter {
      */
     public static void body(DrawContext c, TextRenderer f, GuidebookContentRenderer.Layout body, int tx0, int bodyTop,
                             int clipTop, int clipBottom) {
+        body(c, f, body, tx0, bodyTop, clipTop, clipBottom, null);
+    }
+
+    public static void body(DrawContext c, TextRenderer f, GuidebookContentRenderer.Layout body, int tx0, int bodyTop,
+                            int clipTop, int clipBottom, @Nullable GuidebookContentRenderer.Demo hoveredDemo) {
         for (Ornament ornament : body.ornaments()) {
             int top = bodyTop + ornament.y() - 2;
             if (top + ornament.height() + 4 <= clipTop || top >= clipBottom) {
                 continue;
             }
-            ornament(c, ornament, tx0, bodyTop);
+            boolean lit = hoveredDemo != null && ornament.kind() == Ornament.Kind.DEMO
+                    && ornament.y() == hoveredDemo.y();
+            ornament(c, ornament, tx0, bodyTop, lit);
         }
         for (RenderedLine line : body.lines()) {
             int y = bodyTop + line.y();
@@ -402,7 +421,7 @@ public final class ReaderPainter {
         }
     }
 
-    private static void ornament(DrawContext c, Ornament o, int tx0, int bodyTop) {
+    private static void ornament(DrawContext c, Ornament o, int tx0, int bodyTop, boolean lit) {
         int x = tx0 + o.x();
         int y = bodyTop + o.y();
         int cx = x + o.width() / 2;
@@ -431,7 +450,22 @@ public final class ReaderPainter {
                 c.fill(cx - 8, y + 2, cx - 6, y + 3, o.color());
                 c.fill(cx + 7, y + 2, cx + 9, y + 3, o.color());
             }
+            case DEMO -> demoButton(c, x, y, o.width(), o.height(), lit);
         }
+    }
+
+    /**
+     * Demo button on the paper: a brass-edged strip with a mahogany play disc at its left (the label is a laid line);
+     * lit = gilt leaf under the pointer. The whole strip is the hit area.
+     * 纸面上的演示按钮：黄铜描边的长条，左侧是桃花心木播放圆标（文字是排版行）；指针悬停时铺金箔。整条都是热区。
+     */
+    private static void demoButton(DrawContext c, int x, int y, int w, int h, boolean lit) {
+        ExpressPaint.roundedFill(c, x, y, w, h, lit ? GILT_LEAF : DEMO_WASH);
+        ExpressPaint.roundedOutline(c, x, y, w, h, lit ? BRASS : BRASS_LO);
+        int disc = h - 6;
+        ExpressPaint.roundedFill(c, x + 4, y + 3, disc, disc, lit ? BUTTON_HOVER : BODY);
+        ExpressPaint.roundedOutline(c, x + 4, y + 3, disc, disc, lit ? COIN : BRASS);
+        ExpressPaint.play(c, x + 4 + (disc - 3) / 2 + 1, y + 3 + (disc - 5) / 2, lit ? COIN : BRASS_HI);
     }
 
     /** Height of the frontispiece block, book top to diamond bottom. 扉页内容块高度（书本顶边到菱形底边）。 */

@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.achievement.AchievementAdvancements;
 import dev.caecorthus.sparkassist.client.achievement.AchievementClientState;
 import dev.caecorthus.sparkassist.client.config.SparkAssistConfigManager;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookClientState;
+import dev.caecorthus.sparkassist.client.ponder.PonderSupport;
 import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,6 +16,7 @@ public final class SparkAssistClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         configManager = SparkAssistConfigManager.load();
+        PonderSupport.init();
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
         ClientTickEvents.END_CLIENT_TICK.register(AchievementClientState::tick);
         // A server with no advancements of its own never sends the update that would restore the page.

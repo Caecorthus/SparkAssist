@@ -7,6 +7,7 @@ import dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette;
 import dev.caecorthus.sparkassist.client.guidebook.ui.ReaderPainter;
 import dev.caecorthus.sparkassist.guidebook.GuidebookCatalog;
 import dev.caecorthus.sparkassist.guidebook.GuidebookEntry;
+import dev.caecorthus.sparkassist.client.ponder.PonderSupport;
 import dev.caecorthus.sparkassist.client.guidebook.ui.decor.DecorSettings;
 import dev.caecorthus.sparkassist.client.guidebook.ui.decor.GuidebookDecorator;
 import dev.caecorthus.sparkassist.guidebook.GuidebookLayout;
@@ -133,6 +134,8 @@ public final class GuidebookScreen extends Screen {
     private Text foldTip = Text.empty();
     private Text backTip = Text.empty();
     private Text openTip = Text.empty();
+    private Text demoTip = Text.empty();
+    private Text demoNote = Text.empty();
     private Text markedTip = Text.empty();
     private int manaPriceWidth;
     private int countReserveWidth;
@@ -246,6 +249,8 @@ public final class GuidebookScreen extends Screen {
         foldTip = chineseText("guidebook.sparkassist.fold");
         backTip = chineseText("gui.back");
         openTip = chineseText("button.sparkassist.guidebook.open");
+        demoTip = chineseText("guidebook.sparkassist.demo.tip");
+        demoNote = chineseText("guidebook.sparkassist.demo.note");
         markedTip = chineseText("guidebook.sparkassist.marked");
     }
 
@@ -544,7 +549,7 @@ public final class GuidebookScreen extends Screen {
             }
         }
         content = GuidebookContentRenderer.layout(new GuidebookPage(blocks), textRenderer,
-                sheet.measure(), this::chineseString);
+                sheet.measure(), this::chineseString, PonderSupport::canPlay);
         pageHeader = ReaderPainter.PageHeader.fit(textRenderer, title, gem, marked, markedLabel, sheet.measure());
         readerBand = ReaderPainter.Band.fit(textRenderer, reader, crumb, source, title, gem);
         sourceTooltip = source == null ? null : Text.literal(sourceFormat.formatted(source));
@@ -813,6 +818,7 @@ public final class GuidebookScreen extends Screen {
             runningSectionText = readerBand.section(textRenderer, section);
         }
         boolean thumbHot = draggingArticle || sheet.scrollHit().contains(mouseX, mouseY);
+        GuidebookContentRenderer.Demo demo = demoAt(mouseX, mouseY);
         OrderedText head = runningSectionText;
         // Frame and band, then the paper layers (watermark, scrolled plate), then the content: the layers are
         // textured quads between two fill-and-text batches, under the text by draw order alone.
@@ -829,10 +835,13 @@ public final class GuidebookScreen extends Screen {
             decorator.drawPagePlate(context, sheet, pageSet, pageSeed, articleScroll);
             decorator.drawEndSeal(context, sheet, pageSet, ReaderPainter.bodyEnd(content, plate), articleScroll);
             context.draw(() -> ReaderPainter.content(context, textRenderer, sheet, pageHeader, content,
-                    articleScroll, thumbHot, plate));
+                    articleScroll, thumbHot, plate, demo));
         }
         if (closeHover) {
             return new Tip(List.of(backTip), -1);
+        }
+        if (demo != null) {
+            return new Tip(List.of(demoTip, demoNote), -1);
         }
         if (sourceTooltip != null && readerBand.sourceHit(reader).contains(mouseX, mouseY)) {
             return new Tip(List.of(sourceTooltip), -1);
@@ -956,6 +965,11 @@ public final class GuidebookScreen extends Screen {
             }
         }
         treeFocused = false;
+        GuidebookContentRenderer.Demo demo = demoAt(mouseX, mouseY);
+        if (demo != null) {
+            PonderSupport.play(demo.target(), client.currentScreen);
+            return true;
+        }
         if (isArticleOpen() && maxArticleScroll() > 0 && sheet.scrollHit().contains(mouseX, mouseY)) {
             draggingArticle = true;
             dragScroll(mouseY);
@@ -1266,6 +1280,16 @@ public final class GuidebookScreen extends Screen {
     /** Whether the open page carries a chapter plate above its header. 当前页面页眉上方是否有扉画。 */
     private boolean plateShown() {
         return decorator.plateShown(sheet.measure());
+    }
+
+    /** The demo button under the pointer inside the article viewport, or null. 文章视口内指针下的演示按钮；没有则为 null。 */
+    private GuidebookContentRenderer.Demo demoAt(double mouseX, double mouseY) {
+        if (!isArticleOpen() || creditsOpen || content.demos().isEmpty() || !sheet.viewport().contains(mouseX, mouseY)
+                || mouseX < sheet.textLeft() || mouseX >= sheet.textRight()) {
+            return null;
+        }
+        int bodyTop = sheet.viewport().y() - articleScroll + ReaderPainter.headerHeight(plateShown());
+        return content.demoAt((int) Math.floor(mouseY) - bodyTop);
     }
 
     private boolean isMarked(GuidebookEntry entry) {
