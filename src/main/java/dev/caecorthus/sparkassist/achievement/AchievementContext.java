@@ -106,4 +106,21 @@ public record AchievementContext(
     public boolean inPsycho(int tick) {
         return timeline.inPsycho(self(), tick);
     }
+
+    /** Whether the player held this owner-visible trait at some point this round. 玩家本局是否在某一时刻持有过这个自身可见词条。 */
+    public boolean hadTrait(String traitId) {
+        return facts.hadTrait(traitId);
+    }
+
+    /**
+     * Whether the player held this owner-visible trait around record tick {@code recordTick} (within
+     * {@link RoundFacts#RECORD_TICK_TOLERANCE}), e.g. at the moment of a kill from the match record.
+     * 玩家在记录 tick {@code recordTick} 前后（{@link RoundFacts#RECORD_TICK_TOLERANCE} 以内）是否持有这个自身可见词条，
+     * 例如对局记录中某次击杀的那一刻。
+     */
+    public boolean hadTraitAround(String traitId, int recordTick) {
+        return facts.traits().heldBetween(traitId,
+                (long) recordTick - RoundFacts.RECORD_TICK_TOLERANCE,
+                (long) recordTick + RoundFacts.RECORD_TICK_TOLERANCE);
+    }
 }

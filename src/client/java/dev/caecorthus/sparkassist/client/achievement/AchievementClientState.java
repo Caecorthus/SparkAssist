@@ -67,6 +67,7 @@ public final class AchievementClientState {
         if (!TRACKER.active()) {
             TRACKER.start(player.getUuid());
             recordAtStart = MatchRecordBridge.latest();
+            traits = Set.of();
             traitPollCountdown = 0;
         }
 
@@ -78,7 +79,16 @@ public final class AchievementClientState {
         boolean dead = game.isPlayerDead(self);
         if (--traitPollCountdown <= 0) {
             traitPollCountdown = TRAIT_POLL_TICKS;
-            traits = dead || player.isSpectator() ? Set.of() : SparkTraitsGuideBridge.ownerVisibleActiveTraitIds(player);
+            if (dead) {
+                traits = Set.of();
+            } else if (!player.isSpectator()) {
+                traits = SparkTraitsGuideBridge.ownerVisibleActiveTraitIds(player);
+            }
+            // A living spectator is in a fake death (e.g. Depression): keep the last traits rather than read what
+            // spectators are sent. 存活的旁观者处于假死（例如抑郁）：沿用上次的词条，不读取发给旁观者的数据。
+        }
+        if (!dead) {
+            TRACKER.onDepressionAttacker(SparkTraitsAchievementBridge.depressionPsychoAttacker(player));
         }
         long worldTime = client.world.getTime();
         TRACKER.observe(new RoundObservation(

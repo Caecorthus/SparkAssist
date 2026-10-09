@@ -19,8 +19,9 @@ public final class RoundTracker {
     static final long DEATH_REASON_WINDOW_TICKS = 100;
 
     private final List<String> roleChain = new ArrayList<>();
-    private final Set<String> traitIds = new LinkedHashSet<>();
     private final List<String> poisonOverlays = new ArrayList<>();
+    private final Set<UUID> depressionAttackers = new LinkedHashSet<>();
+    private TraitTimeline.Builder traits = new TraitTimeline.Builder();
 
     private boolean active;
     private boolean roundEndSeen;
@@ -78,11 +79,13 @@ public final class RoundTracker {
             if (deathTick < 0 && !roleChain.isEmpty()) {
                 deathTick = Math.max(0, now - startWorldTime);
                 deathWorldTime = now;
+                // SparkTraits clears traits on a real death. SparkTraits 在真正死亡时清空词条。
+                traits.observe(deathTick, Set.of());
             }
         } else if (roleId != null) {
             int alive = observation.alivePlayers();
             fewestAliveWhileAlive = fewestAliveWhileAlive == 0 ? alive : Math.min(fewestAliveWhileAlive, alive);
-            traitIds.addAll(observation.traitIds());
+            traits.observe(Math.max(0, now - startWorldTime), observation.traitIds());
         }
     }
 
@@ -119,6 +122,16 @@ public final class RoundTracker {
         }
     }
 
+    /**
+     * The local player is in Depression psycho because {@code attacker} attacked them (SparkTraits' owner-only state).
+     * 本地玩家因 {@code attacker} 的攻击进入抑郁疯魔（SparkTraits 仅本人可见的状态）。
+     */
+    public void onDepressionAttacker(UUID attacker) {
+        if (active && attacker != null) {
+            depressionAttackers.add(attacker);
+        }
+    }
+
     /** Wathe's round-end result reached the client. Wathe 的结算结果到达客户端。 */
     public void onRoundEndSynced() {
         if (active) {
@@ -138,13 +151,14 @@ public final class RoundTracker {
                         factionId,
                         players,
                         fewestAliveWhileAlive,
-                        traitIds,
+                        traits.build(),
                         lastLiveWorldTime - startWorldTime,
                         deathTick,
                         deathReason,
                         tasksCompleted,
                         gunDrops,
-                        poisonOverlays))
+                        poisonOverlays,
+                        depressionAttackers))
                 : Optional.empty();
         reset();
         return facts;
@@ -157,8 +171,9 @@ public final class RoundTracker {
 
     private void reset() {
         roleChain.clear();
-        traitIds.clear();
         poisonOverlays.clear();
+        depressionAttackers.clear();
+        traits = new TraitTimeline.Builder();
         active = false;
         roundEndSeen = false;
         self = null;
