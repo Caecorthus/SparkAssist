@@ -5,6 +5,7 @@ import dev.caecorthus.sparkassist.achievement.AchievementCatalog;
 import dev.caecorthus.sparkassist.achievement.AchievementContext;
 import dev.caecorthus.sparkassist.achievement.AchievementEvaluator;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
+import dev.caecorthus.sparkassist.achievement.MatchTimeline;
 import dev.caecorthus.sparkassist.achievement.RoundFacts;
 import dev.caecorthus.sparkassist.achievement.RoundObservation;
 import dev.caecorthus.sparkassist.achievement.RoundOutcome;
@@ -133,11 +134,12 @@ public final class AchievementClientState {
             // Wathe 的结算里没有我们（例如分配角色后才加入）：这不是我们的对局。
             return;
         }
+        MatchTimeline timeline = MatchTimeline.of(outcome.events(), SparkFactionAchievementBridge::baseFaction);
         AchievementLedger ledger = AchievementStorage.ledger(client);
         ledger.stats().recordRound(facts.roleChain(), facts.factionId(), outcome.won(), facts.died(), facts.tasksCompleted());
         List<Achievement> earned = AchievementEvaluator.newlyEarned(
                 AchievementCatalog.all(),
-                new AchievementContext(facts, outcome, ledger.stats(), ledger),
+                new AchievementContext(facts, outcome, timeline, ledger.stats(), ledger),
                 (achievement, exception) -> LOGGER.warn("Achievement {} failed to evaluate", achievement.id(), exception));
         long now = System.currentTimeMillis();
         earned.forEach(achievement -> ledger.unlock(achievement.id(), now));

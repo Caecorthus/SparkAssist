@@ -56,9 +56,15 @@ public record RoundOutcome(
         return events.stream().filter(event -> event.is(type)).toList();
     }
 
-    /** Deaths {@code killer} caused, in order. {@code killer} 造成的死亡，按时间顺序。 */
+    /**
+     * Deaths {@code killer} caused, in order; dying by your own hand (actor = target) is not a kill. Rules should
+     * prefer {@link MatchTimeline#killsBy}.
+     * {@code killer} 造成的死亡，按时间顺序；死于自己之手（actor = target）不算击杀。规则应优先使用 {@link MatchTimeline#killsBy}。
+     */
     public List<MatchEvent> killsBy(UUID killer) {
-        return events.stream().filter(event -> event.is(MatchEvent.DEATH) && killer.equals(event.actor())).toList();
+        return events.stream()
+                .filter(event -> event.is(MatchEvent.DEATH) && killer.equals(event.actor()) && !killer.equals(event.target()))
+                .toList();
     }
 
     /** The death of {@code victim}, if recorded. {@code victim} 的死亡记录（若有）。 */
