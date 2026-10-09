@@ -414,7 +414,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
     }
 
     /** WCAG relative luminance of an sRGB colour. sRGB 颜色的 WCAG 相对亮度。 */
-    private static double luminance(int r, int g, int b) {
+    static double luminance(int r, int g, int b) {
         return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
     }
 
