@@ -14,6 +14,11 @@
               "text": "冤魂不会在开局出现。好人、杀手、魔女阵营的玩家死后有机会变成冤魂：活人看不见你，你也碰不到任何人，但完成 3 个任务就能晋升成新的身份，继续帮自己的阵营。"
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/wraith",
+              "text": "演示：化为冤魂、穿门与晋升"
+            },
+            {
               "type": "section",
               "text": "怎么变成冤魂",
               "tone": "info"
