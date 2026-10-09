@@ -147,7 +147,13 @@ public final class AchievementClientState {
         }
         MatchTimeline timeline = MatchTimeline.of(outcome.events(), SparkFactionAchievementBridge::baseFaction);
         AchievementLedger ledger = AchievementStorage.ledger(client);
-        RoundStatsRecorder.record(ledger.stats(), facts, outcome, timeline);
+        try {
+            RoundStatsRecorder.record(ledger.stats(), facts, outcome, timeline);
+        } catch (RuntimeException exception) {
+            // Unexpected record data must never break the game; this round's stats may be partly counted.
+            // 意外的记录数据绝不能影响游戏；本局统计可能只计入了一部分。
+            LOGGER.warn("Could not count this round's stats", exception);
+        }
         List<Achievement> earned = AchievementEvaluator.newlyEarned(
                 AchievementCatalog.all(),
                 new AchievementContext(facts, outcome, timeline, ledger.stats(), ledger),
