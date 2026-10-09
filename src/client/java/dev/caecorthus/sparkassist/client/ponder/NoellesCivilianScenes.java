@@ -108,6 +108,8 @@ final class NoellesCivilianScenes {
                 scene("wathe/aisle", NoellesCivilianScenes::voodoo));
         role("sparkassist:roles/noellesroles/noisemaker", List.of("noellesroles", "sparkstrength"),
                 scene("wathe/cabin", NoellesCivilianScenes::noisemaker));
+        role("sparkassist:roles/noellesroles/spiritualist", List.of("noellesroles"),
+                scene("wathe/cabin", NoellesCivilianScenes::spiritualist));
     }
 
     /**
@@ -1573,6 +1575,131 @@ final class NoellesCivilianScenes {
         scene.idle(90);
         scene.overlay().showText(90)
                 .text("活着时，技能键能大喊让全车听见，背包里能点亮一个人")
+                .independent();
+        scene.idle(100);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Spiritualist's spirit projection (NoellesRoles Noellesroles SPIRIT_PROJECT_PACKET handler and role setup,
+     * SpiritPlayerComponent, SpiritDamageMixin, SpiritSoundMixin, voice plugin; client SpiritCamera,
+     * SpiritCameraHandler, SpiritBlockStateMixin, SpiritRenderDispatcherMixin, SpiritSkinMixin, SpiritNameMixin,
+     * SpiritVisionMixin; SparkStrength SpiritPossessionService and SpiritPossessionRules, SparkWitch secondary key; SparkTraits
+     * EffectiveTraitService): the ability key, off cooldown (60 s at the start), hands the local camera to a flying
+     * SpiritCamera that has no block collision and stays within 30 blocks of the body (and the map's play area). It is a
+     * client-only entity the server never hears of and the local renderer skips, so nobody sees it; the actor stands
+     * in for the view. The body keeps standing where it was, still outlined by killers' instinct. While projecting the
+     * view is grayscale, other players and bodies mostly wear Steve's skin without names (disguise and confusion skins
+     * can win), sounds the server sends and proximity voice are cut, and attacks, item use and the hotbar are blocked.
+     * Pressing the key again returns at once (a stun, daze, Fear or silence can drop the packet); the body being
+     * damaged, moved more than about 1.4 blocks, swallowed or killed forces the return; either way 60 s cooldown.
+     * SparkStrength's Wraith possession (SparkWitch's second skill key, default N; needs both mods) has no in-world
+     * effect, so it is a caption.
+     * 灵界行者的灵魂出窍：冷却结束时（开局 60 秒）按技能键，本地镜头交给一个会飞、没有方块碰撞的 SpiritCamera，最远离开
+     * 肉身 30 格（也不出地图的游戏区域）。它只存在于本人的客户端，服务端完全不知道，本地也不渲染，所以谁也看不见；演员只是
+     * 代表这个视角。肉身停在原地，杀手的本能照样能透视到它。出窍时画面变黑白，其他玩家和尸体一般显示成没有名字的史蒂夫
+     * 皮肤（伪装、混乱等皮肤可能优先），服务端发来的声音和近距离语音都收不到，也不能攻击、用物品或切换快捷栏。再按一次
+     * 技能键立刻回到肉身（眩晕、晕眩、恐惧或沉默可能丢弃这个数据包）；肉身受伤、被挪开约 1.4 格以上、被吞噬或被杀时强制
+     * 拉回；两种情况都冷却 60 秒。SparkStrength 的附身冤魂（SparkWitch 第二技能键，默认 N；两个模组都要装）在世界中没有
+     * 可见效果，所以只在字幕里说明。
+     */
+    private static void spiritualist(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("role_spiritualist", "灵界行者：灵魂出窍");
+        WatheItemScenes.cabinStage(scene, util);
+        int spiritualistColor = RoleColors.of("noellesroles:spiritualist", 0xA064DC);
+        Vec3d bodySpot = new Vec3d(2.4, 1, 1.4);
+        // The soul floats a little and comes out beside the body, so the two never overlap (illustrative); it crosses
+        // the wall beside the door and stops deep in the cabin, where the camera sees it whole above the wall and
+        // clear of the captions.
+        // 灵魂稍微浮起，从肉身旁边出现，两者不会重叠（示意）；它从门旁的墙里穿过去，停在包厢深处，镜头能越过墙看到它的全身，
+        // 也不会被字幕挡住。
+        Vec3d soulStart = new Vec3d(1.8, 1.3, 1.9);
+        Vec3d soulDrift = new Vec3d(1.4, 0, 4.7);
+        ElementLink<ActorElement> body = Actors.enter(scene, spiritualistColor, Text.literal("灵界行者"),
+                bodySpot, WEST, Direction.DOWN);
+        scene.idle(15);
+        scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 40).showing(abilityKey());
+        scene.overlay().showText(70)
+                .text("按技能键（默认 G）灵魂出窍：肉身留在原地不动")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        ElementLink<ActorElement> soul = Actors.enter(scene, spiritualistColor, Text.literal("灵魂"),
+                soulStart, SOUTH, Direction.UP);
+        scene.idle(65);
+        scene.overlay().showText(75)
+                .text("灵魂（示意）像自由视角一样飞行，能直接穿过墙和门")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(5);
+        Actors.walk(scene, soul, soulDrift, 50);
+        scene.idle(75);
+        scene.overlay().showText(80)
+                .text("灵魂只是你自己的视角，其他人都看不见它")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(90);
+        scene.overlay().showText(85)
+                .text("最远离开肉身 30 格；画面变黑白，别人一般都成了无名的默认皮肤")
+                .independent();
+        scene.idle(10);
+        Actors.turn(scene, soul, EAST);
+        scene.idle(35);
+        Actors.turn(scene, soul, WEST);
+        scene.idle(50);
+        scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
+        scene.overlay().showText(70)
+                .text("一般再按一次技能键，视角就立刻回到肉身")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(10);
+        Actors.vanish(scene, soul);
+        scene.idle(65);
+        scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
+        scene.overlay().showText(60)
+                .text("……冷却 60 秒后才能再出窍（演示缩短了时间）")
+                .independent();
+        scene.idle(10);
+        ElementLink<ActorElement> soulAgain = Actors.enter(scene, spiritualistColor, Text.literal("灵魂"),
+                soulStart, SOUTH, Direction.UP);
+        scene.idle(15);
+        Actors.walk(scene, soulAgain, soulDrift, 40);
+        scene.idle(40);
+        Vec3d killerStart = new Vec3d(6.4, 1, 1.4);
+        Vec3d killerSpot = new Vec3d(3.8, 1, 1.4);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
+                killerStart, WEST, Direction.DOWN);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(10);
+        Actors.walk(scene, killer, killerSpot.subtract(killerStart), 40);
+        scene.overlay().showText(80)
+                .text("出窍时听不到脚步声，有人摸到肉身旁你也很难察觉")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(45);
+        Actors.charge(scene, killer, true);
+        scene.idle(16);
+        Actors.charge(scene, killer, false);
+        Actors.swing(scene, killer);
+        Actors.fall(scene, body);
+        // A killed body forces the return at once (cancelProjection "killed"). 肉身被杀立刻强制拉回。
+        Actors.vanish(scene, soulAgain);
+        scene.idle(10);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("肉身被杀就是你被杀：你多半察觉不到，来不及回身")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(40);
+        Actors.leave(scene, killer, Direction.UP);
+        scene.idle(50);
+        scene.overlay().showText(90)
+                .text("肉身受伤、被挪走或被吞噬时，你也会被强制拉回，同样冷却 60 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("装有 SparkStrength 和 SparkWitch 时，可附身冤魂（默认 N），最多 20 秒")
                 .independent();
         scene.idle(100);
         scene.markAsFinished();
