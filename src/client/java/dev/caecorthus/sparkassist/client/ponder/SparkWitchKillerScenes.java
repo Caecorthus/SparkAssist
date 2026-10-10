@@ -769,8 +769,13 @@ final class SparkWitchKillerScenes {
                 .withItem(stack("sparkwitch:ninja_grappling_hook"));
         scene.idle(10);
         Actors.swing(scene, ninja);
-        Actors.slide(scene, ninja, latch.subtract(feet), 5);
+        // Raise the feet above the ledge before crossing it; the straight line clips the cargo box's side.
+        // 双脚先升到货箱顶面，再越过棱角；直线拉过去会穿入货箱侧面。
+        Vec3d ledgeApproach = new Vec3d(2.4, latch.y, 4.6);
+        Actors.slide(scene, ninja, ledgeApproach.subtract(feet), 4);
         scene.idle(5);
+        Actors.slide(scene, ninja, latch.subtract(ledgeApproach), 2);
+        scene.idle(3);
         unchain(scene, chain);
         unsprite(scene, hook);
         Actors.lookPitch(scene, ninja, 0);
@@ -1943,6 +1948,7 @@ final class SparkWitchKillerScenes {
         private final ElementLink<ActorElement> follower;
         private final double behind;
         private boolean stopped;
+        private boolean attached;
 
         Tether(ElementLink<ActorElement> leader, ElementLink<ActorElement> follower, double behind) {
             super(false, UNTIL_STOPPED);
@@ -1955,6 +1961,7 @@ final class SparkWitchKillerScenes {
         public void reset(PonderScene scene) {
             super.reset(scene);
             stopped = false;
+            attached = false;
         }
 
         @Override
@@ -1965,8 +1972,13 @@ final class SparkWitchKillerScenes {
             if (stopped || lead == null || follow == null) {
                 return;
             }
-            follow.setYaw(lead.yaw());
-            follow.moveTo(lead.position().subtract(forward(lead.yaw()).multiply(behind)));
+            if (attached) {
+                follow.syncYaw(lead.yaw());
+            } else {
+                follow.setYaw(lead.yaw());
+                attached = true;
+            }
+            follow.slideTo(lead.position().subtract(forward(lead.yaw()).multiply(behind)));
         }
 
         @Override
@@ -2080,10 +2092,14 @@ final class SparkWitchKillerScenes {
                 velocity = new Vec3d(velocity.x * drag, grounded ? 0 : (velocity.y - GRAVITY) * VERTICAL_DRAG,
                         velocity.z * drag);
             }
-            placed = true;
             body.setYaw(yaw);
             // The body entity flies; Wathe draws its feet one block behind it. 飞行的是尸体实体；Wathe 把脚画在它身后一格。
-            body.moveTo(at.subtract(pivot));
+            if (placed) {
+                body.slideTo(at.subtract(pivot));
+            } else {
+                body.moveTo(at.subtract(pivot));
+            }
+            placed = true;
         }
     }
 
@@ -2625,7 +2641,7 @@ final class SparkWitchKillerScenes {
                 at = new Vec3d(at.x, floor, at.z);
             }
             velocity = new Vec3d(velocity.x * drag, grounded ? 0 : (velocity.y - 0.08) * 0.98, velocity.z * drag);
-            actor.moveTo(at);
+            actor.slideTo(at);
         }
     }
 

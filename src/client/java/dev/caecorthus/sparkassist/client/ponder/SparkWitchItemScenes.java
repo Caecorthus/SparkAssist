@@ -1167,7 +1167,7 @@ final class SparkWitchItemScenes {
             grounded = next.y <= floor;
             at = new Vec3d(x, grounded ? floor : next.y, z);
             velocity = new Vec3d(vx * drag, grounded ? 0 : (velocity.y - 0.08) * 0.98, vz * drag);
-            actor.moveTo(at);
+            actor.slideTo(at);
         }
     }
 
