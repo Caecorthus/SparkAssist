@@ -60,6 +60,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/fiend",
+              "text": "演示：挨打攒钱，买下魔人时刻"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
@@ -114,7 +119,7 @@
             },
             {
               "type": "bullet",
-              "text": "你能隔墙看到所有活着的玩家，所有人也能隔墙看到你。"
+              "text": "你能隔墙看到所有活着的玩家，所有人也能隔墙看到你（被风油精溅到的人暂时看不到）。"
             },
             {
               "type": "bullet",

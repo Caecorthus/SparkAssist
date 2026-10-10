@@ -79,6 +79,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/ninja",
+              "text": "演示：苦无、手里剑与钩爪"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

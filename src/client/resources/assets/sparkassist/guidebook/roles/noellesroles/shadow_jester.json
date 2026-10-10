@@ -114,6 +114,11 @@
               "text": "结盟后任意一人死亡，另一人随之死亡。"
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/shadow_jester",
+              "text": "演示：结下影誓"
+            },
+            {
               "type": "section",
               "text": "双影谢幕",
               "tone": "danger"

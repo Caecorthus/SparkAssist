@@ -48,6 +48,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/corrupt_cop",
+              "text": "演示：开枪打谁都不受罚"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

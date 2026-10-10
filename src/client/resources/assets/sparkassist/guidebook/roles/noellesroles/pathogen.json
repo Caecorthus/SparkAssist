@@ -48,6 +48,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/pathogen",
+              "text": "演示：悄悄感染"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

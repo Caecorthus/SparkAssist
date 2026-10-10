@@ -55,6 +55,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/vendetta",
+              "text": "演示：用复仇刀复仇"
+            },
+            {
               "type": "bullet",
               "text": "其他玩家和尸体在你眼中都是没有名字的默认皮肤，只能靠描边和灰度认出凶手。"
             },

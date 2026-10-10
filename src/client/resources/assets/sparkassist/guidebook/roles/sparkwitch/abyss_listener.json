@@ -96,6 +96,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/abyss_listener",
+              "text": "演示：监守之啸、啸音铳与深暗孢瓶"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

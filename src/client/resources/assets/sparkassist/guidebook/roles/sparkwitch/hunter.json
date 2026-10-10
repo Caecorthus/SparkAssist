@@ -67,6 +67,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/sparkwitch/hunter",
+              "text": "演示：捕兽夹与双管猎枪"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

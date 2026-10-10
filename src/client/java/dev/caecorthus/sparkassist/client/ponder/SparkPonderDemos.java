@@ -33,6 +33,10 @@ final class SparkPonderDemos {
         WatheShopScenes.register();
         WatheRoleScenes.register();
         NoellesCivilianScenes.register();
+        NoellesKillerScenes.register();
+        SparkWitchCivilianScenes.register();
+        SparkWitchKillerScenes.register();
+        SparkWitchWraithScenes.register();
     }
 
     private SparkPonderDemos() {

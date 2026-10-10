@@ -60,6 +60,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/vulture",
+              "text": "演示：秃鹫怎么吃尸体"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
