@@ -14,6 +14,8 @@ final class RoleColors {
     static final int KILLER = of("wathe:killer", 0xC13838);
     static final int CIVILIAN = of("wathe:civilian", 0x36E51B);
     static final int VIGILANTE = of("wathe:vigilante", 0x1B8AE5);
+    static final int VETERAN = of("wathe:veteran", 0x4A7023);
+    static final int LOOSE_END = of("wathe:loose_end", 0x9F0000);
 
     private RoleColors() {
     }

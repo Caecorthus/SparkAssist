@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import dev.doctor4t.wathe.cca.PlayerPsychoComponent;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
@@ -17,11 +18,14 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
@@ -42,12 +46,16 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private static final float FALL_TICKS = 20;
     private static final float PLAYER_SCALE = 0.9375f;
     private static final float NAME_SCALE = 0.025f;
+    /** Vanilla puts a sleeper this high above the bed block (LivingEntity.setPositionInBed). 原版睡觉时人物离床方块底部的高度。 */
+    private static final double BED_HEIGHT = 0.6875;
+    /** Vanilla shifts a sleeper's feet this far from the head block (eye height - 0.1). 原版睡觉时脚离床头方块的距离。 */
+    private static final double BED_REACH = 1.52;
     @Nullable
     private static PlayerEntityModel<LivingEntity> bodyModel;
 
-    private final int color;
+    private final int startColor;
     @Nullable
-    private final Text name;
+    private final Text startName;
     private final Vec3d startPosition;
     private final float startYaw;
     @Nullable
@@ -55,7 +63,16 @@ public final class ActorElement extends AnimatedSceneElementBase {
     @Nullable
     private ClientWorld playerWorld;
 
+    private int color;
+    @Nullable
+    private Text name;
     private ItemStack held = ItemStack.EMPTY;
+    private ItemStack chest = ItemStack.EMPTY;
+    private boolean invisible;
+    private boolean psycho;
+    @Nullable
+    private BlockPos bedHead;
+    private Direction bedFacing = Direction.NORTH;
     private boolean charging;
     private boolean sneaking;
     private Vec3d position;
@@ -73,8 +90,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
      * @param name     name tag text, or null for none / 名牌文字，null 表示不显示
      */
     public ActorElement(int color, @Nullable Text name, Vec3d position, float yaw) {
-        this.color = color & 0xFFFFFF;
-        this.name = name;
+        this.startColor = color & 0xFFFFFF;
+        this.startName = name;
         this.startPosition = position;
         this.startYaw = yaw;
         reset(null);
@@ -83,12 +100,18 @@ public final class ActorElement extends AnimatedSceneElementBase {
     /** Back to the starting state: Ponder reuses element objects when a scene replays or seeks. 回到初始状态：重播或跳转时 Ponder 会复用元素对象。 */
     @Override
     public void reset(@Nullable PonderScene scene) {
+        color = startColor;
+        name = startName;
         position = startPosition;
         previousPosition = startPosition;
         yaw = startYaw;
         previousYaw = startYaw;
         pitch = 0;
         held = ItemStack.EMPTY;
+        chest = ItemStack.EMPTY;
+        invisible = false;
+        psycho = false;
+        bedHead = null;
         charging = false;
         sneaking = false;
         age = 0;
@@ -121,6 +144,56 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     public void hold(ItemStack stack) {
         held = stack.copy();
+    }
+
+    /** Wear {@code stack} in the chest slot (a vest), or take it off with an empty stack. 胸甲槽穿上 stack（如背心），空物品即脱下。 */
+    public void wear(ItemStack stack) {
+        chest = stack.copy();
+    }
+
+    /** Take on another colour and name tag in place (a disguise, a new role). 原地换成另一种颜色与名牌（伪装、转职）。 */
+    public void retint(int color, @Nullable Text name) {
+        this.color = color & 0xFFFFFF;
+        this.name = name;
+        player = null;
+    }
+
+    /**
+     * Vanilla invisibility: the body and name tag vanish, held items and armour still show, as a real invisible
+     * player looks to others.
+     * 原版隐身：身体与名牌消失，手持物品和盔甲仍可见，与真实隐身玩家在别人眼中的样子一致。
+     */
+    public void setInvisible(boolean invisible) {
+        this.invisible = invisible;
+    }
+
+    /**
+     * Wathe's psycho mode look: the psycho skin, no armour or other layers (Wathe's own renderer mixins read the
+     * psycho component, which this sets on the drawn entity).
+     * Wathe 疯魔模式的外观：疯魔皮肤，不显示盔甲等图层（由 Wathe 自己的渲染 mixin 读取疯魔组件，这里设置在绘制用的实体上）。
+     */
+    public void setPsycho(boolean psycho) {
+        this.psycho = psycho;
+    }
+
+    /**
+     * Lie in the bed whose head block is {@code head} and whose {@code facing} points from foot to head, as a sleeping
+     * player does: on the back, head on the pillow.
+     * 躺进床头方块为 head、朝向（床尾指向床头）为 facing 的床，与睡觉的玩家相同：仰面，头枕在枕头上。
+     */
+    public void lieDown(BlockPos head, Direction facing) {
+        bedHead = head;
+        bedFacing = facing;
+        charging = false;
+        sneaking = false;
+    }
+
+    public void getUp() {
+        bedHead = null;
+    }
+
+    public boolean isAsleep() {
+        return bedHead != null;
     }
 
     /** Hold right-click with the held item (the knife's charge). 按住右键使用手持物品（如刀的蓄力）。 */
@@ -198,11 +271,19 @@ public final class ActorElement extends AnimatedSceneElementBase {
         MatrixStack ms = graphics.getMatrices();
         Vec3d at = previousPosition.lerp(position, pt);
         float bodyYaw = MathHelper.lerpAngleDegrees(pt, previousYaw, yaw);
-        int light = lightCoordsFromFade(fade);
+        int light = lightCoordsFromFade(world.scene == null ? fade : Math.min(fade, StageLights.actorLevel(world.scene)));
         if (isDown()) {
             ms.push();
             ms.translate(at.x, at.y, at.z);
-            body(ms, buffer, bodyYaw, pt, light);
+            lying(ms, buffer, bodyYaw, -90 * bounceOut(Math.min(FALL_TICKS, fall + pt) / FALL_TICKS), light);
+            ms.pop();
+            return;
+        }
+        if (bedHead != null) {
+            ms.push();
+            ms.translate(bedHead.getX() + 0.5 - bedFacing.getOffsetX() * BED_REACH, bedHead.getY() + BED_HEIGHT,
+                    bedHead.getZ() + 0.5 - bedFacing.getOffsetZ() * BED_REACH);
+            lying(ms, buffer, bedFacing.getOpposite().asRotation(), 90, light);
             ms.pop();
             return;
         }
@@ -215,7 +296,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         dispatcher.setRenderShadows(false);
         dispatcher.render(actor, at.x, at.y, at.z, bodyYaw, pt, ms, buffer, light);
         dispatcher.setRenderShadows(MinecraftClient.getInstance().options.getEntityShadows().getValue());
-        if (name != null) {
+        if (name != null && !invisible) {
             ms.push();
             ms.translate(at.x, at.y + 2.15, at.z);
             nameTag(world, ms, buffer, pt);
@@ -226,6 +307,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
     /** Copy this tick's state into the entity the vanilla renderer reads. 把本 tick 的状态写入原版渲染器读取的实体。 */
     private void pose(ActorPlayer actor) {
         actor.setStackInHand(Hand.MAIN_HAND, held);
+        actor.equipStack(EquipmentSlot.CHEST, chest);
+        actor.setInvisible(invisible);
+        PlayerPsychoComponent.KEY.get(actor).psychoTicks = psycho ? 1 : 0;
         actor.charging = charging && !held.isEmpty();
         actor.setSneaking(sneaking);
         actor.setPose(sneaking ? EntityPose.CROUCHING : EntityPose.STANDING);
@@ -240,15 +324,16 @@ public final class ActorElement extends AnimatedSceneElementBase {
     }
 
     /**
-     * Wathe's PlayerBodyEntityRenderer: tip forward about the feet with a bounce-out ease, lifted 0.15 so the body
-     * lies on the floor, arms at the sides.
-     * 与 Wathe 的 PlayerBodyEntityRenderer 相同：以脚为轴向前扑倒，回弹缓动，抬高 0.15 让尸体躺在地面上，双臂贴身。
+     * A player lying flat, feet at the origin, tipped {@code angle} degrees about the feet away from standing: -90 is
+     * Wathe's body (PlayerBodyEntityRenderer: face down towards {@code yaw}, arms at the sides), +90 a sleeper on the
+     * back with the head away from {@code yaw}. Lifted in step with the tip so the model rests on the surface.
+     * 平躺的玩家，脚在原点，绕脚从站立倾倒 angle 度：-90 是 Wathe 的尸体（PlayerBodyEntityRenderer：朝 yaw 脸朝下扑倒，
+     * 双臂贴身），+90 是仰面睡觉、头朝 yaw 反方向的人。随倾倒同步抬高，让模型落在表面上。
      */
-    private void body(MatrixStack ms, VertexConsumerProvider buffer, float bodyYaw, float pt, int light) {
-        float progress = bounceOut(Math.min(FALL_TICKS, fall + pt) / FALL_TICKS);
-        ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - bodyYaw));
-        ms.translate(0, progress * 0.15f, 0);
-        ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-progress * 90));
+    private void lying(MatrixStack ms, VertexConsumerProvider buffer, float yaw, float angle, int light) {
+        ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - yaw));
+        ms.translate(0, Math.abs(angle) / 90 * 0.15f, 0);
+        ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(angle));
         ms.scale(-PLAYER_SCALE, -PLAYER_SCALE, PLAYER_SCALE);
         ms.translate(0, -1.501, 0);
         PlayerEntityModel<LivingEntity> model = bodyModel();
@@ -303,8 +388,39 @@ public final class ActorElement extends AnimatedSceneElementBase {
         }
         ms.scale(NAME_SCALE, NAME_SCALE, NAME_SCALE);
         OrderedText text = name.asOrderedText();
-        font.drawWithOutline(text, -font.getWidth(text) / 2f, -font.fontHeight, 0xFF000000 | color, 0xFF000000,
+        font.drawWithOutline(text, -font.getWidth(text) / 2f, -font.fontHeight, 0xFF000000 | readable(color), 0xFF000000,
                 ms.peek().getPositionMatrix(), buffer, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+    }
+
+    /**
+     * The role colour, lifted towards white until it stands out from the tag's black outline: dark roles (the
+     * Veteran's olive, deep reds) would otherwise read as a dark smudge. Bright colours pass unchanged.
+     * 身份颜色，必要时向白色提亮，直到与名牌的黑色描边拉开对比：深色身份（老兵的橄榄绿、深红）否则会糊成一团。
+     * 亮色保持不变。
+     */
+    static int readable(int rgb) {
+        int r = rgb >> 16 & 0xFF;
+        int g = rgb >> 8 & 0xFF;
+        int b = rgb & 0xFF;
+        for (float t = 0; t <= 1; t += 0.05f) {
+            int lr = Math.round(r + (255 - r) * t);
+            int lg = Math.round(g + (255 - g) * t);
+            int lb = Math.round(b + (255 - b) * t);
+            if (luminance(lr, lg, lb) >= 0.2) {
+                return lr << 16 | lg << 8 | lb;
+            }
+        }
+        return 0xFFFFFF;
+    }
+
+    /** WCAG relative luminance of an sRGB colour. sRGB 颜色的 WCAG 相对亮度。 */
+    static double luminance(int r, int g, int b) {
+        return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+    }
+
+    private static double linear(int channel) {
+        double c = channel / 255.0;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     }
 
     /** The entity, rebuilt when the client world changes; null without a world (Ponder needs one anyway).
