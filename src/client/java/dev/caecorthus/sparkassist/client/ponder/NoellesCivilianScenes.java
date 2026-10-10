@@ -1030,7 +1030,7 @@ final class NoellesCivilianScenes {
                 guardSpot, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, guard, shield);
         scene.idle(15);
-        scene.overlay().showText(80)
+        scene.overlay().showText(77)
                 .text("保镖还能花 100 金币买【民主盾牌】，只有保镖举得起来")
                 .independent()
                 .attachKeyFrame();
@@ -1051,7 +1051,7 @@ final class NoellesCivilianScenes {
         scene.idle(45);
         scene.overlay().showControls(guardSpot.add(0, 2.6, 0), Pointing.DOWN, 40).rightClick().withItem(shield);
         Actors.charge(scene, guard, true);
-        scene.overlay().showText(50)
+        scene.overlay().showText(46)
                 .text("主手拿着按住右键举盾，最多举 10 秒")
                 .independent()
                 .attachKeyFrame();
@@ -1652,7 +1652,7 @@ final class NoellesCivilianScenes {
                 bodySpot, WEST, Direction.DOWN);
         scene.idle(15);
         scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 40).showing(abilityKey());
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("按技能键（默认 G）灵魂出窍：肉身留在原地不动")
                 .independent()
                 .attachKeyFrame();
@@ -1660,7 +1660,7 @@ final class NoellesCivilianScenes {
         ElementLink<ActorElement> soul = Actors.enter(scene, spiritualistColor, Text.literal("灵魂"),
                 soulStart, SOUTH, Direction.UP);
         scene.idle(65);
-        scene.overlay().showText(75)
+        scene.overlay().showText(72)
                 .text("灵魂（示意）像自由视角一样飞行，能直接穿过墙和门")
                 .independent()
                 .attachKeyFrame();
@@ -1681,7 +1681,7 @@ final class NoellesCivilianScenes {
         Actors.turn(scene, soul, WEST);
         scene.idle(50);
         scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("一般再按一次技能键，视角就立刻回到肉身")
                 .independent()
                 .attachKeyFrame();
@@ -1705,7 +1705,7 @@ final class NoellesCivilianScenes {
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(10);
         Actors.walk(scene, killer, killerSpot.subtract(killerStart), 40);
-        scene.overlay().showText(80)
+        scene.overlay().showText(61)
                 .text("出窍时听不到脚步声，有人摸到肉身旁你也很难察觉")
                 .independent()
                 .attachKeyFrame();

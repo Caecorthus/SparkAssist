@@ -168,7 +168,7 @@ final class NoellesKillerScenes {
                 .attachKeyFrame();
         scene.idle(90);
         scene.overlay().showControls(new Vec3d(4.4, 3.6, 2.2), Pointing.DOWN, 40).leftClick().withItem(head);
-        scene.overlay().showText(50)
+        scene.overlay().showText(47)
                 .text("先点一个人的头像（可以选你自己）……")
                 .independent();
         scene.idle(55);
@@ -251,11 +251,11 @@ final class NoellesKillerScenes {
         Actors.turn(scene, vulture, SCREEN_RIGHT);
         scene.idle(6);
         Actors.lookPitch(scene, vulture, 45);
-        scene.overlay().showText(70)
+        scene.overlay().showText(65)
                 .text("走到 2 格内，准星对准尸体，按技能键（默认 G）")
                 .independent()
                 .attachKeyFrame();
-        scene.idle(60);
+        scene.idle(65);
         Vec3d smoke = feet.add(0, 0.5, 0);
         spray(scene, ParticleTypes.SMOKE, smoke, 30, 0.3, 0.02);
         spray(scene, ParticleTypes.SOUL, smoke, 10, 0.2, 0.01);
@@ -264,7 +264,7 @@ final class NoellesKillerScenes {
         // 速度 III 与活人轮廓都从吃完起持续 10 秒。
         Actors.highlight(scene, passenger, color, 200);
         scene.idle(10);
-        scene.overlay().showText(80)
+        scene.overlay().showText(77)
                 .text("尸体当场被吃掉，原地冒出烟雾和灵魂粒子，旁人也看得见")
                 .independent()
                 .attachKeyFrame();
@@ -502,7 +502,7 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("按住右键蓄力：约 1 秒蓄满，蓄得越久飞得越快越远")
                 .independent()
                 .attachKeyFrame();
@@ -516,7 +516,7 @@ final class NoellesKillerScenes {
         // From the eyes (feet + 1.62 - 0.1) along the facing, sagging under gravity until the back wall's north face.
         // 从眼睛高度（脚 + 1.62 - 0.1）沿朝向飞出，受重力略微下沉，直到后墙的北面。
         throwAxe(scene, new Vec3d(6.4, 2.52, 0.5), new Vec3d(0.9, 2.27, 6.0), 16, 3.3f);
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("松开右键扔出：飞斧穿过一个人还会接着飞（演示放慢了）")
                 .independent()
                 .attachKeyFrame();
@@ -616,7 +616,7 @@ final class NoellesKillerScenes {
         Actors.turn(scene, bomber, SCREEN_RIGHT);
         scene.idle(68);
         // 10 s after the plant, in real time. 放置 10 秒后（真实时间）。
-        scene.overlay().showText(90)
+        scene.overlay().showText(88)
                 .text("10 秒后开始滴滴作响，炸弹出现在他背包里：15 秒后爆炸")
                 .independent()
                 .attachKeyFrame();
@@ -736,7 +736,7 @@ final class NoellesKillerScenes {
         scene.world().modifyEntity(drone, entity -> droneData(entity, "PAYLOAD", false));
         ElementLink<ThrownElement> grenade = Actors.toss(scene, armedM67(), new Vec3d(3.0, 2.33, 6.2), drop, 7, 0,
                 true, ThrownElement.Flight.UPRIGHT);
-        scene.overlay().showText(50)
+        scene.overlay().showText(40)
                 .text("左键投下 M67：5 秒后爆炸")
                 .independent()
                 .attachKeyFrame();
@@ -747,7 +747,7 @@ final class NoellesKillerScenes {
         scene.idle(5);
         flyDrone(scene, drone, new Vec3d(4.0, 0, -4.0), 12);
         scene.idle(38);
-        scene.overlay().showText(85)
+        scene.overlay().showText(82)
                 .text("附近的人看得到它的描边：5 格内红色，7 格内黄色")
                 .independent()
                 .attachKeyFrame();
@@ -833,12 +833,12 @@ final class NoellesKillerScenes {
         WatheItemScenes.shoot(scene, vigilante, new Vec3d(5.2, 2.05, 1.8), new Vec3d(3.2, 2.2, 3.8));
         fakeBody(scene, jester);
         scene.idle(10);
-        scene.overlay().showText(90)
+        scene.overlay().showText(78)
                 .colored(PonderPalette.RED)
                 .text("被好人开枪打中时不会死，只留下假尸体；其他活人被定住 5 秒")
                 .independent()
                 .attachKeyFrame();
-        scene.idle(87);
+        scene.idle(88);
         Actors.vanish(scene, jester);
         // A single cycle, as JesterMomentRules.shuffleSpots draws it: each takes the next one's spot and facing.
         // 与 shuffleSpots 一样的单一循环：每人拿到下一个人的位置与朝向。
@@ -2072,7 +2072,7 @@ final class NoellesKillerScenes {
         scene.idle(15);
         Actors.highlight(scene, partner, color, 80);
         Actors.highlight(scene, proposer, color, 80);
-        scene.overlay().showText(80)
+        scene.overlay().showText(77)
                 .text("影子小丑两人一对，能隔墙看见彼此（只在你们屏幕上）")
                 .independent()
                 .attachKeyFrame();
@@ -2086,14 +2086,14 @@ final class NoellesKillerScenes {
         scene.idle(80);
         Actors.walk(scene, proposer, new Vec3d(-2.0, 0, 2.0), 26);
         scene.idle(28);
-        scene.overlay().showText(75)
+        scene.overlay().showText(72)
                 .text("准星对准 3 格内的搭档按技能键（默认 G），发起影誓")
                 .independent()
                 .attachKeyFrame();
         scene.idle(55);
         Actors.turn(scene, partner, SCREEN_LEFT);
         scene.idle(25);
-        scene.overlay().showText(60)
+        scene.overlay().showText(50)
                 .text("搭档也对你按一次技能键，同盟就结成了")
                 .independent()
                 .attachKeyFrame();
@@ -2104,7 +2104,7 @@ final class NoellesKillerScenes {
         Actors.retint(scene, proposer, color, Text.literal("影瞳"));
         Actors.retint(scene, partner, color, Text.literal("影刃"));
         scene.idle(15);
-        scene.overlay().showText(85)
+        scene.overlay().showText(82)
                 .text("发起的你成为影瞳：刀被收走，背包里多了把开锁器")
                 .independent()
                 .attachKeyFrame();
@@ -2112,12 +2112,12 @@ final class NoellesKillerScenes {
         // He takes out the lockpick, which landed in a free slot. 他拿出放进空槽位的开锁器。
         Actors.hold(scene, proposer, stack("wathe:lockpick"));
         scene.idle(45);
-        scene.overlay().showText(85)
+        scene.overlay().showText(82)
                 .text("同意的搭档成为影刃：刀能杀任何人，背包里多一把德林加")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(85)
+        scene.overlay().showText(82)
                 .text("两人都能按住本能键隔墙看见活人；此后一人死，另一人也会死")
                 .independent();
         scene.idle(90);

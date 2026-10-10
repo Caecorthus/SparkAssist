@@ -186,7 +186,7 @@ final class WatheShopScenes {
         scene.idle(45);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(35);
-        scene.overlay().showText(40)
+        scene.overlay().showText(37)
                 .text("……15 秒后（演示缩短了等待时间）")
                 .independent();
         scene.idle(45);
@@ -292,12 +292,12 @@ final class WatheShopScenes {
         scene.idle(40);
         Actors.charge(scene, victim, false);
         Actors.hold(scene, victim, ItemStack.EMPTY);
-        scene.idle(20);
+        scene.idle(30);
         scene.overlay().showText(50)
                 .text("……一般 40～70 秒后（演示缩短了时间）")
                 .independent();
         Actors.walk(scene, victim, new Vec3d(1.2, 0, 0.8), 30);
-        scene.idle(50);
+        scene.idle(60);
         Actors.fall(scene, victim);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
@@ -355,6 +355,10 @@ final class WatheShopScenes {
         ElementLink<ActorElement> sleeper = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(1.2, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
         scene.idle(10);
+        scene.overlay().showText(70)
+                .text("空手右键空床就能躺下睡觉，白天黑夜都能睡")
+                .independent()
+                .attachKeyFrame();
         Actors.walk(scene, sleeper, new Vec3d(1.8, 0, -0.9), 25);
         scene.idle(28);
         Actors.turn(scene, sleeper, NORTH);
@@ -362,10 +366,6 @@ final class WatheShopScenes {
         scene.overlay().showControls(pillow.add(-0.5, 1, 0), Pointing.DOWN, 30).rightClick();
         scene.idle(10);
         Actors.lieDown(scene, sleeper, head, Direction.EAST);
-        scene.overlay().showText(60)
-                .text("空手右键空床就能躺下睡觉，白天黑夜都能睡")
-                .independent()
-                .attachKeyFrame();
         scene.idle(40);
         Effects.unmark(scene, poison);
         scene.overlay().showText(90)
@@ -383,7 +383,7 @@ final class WatheShopScenes {
                 .text("……一般 40～70 秒后（演示缩短了时间）")
                 .independent();
         Actors.walk(scene, sleeper, new Vec3d(1.4, 0, 0.6), 30);
-        scene.idle(50);
+        scene.idle(60);
         Actors.fall(scene, sleeper);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
