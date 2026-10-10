@@ -67,6 +67,11 @@
               "text": "技能模式：花 75 金币，清空其他存活好人的技能冷却（不含你自己）；怀表冷却 30 秒。"
             },
             {
+              "type": "demo",
+              "scene": "sparkstrength:dying_watch",
+              "text": "演示：濒毁怀表"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

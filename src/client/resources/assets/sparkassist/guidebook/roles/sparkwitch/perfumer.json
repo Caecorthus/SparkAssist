@@ -85,8 +85,18 @@
               "text": "【香薰】：必须直接砸中一名玩家才生效，对方 3 秒内灵敏度忽快忽慢、准心乱飘。"
             },
             {
+              "type": "demo",
+              "scene": "sparkstrength:aroma_orb",
+              "text": "演示：香薰"
+            },
+            {
               "type": "bullet",
               "text": "【晨风香水】：喷在自己身上，本局剩余时间获得速度 II，理智下降速度减半。别人看不出你用了它。"
+            },
+            {
+              "type": "demo",
+              "scene": "sparkstrength:zephyr_perfume",
+              "text": "演示：晨风香水"
             },
             {
               "type": "section",
