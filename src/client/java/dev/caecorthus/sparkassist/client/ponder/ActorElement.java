@@ -1,6 +1,10 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
 import dev.doctor4t.wathe.cca.PlayerPsychoComponent;
+import dev.doctor4t.wathe.client.WatheClient;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
@@ -42,6 +46,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class ActorElement extends AnimatedSceneElementBase {
     private static final int SWING_TICKS = 6;
+    /** Degrees turned per tick towards a new heading: a half turn takes five ticks. 每 tick 转向新朝向的角度：转身半圈用五 tick。 */
+    private static final float TURN_SPEED = 36;
+    /** Moves longer than this in one tick are teleports: no stride for them. 单 tick 内超过此距离的移动视为传送，不迈步。 */
+    private static final double TELEPORT = 1;
     /** Wathe's body falls over 20 ticks with a bounce (PlayerBodyEntityRenderer). Wathe 尸体在 20 tick 内回弹着倒下。 */
     private static final float FALL_TICKS = 20;
     private static final float PLAYER_SCALE = 0.9375f;
@@ -77,8 +85,13 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private boolean sneaking;
     private Vec3d position;
     private Vec3d previousPosition;
+    /** Where the actor stood after its own step last tick; anything since is a move made by an instruction. 上一 tick 自身迈步后的位置；之后的位移来自指令。 */
+    private Vec3d settled;
+    /** Walks and slides under way; overlapping ones add up (a knockback with a hop). 进行中的行走与平移；重叠时相加（击退加上弹起）。 */
+    private final List<Move> moves = new ArrayList<>();
     private float yaw;
     private float previousYaw;
+    private float targetYaw;
     private float pitch;
     private int age;
     private int swingTicks = -1;
@@ -104,8 +117,11 @@ public final class ActorElement extends AnimatedSceneElementBase {
         name = startName;
         position = startPosition;
         previousPosition = startPosition;
+        settled = startPosition;
+        moves.clear();
         yaw = startYaw;
         previousYaw = startYaw;
+        targetYaw = startYaw;
         pitch = 0;
         held = ItemStack.EMPTY;
         chest = ItemStack.EMPTY;
@@ -117,7 +133,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         age = 0;
         swingTicks = -1;
         fall = -1;
-        player = null;
+        dropPlayer();
     }
 
     // ------------------------------------------------------------------ state, set by instructions / 状态（由指令设置）
@@ -134,8 +150,29 @@ public final class ActorElement extends AnimatedSceneElementBase {
         return yaw;
     }
 
+    /** Face {@code yaw} at once (a teleport). 立刻朝向 yaw（如传送）。 */
     public void setYaw(float yaw) {
         this.yaw = yaw;
+        targetYaw = yaw;
+    }
+
+    /** Turn towards {@code yaw} over the next few ticks. 在接下来几 tick 内转向 yaw。 */
+    public void turnTo(float yaw) {
+        targetYaw = yaw;
+    }
+
+    /**
+     * Cover {@code delta} in even steps over the next {@code ticks} ticks, turning to {@code heading} on the way
+     * (NaN keeps the current facing), on top of any other walk or slide under way. The actor takes the steps itself
+     * so its stride matches them tick for tick.
+     * 在接下来 ticks 内匀速走完 delta，途中转向 heading（NaN 表示保持朝向），与进行中的其他行走或平移叠加。由演员自己
+     * 迈步，步伐与位移逐 tick 同步。
+     */
+    public void walk(Vec3d delta, int ticks, float heading) {
+        moves.add(new Move(delta.multiply(1.0 / ticks), ticks));
+        if (!Float.isNaN(heading)) {
+            turnTo(heading);
+        }
     }
 
     public void setPitch(float degrees) {
@@ -155,7 +192,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
     public void retint(int color, @Nullable Text name) {
         this.color = color & 0xFFFFFF;
         this.name = name;
-        player = null;
+        if (player != null) {
+            player.recolor(this.color);
+        }
     }
 
     /**
@@ -218,6 +257,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
      */
     public void fall() {
         fall = 0;
+        targetYaw = yaw;
         charging = false;
         sneaking = false;
         held = ItemStack.EMPTY;
@@ -230,12 +270,27 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     @Override
     public void tick(PonderScene scene) {
-        // Runs before this tick's instructions move the actor, so the walk cycle follows last tick's movement.
-        // 在本 tick 的指令移动演员之前运行；步态跟随上一 tick 的位移。
+        // Runs before this tick's instructions. The actor's own step and turn happen here, so rendering eases from
+        // previous to current and the stride matches the step of the same tick; moves made by instructions since the
+        // last tick (a scripted circle) count towards the stride one tick late, teleports not at all.
+        // 在本 tick 的指令之前运行。演员自己的迈步与转身在这里完成，渲染从上一位置平滑过渡到当前位置，步伐与同一 tick
+        // 的位移同步；上一 tick 以来由指令造成的移动（脚本绕圈）晚一 tick 计入步伐，传送不计入。
         ActorPlayer actor = player();
-        double moved = position.subtract(previousPosition).horizontalLength();
+        double pushed = position.subtract(settled).horizontalLength();
         previousPosition = position;
         previousYaw = yaw;
+        for (Iterator<Move> it = moves.iterator(); it.hasNext(); ) {
+            Move move = it.next();
+            position = position.add(move.step);
+            if (--move.ticks <= 0) {
+                it.remove();
+            }
+        }
+        settled = position;
+        if (!isDown() && bedHead == null) {
+            yaw += MathHelper.clamp(MathHelper.wrapDegrees(targetYaw - yaw), -TURN_SPEED, TURN_SPEED);
+        }
+        double moved = position.subtract(previousPosition).horizontalLength() + (pushed < TELEPORT ? pushed : 0);
         age++;
         if (fall >= 0 && fall < FALL_TICKS) {
             fall++;
@@ -268,6 +323,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
         if (fade <= 0.01f) {
             return;
         }
+        // Ponder's slow-reading mode can hand out partial ticks outside 0..1 as a caption closes; never extrapolate.
+        // Ponder 的慢速阅读模式在字幕关闭时可能给出 0..1 之外的插值；不外推。
+        pt = MathHelper.clamp(pt, 0, 1);
         MatrixStack ms = graphics.getMatrices();
         Vec3d at = previousPosition.lerp(position, pt);
         float bodyYaw = MathHelper.lerpAngleDegrees(pt, previousYaw, yaw);
@@ -294,8 +352,13 @@ public final class ActorElement extends AnimatedSceneElementBase {
         pose(actor);
         EntityRenderDispatcher dispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
         dispatcher.setRenderShadows(false);
-        dispatcher.render(actor, at.x, at.y, at.z, bodyYaw, pt, ms, buffer, light);
-        dispatcher.setRenderShadows(MinecraftClient.getInstance().options.getEntityShadows().getValue());
+        ActorPlayer.setDrawing(true);
+        try {
+            dispatcher.render(actor, at.x, at.y, at.z, bodyYaw, pt, ms, buffer, light);
+        } finally {
+            ActorPlayer.setDrawing(false);
+            dispatcher.setRenderShadows(MinecraftClient.getInstance().options.getEntityShadows().getValue());
+        }
         if (name != null && !invisible) {
             ms.push();
             ms.translate(at.x, at.y + 2.15, at.z);
@@ -311,6 +374,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
         actor.setInvisible(invisible);
         PlayerPsychoComponent.KEY.get(actor).psychoTicks = psycho ? 1 : 0;
         actor.charging = charging && !held.isEmpty();
+        // Swings use the arm of preferredHand; left null (never swung through swingHand) it is the off arm.
+        // 挥手动画使用 preferredHand 对应的手臂；为 null（从未经 swingHand 挥过）时会变成副手。
+        actor.preferredHand = Hand.MAIN_HAND;
         actor.setSneaking(sneaking);
         actor.setPose(sneaking ? EntityPose.CROUCHING : EntityPose.STANDING);
         actor.prevBodyYaw = previousYaw;
@@ -432,10 +498,33 @@ public final class ActorElement extends AnimatedSceneElementBase {
             return null;
         }
         if (player == null || playerWorld != world) {
+            dropPlayer();
             player = new ActorPlayer(world, color);
             playerWorld = world;
         }
         return player;
+    }
+
+    /**
+     * Let go of the drawn entity. Wathe keeps a muzzle position per gun-holding player in a static map, which would
+     * otherwise hold every replaced actor and its world.
+     * 释放绘制用的实体。Wathe 在静态表中为每个持枪玩家记录枪口位置，不移除的话会一直持有被替换的演员及其世界。
+     */
+    private void dropPlayer() {
+        if (player != null && WatheClient.particleMap != null) {
+            WatheClient.particleMap.remove(player);
+        }
+        player = null;
+    }
+
+    private static final class Move {
+        private final Vec3d step;
+        private int ticks;
+
+        private Move(Vec3d step, int ticks) {
+            this.step = step;
+            this.ticks = ticks;
+        }
     }
 
     private static PlayerEntityModel<LivingEntity> bodyModel() {

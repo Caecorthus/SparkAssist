@@ -39,9 +39,9 @@ public final class Actors {
         scene.addInstruction(new Walk(actor, delta, heading, ticks));
     }
 
-    /** Turn to {@code yaw} over a few ticks. 在几 tick 内转向 yaw。 */
+    /** Turn to {@code yaw} over a few ticks (a half turn takes five). 在几 tick 内转向 yaw（转身半圈用五 tick）。 */
     public static void turn(SceneBuilder scene, ElementLink<ActorElement> actor, float yaw) {
-        scene.addInstruction(new Turn(actor, yaw, 5));
+        apply(scene, actor, element -> element.turnTo(yaw));
     }
 
     /**
@@ -172,67 +172,29 @@ public final class Actors {
         }
     }
 
+    /**
+     * Hands the walk to the actor, which takes the steps itself from the next tick on; the instruction only keeps the
+     * walk's length on the timeline. 把行走交给演员，演员从下一 tick 起自己迈步；本指令只在时间线上占住行走的时长。
+     */
     private static final class Walk extends TickingInstruction {
         private final ElementLink<ActorElement> link;
-        private final Vec3d step;
+        private final Vec3d delta;
         private final float heading;
-        @Nullable
-        private ActorElement actor;
 
         /** @param heading the yaw to face while walking, or NaN to keep the current one / 行走时的朝向，NaN 表示保持当前朝向 */
         Walk(ElementLink<ActorElement> link, Vec3d delta, float heading, int ticks) {
             super(false, ticks);
             this.link = link;
-            this.step = delta.multiply(1.0 / ticks);
+            this.delta = delta;
             this.heading = heading;
         }
 
         @Override
         protected void firstTick(PonderScene scene) {
             super.firstTick(scene);
-            actor = scene.resolve(link);
-            if (actor != null && !Float.isNaN(heading)) {
-                actor.setYaw(heading);
-            }
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            super.tick(scene);
+            ActorElement actor = scene.resolve(link);
             if (actor != null) {
-                actor.moveTo(actor.position().add(step));
-            }
-        }
-    }
-
-    private static final class Turn extends TickingInstruction {
-        private final ElementLink<ActorElement> link;
-        private final float target;
-        @Nullable
-        private ActorElement actor;
-        private float start;
-
-        Turn(ElementLink<ActorElement> link, float target, int ticks) {
-            super(false, ticks);
-            this.link = link;
-            this.target = target;
-        }
-
-        @Override
-        protected void firstTick(PonderScene scene) {
-            super.firstTick(scene);
-            actor = scene.resolve(link);
-            if (actor != null) {
-                start = actor.yaw();
-            }
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            super.tick(scene);
-            if (actor != null) {
-                float progress = 1 - remainingTicks / (float) totalTicks;
-                actor.setYaw(start + MathHelper.wrapDegrees(target - start) * progress);
+                actor.walk(delta, totalTicks, heading);
             }
         }
     }
