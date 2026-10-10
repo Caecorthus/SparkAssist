@@ -373,7 +373,7 @@ final class NoellesCivilianScenes {
         scene.idle(10);
         Actors.swing(scene, killer);
         WatheItemScenes.openDoor(scene, door, true);
-        scene.overlay().showText(32)
+        scene.overlay().showText(30)
                 .text("但撬棍还是能强行撬开")
                 .independent()
                 .attachKeyFrame();
@@ -386,7 +386,7 @@ final class NoellesCivilianScenes {
         scene.idle(50);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(50);
-        scene.overlay().showText(42)
+        scene.overlay().showText(40)
                 .text("……3 分钟冷却后（演示缩短了时间）")
                 .independent();
         Actors.walk(scene, engineer, new Vec3d(0.8, 0, 1.2), 25);
@@ -455,7 +455,7 @@ final class NoellesCivilianScenes {
         Actors.charge(scene, killer, true);
         scene.overlay().showControls(engineerSpot.add(0, 2.6, 0), Pointing.DOWN, 70)
                 .withItem(stack("sparkstrength:power_restoration"));
-        scene.overlay().showText(72)
+        scene.overlay().showText(70)
                 .text("停电时，工程师能在商店花 300 金币买【电力恢复系统】")
                 .independent()
                 .attachKeyFrame();
@@ -575,7 +575,7 @@ final class NoellesCivilianScenes {
         Actors.charge(scene, vigilante, false);
         Actors.hold(scene, vigilante, ItemStack.EMPTY);
         scene.idle(60);
-        scene.overlay().showText(72)
+        scene.overlay().showText(70)
                 .colored(PonderPalette.GREEN)
                 .text("威士忌：默认 30 秒护盾，一般能挡下一次致命攻击")
                 .independent()
@@ -1030,7 +1030,7 @@ final class NoellesCivilianScenes {
                 guardSpot, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, guard, shield);
         scene.idle(15);
-        scene.overlay().showText(80)
+        scene.overlay().showText(75)
                 .text("保镖还能花 100 金币买【民主盾牌】，只有保镖举得起来")
                 .independent()
                 .attachKeyFrame();
@@ -1051,7 +1051,7 @@ final class NoellesCivilianScenes {
         scene.idle(45);
         scene.overlay().showControls(guardSpot.add(0, 2.6, 0), Pointing.DOWN, 40).rightClick().withItem(shield);
         Actors.charge(scene, guard, true);
-        scene.overlay().showText(50)
+        scene.overlay().showText(44)
                 .text("主手拿着按住右键举盾，最多举 10 秒")
                 .independent()
                 .attachKeyFrame();
@@ -1652,7 +1652,7 @@ final class NoellesCivilianScenes {
                 bodySpot, WEST, Direction.DOWN);
         scene.idle(15);
         scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 40).showing(abilityKey());
-        scene.overlay().showText(70)
+        scene.overlay().showText(65)
                 .text("按技能键（默认 G）灵魂出窍：肉身留在原地不动")
                 .independent()
                 .attachKeyFrame();
@@ -1660,7 +1660,7 @@ final class NoellesCivilianScenes {
         ElementLink<ActorElement> soul = Actors.enter(scene, spiritualistColor, Text.literal("灵魂"),
                 soulStart, SOUTH, Direction.UP);
         scene.idle(65);
-        scene.overlay().showText(75)
+        scene.overlay().showText(70)
                 .text("灵魂（示意）像自由视角一样飞行，能直接穿过墙和门")
                 .independent()
                 .attachKeyFrame();
@@ -1681,7 +1681,7 @@ final class NoellesCivilianScenes {
         Actors.turn(scene, soul, WEST);
         scene.idle(50);
         scene.overlay().showControls(bodySpot.add(0, 2.6, 0), Pointing.DOWN, 30).showing(abilityKey());
-        scene.overlay().showText(70)
+        scene.overlay().showText(65)
                 .text("一般再按一次技能键，视角就立刻回到肉身")
                 .independent()
                 .attachKeyFrame();
@@ -1705,7 +1705,7 @@ final class NoellesCivilianScenes {
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(10);
         Actors.walk(scene, killer, killerSpot.subtract(killerStart), 40);
-        scene.overlay().showText(80)
+        scene.overlay().showText(61)
                 .text("出窍时听不到脚步声，有人摸到肉身旁你也很难察觉")
                 .independent()
                 .attachKeyFrame();

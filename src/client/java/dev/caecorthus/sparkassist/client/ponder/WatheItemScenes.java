@@ -133,7 +133,7 @@ final class WatheItemScenes {
         scene.idle(25);
         scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick()
                 .withItem(stack("wathe:revolver"));
-        scene.overlay().showText(40)
+        scene.overlay().showText(33)
                 .text("点一下右键就开枪，不用蓄力")
                 .independent()
                 .attachKeyFrame();
@@ -381,7 +381,7 @@ final class WatheItemScenes {
         Actors.charge(scene, shooter, false);
         Actors.swing(scene, shooter);
         Actors.fall(scene, second);
-        scene.overlay().showText(50)
+        scene.overlay().showText(45)
                 .text("换成刀蓄力出手，再干掉一个……")
                 .independent();
         scene.idle(55);
@@ -516,7 +516,7 @@ final class WatheItemScenes {
         scene.idle(90);
         Actors.hold(scene, passenger, stack("wathe:mojito"));
         scene.idle(10);
-        scene.overlay().showText(40)
+        scene.overlay().showText(35)
                 .text("按住右键 2 秒喝完")
                 .independent()
                 .attachKeyFrame();
