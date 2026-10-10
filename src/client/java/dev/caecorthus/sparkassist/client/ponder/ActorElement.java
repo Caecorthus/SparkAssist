@@ -1,10 +1,8 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import dev.caecorthus.sparkassist.ponder.ActorMovement;
 import dev.doctor4t.wathe.cca.PlayerPsychoComponent;
 import dev.doctor4t.wathe.client.WatheClient;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
@@ -91,10 +89,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private boolean sneaking;
     private Vec3d position;
     private Vec3d previousPosition;
-    /** Where the actor stood after its own step last tick; anything since is a move made by an instruction. 上一 tick 自身迈步后的位置；之后的位移来自指令。 */
-    private Vec3d settled;
     /** Walks and slides under way; overlapping ones add up (a knockback with a hop). 进行中的行走与平移；重叠时相加（击退加上弹起）。 */
-    private final List<Move> moves = new ArrayList<>();
+    private final ActorMovement movement = new ActorMovement();
     private float yaw;
     private float previousYaw;
     private float targetYaw;
@@ -123,8 +119,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         name = startName;
         position = startPosition;
         previousPosition = startPosition;
-        settled = startPosition;
-        moves.clear();
+        movement.clear();
         yaw = startYaw;
         previousYaw = startYaw;
         targetYaw = startYaw;
@@ -150,8 +145,18 @@ public final class ActorElement extends AnimatedSceneElementBase {
         return position;
     }
 
+    /** Teleport, without interpolating through the scenery or continuing an old walk. 传送，不穿场景插值或继续旧的行走。 */
     public void moveTo(Vec3d target) {
         position = target;
+        previousPosition = target;
+        movement.clear();
+        stopStride();
+    }
+
+    /** An externally driven slide, shove or body flight, interpolated this tick without walking. 外力平移、击退或尸体飞行：本 tick 插值，不迈步。 */
+    public void slideTo(Vec3d target) {
+        position = target;
+        stopStride();
     }
 
     public float yaw() {
@@ -160,6 +165,13 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     /** Face {@code yaw} at once (a teleport). 立刻朝向 yaw（如传送）。 */
     public void setYaw(float yaw) {
+        this.yaw = yaw;
+        previousYaw = yaw;
+        targetYaw = yaw;
+    }
+
+    /** Follow an externally updated heading, retaining this tick's interpolation start. 跟随外部每 tick 更新的朝向，保留本 tick 的插值起点。 */
+    public void syncYaw(float yaw) {
         this.yaw = yaw;
         targetYaw = yaw;
     }
@@ -177,10 +189,18 @@ public final class ActorElement extends AnimatedSceneElementBase {
      * 迈步，步伐与位移逐 tick 同步。
      */
     public void walk(Vec3d delta, int ticks, float heading) {
-        moves.add(new Move(delta.multiply(1.0 / ticks), ticks));
+        if (isDown() || isAsleep()) {
+            return;
+        }
+        movement.add(delta.x, delta.y, delta.z, ticks, true);
         if (!Float.isNaN(heading)) {
             turnTo(heading);
         }
+    }
+
+    /** Move under external force while keeping the current heading and the legs still. 保持朝向，受外力移动而不迈步。 */
+    public void slide(Vec3d delta, int ticks) {
+        movement.add(delta.x, delta.y, delta.z, ticks, false);
     }
 
     public void setPitch(float degrees) {
@@ -205,6 +225,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
      */
     public void ride(ItemStack board) {
         this.board = board.copy();
+        if (!this.board.isEmpty()) {
+            stopStride();
+        }
     }
 
     /** Wear {@code stack} in the chest slot (a vest), or take it off with an empty stack. 胸甲槽穿上 stack（如背心），空物品即脱下。 */
@@ -247,6 +270,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
     public void lieDown(BlockPos head, Direction facing) {
         bedHead = head;
         bedFacing = facing;
+        movement.stopWalking();
+        stopStride();
         charging = false;
         sneaking = false;
     }
@@ -281,6 +306,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
      */
     public void fall() {
         fall = 0;
+        movement.stopWalking();
+        stopStride();
         targetYaw = yaw;
         charging = false;
         sneaking = false;
@@ -297,26 +324,18 @@ public final class ActorElement extends AnimatedSceneElementBase {
     @Override
     public void tick(PonderScene scene) {
         // Runs before this tick's instructions. The actor's own step and turn happen here, so rendering eases from
-        // previous to current and the stride matches the step of the same tick; moves made by instructions since the
-        // last tick (a scripted circle) count towards the stride one tick late, teleports not at all.
+        // previous to current and the stride matches the voluntary step of the same tick. Instruction-driven slides
+        // have no stride, and teleports replace both positions so they never streak across the scenery.
         // 在本 tick 的指令之前运行。演员自己的迈步与转身在这里完成，渲染从上一位置平滑过渡到当前位置，步伐与同一 tick
-        // 的位移同步；上一 tick 以来由指令造成的移动（脚本绕圈）晚一 tick 计入步伐，传送不计入。
+        // 的主动位移同步；指令驱动的外力平移不迈步，传送同时更新前后位置，避免跨场景拖影。
         ActorPlayer actor = player();
-        double pushed = position.subtract(settled).horizontalLength();
         previousPosition = position;
         previousYaw = yaw;
-        for (Iterator<Move> it = moves.iterator(); it.hasNext(); ) {
-            Move move = it.next();
-            position = position.add(move.step);
-            if (--move.ticks <= 0) {
-                it.remove();
-            }
-        }
-        settled = position;
+        ActorMovement.Step step = movement.tick();
+        position = position.add(step.x(), step.y(), step.z());
         if (!isDown() && bedHead == null) {
             yaw += MathHelper.clamp(MathHelper.wrapDegrees(targetYaw - yaw), -TURN_SPEED, TURN_SPEED);
         }
-        double moved = position.subtract(previousPosition).horizontalLength() + (pushed < TELEPORT ? pushed : 0);
         age++;
         if (fall >= 0 && fall < FALL_TICKS) {
             fall++;
@@ -326,8 +345,14 @@ public final class ActorElement extends AnimatedSceneElementBase {
         }
         // LivingEntity's limb and swing bookkeeping, without ticking the entity in the real world.
         // 复刻 LivingEntity 的肢体与挥手计数，但不在真实世界中 tick 这个实体。
-        // A rider rolls instead of walking (SparkStrength SkateboardLimbsMixin). 骑手是滚动而非行走。
-        actor.limbAnimator.updateLimbs(isDown() || !board.isEmpty() ? 0 : Math.min(1, (float) moved * 4), 0.4f);
+        // Riders, sleeping actors and actors moved by an external force do not walk. Clear the old amplitude too:
+        // updating towards zero with vanilla's 0.4 smoothing otherwise leaves several ticks of steps on a board.
+        // 骑手、睡眠演员和受外力移动的演员不迈步。也清除旧振幅：用原版 0.4 缓动趋近零会让人在板上继续迈步数 tick。
+        if (isDown() || isAsleep() || !board.isEmpty() || step.sliding() || step.walkingDistance() >= TELEPORT) {
+            stopStride();
+        } else {
+            actor.limbAnimator.updateLimbs(Math.min(1, (float) step.walkingDistance() * 4), 0.4f);
+        }
         actor.lastHandSwingProgress = actor.handSwingProgress;
         if (swingTicks >= 0) {
             actor.handSwinging = true;
@@ -418,6 +443,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     /** Copy this tick's state into the entity the vanilla renderer reads. 把本 tick 的状态写入原版渲染器读取的实体。 */
     private void pose(ActorPlayer actor) {
+        actor.setPosition(position);
+        actor.prevX = previousPosition.x;
+        actor.prevY = previousPosition.y;
+        actor.prevZ = previousPosition.z;
         actor.setStackInHand(Hand.MAIN_HAND, held);
         actor.setStackInHand(Hand.OFF_HAND, offHand);
         actor.equipStack(EquipmentSlot.CHEST, chest);
@@ -567,13 +596,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
         player = null;
     }
 
-    private static final class Move {
-        private final Vec3d step;
-        private int ticks;
-
-        private Move(Vec3d step, int ticks) {
-            this.step = step;
-            this.ticks = ticks;
+    private void stopStride() {
+        if (player != null) {
+            player.limbAnimator.setSpeed(0);
+            player.limbAnimator.updateLimbs(0, 1);
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import dev.caecorthus.sparkassist.ponder.ActorMovement;
 import java.util.function.Consumer;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
@@ -45,8 +46,8 @@ public final class Actors {
     }
 
     /**
-     * Move by {@code delta} over {@code ticks} without turning: a step back, a shove, a body dragged along.
-     * 在 ticks 内平移 delta 而不转身：后退、被推开、尸体被拖动。
+     * Move by {@code delta} over {@code ticks} without turning or walking: a shove, a body dragged along.
+     * 在 ticks 内平移 delta 而不转身或迈步：被推开、尸体被拖动。
      */
     public static void slide(SceneBuilder scene, ElementLink<ActorElement> actor, Vec3d delta, int ticks) {
         scene.addInstruction(new Walk(actor, delta, Float.NaN, ticks));
@@ -198,6 +199,7 @@ public final class Actors {
         /** @param heading the yaw to face while walking, or NaN to keep the current one / 行走时的朝向，NaN 表示保持当前朝向 */
         Walk(ElementLink<ActorElement> link, Vec3d delta, float heading, int ticks) {
             super(false, ticks);
+            ActorMovement.requireDuration(ticks);
             this.link = link;
             this.delta = delta;
             this.heading = heading;
@@ -208,7 +210,11 @@ public final class Actors {
             super.firstTick(scene);
             ActorElement actor = scene.resolve(link);
             if (actor != null) {
-                actor.walk(delta, totalTicks, heading);
+                if (Float.isNaN(heading)) {
+                    actor.slide(delta, totalTicks);
+                } else {
+                    actor.walk(delta, totalTicks, heading);
+                }
             }
         }
     }

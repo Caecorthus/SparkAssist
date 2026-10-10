@@ -17,6 +17,8 @@
     "LimitedInventoryScreenMixin",
     "MinecraftClientMixin",
     "PoisonOverlayPayloadMixin",
+    "PonderCaptionMixin",
+    "PonderSceneCaptionMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin",
     "TaskCompletePayloadMixin"
