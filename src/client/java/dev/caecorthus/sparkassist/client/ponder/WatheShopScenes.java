@@ -197,7 +197,7 @@ final class WatheShopScenes {
         scene.idle(45);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(35);
-        scene.overlay().showText(37)
+        scene.overlay().showText(35)
                 .text("……15 秒后（演示缩短了等待时间）")
                 .independent();
         scene.idle(45);

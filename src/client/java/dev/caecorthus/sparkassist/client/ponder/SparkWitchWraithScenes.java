@@ -111,7 +111,7 @@ final class SparkWitchWraithScenes {
                 .attachKeyFrame();
         scene.idle(85);
         Actors.turn(scene, killer, EAST);
-        scene.overlay().showText(77)
+        scene.overlay().showText(75)
                 .text("一般就在原地化为冤魂；尸体留下，仍显示你生前的身份")
                 .independent();
         scene.idle(10);
@@ -153,7 +153,7 @@ final class SparkWitchWraithScenes {
         Actors.walk(scene, wraith, new Vec3d(-2.7, 0, -0.1), 35);
         scene.idle(37);
         Actors.lieDown(scene, wraith, util.grid().at(1, 1, 5), Direction.WEST);
-        scene.overlay().showText(77)
+        scene.overlay().showText(75)
                 .text("喝饮品、吃东西、睡觉都能完成对应任务（演示省略了一个、缩短了时间）")
                 .independent()
                 .attachKeyFrame();
@@ -161,7 +161,7 @@ final class SparkWitchWraithScenes {
         // Promotion wakes a sleeping Wraith (WraithLifecycle.promotePlayer). 晋升会叫醒正在睡觉的冤魂。
         Actors.getUp(scene, wraith);
         Actors.retint(scene, wraith, RoleColors.of("sparkwitch:guardian_angel", 0xF0D77A), Text.literal("守护天使"));
-        scene.overlay().showText(97)
+        scene.overlay().showText(95)
                 .colored(PonderPalette.GREEN)
                 .text("做满 3 个任务立刻晋升：好人阵营随机成为风精灵、守护天使或仇杀客")
                 .independent()
@@ -205,7 +205,7 @@ final class SparkWitchWraithScenes {
                 .independent();
         scene.idle(90);
         scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(67)
+        scene.overlay().showText(65)
                 .text("对准 3 格内看得见的活人，按技能键（默认 G）")
                 .independent()
                 .attachKeyFrame();
@@ -229,7 +229,7 @@ final class SparkWitchWraithScenes {
         Actors.charge(scene, killer, false);
         Actors.swing(scene, killer);
         scene.idle(10);
-        scene.overlay().showText(88)
+        scene.overlay().showText(86)
                 .colored(PonderPalette.GREEN)
                 .text("这一刀被护盾挡下：他没死，附近会响起一声盔甲碰撞声")
                 .independent()
@@ -286,7 +286,7 @@ final class SparkWitchWraithScenes {
                 .independent();
         scene.idle(90);
         Actors.hold(scene, spirit, windCharge);
-        scene.overlay().showText(80)
+        scene.overlay().showText(77)
                 .text("在商店花 50 金币买风弹，不限购")
                 .independent()
                 .attachKeyFrame();

@@ -574,7 +574,7 @@ final class SparkWitchCivilianScenes {
                 .attachKeyFrame();
         scene.idle(90);
         Actors.charge(scene, killer, true);
-        scene.overlay().showText(40)
+        scene.overlay().showText(38)
                 .text("有人举刀对着你的队友……")
                 .independent();
         scene.idle(40);
@@ -708,7 +708,7 @@ final class SparkWitchCivilianScenes {
         ElementLink<Gadget> car = gadget(scene, new Gadget(carItem, new Vec3d(4.7, 1, 1.3), WEST, null));
         scene.idle(50);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).showing(key(SECONDARY_KEY, "N"));
-        scene.overlay().showText(73)
+        scene.overlay().showText(71)
                 .text("按第二技能键（默认 N）或右键平板连上小车，本体站着不动")
                 .independent()
                 .attachKeyFrame();
@@ -807,7 +807,7 @@ final class SparkWitchCivilianScenes {
         scene.idle(10);
         Actors.swing(scene, insider);
         WatheItemScenes.openDoor(scene, trainDoor, true);
-        scene.overlay().showText(76)
+        scene.overlay().showText(74)
                 .text("右键列车门或上锁的房门就能打开（被卡住的门不行）")
                 .independent()
                 .attachKeyFrame();
@@ -1094,7 +1094,7 @@ final class SparkWitchCivilianScenes {
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(10);
         scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(74)
+        scene.overlay().showText(72)
                 .text("这局抽到巨力：花 60 魔力，之后 10 秒内空手左键一名玩家")
                 .independent()
                 .attachKeyFrame();
@@ -1258,7 +1258,7 @@ final class SparkWitchCivilianScenes {
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(3.8, 1, 3.2), SCREEN_LEFT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(78)
+        scene.overlay().showText(76)
                 .text("用香精右键一名活人做记号；其他活人看不见你手里的香精")
                 .independent()
                 .attachKeyFrame();
@@ -1484,20 +1484,20 @@ final class SparkWitchCivilianScenes {
                 new Vec3d(0.7, 1, 0.9), EAST, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showText(67)
+        scene.overlay().showText(65)
                 .text("盲人看不见：屏幕一片漆黑，主要靠声音感知周围")
                 .independent()
                 .attachKeyFrame();
         scene.idle(75);
         StageLights.lights(scene, false);
-        scene.overlay().showText(77)
+        scene.overlay().showText(75)
                 .text("切到盲人眼中（示意）：舞台调暗代表黑屏，安静时一片漆黑")
                 .independent()
                 .attachKeyFrame();
         scene.idle(85);
         // Wathe's walking pace, about 3 blocks a second. Wathe 的步行速度，约每秒 3 格。
         loudWalk(scene, civilian, new Vec3d(3.4, 0, 0), 24);
-        scene.overlay().showText(87)
+        scene.overlay().showText(85)
                 .text("一般 10 格内的脚步、说话或枪声，会让声源周围 4 格亮起白线")
                 .independent()
                 .attachKeyFrame();
@@ -1505,7 +1505,7 @@ final class SparkWitchCivilianScenes {
         loudWalk(scene, civilian, new Vec3d(0, 0, -1.3), 9);
         scene.idle(71);
         loudWalk(scene, civilian, new Vec3d(-3.3, 0, 0), 23);
-        scene.overlay().showText(87)
+        scene.overlay().showText(85)
                 .text("出声的人短暂显示成白色人影（白框示意），没有名字、手持物和护甲")
                 .independent()
                 .attachKeyFrame();
@@ -1523,14 +1523,14 @@ final class SparkWitchCivilianScenes {
         // CONSUME: no arm swing. 返回 CONSUME：不挥手。
         caneSweep(scene, feet, List.of(new Revealed(killer, CROUCHING_BOX_HEIGHT),
                 new Revealed(civilian, STANDING_BOX_HEIGHT)));
-        scene.overlay().showText(97)
+        scene.overlay().showText(95)
                 .colored(PonderPalette.GREEN)
                 .text("右键盲杖：5 秒内照亮周围 15 格，5 格内的人一般都会显形")
                 .independent()
                 .attachKeyFrame();
         scene.idle(105);
         scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(87)
+        scene.overlay().showText(85)
                 .text("凝神（默认 G）：10 秒内感知范围 ×5；商店的耳机戴上 ×3")
                 .independent()
                 .attachKeyFrame();
