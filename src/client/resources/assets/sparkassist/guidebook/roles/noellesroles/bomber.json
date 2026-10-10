@@ -92,6 +92,11 @@
               "text": "藏了炸弹的餐盘和床会冒烟，只有杀手阵营看得见（伪装成炸弹客的验尸官也看得见）。"
             },
             {
+              "type": "demo",
+              "scene": "noellesroles:timed_bomb",
+              "text": "演示：定时炸弹与炸弹陷阱"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
@@ -156,6 +161,11 @@
                   "text": "：一次性。同样放下后用平板操控，飞得更快也更耗电；左键、电量耗尽或被打坏时立刻爆炸，炸死 4 格内的所有人，墙壁能挡住爆炸。场上同时只能有一架。"
                 }
               ]
+            },
+            {
+              "type": "demo",
+              "scene": "sparkstrength:bomb_drone",
+              "text": "演示：炸弹无人机"
             },
             {
               "type": "bullet",

@@ -19,6 +19,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityPose;
@@ -58,6 +59,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private static final double BED_HEIGHT = 0.6875;
     /** Vanilla shifts a sleeper's feet this far from the head block (eye height - 0.1). 原版睡觉时脚离床头方块的距离。 */
     private static final double BED_REACH = 1.52;
+    /** SparkStrength lifts a skateboard rider onto the deck by this much (SkateboardRenderer.DECK_TOP_HEIGHT). 滑板骑手被抬到板面上的高度。 */
+    private static final double DECK_HEIGHT = 3 / 16.0;
     @Nullable
     private static PlayerEntityModel<LivingEntity> bodyModel;
 
@@ -75,7 +78,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
     @Nullable
     private Text name;
     private ItemStack held = ItemStack.EMPTY;
+    private ItemStack offHand = ItemStack.EMPTY;
     private ItemStack chest = ItemStack.EMPTY;
+    /** The board ridden, drawn under the feet; empty when on foot. 脚下骑着的滑板；步行时为空。 */
+    private ItemStack board = ItemStack.EMPTY;
     private boolean invisible;
     private boolean psycho;
     @Nullable
@@ -124,7 +130,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
         targetYaw = startYaw;
         pitch = 0;
         held = ItemStack.EMPTY;
+        offHand = ItemStack.EMPTY;
         chest = ItemStack.EMPTY;
+        board = ItemStack.EMPTY;
         invisible = false;
         psycho = false;
         bedHead = null;
@@ -181,6 +189,22 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     public void hold(ItemStack stack) {
         held = stack.copy();
+    }
+
+    /** Hold {@code stack} in the off hand (a second pistol), or empty it. 副手拿着 stack（如第二把手枪），空物品即放下。 */
+    public void holdOffHand(ItemStack stack) {
+        offHand = stack.copy();
+    }
+
+    /**
+     * Stand on {@code board} (SparkStrength's skateboard), or step off with an empty stack. As SkateboardRenderer draws
+     * a rider for every viewer: the board under the feet, nose along the body, the body lifted onto its deck, the legs
+     * still while it rolls along.
+     * 站上 board（SparkStrength 的滑板），空物品即下板。与 SkateboardRenderer 在所有观察者眼中绘制骑手的方式一致：滑板在
+     * 脚下、板头朝向身体朝向，身体抬到板面上，滑行时双腿不动。
+     */
+    public void ride(ItemStack board) {
+        this.board = board.copy();
     }
 
     /** Wear {@code stack} in the chest slot (a vest), or take it off with an empty stack. 胸甲槽穿上 stack（如背心），空物品即脱下。 */
@@ -261,6 +285,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
         charging = false;
         sneaking = false;
         held = ItemStack.EMPTY;
+        offHand = ItemStack.EMPTY;
+        board = ItemStack.EMPTY;
         swingTicks = -1;
     }
 
@@ -300,7 +326,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
         }
         // LivingEntity's limb and swing bookkeeping, without ticking the entity in the real world.
         // 复刻 LivingEntity 的肢体与挥手计数，但不在真实世界中 tick 这个实体。
-        actor.limbAnimator.updateLimbs(isDown() ? 0 : Math.min(1, (float) moved * 4), 0.4f);
+        // A rider rolls instead of walking (SparkStrength SkateboardLimbsMixin). 骑手是滚动而非行走。
+        actor.limbAnimator.updateLimbs(isDown() || !board.isEmpty() ? 0 : Math.min(1, (float) moved * 4), 0.4f);
         actor.lastHandSwingProgress = actor.handSwingProgress;
         if (swingTicks >= 0) {
             actor.handSwinging = true;
@@ -350,26 +377,49 @@ public final class ActorElement extends AnimatedSceneElementBase {
             return;
         }
         pose(actor);
+        double lift = board.isEmpty() ? 0 : DECK_HEIGHT;
+        if (!board.isEmpty() && !invisible) {
+            board(world, ms, buffer, at, bodyYaw, light);
+        }
         EntityRenderDispatcher dispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
         dispatcher.setRenderShadows(false);
         ActorPlayer.setDrawing(true);
         try {
-            dispatcher.render(actor, at.x, at.y, at.z, bodyYaw, pt, ms, buffer, light);
+            dispatcher.render(actor, at.x, at.y + lift, at.z, bodyYaw, pt, ms, buffer, light);
         } finally {
             ActorPlayer.setDrawing(false);
             dispatcher.setRenderShadows(MinecraftClient.getInstance().options.getEntityShadows().getValue());
         }
         if (name != null && !invisible) {
             ms.push();
-            ms.translate(at.x, at.y + 2.15, at.z);
+            ms.translate(at.x, at.y + lift + 2.15, at.z);
             nameTag(world, ms, buffer, pt);
             ms.pop();
         }
     }
 
+    /**
+     * The ridden board as SparkStrength's SkateboardRenderer draws it: the item model at real size, nose (+Z) along
+     * the body yaw, wheels (model y = 0) on the floor. An invisible rider's board is not drawn, as there.
+     * 按 SparkStrength 的 SkateboardRenderer 绘制脚下的滑板：真实尺寸的物品模型，板头（+Z）朝身体朝向，轮子（模型 y = 0）
+     * 贴地。与原版一致，隐身骑手的滑板不绘制。
+     */
+    private void board(PonderLevel world, MatrixStack ms, VertexConsumerProvider buffer, Vec3d feet, float bodyYaw,
+                       int light) {
+        ms.push();
+        ms.translate(feet.x, feet.y, feet.z);
+        ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-bodyYaw));
+        // ItemRenderer recentres by -0.5 after the NONE transform; undo the Y part. 抵消 ItemRenderer 的 -0.5 居中。
+        ms.translate(0, 0.5, 0);
+        MinecraftClient.getInstance().getItemRenderer().renderItem(board, ModelTransformationMode.NONE, light,
+                OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
+        ms.pop();
+    }
+
     /** Copy this tick's state into the entity the vanilla renderer reads. 把本 tick 的状态写入原版渲染器读取的实体。 */
     private void pose(ActorPlayer actor) {
         actor.setStackInHand(Hand.MAIN_HAND, held);
+        actor.setStackInHand(Hand.OFF_HAND, offHand);
         actor.equipStack(EquipmentSlot.CHEST, chest);
         actor.setInvisible(invisible);
         PlayerPsychoComponent.KEY.get(actor).psychoTicks = psycho ? 1 : 0;

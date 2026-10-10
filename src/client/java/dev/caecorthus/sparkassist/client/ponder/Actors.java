@@ -56,6 +56,20 @@ public final class Actors {
         apply(scene, actor, element -> element.hold(stack));
     }
 
+    /** Hold {@code stack} in the off hand, or empty it. 副手拿着 stack，空物品即放下。 */
+    public static void holdOffHand(SceneBuilder scene, ElementLink<ActorElement> actor, ItemStack stack) {
+        apply(scene, actor, element -> element.holdOffHand(stack));
+    }
+
+    /**
+     * Stand on a skateboard (SparkStrength's, drawn under the feet; legs still while rolling), or step off with an
+     * empty stack. Move the rider with {@link #walk} as usual. 站上滑板（SparkStrength 的，画在脚下；滑行时双腿不动），
+     * 空物品即下板。骑手照常用 walk 移动。
+     */
+    public static void ride(SceneBuilder scene, ElementLink<ActorElement> actor, ItemStack board) {
+        apply(scene, actor, element -> element.ride(board));
+    }
+
     /** Put on (or, with an empty stack, take off) chest armour. 穿上（空物品则脱下）胸甲。 */
     public static void wear(SceneBuilder scene, ElementLink<ActorElement> actor, ItemStack stack) {
         apply(scene, actor, element -> element.wear(stack));
