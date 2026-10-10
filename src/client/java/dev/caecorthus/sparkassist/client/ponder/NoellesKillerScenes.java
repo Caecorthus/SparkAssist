@@ -481,13 +481,14 @@ final class NoellesKillerScenes {
     }
 
     /**
-     * Throwing axe (ThrowingAxeItem, ThrowingAxeEntity, ThrowingAxeEntityRenderer, BanditShopHandler): the Bandit's
-     * shop sells it for 200, single use. Holding right-click shows the bow pose; power peaks after 20 ticks, and under
+     * Throwing axe (ThrowingAxeItem, ThrowingAxeEntity, ThrowingAxeEntityRenderer, BanditShopHandler; SparkWitch
+     * MurderousWitchShopRules): the Bandit's shop sells it for 200, single use; with SparkWitch the Murderous Witch's
+     * shop also sells it, for 150. Holding right-click shows the bow pose; power peaks after 20 ticks, and under
      * a quarter of it (6 ticks or fewer) nothing is thrown. The axe flies at up to 2.4 blocks a tick, kills every
      * player whose hitbox it crosses except its thrower (unless a protection stops the kill) and keeps 90% of its
      * speed after each, then sticks in the block it hits and cannot be picked up. Throw, hit and stick play trident
      * sounds. The flight lasts about 3 game ticks here, so the demo slows it down.
-     * 飞斧：强盗商店 200 金币，一次性。按住右键为拉弓姿势；20 tick 蓄满，不到四分之一（6 tick 及以内）就扔不出去。飞斧每 tick
+     * 飞斧：强盗商店 200 金币，一次性；装了 SparkWitch 时杀意魔女的商店也卖，150 金币。按住右键为拉弓姿势；20 tick 蓄满，不到四分之一（6 tick 及以内）就扔不出去。飞斧每 tick
      * 最多飞 2.4 格，杀死所有被它穿过碰撞箱的玩家（扔的人除外），每穿过一人保留 90% 的速度，最后插在撞到的方块上，
      * 捡不回来。投掷、命中、插墙都有三叉戟音效。这里的飞行在游戏中只有约 3 tick，演示做了放慢。
      */
@@ -508,7 +509,7 @@ final class NoellesKillerScenes {
         Actors.hold(scene, bandit, stack("noellesroles:throwing_axe"));
         scene.idle(20);
         scene.overlay().showText(80)
-                .text("强盗能在商店花 200 金币买【飞斧】，用一次就没了")
+                .text("强盗能在商店花 200 金币买【飞斧】（装了 SparkWitch 时杀意魔女也能买），用一次就没了")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);

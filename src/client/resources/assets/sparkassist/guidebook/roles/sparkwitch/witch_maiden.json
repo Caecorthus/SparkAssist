@@ -76,6 +76,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:tofana_elixir",
+              "text": "演示：托法娜仙液"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

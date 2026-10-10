@@ -31,6 +31,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:disruptor",
+              "text": "演示：干扰器"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {

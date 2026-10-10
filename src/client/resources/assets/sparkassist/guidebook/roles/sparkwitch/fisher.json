@@ -43,6 +43,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:clownfish",
+              "text": "演示：鱼饵与能吃的鱼"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
@@ -72,6 +77,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:swordfish",
+              "text": "演示：剑鱼"
+            },
+            {
               "type": "bullet",
               "runs": [
                 {
@@ -82,6 +92,11 @@
                   "text": "：吃下后理智回满，7.77 秒内隔墙看见所有人、穿过门、不与玩家碰撞，并且隐身，别人的本能也看不到你。"
                 }
               ]
+            },
+            {
+              "type": "demo",
+              "scene": "sparkwitch:glimmerfish",
+              "text": "演示：灵光鱼"
             },
             {
               "type": "bullet",
