@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
@@ -176,6 +177,30 @@ final class SparkWitchCivilianScenes {
                 scene("wathe/cabin", SparkWitchCivilianScenes::fiend));
         role("sparkassist:roles/sparkwitch/blind", List.of("sparkwitch"),
                 scene("sparkwitch/civ_blind_carriage", SparkWitchCivilianScenes::blind));
+
+        // Items whose use a demo above already shows; holding W over the item plays that demo.
+        // 上面的演示已经演示过用法的物品；在物品上按住 W 即可播放对应演示。
+        for (String id : List.of("sparkwitch:fishing_rod", "sparkwitch:salmon", "sparkwitch:key_fish")) {
+            item(id, List.of("sparkwitch"), scene("sparkwitch/civ_tray_cabin", SparkWitchCivilianScenes::fisher));
+        }
+        for (String id : List.of("sparkwitch:usec_rifle", "sparkwitch:usec_338_fmj", "sparkwitch:usec_338_ap")) {
+            item(id, List.of("sparkwitch"), scene("sparkwitch/civ_sniper_wall", SparkWitchCivilianScenes::usec));
+        }
+        for (String id : List.of("sparkwitch:taser", "sparkwitch:shock_device")) {
+            item(id, List.of("sparkwitch"), scene("wathe/aisle", SparkWitchCivilianScenes::controlExpert));
+        }
+        for (String id : List.of("sparkwitch:seeker_car", "sparkwitch:seeker_camera")) {
+            item(id, List.of("sparkwitch"), scene("wathe/cabin", SparkWitchCivilianScenes::seeker));
+        }
+        item("noellesroles:neutral_master_key", List.of("sparkwitch", "noellesroles"),
+                scene("sparkwitch/civ_train_cabin", SparkWitchCivilianScenes::insider));
+        item("sparkwitch:holy_flash", List.of("sparkwitch"), scene("wathe/aisle", SparkWitchCivilianScenes::saint));
+        for (String id : List.of("sparkwitch:perfume_essence", "sparkstrength:cooling_oil")) {
+            item(id, List.of("sparkwitch", "sparkstrength"), scene("wathe/aisle", SparkWitchCivilianScenes::perfumer));
+        }
+        for (String id : List.of("sparkwitch:white_cane", "sparkwitch:comtac_viii")) {
+            item(id, List.of("sparkwitch"), scene("sparkwitch/civ_blind_carriage", SparkWitchCivilianScenes::blind));
+        }
     }
 
     /**

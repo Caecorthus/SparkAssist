@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
@@ -172,6 +173,36 @@ final class SparkWitchKillerScenes {
                 scene("sparkwitch/ray_wall", SparkWitchKillerScenes::bellRinger));
         role("sparkassist:roles/sparkwitch/curser", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchKillerScenes::curser));
+
+        // Items whose use a demo above already shows; holding W over the item plays that demo.
+        // 上面的演示已经演示过用法的物品；在物品上按住 W 即可播放对应演示。
+        for (String id : List.of("sparkwitch:feather_blade", "sparkwitch:black_raven_mask")) {
+            item(id, List.of("sparkwitch", "noellesroles"), scene("wathe/aisle", SparkWitchKillerScenes::blackRaven));
+        }
+        item("sparkwitch:time_stealer_pocket_watch", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::timeStealer));
+        item("sparkwitch:poison_apple", List.of("sparkwitch"),
+                scene("sparkwitch/food_platter", SparkWitchKillerScenes::witchMaiden));
+        for (String id : List.of("sparkwitch:ninja_knife", "sparkwitch:ninja_shuriken",
+                "sparkwitch:ninja_grappling_hook")) {
+            item(id, List.of("sparkwitch"), scene("sparkwitch/cargo_ledge", SparkWitchKillerScenes::ninja));
+        }
+        for (String id : List.of("sparkwitch:hunter_trap", "sparkwitch:double_barrel_shotgun")) {
+            item(id, List.of("sparkwitch"), scene("wathe/aisle", SparkWitchKillerScenes::hunter));
+        }
+        item("sparkwitch:knockout_drug", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::kidnapper));
+        item("sparkwitch:ceremonial_sword", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchKillerScenes::grandWitch));
+        for (String id : List.of("sparkwitch:anti_tank_launcher", "sparkwitch:tr_shell")) {
+            item(id, List.of("sparkwitch"), scene("wathe/aisle", SparkWitchKillerScenes::potionGunner));
+        }
+        for (String id : List.of("sparkwitch:shriek_gun", "sparkwitch:deep_dark_spore_flask")) {
+            item(id, List.of("sparkwitch"), scene("sparkwitch/spore_cabin", SparkWitchKillerScenes::abyssListener));
+        }
+        item("sparkwitch:rift_gate", List.of("sparkwitch"), scene("wathe/aisle", SparkWitchKillerScenes::riftwalker));
+        item("sparkwitch:toll_bell", List.of("sparkwitch"),
+                scene("sparkwitch/ray_wall", SparkWitchKillerScenes::bellRinger));
     }
 
     /**
