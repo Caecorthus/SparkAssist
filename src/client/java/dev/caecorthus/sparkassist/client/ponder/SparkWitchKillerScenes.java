@@ -245,7 +245,7 @@ final class SparkWitchKillerScenes {
                 .attachKeyFrame();
         scene.idle(90);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick();
-        scene.overlay().showText(70)
+        scene.overlay().showText(65)
                 .text("开启后 10 秒内能射 3 发：左键开火，手里拿什么都行")
                 .independent()
                 .attachKeyFrame();
@@ -325,7 +325,7 @@ final class SparkWitchKillerScenes {
         scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
         StageLights.lights(scene, false);
         scene.idle(70);
-        scene.overlay().showText(80)
+        scene.overlay().showText(78)
                 .text("只是关灯：不会让人失明，火把等其他光源照样亮")
                 .independent()
                 .attachKeyFrame();
@@ -435,7 +435,7 @@ final class SparkWitchKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(40)
+        scene.overlay().showText(35)
                 .text("……标记 20 秒后（演示缩短了时间）")
                 .independent();
         scene.idle(45);
@@ -501,7 +501,7 @@ final class SparkWitchKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(70);
-        scene.overlay().showText(40)
+        scene.overlay().showText(35)
                 .text("……15 秒后（演示缩短了时间）")
                 .independent();
         scene.idle(45);
@@ -569,7 +569,7 @@ final class SparkWitchKillerScenes {
                 Text.literal("巫女"), new Vec3d(6.0, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, maiden, stack("sparkwitch:poison_apple"));
         scene.idle(20);
-        scene.overlay().showText(80)
+        scene.overlay().showText(74)
                 .text("巫女的毒苹果：拿在手上右键餐盘（饮品托盘也行）")
                 .independent()
                 .attachKeyFrame();
@@ -630,7 +630,7 @@ final class SparkWitchKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("吃下或喝下才会中毒；这份看起来和别的一样")
                 .independent()
                 .attachKeyFrame();
@@ -641,7 +641,7 @@ final class SparkWitchKillerScenes {
         Actors.charge(scene, second, false);
         Actors.hold(scene, second, ItemStack.EMPTY);
         scene.idle(45);
-        scene.overlay().showText(50)
+        scene.overlay().showText(45)
                 .text("……一般 40～70 秒后（演示缩短了时间）")
                 .independent();
         Actors.walk(scene, second, new Vec3d(-1.0, 0, -1.0), 30);
@@ -744,7 +744,7 @@ final class SparkWitchKillerScenes {
         Actors.leave(scene, second, Direction.UP);
         Actors.hold(scene, ninja, stack("sparkwitch:ninja_grappling_hook"));
         scene.idle(20);
-        scene.overlay().showText(80)
+        scene.overlay().showText(75)
                 .text("钩爪：右键朝准星抛出，能钩住 24 格内的方块")
                 .independent()
                 .attachKeyFrame();
@@ -807,7 +807,7 @@ final class SparkWitchKillerScenes {
                 Text.literal("猎人"), new Vec3d(2.5, 1, 1.4), SOUTH, Direction.DOWN);
         Actors.hold(scene, hunter, stack("sparkwitch:hunter_trap"));
         scene.idle(20);
-        scene.overlay().showText(80)
+        scene.overlay().showText(77)
                 .text("猎人拿着捕兽夹，对着脚前的地面右键放下")
                 .independent()
                 .attachKeyFrame();
@@ -855,7 +855,7 @@ final class SparkWitchKillerScenes {
         fractureSwirls(scene, caught, 50);
         float aim = yawTowards(shooterFeet, caught);
         Actors.turn(scene, hunter, aim);
-        scene.overlay().showText(70)
+        scene.overlay().showText(68)
                 .colored(PonderPalette.RED)
                 .text("踩中的人被夹住：定身 3 秒，一般还叠上一层骨折")
                 .independent()
@@ -917,7 +917,7 @@ final class SparkWitchKillerScenes {
                 Text.literal("绑架者"), new Vec3d(1.0, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
         Actors.hold(scene, kidnapper, stack("sparkwitch:knockout_drug"));
         scene.idle(20);
-        scene.overlay().showText(80)
+        scene.overlay().showText(74)
                 .text("绑架者开局自带 1 瓶迷药（开局约 40 秒内不能用）")
                 .independent()
                 .attachKeyFrame();
@@ -935,7 +935,7 @@ final class SparkWitchKillerScenes {
         Actors.slide(scene, victim, new Vec3d(-1.6, 0, 1.6), 3);
         scene.idle(4);
         Tether held = tether(scene, kidnapper, victim, 0);
-        scene.overlay().showText(80)
+        scene.overlay().showText(75)
                 .text("对准身边的人右键：用迷药劫持他 30 秒")
                 .independent()
                 .attachKeyFrame();
@@ -973,7 +973,7 @@ final class SparkWitchKillerScenes {
         scene.overlay().showControls(new Vec3d(4.4, 3.6, 2.6), Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
         scene.idle(10);
         Tether dragged = tether(scene, kidnapper, body, DRAGGED_FEET);
-        scene.overlay().showText(90)
+        scene.overlay().showText(84)
                 .text("按技能键（默认 G）拖起 2 格内的尸体，再按一次放下")
                 .independent()
                 .attachKeyFrame();
@@ -1248,7 +1248,7 @@ final class SparkWitchKillerScenes {
                 Direction.DOWN);
         scene.idle(20);
         scene.overlay().showControls(overHead, Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(70)
+        scene.overlay().showText(65)
                 .text("监守之啸：按技能键（默认 G），消耗 75 魔力")
                 .independent()
                 .attachKeyFrame();
@@ -1268,11 +1268,11 @@ final class SparkWitchKillerScenes {
         scene.idle(90);
         Actors.hold(scene, listener, stack("sparkwitch:shriek_gun"));
         scene.idle(10);
-        scene.overlay().showText(80)
+        scene.overlay().showText(73)
                 .text("啸音铳（其他活人看不见）：右键击中 12 格内的第一个人")
                 .independent()
                 .attachKeyFrame();
-        scene.idle(30);
+        scene.idle(48);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick()
                 .withItem(stack("sparkwitch:shriek_gun"));
         scene.idle(10);
@@ -1295,7 +1295,7 @@ final class SparkWitchKillerScenes {
         scene.idle(80);
         Actors.hold(scene, listener, stack("sparkwitch:deep_dark_spore_flask"));
         Actors.lookPitch(scene, listener, 20);
-        scene.overlay().showText(80)
+        scene.overlay().showText(76)
                 .text("深暗孢瓶：右键扔出，落点周围瞬间变成深暗领域")
                 .independent()
                 .attachKeyFrame();
@@ -1402,7 +1402,7 @@ final class SparkWitchKillerScenes {
         scene.idle(10);
         riftGate(scene, secondGate, Direction.WEST, walkerColor);
         Actors.hold(scene, walker, ItemStack.EMPTY);
-        scene.overlay().showText(80)
+        scene.overlay().showText(67)
                 .text("走开几步再放一扇：门与门至少相隔 3 格")
                 .independent()
                 .attachKeyFrame();
@@ -1521,7 +1521,7 @@ final class SparkWitchKillerScenes {
         Vec3d guardFeet = new Vec3d(0.4, 1, 3.4);
         float guardAim = yawTowards(guardFeet, shotFrom);
         scene.overlay().showControls(shotFrom.add(0, 2.6, 0), Pointing.DOWN, 30).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(70)
+        scene.overlay().showText(67)
                 .text("再按一次技能键结束录制，然后走开")
                 .independent()
                 .attachKeyFrame();
@@ -1780,7 +1780,7 @@ final class SparkWitchKillerScenes {
         Actors.retint(scene, witness, RoleColors.CIVILIAN, civilian);
         Actors.retint(scene, bystander, RoleColors.CIVILIAN, civilian);
         Actors.retint(scene, witch, witchColor, witchName);
-        scene.overlay().showText(45)
+        scene.overlay().showText(40)
                 .text("……10 秒后混乱结束，一切恢复原样")
                 .independent();
         scene.idle(50);
