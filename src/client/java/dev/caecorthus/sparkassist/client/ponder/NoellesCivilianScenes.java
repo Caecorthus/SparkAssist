@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
@@ -110,6 +111,38 @@ final class NoellesCivilianScenes {
                 scene("wathe/cabin", NoellesCivilianScenes::noisemaker));
         role("sparkassist:roles/noellesroles/spiritualist", List.of("noellesroles"),
                 scene("wathe/cabin", NoellesCivilianScenes::spiritualist));
+
+        // Items whose use a demo above already shows; holding W over the item plays that demo.
+        // 上面的演示已经演示过用法的物品；在物品上按住 W 即可播放对应演示。
+        item("noellesroles:master_key", List.of("noellesroles"),
+                scene("wathe/cabin", NoellesCivilianScenes::conductor));
+        item("noellesroles:demon_hunter_pistol", List.of("noellesroles"),
+                scene("wathe/aisle", NoellesCivilianScenes::demonHunter));
+        item("noellesroles:repair_tool", List.of("noellesroles"),
+                scene("wathe/cabin", NoellesCivilianScenes::engineer));
+        item("sparkstrength:power_restoration", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/lit_carriage", NoellesCivilianScenes::engineerPower));
+        for (String ingredient : List.of("noellesroles:base_spirit", "noellesroles:whiskey")) {
+            item(ingredient, List.of("noellesroles"), scene("wathe/bar", NoellesCivilianScenes::bartender));
+        }
+        item("noellesroles:antidote", List.of("noellesroles", "sparkstrength", "sparktraits"),
+                scene("wathe/bar", NoellesCivilianScenes::toxicologist));
+        item("sparkstrength:blue_vitriol", List.of("noellesroles", "sparkstrength", "sparktraits"),
+                scene("wathe/bar", NoellesCivilianScenes::toxicologist));
+        item("noellesroles:iron_man_vial", List.of("noellesroles"),
+                scene("wathe/aisle", NoellesCivilianScenes::professor));
+        item("sparkstrength:invisibility_serum", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/cabin", NoellesCivilianScenes::professorSerums));
+        item("sparkstrength:doorpassing_potion", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/cabin", NoellesCivilianScenes::professorSerums));
+        item("sparkstrength:bodyguard_vest", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::bodyguard));
+        item("sparkstrength:democracy_shield", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::bodyguardShield));
+        item("sparkstrength:coroner_body_bag", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::coroner));
+        item("sparkstrength:magnifier", List.of("noellesroles", "sparkstrength"),
+                scene("wathe/aisle", NoellesCivilianScenes::detective));
     }
 
     /**

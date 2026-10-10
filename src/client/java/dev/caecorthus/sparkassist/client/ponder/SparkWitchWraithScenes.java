@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
@@ -60,6 +61,11 @@ final class SparkWitchWraithScenes {
         role("sparkassist:roles/sparkwitch/wind_spirit", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchWraithScenes::windSpirit));
         role("sparkassist:roles/sparkwitch/vendetta", List.of("sparkwitch"),
+                scene("wathe/aisle", SparkWitchWraithScenes::vendetta));
+
+        // Items whose use a demo above already shows; holding W over the item plays that demo.
+        // 上面的演示已经演示过用法的物品；在物品上按住 W 即可播放对应演示。
+        item("sparkwitch:vendetta_knife", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchWraithScenes::vendetta));
     }
 
