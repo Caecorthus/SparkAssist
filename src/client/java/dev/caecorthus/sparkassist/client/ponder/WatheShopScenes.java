@@ -18,6 +18,7 @@ import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.api.scene.Selection;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ItemStackParticleEffect;
@@ -51,7 +52,17 @@ final class WatheShopScenes {
         item("wathe:scorpion", scene("wathe/bedroom", WatheShopScenes::scorpion));
         item("wathe:body_bag", scene("wathe/aisle", WatheShopScenes::bodyBag));
         item("wathe:blackout", scene("wathe/lit_carriage", WatheShopScenes::blackout));
-        item("wathe:psycho_mode", scene("wathe/aisle", WatheShopScenes::psychoMode));
+        // With SparkStrength a NoellesRoles Serial Killer's psycho mode hands out twin pistols instead of the bat; that
+        // scene is appended only when both mods are loaded, so plain Wathe keeps the bat demo alone.
+        // 装了 SparkStrength 时，NoellesRoles 连环杀手的疯魔模式改发两把手枪而不是球棒；仅在两个模组都加载时追加该场景，
+        // 纯 Wathe 下仍只有球棒演示。
+        if (FabricLoader.getInstance().isModLoaded("noellesroles")
+                && FabricLoader.getInstance().isModLoaded("sparkstrength")) {
+            item("wathe:psycho_mode", scene("wathe/aisle", WatheShopScenes::psychoMode),
+                    scene("wathe/aisle", SparkStrengthKillerItemScenes::serialPistols));
+        } else {
+            item("wathe:psycho_mode", scene("wathe/aisle", WatheShopScenes::psychoMode));
+        }
     }
 
     /**
@@ -533,10 +544,13 @@ final class WatheShopScenes {
      * Psycho mode (PlayerPsychoComponent): bought in the shop, by default 30 s with the bat locked in hand and the
      * psycho skin and garbled name everyone can see; a public psycho plays music for the whole train (the Silencer's
      * is silent). A fully charged left-click kills; by default one shield absorbs the first ordinary lethal hit (only
-     * the psycho hears it). The shop entry cools down 5 min from the purchase.
+     * the psycho hears it). The shop entry cools down 5 min from the purchase. Not every psycho gets the bat: with
+     * SparkStrength a NoellesRoles Serial Killer gets twin pistols instead (SparkStrengthKillerItemScenes::serialPistols,
+     * appended to this demo), hence the hedged caption.
      * 疯魔模式：在商店购买，默认持续 30 秒，球棒锁在手上，所有人都能看到疯魔皮肤和乱码名字；公开的疯魔会让全车响起
      * 音乐（静语者的没有）。蓄满力的左键一击必杀；默认 1 层护盾挡下第一次普通致命攻击（只有疯魔自己听得到）。
-     * 商店购买后冷却 5 分钟。
+     * 商店购买后冷却 5 分钟。并非所有疯魔都拿球棒：装了 SparkStrength 时，NoellesRoles 连环杀手改拿两把手枪（见
+     * SparkStrengthKillerItemScenes::serialPistols，已追加到本演示），所以字幕留有余地。
      */
     private static void psychoMode(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("wathe_psycho_mode", "疯魔模式：30 秒的球棒狂徒");
@@ -575,7 +589,7 @@ final class WatheShopScenes {
         scene.overlay().showControls(new Vec3d(4.2, 3.6, 2.8), Pointing.DOWN, 30).leftClick()
                 .withItem(stack("wathe:bat"));
         scene.overlay().showText(80)
-                .text("球棒蓄满力（约 1 秒）后左键，一击必杀")
+                .text("球棒蓄满力（约 1 秒）后左键，一般一击必杀")
                 .independent()
                 .attachKeyFrame();
         scene.idle(10);
@@ -589,7 +603,7 @@ final class WatheShopScenes {
                 .attachKeyFrame();
         scene.idle(100);
         scene.overlay().showText(60)
-                .text("护盾没了，再挨一下就会死")
+                .text("护盾没了，再挨一下一般就会死")
                 .independent();
         scene.idle(70);
         scene.overlay().showText(70)

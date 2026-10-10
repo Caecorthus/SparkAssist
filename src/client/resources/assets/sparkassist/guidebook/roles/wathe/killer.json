@@ -86,6 +86,11 @@
             },
             {
               "type": "demo",
+              "scene": "sparkstrength:m67",
+              "text": "演示：M67 手雷怎么用"
+            },
+            {
+              "type": "demo",
               "scene": "wathe:psycho_mode",
               "text": "演示：疯魔模式"
             },
