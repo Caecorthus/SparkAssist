@@ -249,7 +249,7 @@ final class SparkStrengthKillerItemScenes {
         // 朝脚下猛扔：平着扔要飞出约 13 格才第一次落地（M67Physics，每 tick 2.25 格）。
         Actors.lookPitch(scene, killer, 77);
         Actors.charge(scene, killer, true);
-        scene.overlay().showText(90)
+        scene.overlay().showText(58)
                 .text("按住右键拉环，一般约 1 秒拉满再松手；没拉满就松手算取消，冷却约 2 秒")
                 .independent()
                 .attachKeyFrame();
@@ -289,7 +289,7 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(10);
         scene.overlay().showText(80)
                 .text("每个人按自己离它的距离看到描边：5 格内红色，7 格内黄色；不管掩体（盲人看不到）")
-                .independent()
+                .independent(40)
                 .attachKeyFrame();
         scene.idle(42);
         // The M67 went off 100 ticks after the throw. M67 在扔出 100 tick 后爆炸。
@@ -712,7 +712,7 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(5);
         WatheItemScenes.shoot(scene, killer, muzzle(spot, SCREEN_RIGHT, -0.12), firstSpot.add(0, 0.9, 0));
         Actors.fall(scene, first);
-        scene.overlay().showText(80)
+        scene.overlay().showText(75)
                 .text("右键开枪，射程 30 格，打中一般当场死亡；隔墙打不到人")
                 .independent()
                 .attachKeyFrame();

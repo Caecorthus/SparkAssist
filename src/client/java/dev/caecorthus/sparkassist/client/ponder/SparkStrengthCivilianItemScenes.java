@@ -286,12 +286,13 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showControls(toxicologistStart.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
-                .withItem(fruit);
-        scene.overlay().showText(60)
+        scene.overlay().showText(55)
                 .text("按住右键吃下（约 0.8 秒），进入 5 秒蓝毒状态")
                 .independent()
                 .attachKeyFrame();
+        scene.idle(45);
+        scene.overlay().showControls(toxicologistStart.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
+                .withItem(fruit);
         Actors.charge(scene, toxicologist, true);
         scene.idle(16);
         Actors.charge(scene, toxicologist, false);
@@ -301,7 +302,7 @@ final class SparkStrengthCivilianItemScenes {
         int dash = (int) Math.round(toxicologistDash.length() / SPEED_II);
         Actors.walk(scene, toxicologist, toxicologistDash, dash);
         Actors.walk(scene, walker, toxicologistDash.normalize().multiply(WALK * dash), dash);
-        scene.overlay().showText(100)
+        scene.overlay().showText(94)
                 .colored(PonderPalette.GREEN)
                 .text("蓝毒状态下你不掉蓝毒的理智，反而每秒回 10%% 理智，还有速度 II（不冒粒子）")
                 .independent()
@@ -541,7 +542,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         Actors.walk(scene, professor, professorNear.subtract(professorSpot), 15);
         scene.idle(18);
-        scene.overlay().showText(70)
+        scene.overlay().showText(40)
                 .text("怀疑一个人？给他喂一瓶【吐真试剂】")
                 .independent()
                 .attachKeyFrame();
@@ -1059,7 +1060,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.hold(scene, vodkaDrinker, vodka);
         scene.idle(15);
         drink(scene, vodkaDrinker, vodkaStart, vodka);
-        scene.overlay().showText(90)
+        scene.overlay().showText(87)
                 .colored(PonderPalette.GREEN)
                 .text("伏特加：默认亢奋 20 秒，这期间疾跑不消耗体力")
                 .independent()
@@ -1142,7 +1143,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.walk(scene, plain, diagonal.multiply(SPEED_II * 10), 10);
         scene.overlay().showText(90)
                 .text("之后（人还活着才算）才回酒的理智、触发材料效果：朗姆酒的加速这才开始（演示中缩短了时间）")
-                .independent();
+                .independent(40);
         scene.idle(100);
         Actors.leave(scene, plain, Direction.UP);
         scene.idle(15);
@@ -1201,27 +1202,27 @@ final class SparkStrengthCivilianItemScenes {
         WatheItemScenes.shoot(scene, vigilante, REVOLVER_MUZZLE, new Vec3d(2.9, 1.9, 4.1));
         scene.idle(12);
         Actors.turn(scene, killer, SCREEN_LEFT);
-        scene.overlay().showText(70)
+        scene.overlay().showText(50)
                 .text("义警一枪打空：左轮要冷却一会儿才能再开")
                 .independent()
                 .attachKeyFrame();
-        scene.idle(30);
+        scene.idle(50);
         ItemStack special = spirit("ice_cube", "ghostflame_bitters", "ember_sugar");
         Actors.hold(scene, vigilante, special);
         scene.idle(10);
         scene.overlay().showControls(vigilanteSpot.add(0, 2.6, 0), Pointing.DOWN, 40)
                 .withItem(stack("sparkstrength:ember_sugar"));
-        scene.overlay().showText(80)
+        scene.overlay().showText(60)
                 .text("他手里这杯加了冰块、【幽焰苦精】和【火种方糖】")
                 .independent();
-        scene.idle(50);
+        scene.idle(64);
         scene.overlay().showControls(vigilanteSpot.add(0, 2.6, 0), Pointing.DOWN, 20).rightClick().withItem(special);
         scene.idle(5);
         Actors.charge(scene, vigilante, true);
         scene.idle(1);
         Actors.charge(scene, vigilante, false);
         Actors.hold(scene, vigilante, ItemStack.EMPTY);
-        scene.overlay().showText(70)
+        scene.overlay().showText(55)
                 .text("【火种方糖】：点一下右键就喝完，不用按住 2 秒")
                 .independent()
                 .attachKeyFrame();
@@ -1230,7 +1231,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         WatheItemScenes.shoot(scene, vigilante, REVOLVER_MUZZLE, new Vec3d(2.9, 1.9, 4.1));
         Actors.fall(scene, killer);
-        scene.idle(20);
+        scene.idle(25);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
                 .text("【幽焰苦精】：酒生效时清空你身上物品的冷却（少数持续状态维持的冷却除外），左轮马上又能开枪")
