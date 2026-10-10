@@ -712,7 +712,7 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(5);
         WatheItemScenes.shoot(scene, killer, muzzle(spot, SCREEN_RIGHT, -0.12), firstSpot.add(0, 0.9, 0));
         Actors.fall(scene, first);
-        scene.overlay().showText(75)
+        scene.overlay().showText(73)
                 .text("右键开枪，射程 30 格，打中一般当场死亡；隔墙打不到人")
                 .independent()
                 .attachKeyFrame();

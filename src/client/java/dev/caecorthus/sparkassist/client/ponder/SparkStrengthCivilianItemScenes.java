@@ -625,7 +625,7 @@ final class SparkStrengthCivilianItemScenes {
         int approach = (int) Math.round(killerStep.length() / WALK);
         // The ring lasts until the device is gone. 范围线一直显示到装置消失。
         ring(scene, deviceAt.add(0, 0.05, 0), 5, 30 + 20 + 30 + approach);
-        scene.overlay().showText(90)
+        scene.overlay().showText(88)
                 .text("以它为中心 5 格内（白线示意，隔墙、上下层也算），你以外的活人一进来就会触发")
                 .independent()
                 .attachKeyFrame();
@@ -1060,7 +1060,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.hold(scene, vodkaDrinker, vodka);
         scene.idle(15);
         drink(scene, vodkaDrinker, vodkaStart, vodka);
-        scene.overlay().showText(87)
+        scene.overlay().showText(85)
                 .colored(PonderPalette.GREEN)
                 .text("伏特加：默认亢奋 20 秒，这期间疾跑不消耗体力")
                 .independent()
