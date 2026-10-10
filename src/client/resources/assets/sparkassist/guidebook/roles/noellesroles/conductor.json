@@ -18,6 +18,11 @@
               "text": "好人阵营的特殊身份。你带着一把【万能钥匙】，能进出车上任何一扇锁着的门，是最快赶到现场、救人或查房的人。"
             },
             {
+              "type": "demo",
+              "scene": "sparkassist:roles/noellesroles/conductor",
+              "text": "演示：列车长怎么用万能钥匙"
+            },
+            {
               "type": "section",
               "text": "初始物品",
               "tone": "item"

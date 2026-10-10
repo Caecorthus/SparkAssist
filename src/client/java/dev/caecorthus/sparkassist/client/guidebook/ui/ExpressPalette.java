@@ -72,6 +72,8 @@ public final class ExpressPalette {
     public static final int INK_RULE = 0x803B2A1A;
     public static final int INK_RULE_SOFT = 0x383B2A1A;
     public static final int CALLOUT = 0x143B2A1A;
+    /** Idle demo button on the paper: a faint brass wash. 纸面上未悬停的演示按钮：淡黄铜底。 */
+    public static final int DEMO_WASH = 0x24A58224;
     public static final int PAPER_THUMB = 0xFF8C7659;
     public static final int PAPER_THUMB_HI = 0xFFA8926F;
     public static final int GILT_LEAF = 0xFFF6DE9C;

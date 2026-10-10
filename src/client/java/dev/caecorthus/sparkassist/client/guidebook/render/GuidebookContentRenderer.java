@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,6 +66,11 @@ public final class GuidebookContentRenderer {
     private static final int ORNAMENT_HEIGHT = 5;
     private static final int TAIL_GAP = 14;
     private static final int TAIL_AFTER = 6;
+    /** Height of a demo button row. 演示按钮行高。 */
+    public static final int DEMO_HEIGHT = 20;
+    /** Label start inside a demo button, right of the play disc. 演示按钮内文字起点（播放圆标右侧）。 */
+    public static final int DEMO_LABEL_X = 24;
+    private static final int DEMO_GAP = 8;
     private static final Pattern EMPHASIS = Pattern.compile("【[^】]*】|\\d+ ?金币");
     /** Preferred split points for a balanced two-line epigraph. 两行引言优先的断点。 */
     private static final String BALANCE_BREAKS = "，。；：！？、…」";
@@ -78,11 +84,24 @@ public final class GuidebookContentRenderer {
             int width,
             Function<String, String> translationResolver
     ) {
+        return layout(page, textRenderer, width, translationResolver, target -> false);
+    }
+
+    /** @param demoPlayable whether a DEMO block's target can be played; unplayable demos take no space
+     *                     / DEMO 块的目标能否播放；不能播放的演示不占位置 */
+    public static Layout layout(
+            GuidebookPage page,
+            TextRenderer textRenderer,
+            int width,
+            Function<String, String> translationResolver,
+            Predicate<String> demoPlayable
+    ) {
         // Widths are cached per (code point, style) for this layout only; a resource reload rebuilds the article.
         // 字宽按（码点，样式）缓存，仅在本次排版内有效；资源重载会重新排版。
         Map<Cell, Integer> widths = new HashMap<>();
         return typeset(page, cell -> widths.computeIfAbsent(cell,
-                key -> textRenderer.getWidth(OrderedText.styled(key.codePoint(), key.style()))), width, translationResolver);
+                key -> textRenderer.getWidth(OrderedText.styled(key.codePoint(), key.style()))), width, translationResolver,
+                demoPlayable);
     }
 
     /** Font-free core (tests pass a fake width): {@code advance} measures one cell. 无字体的核心排版，测试可传入假字宽。 */
@@ -92,7 +111,17 @@ public final class GuidebookContentRenderer {
             int width,
             Function<String, String> translationResolver
     ) {
-        Typesetter typesetter = new Typesetter(advance, width, translationResolver);
+        return typeset(page, advance, width, translationResolver, target -> false);
+    }
+
+    static Layout typeset(
+            GuidebookPage page,
+            ToIntFunction<Cell> advance,
+            int width,
+            Function<String, String> translationResolver,
+            Predicate<String> demoPlayable
+    ) {
+        Typesetter typesetter = new Typesetter(advance, width, translationResolver, demoPlayable);
         for (GuidebookBlock block : page.blocks()) {
             typesetter.block(block);
         }
@@ -152,13 +181,17 @@ public final class GuidebookContentRenderer {
         private final Function<String, String> resolver;
         private final List<RenderedLine> lines = new ArrayList<>();
         private final List<Ornament> ornaments = new ArrayList<>();
+        private final List<Demo> demos = new ArrayList<>();
+        private final Predicate<String> demoPlayable;
         private int y;
         private boolean first = true;
 
-        Typesetter(ToIntFunction<Cell> advance, int width, Function<String, String> resolver) {
+        Typesetter(ToIntFunction<Cell> advance, int width, Function<String, String> resolver,
+                   Predicate<String> demoPlayable) {
             this.advance = advance;
             this.width = Math.max(1, width);
             this.resolver = resolver;
+            this.demoPlayable = demoPlayable;
         }
 
         void block(GuidebookBlock block) {
@@ -185,7 +218,28 @@ public final class GuidebookContentRenderer {
                     paragraph(block);
                     first = false;
                 }
+                case DEMO -> {
+                    if (demoPlayable.test(block.target())) {
+                        demo(block);
+                        first = false;
+                    }
+                }
             }
+        }
+
+        /** A full-width button row; the label is cut to one line. 通栏按钮行；文字截成一行。 */
+        private void demo(GuidebookBlock block) {
+            if (!first) {
+                y += DEMO_GAP;
+            }
+            List<Cell> cells = CjkLineBreaker.normalise(plainCells(block, INK), true);
+            List<List<Cell>> wrapped = CjkLineBreaker.wrap(cells, width - DEMO_LABEL_X - 6, advance);
+            List<Cell> label = wrapped.isEmpty() ? List.of() : wrapped.get(0);
+            ornaments.add(new Ornament(Ornament.Kind.DEMO, 0, y, width, DEMO_HEIGHT, BRASS_LO,
+                    Text.literal(CjkLineBreaker.string(cells))));
+            lines.add(new RenderedLine(CjkLineBreaker.toOrderedText(label), DEMO_LABEL_X, y + (DEMO_HEIGHT - 8) / 2));
+            demos.add(new Demo(block.target(), y, DEMO_HEIGHT));
+            y += DEMO_HEIGHT + DEMO_GAP / 2;
         }
 
         private void section(GuidebookBlock block) {
@@ -277,7 +331,7 @@ public final class GuidebookContentRenderer {
             y += TAIL_GAP;
             ornaments.add(new Ornament(Ornament.Kind.TAILPIECE, 0, y, width, ORNAMENT_HEIGHT, INK_FAINT, null));
             y += ORNAMENT_HEIGHT + TAIL_AFTER;
-            return new Layout(lines, ornaments, y);
+            return new Layout(lines, ornaments, y, demos);
         }
 
         /** Runs in their tone colours (DEFAULT -> base); bold and italic are ignored. 各段按色调着色，忽略粗斜体。 */
@@ -364,7 +418,7 @@ public final class GuidebookContentRenderer {
      * SECTION_MARK = the 5x5 diamond box (label = section title, for the running head);
      * SECTION_RULE = the 1 px rule rect; BULLET = the 3x3 cross box;
      * QUOTE_RULE / DIVIDER / TAILPIECE = full-column box, centred on x + width / 2 (y is the rule row or ornament top);
-     * CALLOUT = the tinted box, 2 px BRASS bar at its left.
+     * CALLOUT = the tinted box, 2 px BRASS bar at its left; DEMO = the button box (label = full button text).
      * 正文坐标中的装饰；各类型的几何含义见上。
      */
     public record Ornament(Kind kind, int x, int y, int width, int height, int color, @Nullable Text label) {
@@ -375,16 +429,37 @@ public final class GuidebookContentRenderer {
             QUOTE_RULE,
             CALLOUT,
             DIVIDER,
-            TAILPIECE
+            TAILPIECE,
+            DEMO
         }
     }
 
-    public record Layout(List<RenderedLine> lines, List<Ornament> ornaments, int height) {
+    /** A playable demo button: {@code target} is the demo id, the box spans the column from body y {@code y}.
+     * 可播放的演示按钮：target 为演示 id，按钮从正文 y 处起横跨整栏。 */
+    public record Demo(String target, int y, int height) {
+    }
+
+    public record Layout(List<RenderedLine> lines, List<Ornament> ornaments, int height, List<Demo> demos) {
         public static final Layout EMPTY = new Layout(List.of(), List.of(), 0);
 
         public Layout {
             lines = List.copyOf(lines);
             ornaments = List.copyOf(ornaments);
+            demos = List.copyOf(demos);
+        }
+
+        public Layout(List<RenderedLine> lines, List<Ornament> ornaments, int height) {
+            this(lines, ornaments, height, List.of());
+        }
+
+        /** The demo whose button covers body y {@code bodyY}, or null. 覆盖正文 y 的演示按钮；没有则为 null。 */
+        public @Nullable Demo demoAt(int bodyY) {
+            for (Demo demo : demos) {
+                if (bodyY >= demo.y() && bodyY < demo.y() + demo.height()) {
+                    return demo;
+                }
+            }
+            return null;
         }
 
         /** Title of the last section whose row top is at or above body y {@code bodyY}, or null.
