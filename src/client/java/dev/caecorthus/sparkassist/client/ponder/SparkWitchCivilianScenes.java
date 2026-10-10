@@ -1659,7 +1659,9 @@ final class SparkWitchCivilianScenes {
         ElementLink<Gadget> link = new ElementLinkImpl<>(Gadget.class);
         scene.addInstruction(ponder -> {
             gadget.setVisible(true);
-            gadget.setFade(1);
+            // Instant placement initializes both fade samples; setFade alone repeats 0 -> 1 every tick.
+            // 即刻放置须同步前后可见度；仅 setFade 会让每个 tick 重复从暗到亮。
+            gadget.forceApplyFade(1);
             ponder.addElement(gadget);
             ponder.linkElement(gadget, link);
         });
