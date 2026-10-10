@@ -2,6 +2,9 @@ package dev.caecorthus.sparkassist.client.ponder;
 
 import dev.doctor4t.wathe.cca.PlayerPsychoComponent;
 import dev.doctor4t.wathe.client.WatheClient;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
@@ -84,8 +87,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private Vec3d previousPosition;
     /** Where the actor stood after its own step last tick; anything since is a move made by an instruction. 上一 tick 自身迈步后的位置；之后的位移来自指令。 */
     private Vec3d settled;
-    private Vec3d step = Vec3d.ZERO;
-    private int stepTicks;
+    /** Walks and slides under way; overlapping ones add up (a knockback with a hop). 进行中的行走与平移；重叠时相加（击退加上弹起）。 */
+    private final List<Move> moves = new ArrayList<>();
     private float yaw;
     private float previousYaw;
     private float targetYaw;
@@ -115,8 +118,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         position = startPosition;
         previousPosition = startPosition;
         settled = startPosition;
-        step = Vec3d.ZERO;
-        stepTicks = 0;
+        moves.clear();
         yaw = startYaw;
         previousYaw = startYaw;
         targetYaw = startYaw;
@@ -161,12 +163,13 @@ public final class ActorElement extends AnimatedSceneElementBase {
 
     /**
      * Cover {@code delta} in even steps over the next {@code ticks} ticks, turning to {@code heading} on the way
-     * (NaN keeps the current facing). The actor takes the steps itself so its stride matches them tick for tick.
-     * 在接下来 ticks 内匀速走完 delta，途中转向 heading（NaN 表示保持朝向）。由演员自己迈步，步伐与位移逐 tick 同步。
+     * (NaN keeps the current facing), on top of any other walk or slide under way. The actor takes the steps itself
+     * so its stride matches them tick for tick.
+     * 在接下来 ticks 内匀速走完 delta，途中转向 heading（NaN 表示保持朝向），与进行中的其他行走或平移叠加。由演员自己
+     * 迈步，步伐与位移逐 tick 同步。
      */
     public void walk(Vec3d delta, int ticks, float heading) {
-        step = delta.multiply(1.0 / ticks);
-        stepTicks = ticks;
+        moves.add(new Move(delta.multiply(1.0 / ticks), ticks));
         if (!Float.isNaN(heading)) {
             turnTo(heading);
         }
@@ -276,9 +279,12 @@ public final class ActorElement extends AnimatedSceneElementBase {
         double pushed = position.subtract(settled).horizontalLength();
         previousPosition = position;
         previousYaw = yaw;
-        if (stepTicks > 0) {
-            position = position.add(step);
-            stepTicks--;
+        for (Iterator<Move> it = moves.iterator(); it.hasNext(); ) {
+            Move move = it.next();
+            position = position.add(move.step);
+            if (--move.ticks <= 0) {
+                it.remove();
+            }
         }
         settled = position;
         if (!isDown() && bedHead == null) {
@@ -509,6 +515,16 @@ public final class ActorElement extends AnimatedSceneElementBase {
             WatheClient.particleMap.remove(player);
         }
         player = null;
+    }
+
+    private static final class Move {
+        private final Vec3d step;
+        private int ticks;
+
+        private Move(Vec3d step, int ticks) {
+            this.step = step;
+            this.ticks = ticks;
+        }
     }
 
     private static PlayerEntityModel<LivingEntity> bodyModel() {
