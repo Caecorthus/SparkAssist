@@ -1014,11 +1014,11 @@ final class SparkWitchKillerScenes {
      * charge full and the target inside the sword's +2 reach, kills through most shields. A right-click swings (the
      * client returns success) and dashes 6 blocks along the level look at 1.5 blocks a tick; the first player the swept
      * box touches is killed, ally or not, and the dash stops there or before a wall; 5 s item cooldown. Both kills share
-     * a 30 s kill cooldown, during which the dash only moves.
+     * a 30 s kill cooldown, during which the dash still stops at the first player it touches but kills nobody.
      * 大魔女的仪礼剑：完成第 2 个任务时免费发放，手持不隐藏；主手或副手拿着时移速提高 40%。左键挥剑（原版攻击），攻击蓄力
      * 0.5 秒满、目标在 +2 格的攻击距离内即击杀，能穿透大部分护盾。右键挥手（客户端返回成功）并沿水平视线以每 tick 1.5 格
      * 冲刺 6 格；扫过的碰撞箱碰到的第一名玩家被击杀，不分敌我，冲刺在那里或撞墙前停下；物品冷却 5 秒。两种击杀共用 30 秒
-     * 击杀冷却，冷却期间冲刺只能位移。
+     * 击杀冷却，冷却期间冲刺碰到人照样停下，但杀不了人。
      */
     private static void grandWitch(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_grand_witch", "大魔女：仪礼剑");
@@ -1094,7 +1094,7 @@ final class SparkWitchKillerScenes {
                 .independent();
         scene.idle(100);
         scene.overlay().showText(90)
-                .text("冲刺本身冷却 5 秒；击杀冷却中冲刺只能赶路，杀不了人")
+                .text("冲刺本身冷却 5 秒；击杀冷却中冲刺碰到人照样停下，但杀不了人")
                 .independent();
         scene.idle(100);
         scene.markAsFinished();
@@ -1117,7 +1117,7 @@ final class SparkWitchKillerScenes {
      * 5 × 5 × 5 立方体内且视线可达的所有人（普通击杀，护盾能挡），药炮手本人与队友也不例外；DK、AC、MR 弹只影响非队友。每次
      * 开火都会从眼睛向正后方喷出 4 格火焰与烟（遇方块截断），对其中最近的一名玩家进行一次普通击杀，不分阵营。
      */
-    private static void potionGunner(SceneBuilder scene, SceneBuildingUtil util) {
+    static void potionGunner(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_potion_gunner", "药炮手：反坦克炮筒");
         WatheItemScenes.stage(scene);
         Text civilian = Text.literal("平民");
@@ -2088,7 +2088,7 @@ final class SparkWitchKillerScenes {
     }
 
     /** Show {@code sprite} in the scene. 在场景中显示 sprite。 */
-    private static ElementLink<Sprite> sprite(SceneBuilder scene, Sprite sprite) {
+    static ElementLink<Sprite> sprite(SceneBuilder scene, Sprite sprite) {
         ElementLink<Sprite> link = new ElementLinkImpl<>(Sprite.class);
         scene.addInstruction(ponder -> {
             sprite.setVisible(true);
@@ -2115,7 +2115,7 @@ final class SparkWitchKillerScenes {
      * 始终朝向观看者的图片，在 ticks 内从 from 移到 to，之后停在那里或消失：像原版 FlyingItemEntityRenderer 绘制手里剑那样的
      * 投掷物，或像 NinjaGrapplingHookEntityRenderer.renderHead 那样用钩头自己的贴图绘制（以钩爪中心为中心、边长 0.5 的方块）。
      */
-    private static final class Sprite extends AnimatedSceneElementBase {
+    static final class Sprite extends AnimatedSceneElementBase {
         private static final Identifier HOOK_HEAD = Identifier.of("sparkwitch", "textures/entity/ninja_grappling_hook.png");
         private static final float HOOK_HEAD_SIZE = 0.5f;
         /** Half the hook entity's 0.25 height: the head is drawn at its centre. 钩爪实体 0.25 高度的一半：钩头画在其中心。 */
@@ -2224,8 +2224,8 @@ final class SparkWitchKillerScenes {
      * 从 from 飞到 to、用时 ticks、弧线与 ThrownElement 相同的物体留下的轨迹：每 tick 沿这一段均匀放出 perTick 个粒子，每个按
      * chance 的概率保留。
      */
-    private static void trail(SceneBuilder scene, ParticleEffect particle, Vec3d from, Vec3d to, int ticks, double arc,
-                              int perTick, float chance) {
+    static void trail(SceneBuilder scene, ParticleEffect particle, Vec3d from, Vec3d to, int ticks, double arc,
+                      int perTick, float chance) {
         scene.addInstruction(new Trail(particle, from, to, ticks, arc, perTick, chance));
     }
 
@@ -2235,7 +2235,7 @@ final class SparkWitchKillerScenes {
      * 炮筒尾焰，排布与 PotionBackblastService.present 相同：从眼睛沿正后方（只看偏航角）每 0.25 格一点，共 4 格，每点两团火焰、
      * 一团大烟。
      */
-    private static void backblast(SceneBuilder scene, Vec3d eyes, float yaw) {
+    static void backblast(SceneBuilder scene, Vec3d eyes, float yaw) {
         Vec3d backwards = forward(yaw).multiply(-1);
         scene.effects().emitParticles(eyes, (world, x, y, z) -> {
             for (double travelled = BACKBLAST_STEP; travelled <= BACKBLAST_LENGTH; travelled += BACKBLAST_STEP) {
@@ -2260,7 +2260,7 @@ final class SparkWitchKillerScenes {
      * 药剂炮弹爆炸，与 PotionBlastService.present 展示给所有人的相同：Wathe 的大爆炸闪光、100 团烟和 100 片炮弹碎片，位于爆心
      * 上方 0.1 处。
      */
-    private static void shellBlast(SceneBuilder scene, Vec3d center, ItemStack shell) {
+    static void shellBlast(SceneBuilder scene, Vec3d center, ItemStack shell) {
         Vec3d at = center.add(0, 0.1, 0);
         serverParticles(scene, WatheParticles.BIG_EXPLOSION, at, 1, 0, 0, 0, 0);
         serverParticles(scene, ParticleTypes.SMOKE, at, 100, 0, 0, 0, 0.2);

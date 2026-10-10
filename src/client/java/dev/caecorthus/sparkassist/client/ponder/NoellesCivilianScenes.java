@@ -508,7 +508,7 @@ final class NoellesCivilianScenes {
      * 威士忌给 30 秒护盾（特调利口酒让这些时间翻倍），挡下一次致命击杀（误杀惩罚、刺客猜中、巫毒、掉出列车与强制击杀
      * 除外），并在受害者周围响起疯魔护甲声。基酒与材料在酒保手里别人看不见。喝过列车自带鸡尾酒的人会在酒保眼里亮绿框 40 秒。
      */
-    private static void bartender(SceneBuilder scene, SceneBuildingUtil util) {
+    static void bartender(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_bartender", "酒保：调一杯酒请人喝");
         WatheItemScenes.setStage(scene, util);
         BlockPos tray = util.grid().at(3, 2, 3);

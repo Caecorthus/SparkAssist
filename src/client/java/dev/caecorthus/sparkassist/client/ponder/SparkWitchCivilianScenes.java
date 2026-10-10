@@ -325,7 +325,7 @@ final class SparkWitchCivilianScenes {
      * 钥匙鱼能打开锁着的小门（对局中也能开车门），打不开被卡住、被撬开或开着的门；门整道打开后钥匙鱼用掉，门照样 5 秒后
      * 自动关上。
      */
-    private static void fisher(SceneBuilder scene, SceneBuildingUtil util) {
+    static void fisher(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_fisher", "钓鱼佬：托盘钓鱼与钥匙鱼");
         WatheItemScenes.setStage(scene, util);
         BlockPos door = util.grid().at(3, 1, 3);

@@ -31,6 +31,7 @@ import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
 import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -105,7 +106,16 @@ final class NoellesKillerScenes {
         item("noellesroles:throwing_axe", NOELLES, scene("noellesroles/axe_wall", NoellesKillerScenes::throwingAxe));
         role("sparkassist:roles/noellesroles/bomber", NOELLES,
                 scene("wathe/aisle", NoellesKillerScenes::timedBomb));
-        item("noellesroles:timed_bomb", NOELLES, scene("wathe/aisle", NoellesKillerScenes::timedBomb));
+        // SparkStrength adds a second use, hiding the bomb in a tray or bed as a trap; that scene is appended only when
+        // SparkStrength is loaded, so the NoellesRoles-only demo stays as it was.
+        // SparkStrength 新增第二种用法（把炸弹藏进托盘或床做陷阱）；仅在加载 SparkStrength 时追加该场景，只装 NoellesRoles
+        // 时演示保持原样。
+        if (FabricLoader.getInstance().isModLoaded("sparkstrength")) {
+            item("noellesroles:timed_bomb", NOELLES, scene("wathe/aisle", NoellesKillerScenes::timedBomb),
+                    scene("wathe/bar", SparkStrengthKillerItemScenes::timedBombTrap));
+        } else {
+            item("noellesroles:timed_bomb", NOELLES, scene("wathe/aisle", NoellesKillerScenes::timedBomb));
+        }
         item("sparkstrength:grenade_drone", NOELLES_STRENGTH,
                 scene("noellesroles/wide_aisle", NoellesKillerScenes::grenadeDrone));
         role("sparkassist:roles/noellesroles/jester", NOELLES_STRENGTH,
@@ -471,13 +481,14 @@ final class NoellesKillerScenes {
     }
 
     /**
-     * Throwing axe (ThrowingAxeItem, ThrowingAxeEntity, ThrowingAxeEntityRenderer, BanditShopHandler): the Bandit's
-     * shop sells it for 200, single use. Holding right-click shows the bow pose; power peaks after 20 ticks, and under
+     * Throwing axe (ThrowingAxeItem, ThrowingAxeEntity, ThrowingAxeEntityRenderer, BanditShopHandler; SparkWitch
+     * MurderousWitchShopRules): the Bandit's shop sells it for 200, single use; with SparkWitch the Murderous Witch's
+     * shop also sells it, for 150. Holding right-click shows the bow pose; power peaks after 20 ticks, and under
      * a quarter of it (6 ticks or fewer) nothing is thrown. The axe flies at up to 2.4 blocks a tick, kills every
      * player whose hitbox it crosses except its thrower (unless a protection stops the kill) and keeps 90% of its
      * speed after each, then sticks in the block it hits and cannot be picked up. Throw, hit and stick play trident
      * sounds. The flight lasts about 3 game ticks here, so the demo slows it down.
-     * 飞斧：强盗商店 200 金币，一次性。按住右键为拉弓姿势；20 tick 蓄满，不到四分之一（6 tick 及以内）就扔不出去。飞斧每 tick
+     * 飞斧：强盗商店 200 金币，一次性；装了 SparkWitch 时杀意魔女的商店也卖，150 金币。按住右键为拉弓姿势；20 tick 蓄满，不到四分之一（6 tick 及以内）就扔不出去。飞斧每 tick
      * 最多飞 2.4 格，杀死所有被它穿过碰撞箱的玩家（扔的人除外），每穿过一人保留 90% 的速度，最后插在撞到的方块上，
      * 捡不回来。投掷、命中、插墙都有三叉戟音效。这里的飞行在游戏中只有约 3 tick，演示做了放慢。
      */
@@ -498,7 +509,7 @@ final class NoellesKillerScenes {
         Actors.hold(scene, bandit, stack("noellesroles:throwing_axe"));
         scene.idle(20);
         scene.overlay().showText(80)
-                .text("强盗能在商店花 200 金币买【飞斧】，用一次就没了")
+                .text("强盗能在商店花 200 金币买【飞斧】（装了 SparkWitch 时杀意魔女也能买），用一次就没了")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
@@ -706,7 +717,7 @@ final class NoellesKillerScenes {
         scene.idle(10);
         Actors.swing(scene, bomber);
         Actors.hold(scene, bomber, ItemStack.EMPTY);
-        ElementLink<EntityElement> drone = placeDrone(scene, new Vec3d(7.3, 1, 1.9), SCREEN_RIGHT);
+        ElementLink<EntityElement> drone = placeDrone(scene, "grenade_drone", new Vec3d(7.3, 1, 1.9), SCREEN_RIGHT);
         scene.idle(15);
         Actors.lookPitch(scene, bomber, 0);
         scene.overlay().showText(80)
@@ -782,7 +793,7 @@ final class NoellesKillerScenes {
         scene.world().modifyEntity(drone, Entity::discard);
         scene.idle(45);
         scene.overlay().showText(80)
-                .text("飞行每秒耗电 2%，悬停 1%；收回后会慢慢充电")
+                .text("飞行每秒耗电 2%%，悬停 1%%；收回后会慢慢充电")
                 .independent();
         scene.idle(90);
         scene.markAsFinished();
@@ -945,7 +956,7 @@ final class NoellesKillerScenes {
                 .attachKeyFrame();
         scene.idle(100);
         scene.overlay().showText(90)
-                .text("每杀一人画面变灰 10%（最多 50%），也听不到任何人说话")
+                .text("每杀一人画面变灰 10%%（最多 50%%），也听不到任何人说话")
                 .independent();
         scene.idle(100);
         scene.markAsFinished();
@@ -1250,8 +1261,8 @@ final class NoellesKillerScenes {
      * each moving at a gaussian {@code speed}.
      * 与 ServerWorld.spawnParticles 发出的一致：在 at 处按高斯分布 spread 散开 count 个粒子，速度按高斯分布 speed。
      */
-    private static void spray(SceneBuilder scene, ParticleEffect particle, Vec3d at, int count, double spread,
-                              double speed) {
+    static void spray(SceneBuilder scene, ParticleEffect particle, Vec3d at, int count, double spread,
+                      double speed) {
         scene.addInstruction(ponder -> {
             for (int i = 0; i < count; i++) {
                 ponder.getWorld().addParticle(particle, at.x + RANDOM.nextGaussian() * spread,
@@ -1381,7 +1392,7 @@ final class NoellesKillerScenes {
      * The 9-wide aisle, slightly further out than the 7-wide one so the M67's 5-block reach fits on it.
      * 9 格宽的走廊，比 7 格的稍远一些，让 M67 的 5 格范围放得下。
      */
-    private static void wideStage(SceneBuilder scene) {
+    static void wideStage(SceneBuilder scene) {
         scene.configureBasePlate(0, 0, 9);
         scene.scaleSceneView(1.2f);
         scene.showBasePlate();
@@ -1389,15 +1400,16 @@ final class NoellesKillerScenes {
     }
 
     /**
-     * SparkStrength's grenade drone entity, drawn by its own renderer, set down at {@code at} facing {@code yaw} with
-     * an M67 bound (as DroneItem.useOnBlock places it). 由 SparkStrength 自己的渲染器绘制的投弹无人机实体，像
-     * DroneItem.useOnBlock 那样挂着 M67、朝 yaw 放在 at 处。
+     * A SparkStrength drone entity ({@code kind} grenade_drone or bomb_drone), drawn by its own renderer, set down at
+     * {@code at} facing {@code yaw} as DroneItem.useOnBlock places it; a grenade drone carries its bound M67.
+     * 由 SparkStrength 自己的渲染器绘制的无人机实体（kind 为 grenade_drone 或 bomb_drone），像 DroneItem.useOnBlock
+     * 那样朝 yaw 放在 at 处；投弹无人机挂着 M67。
      */
-    private static ElementLink<EntityElement> placeDrone(SceneBuilder scene, Vec3d at, float yaw) {
+    static ElementLink<EntityElement> placeDrone(SceneBuilder scene, String kind, Vec3d at, float yaw) {
         return scene.world().createEntity(world -> {
-            Entity drone = Registries.ENTITY_TYPE.get(Identifier.of("sparkstrength", "grenade_drone")).create(world);
+            Entity drone = Registries.ENTITY_TYPE.get(Identifier.of("sparkstrength", kind)).create(world);
             drone.refreshPositionAndAngles(at.x, at.y, at.z, yaw, 0);
-            droneData(drone, "PAYLOAD", true);
+            droneData(drone, "PAYLOAD", kind.equals("grenade_drone"));
             return drone;
         });
     }
@@ -1421,19 +1433,19 @@ final class NoellesKillerScenes {
     }
 
     /** Fly the drone by {@code delta} over {@code ticks}; it hovers once there. 在 ticks 内让无人机飞过 delta，到达后悬停。 */
-    private static void flyDrone(SceneBuilder scene, ElementLink<EntityElement> drone, Vec3d delta, int ticks) {
+    static void flyDrone(SceneBuilder scene, ElementLink<EntityElement> drone, Vec3d delta, int ticks) {
         scene.addInstruction(new DroneFlight(drone, delta, ticks));
     }
 
     /** The M67 as a dropped one looks: the armed model (custom model data 1). 投下的 M67 的样子：已拉环的模型。 */
-    private static ItemStack armedM67() {
+    static ItemStack armedM67() {
         ItemStack m67 = stack("sparkstrength:m67");
         m67.set(DataComponentTypes.CUSTOM_MODEL_DATA, new CustomModelDataComponent(1));
         return m67;
     }
 
     /** A {@code radius} ring on the floor around {@code center}, kept on a {@code size} plate. 地面上以 center 为圆心、半径 radius 的圆圈，只画在 size 大小的底板内。 */
-    private static void blastRing(SceneBuilder scene, Vec3d center, double radius, int size, int ticks) {
+    static void blastRing(SceneBuilder scene, Vec3d center, double radius, int size, int ticks) {
         int segments = 64;
         for (int i = 0; i < segments; i++) {
             double a = MathHelper.TAU * i / segments;

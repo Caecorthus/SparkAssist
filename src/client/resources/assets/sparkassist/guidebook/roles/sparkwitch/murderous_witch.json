@@ -93,6 +93,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:fire_poker",
+              "text": "演示：烧火棍"
+            },
+            {
               "type": "section",
               "text": "玩法建议",
               "tone": "good"

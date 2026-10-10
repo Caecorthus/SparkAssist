@@ -97,6 +97,11 @@
               "text": "被你标记的人会一直在你眼中高亮，方便跟踪。"
             },
             {
+              "type": "demo",
+              "scene": "sparkstrength:morph_reagent",
+              "text": "演示：变形试剂与遥控器"
+            },
+            {
               "type": "section",
               "text": "玩法建议",
               "tone": "good"
