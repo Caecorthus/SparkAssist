@@ -84,6 +84,11 @@
               ]
             },
             {
+              "type": "demo",
+              "scene": "sparkwitch:time_stealer_gift_watch",
+              "text": "演示：赠时怀表"
+            },
+            {
               "type": "section",
               "text": "商店",
               "tone": "money"

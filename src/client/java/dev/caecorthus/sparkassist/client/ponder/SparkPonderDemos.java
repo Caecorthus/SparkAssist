@@ -37,6 +37,7 @@ final class SparkPonderDemos {
         SparkWitchCivilianScenes.register();
         SparkWitchKillerScenes.register();
         SparkWitchWraithScenes.register();
+        SparkWitchItemScenes.register();
     }
 
     private SparkPonderDemos() {
