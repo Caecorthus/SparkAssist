@@ -203,7 +203,10 @@ public final class AchievementCatalog {
                     TraitRules::civilianFortune),
             new Achievement("outlasted", 2, "minecraft:golden_apple", "你已疾苦",
                     "作为生存大师触发生存时刻并通过倒计时结束胜利",
-                    RoleSkillRules::outlastedSurvivalMoment)
+                    RoleSkillRules::outlastedSurvivalMoment),
+            new Achievement("prized_pupil", 4, "minecraft:experience_bottle", "萨妮教授的得意门生",
+                    "以教授身份成功用铁人药剂为 10 名玩家抵挡致命伤害",
+                    RoleSkillRules::ironManSavedTen)
     );
     private static final Map<String, Achievement> BY_ID = index(ALL);
 
