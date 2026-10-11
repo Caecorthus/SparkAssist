@@ -204,7 +204,7 @@ public final class AchievementCatalog {
             new Achievement("outlasted", 2, "minecraft:golden_apple", "你已疾苦",
                     "作为生存大师触发生存时刻并通过倒计时结束胜利",
                     RoleSkillRules::outlastedSurvivalMoment),
-            new Achievement("prized_pupil", 4, "minecraft:experience_bottle", "萨妮教授的得意门生",
+            new Achievement("prized_pupil", 5, "minecraft:experience_bottle", "萨妮教授的得意门生",
                     "以教授身份成功用铁人药剂为 10 名玩家抵挡致命伤害",
                     RoleSkillRules::ironManSavedTen)
     );
