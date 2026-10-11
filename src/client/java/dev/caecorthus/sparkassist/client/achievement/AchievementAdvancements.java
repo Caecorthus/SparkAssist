@@ -26,16 +26,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 /**
  * Shows earned achievements as one extra page in the vanilla advancements screen. The page and its entries live only
  * in this client's advancement tree: they are added back every time the server resends its advancements, the tab
  * selection is never reported to the server, and nothing exists until the first achievement is earned. Every entry
- * has a single, already obtained criterion, so vanilla never draws a progress bar.
+ * has a single, already obtained criterion, so vanilla never draws a progress bar. Entries hang off the root only
+ * because vanilla needs a parent to put them on the page; the page draws no connector lines.
  * 在原版成就界面里以额外一页展示已达成的成就。这一页及其条目只存在于本客户端的进度树中：服务器每次重发进度后都会补回，
  * 切到这一页不会告知服务器，第一个成就达成之前这一页不存在。每个条目只有一个已完成的条件，所以原版从不绘制进度条。
+ * 条目挂在根节点下只是因为原版需要父节点才会把它们放上这一页；这一页不画连线。
  */
 public final class AchievementAdvancements {
     public static final Identifier ROOT_ID = SparkAssist.id("achievements/root");
@@ -44,6 +48,9 @@ public final class AchievementAdvancements {
     private static final String CRITERION = "earned";
     // "Level x · <description>". “Level x · <描述>”。
     private static final String DESCRIPTION_KEY = "advancements.sparkassist.achievement.description";
+    // Last description line: "获得地点：<server address | 本地世界>". 描述最后一行：“获得地点：<服务器地址 | 本地世界>”。
+    private static final String PLACE_KEY = "advancements.sparkassist.achievement.place";
+    private static final String LOCAL_WORLD_KEY = "advancements.sparkassist.achievement.place.local_world";
 
     private AchievementAdvancements() {
     }
@@ -103,24 +110,17 @@ public final class AchievementAdvancements {
 
     /** The root plus every earned, still-known achievement, in unlock order. 根节点加上所有已达成且仍存在的成就，按解锁顺序。 */
     private static List<AdvancementEntry> entries(AchievementLedger ledger) {
-        List<Achievement> earned = new ArrayList<>();
-        for (AchievementLedger.Unlock unlock : ledger.unlocks()) {
-            AchievementCatalog.byId(unlock.id()).ifPresent(earned::add);
-        }
-        if (earned.isEmpty()) {
-            return List.of();
-        }
+        List<AdvancementEntry> entries = new ArrayList<>();
         AdvancementEntry root = root();
-        List<AdvancementEntry> placed = new ArrayList<>(earned.size());
-        for (int i = 0; i < earned.size(); i++) {
-            AchievementLayout.Slot slot = AchievementLayout.slot(i);
-            AdvancementEntry parent = slot.parentIndex() < 0 ? root : placed.get(slot.parentIndex());
-            placed.add(entry(earned.get(i), slot, parent));
-        }
-        List<AdvancementEntry> entries = new ArrayList<>(placed.size() + 1);
         entries.add(root);
-        entries.addAll(placed);
-        return entries;
+        for (AchievementLedger.Unlock unlock : ledger.unlocks()) {
+            Optional<Achievement> achievement = AchievementCatalog.byId(unlock.id());
+            if (achievement.isPresent()) {
+                AchievementLayout.Slot slot = AchievementLayout.slot(entries.size() - 1);
+                entries.add(entry(achievement.get(), unlock.place(), slot, root));
+            }
+        }
+        return entries.size() > 1 ? entries : List.of();
     }
 
     private static AdvancementEntry root() {
@@ -137,11 +137,12 @@ public final class AchievementAdvancements {
         return build(ROOT_ID, null, display);
     }
 
-    private static AdvancementEntry entry(Achievement achievement, AchievementLayout.Slot slot, AdvancementEntry parent) {
+    private static AdvancementEntry entry(
+            Achievement achievement, AchievementLedger.Place place, AchievementLayout.Slot slot, AdvancementEntry parent) {
         AdvancementDisplay display = new AdvancementDisplay(
                 icon(achievement.icon()),
                 Text.literal(achievement.title()),
-                Text.translatable(DESCRIPTION_KEY, achievement.level(), achievement.description()),
+                description(achievement, place),
                 Optional.empty(),
                 switch (achievement.frame()) {
                     case TASK -> AdvancementFrame.TASK;
@@ -153,6 +154,20 @@ public final class AchievementAdvancements {
                 false);
         display.setPos(slot.x(), slot.y());
         return build(idFor(achievement.id()), parent, display);
+    }
+
+    /**
+     * "Level x · <description>", then a grey "获得地点" line when the place is known (saves from before places were
+     * recorded have none).
+     * “Level x · <描述>”，地点已知时再加一行灰色的“获得地点”（记录地点之前的存档没有地点）。
+     */
+    private static Text description(Achievement achievement, AchievementLedger.Place place) {
+        MutableText description = Text.translatable(DESCRIPTION_KEY, achievement.level(), achievement.description());
+        if (place == null) {
+            return description;
+        }
+        Text where = place.isLocalWorld() ? Text.translatable(LOCAL_WORLD_KEY) : Text.literal(place.server());
+        return description.append("\n").append(Text.translatable(PLACE_KEY, where).formatted(Formatting.GRAY));
     }
 
     private static AdvancementEntry build(Identifier id, AdvancementEntry parent, AdvancementDisplay display) {

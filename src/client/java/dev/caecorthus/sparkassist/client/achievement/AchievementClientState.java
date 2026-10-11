@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Identifier;
@@ -159,9 +160,25 @@ public final class AchievementClientState {
                 new AchievementContext(facts, outcome, timeline, ledger.stats(), ledger),
                 (achievement, exception) -> LOGGER.warn("Achievement {} failed to evaluate", achievement.id(), exception));
         long now = System.currentTimeMillis();
-        earned.forEach(achievement -> ledger.unlock(achievement.id(), now));
+        AchievementLedger.Place place = place(client);
+        earned.forEach(achievement -> ledger.unlock(achievement.id(), now, place));
         AchievementStorage.save();
         AchievementAdvancements.announce(client, earned);
+    }
+
+    /**
+     * The local world when this client hosts the game (including a world opened to LAN), otherwise the server address
+     * as entered in the server list or Direct Connect; null when neither is known.
+     * 本客户端自己运行游戏时（包括对局域网开放的世界）为本地世界，否则为服务器列表或直接连接里填写的地址；两者都不知道时为 null。
+     */
+    private static AchievementLedger.Place place(MinecraftClient client) {
+        if (client.isIntegratedServerRunning()) {
+            return AchievementLedger.Place.LOCAL_WORLD;
+        }
+        ServerInfo server = client.getCurrentServerEntry();
+        return server == null || server.address == null || server.address.isBlank()
+                ? null
+                : new AchievementLedger.Place(server.address);
     }
 
     private static RoundOutcome outcome(Scoreboard scoreboard, GameWorldComponent game, UUID self) {
