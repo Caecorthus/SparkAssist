@@ -38,8 +38,9 @@ public final class LifetimeStats {
     private static final String CONSUMED = "consumed";
     private static final String KILLED_ROLES = "killedRoles";
     private static final String STREAK_KILLED_ROLES = "streakKilledRoles";
+    private static final String SAVES = "saves";
     private static final Set<String> KNOWN_FIELDS = Set.of(ROUNDS, WINS, DEATHS, TASKS, ROLE_ROUNDS, ROLE_WINS,
-            FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES);
+            FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES, SAVES);
 
     private int rounds;
     private int wins;
@@ -51,6 +52,7 @@ public final class LifetimeStats {
     private final Map<String, Integer> factionRounds = new TreeMap<>();
     private final Map<String, Integer> factionWins = new TreeMap<>();
     private final Map<String, Integer> consumed = new TreeMap<>();
+    private final Map<String, Integer> saves = new TreeMap<>();
     private final Map<String, Set<String>> killedRoles = new TreeMap<>();
     private final Map<String, Set<String>> streakKilledRoles = new TreeMap<>();
     // Written by a newer SparkAssist; kept as is. 较新版本写入的字段，原样保留。
@@ -90,6 +92,17 @@ public final class LifetimeStats {
     public void recordConsumed(String kind, int count) {
         if (kind != null && !kind.isBlank() && count > 0) {
             consumed.merge(kind, count, Integer::sum);
+        }
+    }
+
+    /**
+     * Counts {@code count} times another player was saved from death by {@code source} (an item id such as
+     * {@code noellesroles:iron_man_vial}) that the player gave them.
+     * 记入 {@code count} 次其他玩家靠本玩家给的 {@code source}（物品 id，例如 {@code noellesroles:iron_man_vial}）免于一死。
+     */
+    public void recordSaves(String source, int count) {
+        if (source != null && !source.isBlank() && count > 0) {
+            saves.merge(source, count, Integer::sum);
         }
     }
 
@@ -166,6 +179,15 @@ public final class LifetimeStats {
         return Collections.unmodifiableMap(consumed);
     }
 
+    /** Players saved from death by {@code source}. 靠 {@code source} 免于一死的玩家次数。 */
+    public int saves(String source) {
+        return saves.getOrDefault(source, 0);
+    }
+
+    public Map<String, Integer> saves() {
+        return Collections.unmodifiableMap(saves);
+    }
+
     /** Every role killed while in {@code group}, sorted. 在 {@code group} 分组中击杀过的全部身份，已排序。 */
     public Set<String> killedRoles(String group) {
         return view(killedRoles, group);
@@ -189,6 +211,7 @@ public final class LifetimeStats {
         json.add(CONSUMED, counts(consumed));
         json.add(KILLED_ROLES, roleSets(killedRoles));
         json.add(STREAK_KILLED_ROLES, roleSets(streakKilledRoles));
+        json.add(SAVES, counts(saves));
         laterFields.forEach((key, value) -> json.add(key, value.deepCopy()));
         return json;
     }
@@ -213,6 +236,7 @@ public final class LifetimeStats {
         readCounts(json.get(CONSUMED), stats.consumed);
         readRoleSets(json.get(KILLED_ROLES), stats.killedRoles);
         readRoleSets(json.get(STREAK_KILLED_ROLES), stats.streakKilledRoles);
+        readCounts(json.get(SAVES), stats.saves);
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (!KNOWN_FIELDS.contains(entry.getKey())) {
                 stats.laterFields.put(entry.getKey(), entry.getValue().deepCopy());

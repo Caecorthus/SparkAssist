@@ -1,9 +1,7 @@
 package dev.caecorthus.sparkassist.achievement;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,7 +16,6 @@ final class RoleSkillRules {
     static final String VULTURE = "noellesroles:vulture";
     static final String WAITER = "noellesroles:waiter";
     static final String POISONER = "noellesroles:poisoner";
-    static final String PROFESSOR = "noellesroles:professor";
     static final String BARTENDER = "noellesroles:bartender";
     static final String CORONER = "noellesroles:coroner";
     static final String SURVIVAL_MASTER = "noellesroles:survival_master";
@@ -26,7 +23,6 @@ final class RoleSkillRules {
     static final String GUARDIAN_SKILL = "sparkwitch:guardian";
     static final String WAITER_SKILL = "noellesroles:waiter";
     static final String VENDETTA_KNIFE = "sparkwitch:vendetta_knife";
-    static final String IRON_MAN_VIAL = "noellesroles:iron_man_vial";
     static final String BASE_SPIRIT = "noellesroles:base_spirit";
     static final String GHOSTFLAME_BITTERS = "ghostflame_bitters";
     static final String EMBER_SUGAR = "ember_sugar";
@@ -47,7 +43,6 @@ final class RoleSkillRules {
     static final String TAOTIE_VOLLEY = "sparkstrength:taotie_volley";
     static final String CORONER_DISGUISE = "sparkstrength:coroner_disguise";
     static final String SPIRIT_POSSESSION_STARTED = "sparkstrength:spirit_possession_started";
-    static final String IRON_MAN_ACTIVATED = "iron_man_activated";
     static final String DEMOCRACY_SHIELD = "sparkstrength:democracy_shield";
     static final String TEAM_CONTRIBUTION = "sparkstrength:team_contribution";
     static final String SURVIVAL_MOMENT_START = "noellesroles:survival_moment_start";
@@ -137,31 +132,20 @@ final class RoleSkillRules {
     }
 
     /**
-     * 我的药剂是有效的: as the Professor, my Iron Man vial blocks two hits for other players. An activation counts when
-     * the latest vial given to that player before it was mine, and the player did not die in that same tick
-     * (a pierced protection).
-     * 以教授身份，我的铁人药剂为其他玩家挡下两次伤害。某次生效计入的条件：在它之前该玩家最近一次获得的药剂是我给的，
-     * 且该玩家没有在同一 tick 死亡（护盾被击穿）。
+     * 我的药剂是有效的: as the Professor, my Iron Man vial blocks two hits for other players in one round (see
+     * {@link IronManSaves}).
+     * 以教授身份，我的铁人药剂在一局内为其他玩家挡下两次伤害（见 {@link IronManSaves}）。
      */
     static boolean ironManBlocksTwice(AchievementContext context) {
-        UUID self = context.self();
-        Map<UUID, MatchEvent> latestVial = new HashMap<>();
-        List<MatchEvent> deaths = context.timeline().deaths();
-        int blocks = 0;
-        for (MatchEvent event : context.timeline().events()) {
-            if (event.is(MatchEvent.ITEM_USE) && IRON_MAN_VIAL.equals(event.value("item")) && event.target() != null) {
-                latestVial.put(event.target(), event);
-            } else if (event.is(IRON_MAN_ACTIVATED) && event.actor() != null && !event.actor().equals(self)) {
-                MatchEvent vial = latestVial.get(event.actor());
-                boolean pierced = deaths.stream().anyMatch(death -> death.tick() == event.tick()
-                        && event.actor().equals(death.target()));
-                if (vial != null && self != null && self.equals(vial.actor()) && Rules.iWas(context, vial, PROFESSOR)
-                        && !pierced) {
-                    blocks++;
-                }
-            }
-        }
-        return blocks >= 2;
+        return IronManSaves.byMe(context.timeline(), context.self()) >= 2;
+    }
+
+    /**
+     * 萨妮教授的得意门生: my Iron Man vials have saved 10 players from a lethal hit, counted across rounds.
+     * 我的铁人药剂累计为 10 名玩家挡下致命伤害（跨局累计）。
+     */
+    static boolean ironManSavedTen(AchievementContext context) {
+        return context.stats().saves(IronManSaves.VIAL) >= 10;
     }
 
     /** 捕风捉影: the Detective questions the real killer. 侦探盘问到真凶。 */
