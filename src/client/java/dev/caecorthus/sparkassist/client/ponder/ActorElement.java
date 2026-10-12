@@ -643,6 +643,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
     }
 
     private void stopStride() {
+        // A step still owed for being led along is dropped too, so a takeover or teleport never adds one.
+        // 被领着走而尚未迈出的一步也一并丢弃，接管或传送后不会多迈一步。
+        led = 0;
         if (player != null) {
             player.limbAnimator.setSpeed(0);
             player.limbAnimator.updateLimbs(0, 1);
