@@ -1145,6 +1145,9 @@ final class SparkWitchItemScenes {
         protected void firstTick(PonderScene scene) {
             super.firstTick(scene);
             ActorElement actor = scene.resolve(link);
+            if (actor != null) {
+                actor.cancelPendingMovement();
+            }
             at = actor == null ? Vec3d.ZERO : actor.position();
             floor = at.y;
             velocity = launch;
