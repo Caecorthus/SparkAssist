@@ -119,6 +119,43 @@ class ActorMovementTest {
         assertIdle(movement.tick());
     }
 
+    @Test
+    void strideMatchesVanillaFromANormalWalkUp() {
+        for (double distance = 0.16; distance <= 0.6; distance += 0.01) {
+            assertEquals(Math.min(1, 4 * distance), ActorMovement.strideSpeed(distance), 1.0e-6);
+        }
+    }
+
+    @Test
+    void slowWalksSwingTheLegsFarEnoughToCoverTheGround() {
+        // BipedEntityModel: leg pitch = cos(0.6662 * pos) * 1.4 * speed, pos += speed per tick; legs 12/16 of a block
+        // at the player scale 0.9375. Half a gait cycle sweeps the foot 2 * leg * sin(1.4 * speed).
+        double leg = 0.75 * 0.9375;
+        for (double distance : new double[]{0.028, 0.05, 0.08, 0.1, 0.13}) {
+            double speed = ActorMovement.strideSpeed(distance);
+            double sweep = 2 * leg * Math.sin(1.4 * speed);
+            double travel = Math.PI / 0.6662 / speed * distance;
+            assertEquals(1, sweep / travel, 0.1, "distance " + distance);
+            double vanilla = Math.min(1, 4 * distance);
+            assertTrue(2 * leg * Math.sin(1.4 * vanilla) < Math.PI / 0.6662 / vanilla * distance * 0.8,
+                    "vanilla stride already covers " + distance);
+        }
+    }
+
+    @Test
+    void strideIsBoundedAndRisesSmoothly() {
+        float previous = 0;
+        for (int i = 1; i <= 2000; i++) {
+            float speed = ActorMovement.strideSpeed(i / 1000.0);
+            assertTrue(speed >= previous && speed <= 1, "at " + i / 1000.0);
+            assertTrue(speed - previous < 0.06, "jump at " + i / 1000.0);
+            previous = speed;
+        }
+        assertEquals(0, ActorMovement.strideSpeed(0));
+        assertEquals(0, ActorMovement.strideSpeed(-0.1));
+        assertEquals(0, ActorMovement.strideSpeed(Double.NaN));
+    }
+
     private static void assertIdle(ActorMovement.Step step) {
         assertEquals(0, step.x(), EPSILON);
         assertEquals(0, step.y(), EPSILON);
