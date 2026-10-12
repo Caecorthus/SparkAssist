@@ -1389,9 +1389,7 @@ final class SparkStrengthCivilianItemScenes {
     private static void throwSprite(SceneBuilder scene, ItemStack stack, Vec3d from, Vec3d to, int ticks) {
         Flight flight = new Flight(stack, from, to, ticks);
         scene.addInstruction(ponder -> {
-            flight.setVisible(true);
-            flight.setFade(1);
-            ponder.addElement(flight);
+            Actors.placeAtOnce(ponder, flight);
         });
     }
 
@@ -1400,9 +1398,7 @@ final class SparkStrengthCivilianItemScenes {
         Placed placed = new Placed(stack, at, yaw);
         ElementLink<Placed> link = new ElementLinkImpl<>(Placed.class);
         scene.addInstruction(ponder -> {
-            placed.setVisible(true);
-            placed.setFade(1);
-            ponder.addElement(placed);
+            Actors.placeAtOnce(ponder, placed);
             ponder.linkElement(placed, link);
         });
         return link;

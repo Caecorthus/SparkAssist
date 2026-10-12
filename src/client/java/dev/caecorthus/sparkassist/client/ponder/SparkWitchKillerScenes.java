@@ -111,6 +111,12 @@ final class SparkWitchKillerScenes {
      */
     private static final double BODY_PIVOT = 1.0;
     private static final double DRAGGED_FEET = 1.0 + BODY_PIVOT;
+    /**
+     * Where the demo keeps a hijacked player: just in front of the Kidnapper along his screen-left walk, far enough
+     * that the two bodies never cut through each other.
+     * 演示中被劫持者的位置：沿绑架者朝屏幕左侧的行走方向紧挨在他身前，两人的身体不会互相穿插。
+     */
+    private static final Vec3d HOSTAGE_AHEAD = forward(SCREEN_LEFT).multiply(0.6);
     /** A tether or chain runs until stopped; long enough for any scene. 拴绳或铁链运行到被停止为止；对任何场景都足够长。 */
     private static final int UNTIL_STOPPED = 20 * 60 * 10;
     /** The TR shell's trail: its colour 0xD8432F as dust of scale 1 (PotionShellEntity.spawnTrail). TR 弹的烟迹：本色 0xD8432F 的粉尘，大小 1。 */
@@ -934,21 +940,26 @@ final class SparkWitchKillerScenes {
         scene.idle(10);
         Actors.swing(scene, kidnapper);
         Actors.hold(scene, kidnapper, ItemStack.EMPTY);
-        // The two stand in one spot from now on; one name tag is enough. 此后两人重叠在一处，只留一个名牌。
+        // In the game he is put exactly where the Kidnapper stands; drawn there, two bodies would cut through each
+        // other, so the demo holds him just in front. The tags would overlap too; one is enough.
+        // 游戏里他被放在绑架者所站的同一位置；照样画的话两个身体会互相穿插，所以演示让他紧挨在绑架者身前。两个名牌也会叠在
+        // 一起，只留一个。
         Actors.retint(scene, victim, RoleColors.CIVILIAN, null);
         Actors.turn(scene, victim, SCREEN_LEFT);
-        Actors.slide(scene, victim, new Vec3d(-1.6, 0, 1.6), 3);
+        Actors.slide(scene, victim, new Vec3d(1.4, 0, 5.6).add(HOSTAGE_AHEAD).subtract(3.0, 0, 4.0), 3);
         scene.idle(4);
-        Tether held = tether(scene, kidnapper, victim, 0);
+        Tether held = hold(scene, kidnapper, victim, HOSTAGE_AHEAD);
         scene.overlay().showText(75)
                 .text("对准身边的人右键：用迷药劫持他 30 秒")
                 .independent()
                 .attachKeyFrame();
         scene.idle(45);
-        Actors.walk(scene, kidnapper, new Vec3d(3.0, 0, -3.0), 50);
+        // Stops short of the body on screen, so the hostage is never drawn behind it; he steps up to it after letting
+        // go. 画面上离尸体还有一段就停下，人质不会被尸体挡住；放人后他再走近尸体。
+        Actors.walk(scene, kidnapper, new Vec3d(2.4, 0, -2.4), 50);
         scene.idle(40);
         scene.overlay().showText(90)
-                .text("他被一直拉到你身上：眼前一片黑，不能攻击或用东西")
+                .text("他被一直拉到你身上（演示中错开显示）：眼前一片黑，不能攻击或用东西")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
@@ -966,11 +977,12 @@ final class SparkWitchKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(10);
-        Actors.walk(scene, victim, new Vec3d(-0.2, 0, 2.0), 30);
+        Actors.walk(scene, victim, new Vec3d(-1.0, 0, -1.2), 30);
         scene.idle(15);
         Actors.sneak(scene, kidnapper, false);
         scene.idle(15);
         Actors.leave(scene, victim, Direction.UP);
+        Actors.walk(scene, kidnapper, new Vec3d(0.6, 0, -0.6), 12);
         scene.idle(50);
         Actors.turn(scene, kidnapper, EAST);
         Actors.lookPitch(scene, kidnapper, 50);
@@ -1896,14 +1908,24 @@ final class SparkWitchKillerScenes {
 
     /**
      * Keeps {@code follower} {@code behind} blocks behind {@code leader}, facing the same way, until {@link #release}d:
-     * a hijacked player teleported onto the Kidnapper every tick (0, KidnapperControlComponent.teleportToController) or
      * a dragged body riding behind him ({@link #DRAGGED_FEET}).
-     * 让 follower 保持在 leader 身后 behind 格、朝向相同，直到 release：被劫持的人每 tick 被传送到绑架者身上（0），或被拖的
-     * 尸体挂在他身后（DRAGGED_FEET）。
+     * 让 follower 保持在 leader 身后 behind 格、朝向相同，直到 release：被拖的尸体挂在他身后（DRAGGED_FEET）。
      */
     private static Tether tether(SceneBuilder scene, ElementLink<ActorElement> leader,
                                  ElementLink<ActorElement> follower, double behind) {
-        Tether tether = new Tether(leader, follower, behind);
+        Tether tether = new Tether(leader, follower, behind, null);
+        scene.addInstruction(tether);
+        return tether;
+    }
+
+    /**
+     * Keeps a living {@code hostage} at {@code offset} (scene axes) from {@code leader}, turning and stepping along with
+     * him, until {@link #release}d.
+     * 让活着的 hostage 保持在 leader 的 offset（场景坐标）处，随他转身、迈步，直到 release。
+     */
+    private static Tether hold(SceneBuilder scene, ElementLink<ActorElement> leader, ElementLink<ActorElement> hostage,
+                               Vec3d offset) {
+        Tether tether = new Tether(leader, hostage, 0, offset);
         scene.addInstruction(tether);
         return tether;
     }
@@ -1947,14 +1969,19 @@ final class SparkWitchKillerScenes {
         private final ElementLink<ActorElement> leader;
         private final ElementLink<ActorElement> follower;
         private final double behind;
+        /** A held hostage's fixed offset, or null for a body dragged behind. 人质的固定偏移；被拖在身后的尸体为 null。 */
+        @Nullable
+        private final Vec3d offset;
         private boolean stopped;
         private boolean attached;
 
-        Tether(ElementLink<ActorElement> leader, ElementLink<ActorElement> follower, double behind) {
+        Tether(ElementLink<ActorElement> leader, ElementLink<ActorElement> follower, double behind,
+               @Nullable Vec3d offset) {
             super(false, UNTIL_STOPPED);
             this.leader = leader;
             this.follower = follower;
             this.behind = behind;
+            this.offset = offset;
         }
 
         @Override
@@ -1970,6 +1997,15 @@ final class SparkWitchKillerScenes {
             ActorElement lead = scene.resolve(leader);
             ActorElement follow = scene.resolve(follower);
             if (stopped || lead == null || follow == null) {
+                return;
+            }
+            if (!attached) {
+                follow.cancelPendingMovement();
+            }
+            if (offset != null) {
+                follow.turnTo(lead.yaw());
+                follow.followTo(lead.position().add(offset));
+                attached = true;
                 return;
             }
             if (attached) {
@@ -2107,9 +2143,7 @@ final class SparkWitchKillerScenes {
     static ElementLink<Sprite> sprite(SceneBuilder scene, Sprite sprite) {
         ElementLink<Sprite> link = new ElementLinkImpl<>(Sprite.class);
         scene.addInstruction(ponder -> {
-            sprite.setVisible(true);
-            sprite.setFade(1);
-            ponder.addElement(sprite);
+            Actors.placeAtOnce(ponder, sprite);
             ponder.linkElement(sprite, link);
         });
         return link;
@@ -2464,9 +2498,7 @@ final class SparkWitchKillerScenes {
     private static void riftGate(SceneBuilder scene, Vec3d pos, Direction facing, int color) {
         RiftGate gate = new RiftGate(pos, facing, color);
         scene.addInstruction(ponder -> {
-            gate.setVisible(true);
-            gate.setFade(1);
-            ponder.addElement(gate);
+            Actors.placeAtOnce(ponder, gate);
         });
         Vec3d centre = pos.add(0, 1, 0);
         serverParticles(scene, ParticleTypes.PORTAL, centre, 24, 0.3, 0.7, 0.3, 0.4);
@@ -2622,6 +2654,9 @@ final class SparkWitchKillerScenes {
         protected void firstTick(PonderScene scene) {
             super.firstTick(scene);
             ActorElement actor = scene.resolve(link);
+            if (actor != null) {
+                actor.cancelPendingMovement();
+            }
             at = actor == null ? Vec3d.ZERO : actor.position();
             velocity = launch;
             grounded = true;
@@ -2749,9 +2784,7 @@ final class SparkWitchKillerScenes {
         ActorElement actor = new ActorElement(color, name, feet, yaw);
         ElementLink<ActorElement> link = new ElementLinkImpl<>(ActorElement.class);
         scene.addInstruction(ponder -> {
-            actor.setVisible(true);
-            actor.setFade(1);
-            ponder.addElement(actor);
+            Actors.placeAtOnce(ponder, actor);
             ponder.linkElement(actor, link);
         });
         return link;

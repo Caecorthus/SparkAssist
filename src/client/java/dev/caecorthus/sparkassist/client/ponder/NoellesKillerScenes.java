@@ -1588,9 +1588,7 @@ final class NoellesKillerScenes {
         TaotieHead head = new TaotieHead(skin, from, to, ticks);
         scene.addInstruction(ponder -> {
             head.reset(ponder);
-            head.setVisible(true);
-            head.setFade(1);
-            ponder.addElement(head);
+            Actors.placeAtOnce(ponder, head);
         });
     }
 
@@ -1604,9 +1602,7 @@ final class NoellesKillerScenes {
         ElementLink<Corpse> link = new ElementLinkImpl<>(Corpse.class);
         Actors.vanish(scene, actor);
         scene.addInstruction(ponder -> {
-            corpse.setVisible(true);
-            corpse.setFade(1);
-            ponder.addElement(corpse);
+            Actors.placeAtOnce(ponder, corpse);
             ponder.linkElement(corpse, link);
         });
         return link;
@@ -1763,9 +1759,7 @@ final class NoellesKillerScenes {
         FlyingAxe axe = new FlyingAxe(from, to, ticks, gameTicks);
         scene.addInstruction(ponder -> {
             axe.reset(ponder);
-            axe.setVisible(true);
-            axe.setFade(1);
-            ponder.addElement(axe);
+            Actors.placeAtOnce(ponder, axe);
         });
     }
 

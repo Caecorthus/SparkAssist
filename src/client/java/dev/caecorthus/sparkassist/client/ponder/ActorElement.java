@@ -47,6 +47,12 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private static final int SWING_TICKS = 6;
     /** Degrees turned per tick towards a new heading: a half turn takes five ticks. 每 tick 转向新朝向的角度：转身半圈用五 tick。 */
     private static final float TURN_SPEED = 36;
+    /**
+     * The same while walking: a walk moves from its first tick, so a slow turn would carry the actor sideways or
+     * backwards for several ticks; this one faces the way within three.
+     * 行走时的转向角度：行走从第一个 tick 就开始位移，转得慢会让演员侧着或倒着走好几 tick；这样三 tick 内就面朝前进方向。
+     */
+    private static final float WALK_TURN_SPEED = 72;
     /** Moves longer than this in one tick are teleports: no stride for them. 单 tick 内超过此距离的移动视为传送，不迈步。 */
     private static final double TELEPORT = 1;
     /** Wathe's body falls over 20 ticks with a bounce (PlayerBodyEntityRenderer). Wathe 尸体在 20 tick 内回弹着倒下。 */
@@ -95,6 +101,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
     private float previousYaw;
     private float targetYaw;
     private float pitch;
+    private float previousPitch;
+    /** How far a leader pulled this actor during the last tick, walked off in this one. 上一 tick 被领着走的距离，在本 tick 迈步走完。 */
+    private double led;
     private int age;
     private int swingTicks = -1;
     private float fall = -1;
@@ -124,6 +133,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
         previousYaw = startYaw;
         targetYaw = startYaw;
         pitch = 0;
+        previousPitch = 0;
+        led = 0;
         held = ItemStack.EMPTY;
         offHand = ItemStack.EMPTY;
         chest = ItemStack.EMPTY;
@@ -156,6 +167,27 @@ public final class ActorElement extends AnimatedSceneElementBase {
     /** An externally driven slide, shove or body flight, interpolated this tick without walking. 外力平移、击退或尸体飞行：本 tick 插值，不迈步。 */
     public void slideTo(Vec3d target) {
         position = target;
+        stopStride();
+    }
+
+    /**
+     * Be pulled to {@code target} by someone the actor follows (a hostage led along): interpolated this tick like a
+     * slide, but the legs step over the distance, on the next tick since this runs after the actor's own tick.
+     * 被所跟随的人拉到 target（如被领着走的人质）：本 tick 与平移一样插值，但双腿按这段距离迈步；由于在演员自身的
+     * tick 之后调用，步伐在下一 tick 体现。
+     */
+    public void followTo(Vec3d target) {
+        led += target.subtract(position).horizontalLength();
+        position = target;
+    }
+
+    /**
+     * Drop the walks and slides still queued, as an outside controller takes over the actor's position (a tether, a
+     * shove), so none of them is eaten or resumes once the controller lets go. Later moves still queue as usual.
+     * 丢弃尚在排队的行走与平移，由外部控制接管演员位置（牵引、推开），以免其被吞掉或在控制结束后继续。之后的移动照常排队。
+     */
+    public void cancelPendingMovement() {
+        movement.clear();
         stopStride();
     }
 
@@ -195,6 +227,12 @@ public final class ActorElement extends AnimatedSceneElementBase {
         movement.add(delta.x, delta.y, delta.z, ticks, true);
         if (!Float.isNaN(heading)) {
             turnTo(heading);
+            // The first step lands next tick, so the turn gets a tick's start: within this tick's turning allowance.
+            // 第一步在下一 tick 才迈出，所以转身先行一 tick：不超过本 tick 剩余的转向幅度。
+            float allowance = WALK_TURN_SPEED - Math.abs(MathHelper.wrapDegrees(yaw - previousYaw));
+            if (allowance > 0) {
+                yaw += MathHelper.clamp(MathHelper.wrapDegrees(targetYaw - yaw), -allowance, allowance);
+            }
         }
     }
 
@@ -331,10 +369,14 @@ public final class ActorElement extends AnimatedSceneElementBase {
         ActorPlayer actor = player();
         previousPosition = position;
         previousYaw = yaw;
+        previousPitch = pitch;
         ActorMovement.Step step = movement.tick();
         position = position.add(step.x(), step.y(), step.z());
+        double walked = step.walkingDistance() + led;
+        led = 0;
         if (!isDown() && bedHead == null) {
-            yaw += MathHelper.clamp(MathHelper.wrapDegrees(targetYaw - yaw), -TURN_SPEED, TURN_SPEED);
+            float turn = walked > 0 ? WALK_TURN_SPEED : TURN_SPEED;
+            yaw += MathHelper.clamp(MathHelper.wrapDegrees(targetYaw - yaw), -turn, turn);
         }
         age++;
         if (fall >= 0 && fall < FALL_TICKS) {
@@ -348,10 +390,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
         // Riders, sleeping actors and actors moved by an external force do not walk. Clear the old amplitude too:
         // updating towards zero with vanilla's 0.4 smoothing otherwise leaves several ticks of steps on a board.
         // 骑手、睡眠演员和受外力移动的演员不迈步。也清除旧振幅：用原版 0.4 缓动趋近零会让人在板上继续迈步数 tick。
-        if (isDown() || isAsleep() || !board.isEmpty() || step.sliding() || step.walkingDistance() >= TELEPORT) {
+        if (isDown() || isAsleep() || !board.isEmpty() || step.sliding() || walked >= TELEPORT) {
             stopStride();
         } else {
-            actor.limbAnimator.updateLimbs(Math.min(1, (float) step.walkingDistance() * 4), 0.4f);
+            actor.limbAnimator.updateLimbs(ActorMovement.strideSpeed(walked), 0.4f);
         }
         actor.lastHandSwingProgress = actor.handSwingProgress;
         if (swingTicks >= 0) {
@@ -447,6 +489,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
         actor.prevX = previousPosition.x;
         actor.prevY = previousPosition.y;
         actor.prevZ = previousPosition.z;
+        // Mods that interpolate entities the way the world renderer does read these. 以世界渲染器方式插值实体的模组读取这些值。
+        actor.lastRenderX = previousPosition.x;
+        actor.lastRenderY = previousPosition.y;
+        actor.lastRenderZ = previousPosition.z;
         actor.setStackInHand(Hand.MAIN_HAND, held);
         actor.setStackInHand(Hand.OFF_HAND, offHand);
         actor.equipStack(EquipmentSlot.CHEST, chest);
@@ -464,7 +510,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         actor.headYaw = yaw;
         actor.prevYaw = previousYaw;
         actor.setYaw(yaw);
-        actor.prevPitch = pitch;
+        actor.prevPitch = previousPitch;
         actor.setPitch(pitch);
     }
 
@@ -597,6 +643,9 @@ public final class ActorElement extends AnimatedSceneElementBase {
     }
 
     private void stopStride() {
+        // A step still owed for being led along is dropped too, so a takeover or teleport never adds one.
+        // 被领着走而尚未迈出的一步也一并丢弃，接管或传送后不会多迈一步。
+        led = 0;
         if (player != null) {
             player.limbAnimator.setSpeed(0);
             player.limbAnimator.updateLimbs(0, 1);

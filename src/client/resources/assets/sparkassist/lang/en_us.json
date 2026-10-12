@@ -792,7 +792,7 @@
   "sparkassist.ponder.role_kidnapper.header": "绑架者：迷药、拖尸与扔尸",
   "sparkassist.ponder.role_kidnapper.text_1": "绑架者开局自带 1 瓶迷药（开局约 40 秒内不能用）",
   "sparkassist.ponder.role_kidnapper.text_2": "对准身边的人右键：用迷药劫持他 30 秒",
-  "sparkassist.ponder.role_kidnapper.text_3": "他被一直拉到你身上：眼前一片黑，不能攻击或用东西",
+  "sparkassist.ponder.role_kidnapper.text_3": "他被一直拉到你身上（演示中错开显示）：眼前一片黑，不能攻击或用东西",
   "sparkassist.ponder.role_kidnapper.text_4": "劫持期间亲手杀了他，额外得 100 金币",
   "sparkassist.ponder.role_kidnapper.text_5": "你一按潜行就会放人；30 秒到了也会结束",
   "sparkassist.ponder.role_kidnapper.text_6": "按技能键（默认 G）拖起 2 格内的尸体，再按一次放下",

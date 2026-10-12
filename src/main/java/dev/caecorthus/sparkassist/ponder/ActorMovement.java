@@ -13,6 +13,20 @@ public final class ActorMovement {
         moves.add(new Move(x / ticks, y / ticks, z / ticks, ticks, walking));
     }
 
+    /**
+     * Limb-swing speed for an actor walking {@code distance} blocks in one tick. Vanilla's min(1, 4 * distance) barely
+     * swings the legs on a slow walk while the body glides on, so a planted foot slides along with most of each step.
+     * Below a normal walk the swing follows 1.6 * sqrt(distance) instead, which makes the average stride (leg pitch
+     * 1.4 * speed * cos(0.6662 * pos), pos advancing by speed each tick) cover the distance walked; from about 0.16
+     * blocks a tick on it is vanilla's.
+     */
+    public static float strideSpeed(double distance) {
+        if (!(distance > 0)) {
+            return 0;
+        }
+        return (float) Math.min(1, Math.max(4 * distance, 1.6 * Math.sqrt(distance)));
+    }
+
     public static void requireDuration(int ticks) {
         if (ticks < 1) {
             throw new IllegalArgumentException("Actor movement duration must be at least one tick");

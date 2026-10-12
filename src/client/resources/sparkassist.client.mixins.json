@@ -20,6 +20,7 @@
     "PoisonOverlayPayloadMixin",
     "PonderCaptionMixin",
     "PonderSceneCaptionMixin",
+    "PonderTimingMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin",
     "TaskCompletePayloadMixin"

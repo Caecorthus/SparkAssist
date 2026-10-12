@@ -2,6 +2,7 @@ package dev.caecorthus.sparkassist.client.ponder;
 
 import dev.caecorthus.sparkassist.ponder.ActorMovement;
 import java.util.function.Consumer;
+import net.createmod.ponder.api.element.AnimatedSceneElement;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.foundation.PonderScene;
@@ -124,9 +125,7 @@ public final class Actors {
         ThrownElement element = new ThrownElement(stack, from, to, ticks, arc, stays, flight);
         ElementLink<ThrownElement> link = new ElementLinkImpl<>(ThrownElement.class);
         scene.addInstruction(ponder -> {
-            element.setVisible(true);
-            element.setFade(1);
-            ponder.addElement(element);
+            placeAtOnce(ponder, element);
             ponder.linkElement(element, link);
         });
         return link;
@@ -165,6 +164,19 @@ public final class Actors {
     /** Fade the actor out towards {@code to}. 演员朝 to 方向淡出。 */
     public static void leave(SceneBuilder scene, ElementLink<ActorElement> actor, Direction to) {
         scene.special().hideElement(actor, to);
+    }
+
+    /**
+     * Put {@code element} in the scene fully shown from this tick on, with no fade or drop (an entity spawned
+     * mid-round). Both fade samples are set: a lone setFade(1) leaves the previous one at 0, so the element would fade
+     * in again within every tick, flickering and vanishing at the start of each.
+     * 让 element 从本 tick 起完全显示在场景中，不淡入也不落下（如对局中途生成的实体）。前后两个可见度采样都要设：单独
+     * setFade(1) 会让上一采样停在 0，元素在每个 tick 内都重新淡入一遍，闪烁并在每 tick 开头消失。
+     */
+    static void placeAtOnce(PonderScene scene, AnimatedSceneElement element) {
+        element.setVisible(true);
+        element.forceApplyFade(1);
+        scene.addElement(element);
     }
 
     private static void apply(SceneBuilder scene, ElementLink<ActorElement> actor, Consumer<ActorElement> change) {
