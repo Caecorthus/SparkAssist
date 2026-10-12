@@ -1648,9 +1648,7 @@ final class SparkWitchCivilianScenes {
      */
     private static void throwSprite(SceneBuilder scene, SpriteFlight flight) {
         scene.addInstruction(ponder -> {
-            flight.setVisible(true);
-            flight.setFade(1);
-            ponder.addElement(flight);
+            Actors.placeAtOnce(ponder, flight);
         });
     }
 
@@ -1658,11 +1656,7 @@ final class SparkWitchCivilianScenes {
     private static ElementLink<Gadget> gadget(SceneBuilder scene, Gadget gadget) {
         ElementLink<Gadget> link = new ElementLinkImpl<>(Gadget.class);
         scene.addInstruction(ponder -> {
-            gadget.setVisible(true);
-            // Instant placement initializes both fade samples; setFade alone repeats 0 -> 1 every tick.
-            // 即刻放置须同步前后可见度；仅 setFade 会让每个 tick 重复从暗到亮。
-            gadget.forceApplyFade(1);
-            ponder.addElement(gadget);
+            Actors.placeAtOnce(ponder, gadget);
             ponder.linkElement(gadget, link);
         });
         return link;

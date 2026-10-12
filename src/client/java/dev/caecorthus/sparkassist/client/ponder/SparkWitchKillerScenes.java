@@ -2107,9 +2107,7 @@ final class SparkWitchKillerScenes {
     static ElementLink<Sprite> sprite(SceneBuilder scene, Sprite sprite) {
         ElementLink<Sprite> link = new ElementLinkImpl<>(Sprite.class);
         scene.addInstruction(ponder -> {
-            sprite.setVisible(true);
-            sprite.setFade(1);
-            ponder.addElement(sprite);
+            Actors.placeAtOnce(ponder, sprite);
             ponder.linkElement(sprite, link);
         });
         return link;
@@ -2464,9 +2462,7 @@ final class SparkWitchKillerScenes {
     private static void riftGate(SceneBuilder scene, Vec3d pos, Direction facing, int color) {
         RiftGate gate = new RiftGate(pos, facing, color);
         scene.addInstruction(ponder -> {
-            gate.setVisible(true);
-            gate.setFade(1);
-            ponder.addElement(gate);
+            Actors.placeAtOnce(ponder, gate);
         });
         Vec3d centre = pos.add(0, 1, 0);
         serverParticles(scene, ParticleTypes.PORTAL, centre, 24, 0.3, 0.7, 0.3, 0.4);
@@ -2749,9 +2745,7 @@ final class SparkWitchKillerScenes {
         ActorElement actor = new ActorElement(color, name, feet, yaw);
         ElementLink<ActorElement> link = new ElementLinkImpl<>(ActorElement.class);
         scene.addInstruction(ponder -> {
-            actor.setVisible(true);
-            actor.setFade(1);
-            ponder.addElement(actor);
+            Actors.placeAtOnce(ponder, actor);
             ponder.linkElement(actor, link);
         });
         return link;

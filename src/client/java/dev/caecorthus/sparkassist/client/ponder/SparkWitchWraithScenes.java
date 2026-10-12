@@ -415,9 +415,7 @@ final class SparkWitchWraithScenes {
     private static void throwWindCharge(SceneBuilder scene, Vec3d from, Vec3d to, int ticks) {
         WindChargeFlight flight = new WindChargeFlight(from, to, ticks);
         scene.addInstruction(ponder -> {
-            flight.setVisible(true);
-            flight.setFade(1);
-            ponder.addElement(flight);
+            Actors.placeAtOnce(ponder, flight);
         });
     }
 
