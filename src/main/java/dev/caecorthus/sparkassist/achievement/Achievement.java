@@ -12,8 +12,10 @@ import java.util.regex.Pattern;
  * 条件看到的是一局已结算的对局，只在成就尚未解锁时才会判定。
  *
  * @param level difficulty from {@link #MIN_LEVEL} to {@link #MAX_LEVEL}; it picks the frame and is shown as
- *              "Level x" on the page and in the toast
- *              难度，从 {@link #MIN_LEVEL} 到 {@link #MAX_LEVEL}；决定边框，并在成就页和弹窗里显示为“Level x”
+ *              "Level x" on the page and in the toast. {@link #MAX_LEVEL} is kept for the one achievement at the
+ *              middle of the page, earned by earning all the others
+ *              难度，从 {@link #MIN_LEVEL} 到 {@link #MAX_LEVEL}；决定边框，并在成就页和弹窗里显示为“Level x”。
+ *              {@link #MAX_LEVEL} 只留给成就页正中的那一个成就，达成其他所有成就即可获得
  * @param icon  an item id such as {@code minecraft:clock}; unknown ids fall back to paper
  *              物品 id，例如 {@code minecraft:clock}；未知 id 会显示为纸
  */
@@ -26,7 +28,7 @@ public record Achievement(
         Predicate<AchievementContext> condition
 ) {
     public static final int MIN_LEVEL = 1;
-    public static final int MAX_LEVEL = 5;
+    public static final int MAX_LEVEL = 6;
     private static final Pattern ID = Pattern.compile("[a-z0-9_]+");
 
     public Achievement {
@@ -35,7 +37,7 @@ public record Achievement(
             throw new IllegalArgumentException("Achievement id must match [a-z0-9_]+: " + id);
         }
         if (level < MIN_LEVEL || level > MAX_LEVEL) {
-            throw new IllegalArgumentException("Achievement level must be 1-5: " + id + " has " + level);
+            throw new IllegalArgumentException("Achievement level must be 1-6: " + id + " has " + level);
         }
         Objects.requireNonNull(icon, "icon");
         Objects.requireNonNull(title, "title");
@@ -46,5 +48,10 @@ public record Achievement(
     /** The frame this level is drawn with. 该等级使用的边框。 */
     public AchievementFrame frame() {
         return AchievementFrame.forLevel(level);
+    }
+
+    /** Whether this is the top-level achievement, whose title is drawn in gold. 是否为最高等级的成就，其标题以金色绘制。 */
+    public boolean crown() {
+        return level == MAX_LEVEL;
     }
 }

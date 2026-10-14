@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Every achievement SparkAssist knows. Players never see this list: an achievement appears only once earned, and
- * several earned in one round unlock in this order. Ids go into players' saves and never change; the rules live in
- * {@link RoundRules}, {@link ConsumptionRules}, {@link KillRules}, {@link RoleSkillRules} and {@link TraitRules}.
- * SparkAssist 已知的全部成就。玩家看不到这份列表：成就只有在达成后才会出现，同一局达成的多个成就按此顺序解锁。
+ * Every achievement SparkAssist knows. Players never see this list as a whole: the page shows only earned
+ * achievements and those they link to (see {@link AchievementGalaxy}), and several earned in one round unlock in this
+ * order. Ids go into players' saves and never change; the rules live in
+ * {@link RoundRules}, {@link ConsumptionRules}, {@link KillRules}, {@link RoleSkillRules} and {@link TraitRules},
+ * except the rule of the level 6 achievement, which is about this list itself.
+ * SparkAssist 已知的全部成就。玩家看不到完整的列表：成就页只显示已达成的成就及其连向的成就（见 {@link AchievementGalaxy}），
+ * 同一局达成的多个成就按此顺序解锁。
  * id 会写进玩家存档，永不修改；规则见 {@link RoundRules}、{@link ConsumptionRules}、{@link KillRules}、
- * {@link RoleSkillRules} 与 {@link TraitRules}。
+ * {@link RoleSkillRules} 与 {@link TraitRules}；只有 6 级成就的规则写在这里，因为它针对的就是这份列表本身。
  */
 public final class AchievementCatalog {
     private static final List<Achievement> ALL = List.of(
@@ -206,7 +209,10 @@ public final class AchievementCatalog {
                     RoleSkillRules::outlastedSurvivalMoment),
             new Achievement("prized_pupil", 5, "minecraft:experience_bottle", "萨妮教授的得意门生",
                     "以教授身份成功用铁人药剂为 10 名玩家抵挡致命伤害",
-                    RoleSkillRules::ironManSavedTen)
+                    RoleSkillRules::ironManSavedTen),
+            new Achievement(AchievementGalaxy.CENTER, Achievement.MAX_LEVEL, "minecraft:dragon_egg", "微小胜利",
+                    "达成其他所有成就",
+                    AchievementCatalog::earnedAllOthers)
     );
     private static final Map<String, Achievement> BY_ID = index(ALL);
 
@@ -219,6 +225,17 @@ public final class AchievementCatalog {
 
     public static Optional<Achievement> byId(String id) {
         return Optional.ofNullable(BY_ID.get(id));
+    }
+
+    /**
+     * Whether every other achievement is unlocked, counting those earned this round. Achievements added later raise
+     * the bar only for players who have not earned this one yet; an unlock is never taken back.
+     * 是否已解锁其他所有成就，本局达成的也算在内。以后新增的成就只会提高尚未获得此成就的玩家的门槛；已解锁的成就永不收回。
+     */
+    static boolean earnedAllOthers(AchievementContext context) {
+        return ALL.stream()
+                .filter(achievement -> !achievement.id().equals(AchievementGalaxy.CENTER))
+                .allMatch(achievement -> context.isUnlocked(achievement.id()));
     }
 
     static Map<String, Achievement> index(List<Achievement> achievements) {

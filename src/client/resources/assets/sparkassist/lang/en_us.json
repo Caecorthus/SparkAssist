@@ -1169,7 +1169,9 @@
   "message.sparkwitch.emma.invalid_target": "No player within range",
   "message.sparkwitch.emma.no_capacity": "The shared first-spread quota is exhausted for this round.",
   "toast.sparkassist.achievement.title": "Level %s Achievement Unlocked",
-  "advancements.sparkassist.achievement.description": "Level %s · %s",
+  "advancements.sparkassist.achievement.level": "Level %s",
   "advancements.sparkassist.achievement.place": "Earned at: %s",
-  "advancements.sparkassist.achievement.place.local_world": "Local world"
+  "advancements.sparkassist.achievement.place.local_world": "Local world",
+  "advancements.sparkassist.achievement.not_yet": "Not earned yet",
+  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
 }
