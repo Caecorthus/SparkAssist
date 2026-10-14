@@ -49,6 +49,7 @@ public final class AchievementGalaxyScreen extends Screen {
     private static final int TOP = TAB_HEIGHT + 4;
     private static final int BOTTOM = 32;
     private static final int TOOLTIP_WIDTH = 200;
+    private static final int HINT_X = 6;
     private static final double MIN_ZOOM = 0.35;
     private static final double MAX_ZOOM = 2.5;
     private static final double ZOOM_STEP = 1.15;
@@ -133,8 +134,11 @@ public final class AchievementGalaxyScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.drawTextWithShadow(textRenderer, Text.translatable(HINT_KEY).formatted(Formatting.DARK_GRAY),
-                6, height - BOTTOM + 12, -1);
+        Text hint = Text.translatable(HINT_KEY).formatted(Formatting.DARK_GRAY);
+        // Only where it clears the Done button. 只在不挡住“完成”按钮时显示。
+        if (HINT_X + textRenderer.getWidth(hint) + 4 <= width / 2 - 100) {
+            context.drawTextWithShadow(textRenderer, hint, HINT_X, height - BOTTOM + 12, -1);
+        }
         PlacedAdvancement hoveredTab = drawTabs(context, mouseX, mouseY);
         if (hoveredTab != null) {
             hoveredTab.getAdvancement().display()
