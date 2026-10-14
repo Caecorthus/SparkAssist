@@ -3,19 +3,22 @@ package dev.caecorthus.sparkassist.achievement;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * What an achievement condition may look at: the round that just settled as the client saw it ({@link #facts}),
  * how it ended ({@link #outcome}), the server's match record ({@link #timeline}, empty when the server sent none),
- * and the account's stats and unlocks with this round already counted.
+ * and the account's stats and unlocks with this round already counted. {@link #earnedThisRound} holds achievements
+ * this round has already earned but the ledger does not list yet; {@link #isUnlocked} counts them.
  * <p>
  * Two clocks: {@link RoundFacts} counts round ticks from the first live tick the client saw; the match record counts
  * record ticks from the server's match start. They agree to within network latency; compare them with
  * {@link RoundFacts#RECORD_TICK_TOLERANCE}.
  * <p>
  * 成就条件可以查看的内容：客户端看到的刚结算的这一局（{@link #facts}）、它的结局（{@link #outcome}）、服务端对局记录
- * （{@link #timeline}，服务器没发送时为空），以及已计入本局的账号统计与解锁记录。
+ * （{@link #timeline}，服务器没发送时为空），以及已计入本局的账号统计与解锁记录。{@link #earnedThisRound} 是本局已达成、
+ * 但还没写进存档的成就；{@link #isUnlocked} 会把它们算上。
  * 两种时钟：{@link RoundFacts} 的对局 tick 从客户端看到的第一个进行中 tick 算起；对局记录的记录 tick 从服务端开始对局算起。
  * 两者相差不超过网络延迟，比较时使用 {@link RoundFacts#RECORD_TICK_TOLERANCE}。
  */
@@ -24,7 +27,8 @@ public record AchievementContext(
         RoundOutcome outcome,
         MatchTimeline timeline,
         LifetimeStats stats,
-        AchievementLedger ledger
+        AchievementLedger ledger,
+        Set<String> earnedThisRound
 ) {
     public AchievementContext {
         Objects.requireNonNull(facts, "facts");
@@ -32,6 +36,13 @@ public record AchievementContext(
         Objects.requireNonNull(timeline, "timeline");
         Objects.requireNonNull(stats, "stats");
         Objects.requireNonNull(ledger, "ledger");
+        earnedThisRound = Set.copyOf(earnedThisRound);
+    }
+
+    /** A context before any achievement of this round is earned. 本局还没有达成任何成就时的上下文。 */
+    public AchievementContext(
+            RoundFacts facts, RoundOutcome outcome, MatchTimeline timeline, LifetimeStats stats, AchievementLedger ledger) {
+        this(facts, outcome, timeline, stats, ledger, Set.of());
     }
 
     /**
@@ -40,6 +51,19 @@ public record AchievementContext(
      */
     public AchievementContext(RoundFacts facts, RoundOutcome outcome, LifetimeStats stats, AchievementLedger ledger) {
         this(facts, outcome, MatchTimeline.of(outcome.events(), role -> null), stats, ledger);
+    }
+
+    /** This context with {@code earned} counted as earned this round. 把 {@code earned} 算作本局已达成的上下文。 */
+    public AchievementContext withEarnedThisRound(Set<String> earned) {
+        return new AchievementContext(facts, outcome, timeline, stats, ledger, earned);
+    }
+
+    /**
+     * Whether the achievement is unlocked, counting those this round has already earned.
+     * 该成就是否已解锁，本局已达成的也算在内。
+     */
+    public boolean isUnlocked(String id) {
+        return ledger.isUnlocked(id) || earnedThisRound.contains(id);
     }
 
     public UUID self() {

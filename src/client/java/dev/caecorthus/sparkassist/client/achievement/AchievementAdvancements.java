@@ -3,20 +3,14 @@ package dev.caecorthus.sparkassist.client.achievement;
 import dev.caecorthus.sparkassist.SparkAssist;
 import dev.caecorthus.sparkassist.achievement.Achievement;
 import dev.caecorthus.sparkassist.achievement.AchievementCatalog;
-import dev.caecorthus.sparkassist.achievement.AchievementLayout;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
-import dev.caecorthus.sparkassist.client.mixin.ClientAdvancementManagerAccessor;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementDisplay;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.advancement.AdvancementManager;
-import net.minecraft.advancement.AdvancementProgress;
-import net.minecraft.advancement.PlacedAdvancement;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.advancement.criterion.ImpossibleCriterion;
 import net.minecraft.client.MinecraftClient;
@@ -32,25 +26,18 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 /**
- * Shows earned achievements as one extra page in the vanilla advancements screen. The page and its entries live only
- * in this client's advancement tree: they are added back every time the server resends its advancements, the tab
- * selection is never reported to the server, and nothing exists until the first achievement is earned. Every entry
- * has a single, already obtained criterion, so vanilla never draws a progress bar. Entries hang off the root only
- * because vanilla needs a parent to put them on the page; the page draws no connector lines.
- * 在原版成就界面里以额外一页展示已达成的成就。这一页及其条目只存在于本客户端的进度树中：服务器每次重发进度后都会补回，
- * 切到这一页不会告知服务器，第一个成就达成之前这一页不存在。每个条目只有一个已完成的条件，所以原版从不绘制进度条。
- * 条目挂在根节点下只是因为原版需要父节点才会把它们放上这一页；这一页不画连线。
+ * Puts the achievement page in the vanilla advancements screen as one extra tab. The tab is a single root that lives
+ * only in this client's advancement tree: it is added back every time the server resends its advancements, selecting
+ * it is never reported to the server, and it does not exist until the first achievement is earned. Selecting it opens
+ * {@link AchievementGalaxyScreen}, which draws the page full screen.
+ * 在原版成就界面里以额外一页放入成就页。这一页只是一个根节点，只存在于本客户端的进度树中：服务器每次重发进度后都会补回，
+ * 选中它不会告知服务器，第一个成就达成之前它不存在。选中它会打开全屏绘制成就页的 {@link AchievementGalaxyScreen}。
  */
 public final class AchievementAdvancements {
     public static final Identifier ROOT_ID = SparkAssist.id("achievements/root");
-    // Tiled 16 × 16 GUI pixels by vanilla; the image may be any square size. 原版按 16 × 16 GUI 像素平铺；贴图可为任意正方形尺寸。
+    // Shown by vanilla only if the galaxy screen fails to open. 仅在银河界面没能打开时由原版显示。
     private static final Identifier BACKGROUND = SparkAssist.id("textures/gui/achievements/background.png");
     private static final String CRITERION = "earned";
-    // "Level x · <description>". “Level x · <描述>”。
-    private static final String DESCRIPTION_KEY = "advancements.sparkassist.achievement.description";
-    // Last description line: "获得地点：<server address | 本地世界>". 描述最后一行：“获得地点：<服务器地址 | 本地世界>”。
-    private static final String PLACE_KEY = "advancements.sparkassist.achievement.place";
-    private static final String LOCAL_WORLD_KEY = "advancements.sparkassist.achievement.place.local_world";
 
     private AchievementAdvancements() {
     }
@@ -60,39 +47,22 @@ public final class AchievementAdvancements {
     }
 
     /**
-     * Adds every earned achievement still missing from the client's advancement tree.
-     * 把客户端进度树中缺少的已达成成就补上。
+     * Adds the tab to the client's advancement tree once an achievement is earned.
+     * 一旦有成就达成，就把这一页补进客户端的进度树。
      */
     public static void restore(ClientAdvancementManager manager) {
-        List<AdvancementEntry> wanted = entries(AchievementStorage.ledger(MinecraftClient.getInstance()));
-        if (wanted.isEmpty()) {
+        if (!hasEarnedAny(AchievementStorage.ledger(MinecraftClient.getInstance()))) {
             return;
         }
         AdvancementManager tree = manager.getManager();
-        List<AdvancementEntry> missing = wanted.stream().filter(entry -> tree.get(entry.id()) == null).toList();
-        if (!missing.isEmpty()) {
-            tree.addAll(missing);
-        }
-        ClientAdvancementManagerAccessor access = (ClientAdvancementManagerAccessor) manager;
-        Map<AdvancementEntry, AdvancementProgress> progresses = access.sparkassist$progresses();
-        for (AdvancementEntry wantedEntry : wanted) {
-            PlacedAdvancement placed = tree.get(wantedEntry.id());
-            if (placed == null || progresses.containsKey(placed.getAdvancementEntry())) {
-                continue;
-            }
-            AdvancementProgress progress = new AdvancementProgress();
-            progress.init(placed.getAdvancement().requirements());
-            progress.obtain(CRITERION);
-            progresses.put(placed.getAdvancementEntry(), progress);
-            if (access.sparkassist$listener() != null) {
-                access.sparkassist$listener().setProgress(placed, progress);
-            }
+        if (tree.get(ROOT_ID) == null) {
+            tree.addAll(List.of(root()));
         }
     }
 
     /**
-     * Puts newly earned achievements on the page and shows a vanilla-style toast headed "Level x 成就达成" for each.
-     * 把新达成的成就放上成就页，并为每个显示原版样式、标题为“Level x 成就达成”的弹窗。
+     * Makes sure the tab exists and shows a vanilla-style toast headed "Level x 成就达成" for each new achievement.
+     * 确保这一页存在，并为每个新成就显示原版样式、标题为“Level x 成就达成”的弹窗。
      */
     public static void announce(MinecraftClient client, List<Achievement> earned) {
         if (earned.isEmpty()) {
@@ -103,24 +73,38 @@ public final class AchievementAdvancements {
             restore(handler.getAdvancementHandler());
         }
         for (Achievement achievement : earned) {
-            client.getToastManager().add(new AchievementToast(
-                    icon(achievement.icon()), Text.literal(achievement.title()), achievement.level()));
+            client.getToastManager().add(new AchievementToast(icon(achievement.icon()), title(achievement), achievement.level()));
         }
     }
 
-    /** The root plus every earned, still-known achievement, in unlock order. 根节点加上所有已达成且仍存在的成就，按解锁顺序。 */
-    private static List<AdvancementEntry> entries(AchievementLedger ledger) {
-        List<AdvancementEntry> entries = new ArrayList<>();
-        AdvancementEntry root = root();
-        entries.add(root);
-        for (AchievementLedger.Unlock unlock : ledger.unlocks()) {
-            Optional<Achievement> achievement = AchievementCatalog.byId(unlock.id());
-            if (achievement.isPresent()) {
-                AchievementLayout.Slot slot = AchievementLayout.slot(entries.size() - 1);
-                entries.add(entry(achievement.get(), unlock.place(), slot, root));
-            }
-        }
-        return entries.size() > 1 ? entries : List.of();
+    /** The title in its level's colour. 以等级配色显示的标题。 */
+    static MutableText title(Achievement achievement) {
+        return Text.literal(achievement.title()).formatted(levelColor(achievement.level()));
+    }
+
+    /**
+     * Rarity colours by level, from common white to legendary gold for the top level.
+     * 按等级的稀有度配色，从普通的白色到最高等级传说的金色。
+     */
+    static Formatting levelColor(int level) {
+        return switch (level) {
+            case 1 -> Formatting.WHITE;
+            case 2 -> Formatting.GREEN;
+            case 3 -> Formatting.AQUA;
+            case 4 -> Formatting.LIGHT_PURPLE;
+            case 5 -> Formatting.RED;
+            default -> Formatting.GOLD;
+        };
+    }
+
+    static ItemStack icon(String itemId) {
+        Identifier id = Identifier.tryParse(itemId);
+        Item item = id == null ? Items.AIR : Registries.ITEM.get(id);
+        return new ItemStack(item == Items.AIR ? Items.PAPER : item);
+    }
+
+    private static boolean hasEarnedAny(AchievementLedger ledger) {
+        return ledger.unlocks().stream().anyMatch(unlock -> AchievementCatalog.byId(unlock.id()).isPresent());
     }
 
     private static AdvancementEntry root() {
@@ -134,59 +118,9 @@ public final class AchievementAdvancements {
                 false,
                 false);
         display.setPos(0, 0);
-        return build(ROOT_ID, null, display);
-    }
-
-    private static AdvancementEntry entry(
-            Achievement achievement, AchievementLedger.Place place, AchievementLayout.Slot slot, AdvancementEntry parent) {
-        AdvancementDisplay display = new AdvancementDisplay(
-                icon(achievement.icon()),
-                Text.literal(achievement.title()),
-                description(achievement, place),
-                Optional.empty(),
-                switch (achievement.frame()) {
-                    case TASK -> AdvancementFrame.TASK;
-                    case GOAL -> AdvancementFrame.GOAL;
-                    case CHALLENGE -> AdvancementFrame.CHALLENGE;
-                },
-                true,
-                false,
-                false);
-        display.setPos(slot.x(), slot.y());
-        return build(idFor(achievement.id()), parent, display);
-    }
-
-    /**
-     * "Level x · <description>", then a grey "获得地点" line when the place is known (saves from before places were
-     * recorded have none).
-     * “Level x · <描述>”，地点已知时再加一行灰色的“获得地点”（记录地点之前的存档没有地点）。
-     */
-    private static Text description(Achievement achievement, AchievementLedger.Place place) {
-        MutableText description = Text.translatable(DESCRIPTION_KEY, achievement.level(), achievement.description());
-        if (place == null) {
-            return description;
-        }
-        Text where = place.isLocalWorld() ? Text.translatable(LOCAL_WORLD_KEY) : Text.literal(place.server());
-        return description.append("\n").append(Text.translatable(PLACE_KEY, where).formatted(Formatting.GRAY));
-    }
-
-    private static AdvancementEntry build(Identifier id, AdvancementEntry parent, AdvancementDisplay display) {
-        Advancement.Builder builder = Advancement.Builder.createUntelemetered()
+        return Advancement.Builder.createUntelemetered()
                 .display(display)
-                .criterion(CRITERION, Criteria.IMPOSSIBLE.create(new ImpossibleCriterion.Conditions()));
-        if (parent != null) {
-            builder.parent(parent);
-        }
-        return builder.build(id);
-    }
-
-    private static Identifier idFor(String achievementId) {
-        return SparkAssist.id("achievements/" + achievementId);
-    }
-
-    private static ItemStack icon(String itemId) {
-        Identifier id = Identifier.tryParse(itemId);
-        Item item = id == null ? Items.AIR : Registries.ITEM.get(id);
-        return new ItemStack(item == Items.AIR ? Items.PAPER : item);
+                .criterion(CRITERION, Criteria.IMPOSSIBLE.create(new ImpossibleCriterion.Conditions()))
+                .build(ROOT_ID);
     }
 }

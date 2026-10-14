@@ -1169,7 +1169,9 @@
   "message.sparkwitch.emma.invalid_target": "范围内里没有玩家",
   "message.sparkwitch.emma.no_capacity": "本局共用因子首传额度已用尽。",
   "toast.sparkassist.achievement.title": "Level %s 成就达成",
-  "advancements.sparkassist.achievement.description": "Level %s · %s",
+  "advancements.sparkassist.achievement.level": "Level %s",
   "advancements.sparkassist.achievement.place": "获得地点：%s",
-  "advancements.sparkassist.achievement.place.local_world": "本地世界"
+  "advancements.sparkassist.achievement.place.local_world": "本地世界",
+  "advancements.sparkassist.achievement.not_yet": "尚未达成",
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
 }

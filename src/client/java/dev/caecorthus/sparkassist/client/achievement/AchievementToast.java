@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.achievement;
 
+import dev.caecorthus.sparkassist.achievement.Achievement;
 import dev.caecorthus.sparkassist.achievement.AchievementFrame;
 import java.util.List;
 import net.minecraft.client.font.TextRenderer;
@@ -18,9 +19,10 @@ import net.minecraft.util.math.MathHelper;
 /**
  * The toast for an earned achievement. It draws exactly like vanilla's advancement toast (same frame texture, icon
  * position, colours, wrapping and fade, same duration and challenge fanfare) but its heading reads
- * "Level x 成就达成" instead of the frame's "达成进度！"/"达成目标！"/"完成挑战！".
+ * "Level x 成就达成" instead of the frame's "达成进度！"/"达成目标！"/"完成挑战！". The top-level achievement's
+ * heading is gold.
  * 达成成就时的弹窗。绘制方式与原版进度弹窗完全一致（相同的边框贴图、图标位置、颜色、换行与淡入淡出，相同的时长和挑战号角声），
- * 只是标题行显示“Level x 成就达成”，而不是边框对应的“达成进度！”/“达成目标！”/“完成挑战！”。
+ * 只是标题行显示“Level x 成就达成”，而不是边框对应的“达成进度！”/“达成目标！”/“完成挑战！”。最高等级成就的标题行为金色。
  */
 final class AchievementToast implements Toast {
     private static final Identifier TEXTURE = Identifier.ofVanilla("toast/advancement");
@@ -29,6 +31,7 @@ final class AchievementToast implements Toast {
     private static final long DURATION_MS = 5000L;
     private static final int CHALLENGE_COLOR = 0xFF88FF;
     private static final int HEADING_COLOR = 0xFFFF00;
+    private static final int CROWN_COLOR = 0xFFAA00;
     private static final int TITLE_WIDTH = 125;
     private static final long HEADING_MS = 1500L;
     private static final float FADE_MS = 300.0F;
@@ -37,6 +40,7 @@ final class AchievementToast implements Toast {
     private final Text title;
     private final Text heading;
     private final boolean challenge;
+    private final int headingColor;
     private boolean soundPlayed;
 
     AchievementToast(ItemStack icon, Text title, int level) {
@@ -44,6 +48,7 @@ final class AchievementToast implements Toast {
         this.title = title;
         this.heading = Text.translatable(HEADING_KEY, level);
         this.challenge = AchievementFrame.forLevel(level) == AchievementFrame.CHALLENGE;
+        this.headingColor = level == Achievement.MAX_LEVEL ? CROWN_COLOR : challenge ? CHALLENGE_COLOR : HEADING_COLOR;
     }
 
     @Override
@@ -51,7 +56,6 @@ final class AchievementToast implements Toast {
         TextRenderer textRenderer = manager.getClient().textRenderer;
         context.drawGuiTexture(TEXTURE, 0, 0, getWidth(), getHeight());
         List<OrderedText> lines = textRenderer.wrapLines(title, TITLE_WIDTH);
-        int headingColor = challenge ? CHALLENGE_COLOR : HEADING_COLOR;
         if (lines.size() == 1) {
             context.drawText(textRenderer, heading, 30, 7, headingColor | Colors.BLACK, false);
             context.drawText(textRenderer, lines.getFirst(), 30, 18, -1, false);
