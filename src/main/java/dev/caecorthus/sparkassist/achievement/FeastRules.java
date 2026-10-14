@@ -31,6 +31,19 @@ final class FeastRules {
     static final String CATALYST = "noellesroles:catalyst";
     /** Noelle's Roles' record of an Iron Man or Whiskey shield stopping a death. Noelle's Roles 记录铁人药剂或威士忌护盾挡下死亡。 */
     static final String DEATH_BLOCKED = "death_blocked";
+    /**
+     * {@link MatchEvent#GLOBAL_EVENT} id: a Guardian Angel's shield (actor = its owner) stopped a death of
+     * {@code target} with this {@code death_reason}.
+     * {@link MatchEvent#GLOBAL_EVENT} 的 id：守护天使的护盾（actor 为其主人）挡下了 {@code target} 这次死因为
+     * {@code death_reason} 的死亡。
+     */
+    static final String GUARDIAN_SHIELD_ACTIVATED = "sparkwitch:guardian_shield_activated";
+    /**
+     * {@link MatchEvent#GLOBAL_EVENT} id: a Jester in its fake death (actor) shrugged off a death with this
+     * {@code death_reason}.
+     * {@link MatchEvent#GLOBAL_EVENT} 的 id：处于假死的小丑（actor）免疫了一次死因为 {@code death_reason} 的死亡。
+     */
+    static final String JESTER_FAKE_DEATH_KILL_BLOCKED = "sparkstrength:jester_fake_death_kill_blocked";
     /** The longest a poison (food or blue) runs: Wathe's 800–1400 ticks. 毒（食物毒或蓝毒）最长的时长：Wathe 的 800–1400 tick。 */
     static final int LONGEST_POISON_TICKS = 1400;
     static final String ALIVE = "ALIVE";
@@ -148,12 +161,20 @@ final class FeastRules {
     /**
      * 回光返照: I won and was alive when the win was decided (Wathe's round-end status; dying of the poison during the
      * round-end fade still counts), and my current poisoning — the latest {@code player_poisoned} on me, or a Catalyst
-     * on me — was never cured (Antidote {@code action=cure}) or stopped ({@code shield_blocked} / {@code death_blocked}
-     * of a poison death, Last Stand) after it, while I killed its poisoner, a 非好人, by my own hand (not by poison)
-     * after being poisoned. Needs the whole record. Cures or blocks that write no record cannot be seen.
+     * on me — was never cured (Antidote {@code action=cure}) or stopped after it, while I killed its poisoner, a 非好人,
+     * by my own hand (not by poison) after being poisoned. Wathe clears the poison before the poison death it then
+     * tries, so a blocked or undone death leaves me poison-free: any {@code death} record of mine before the win was
+     * decided ({@code match_end} minus {@link GeneralRules#STOP_FADE_TICKS}) ends the poisoning, and so does a Last
+     * Stand, or a poison death of mine stopped by {@code shield_blocked} / {@code death_blocked},
+     * {@link #GUARDIAN_SHIELD_ACTIVATED}, {@link #JESTER_FAKE_DEATH_KILL_BLOCKED} or Last Escape
+     * ({@link TraitRecordRules#LAST_ESCAPE_TRIGGERED}). Needs the whole record. Cures or blocks that write no record
+     * cannot be seen.
      * 我获胜，且判定胜负时仍存活（取 Wathe 的结算状态；在结束淡出期间毒发身亡也算），而我身上当前的毒（我最近一次
-     * {@code player_poisoned}，或对我使用的催化剂）此后从未被解毒（解毒剂 {@code action=cure}）或挡下（毒死被
-     * {@code shield_blocked} / {@code death_blocked} 挡住、背水一战），同时我在中毒后亲手（不是用毒）击杀了下毒的非好人。
+     * {@code player_poisoned}，或对我使用的催化剂）此后从未被解毒（解毒剂 {@code action=cure}）或挡下，同时我在中毒后亲手
+     * （不是用毒）击杀了下毒的非好人。Wathe 在尝试毒死之前就清掉了毒，所以被挡下或被撤销的死亡会让我不再中毒：胜负判定
+     * （{@code match_end} 减去 {@link GeneralRules#STOP_FADE_TICKS}）之前我的任何 {@code death} 记录都会结束这次中毒，
+     * 背水一战也是；我的毒死被 {@code shield_blocked} / {@code death_blocked}、{@link #GUARDIAN_SHIELD_ACTIVATED}、
+     * {@link #JESTER_FAKE_DEATH_KILL_BLOCKED} 或绝处逢生（{@link TraitRecordRules#LAST_ESCAPE_TRIGGERED}）挡下时同样如此。
      * 需要完整记录。不写记录的解毒或格挡无法察觉。
      */
     static boolean killedMyPoisonerBeforeItKilledMe(AchievementContext context) {
@@ -163,6 +184,7 @@ final class FeastRules {
                 .map(participant -> ALIVE.equals(participant.endStatus())).orElse(false)) {
             return false;
         }
+        int decidedAt = timeline.matchEnd().map(end -> end.tick() - GeneralRules.STOP_FADE_TICKS).orElse(0);
         boolean poisoned = false;
         UUID poisoner = null;
         boolean killedPoisoner = false;
@@ -172,7 +194,7 @@ final class FeastRules {
                 killedPoisoner = killedPoisoner && poisoned && newPoisoner != null && newPoisoner.equals(poisoner);
                 poisoned = true;
                 poisoner = newPoisoner;
-            } else if (poisoned && savedFromPoison(event, self)) {
+            } else if (poisoned && savedFromPoison(event, self, decidedAt)) {
                 poisoned = false;
                 poisoner = null;
                 killedPoisoner = false;
@@ -200,15 +222,23 @@ final class FeastRules {
         return event.is(MatchEvent.PLAYER_POISONED) && self.equals(event.target()) && event.uuid("poisoner_uuid") == null;
     }
 
-    /** A cure of my poison, or a poison death of mine stopped. 我的毒被解，或我的毒死被挡下。 */
-    private static boolean savedFromPoison(MatchEvent event, UUID self) {
+    /**
+     * A cure of my poison, a poison death of mine stopped, or any death of mine before record tick {@code decidedAt}
+     * (a later one is the poison catching up during the round-end fade).
+     * 我的毒被解、我的毒死被挡下，或记录 tick {@code decidedAt} 之前我的任何一次死亡（之后的死亡是在结束淡出期间毒发）。
+     */
+    private static boolean savedFromPoison(MatchEvent event, UUID self, int decidedAt) {
         if (event.is(MatchEvent.ITEM_USE) && ANTIDOTE.equals(event.value("item")) && self.equals(event.target())) {
             return CURE_ACTION.equals(event.value("action", CURE_ACTION));
         }
-        if ((event.is(MatchEvent.SHIELD_BLOCKED) || event.is(DEATH_BLOCKED)) && self.equals(event.actor())) {
+        if ((event.is(MatchEvent.SHIELD_BLOCKED) || event.is(DEATH_BLOCKED)
+                || event.isGlobal(JESTER_FAKE_DEATH_KILL_BLOCKED) || event.is(TraitRecordRules.LAST_ESCAPE_TRIGGERED))
+                && self.equals(event.actor())
+                || event.isGlobal(GUARDIAN_SHIELD_ACTIVATED) && self.equals(event.target())) {
             return Rules.reason(event, POISON);
         }
-        return event.isGlobal(MatchEvent.LAST_STAND_TRIGGERED) && self.equals(event.actor());
+        return event.is(MatchEvent.DEATH) && self.equals(event.target()) && event.tick() < decidedAt
+                || event.isGlobal(MatchEvent.LAST_STAND_TRIGGERED) && self.equals(event.actor());
     }
 
     // ---- Record order 记录顺序 ----

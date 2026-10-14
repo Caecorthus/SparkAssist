@@ -191,10 +191,10 @@ final class WitchRecordRules {
 
     /**
      * 法外狂徒张三: as the Judge, sentence a player ({@code sparkwitch:judge_verdict} with {@code sentenced}), then,
-     * still the Judge, kill them myself after the verdict and at most {@code duration} ticks after it, they being a
-     * 非好人 at that death.
-     * 以法官身份判刑一名玩家（带 {@code sentenced} 的 {@code sparkwitch:judge_verdict}），之后仍以法官身份在判决之后、不晚于判决后
-     * {@code duration} tick 亲手将其击杀，对方死亡时为非好人。
+     * still the Judge, kill them myself after the verdict and less than {@code duration} ticks after it (SparkWitch
+     * lifts the sentence at verdict + {@code duration}), they being a 非好人 at that death.
+     * 以法官身份判刑一名玩家（带 {@code sentenced} 的 {@code sparkwitch:judge_verdict}），之后仍以法官身份在判决之后、判决后不到
+     * {@code duration} tick 时亲手将其击杀（SparkWitch 在判决 + {@code duration} 时解除刑期），对方死亡时为非好人。
      */
     static boolean killedWhileSentenced(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
@@ -203,7 +203,7 @@ final class WitchRecordRules {
                 && context.kills().stream().anyMatch(kill -> verdict.target().equals(kill.target())
                         && Rules.killedAs(context, kill, JUDGE) && Rules.victimNonCivilian(context, kill)
                         && StrengthRecordRules.comesAfter(timeline, kill, verdict)
-                        && kill.tick() - verdict.tick() <= verdict.intValue("duration", 0)));
+                        && kill.tick() - verdict.tick() < verdict.intValue("duration", 0)));
     }
 
     /**

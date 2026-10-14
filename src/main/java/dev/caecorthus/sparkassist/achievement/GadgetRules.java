@@ -36,12 +36,14 @@ final class GadgetRules {
 
     /**
      * 禁飞区: break a drone that is someone else's ({@code sparkstrength:drone_destroyed}: actor = me, target = its
-     * owner, who is not me).
-     * 打坏一架别人的无人机（{@code sparkstrength:drone_destroyed}：actor 为我，target 为其主人且不是我）。
+     * owner, who is not me). Without a local player nothing counts (a breaker-less record would otherwise match).
+     * 打坏一架别人的无人机（{@code sparkstrength:drone_destroyed}：actor 为我，target 为其主人且不是我）。没有本地玩家时
+     * 什么都不算（否则没有破坏者的记录也会匹配）。
      */
     static boolean brokeSomeoneElsesDrone(AchievementContext context) {
-        return Rules.myGlobalEvents(context, DRONE_DESTROYED).stream().anyMatch(destroyed -> destroyed.target() != null
-                && !destroyed.target().equals(context.self()));
+        UUID self = context.self();
+        return self != null && Rules.myGlobalEvents(context, DRONE_DESTROYED).stream()
+                .anyMatch(destroyed -> destroyed.target() != null && !destroyed.target().equals(self));
     }
 
     /**
@@ -67,9 +69,12 @@ final class GadgetRules {
     }
 
     /**
-     * 真相只有一个！: as the Professor, feed the truth serum to another player who is a 非好人 then, and their real
-     * role is announced to everyone ({@code sparkstrength:professor_truth_revealed} for them in the same tick).
-     * 以教授身份让另一名当时是非好人的玩家喝下吐真试剂，并向所有人公布其真实身份（同一 tick 内有其
+     * 真相只有一个！: as the Professor, feed the truth serum to another player who is a 非好人 then (by
+     * {@link StrengthRecordRules#factionAround}, which catches an Impostor or Conscience flip from a later death
+     * record), and their real role is announced to everyone ({@code sparkstrength:professor_truth_revealed} for them in
+     * the same tick).
+     * 以教授身份让另一名当时是非好人的玩家（按 {@link StrengthRecordRules#factionAround} 判断，能从之后的死亡记录识别内鬼、
+     * 良知造成的阵营翻转）喝下吐真试剂，并向所有人公布其真实身份（同一 tick 内有其
      * {@code sparkstrength:professor_truth_revealed}）。
      */
     static boolean truthSerumOnOtherSide(AchievementContext context) {
@@ -80,7 +85,7 @@ final class GadgetRules {
                 && !fed.target().equals(context.self())
                 && TRUTH_SERUM.equals(fed.value("item"))
                 && Rules.iWas(context, fed, PROFESSOR)
-                && Factions.isNonCivilian(context.factionAt(fed.target(), fed))
+                && Factions.isNonCivilian(StrengthRecordRules.factionAround(context.timeline(), fed.target(), fed))
                 && reveals.stream().anyMatch(reveal -> reveal.tick() == fed.tick()
                         && fed.target().equals(reveal.actor())));
     }

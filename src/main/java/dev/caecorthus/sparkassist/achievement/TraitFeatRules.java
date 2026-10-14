@@ -107,16 +107,20 @@ final class TraitFeatRules {
 
     /**
      * 破防了: with Second Strike, my attack on a player is stopped by their shield and that same attack still kills
-     * them: their shield block against me, then my kill of them, in the same tick.
+     * them: their shield block against me, then my kill of them, in the same tick. A Last Stand false death does not
+     * kill them: they come back.
      * 持有二次打击时，我对一名玩家的攻击被其护盾挡下，而这一击仍然杀死了对方：同一 tick 内先有其对我的护盾抵挡，再有我对其的击杀。
+     * 背水一战的假死不算杀死：对方会复活。
      */
     static boolean killThroughShield(AchievementContext context) {
         UUID self = context.self();
-        List<MatchEvent> events = context.timeline().events();
+        MatchTimeline timeline = context.timeline();
+        List<MatchEvent> events = timeline.events();
         for (int i = 0; i < events.size(); i++) {
             MatchEvent kill = events.get(i);
             if (!kill.is(MatchEvent.DEATH) || self == null || !self.equals(kill.actor()) || kill.target() == null
-                    || self.equals(kill.target()) || !context.hadTraitAround(SECOND_STRIKE, kill.tick())) {
+                    || self.equals(kill.target()) || timeline.isFakeDeath(kill)
+                    || !context.hadTraitAround(SECOND_STRIKE, kill.tick())) {
                 continue;
             }
             for (int j = i - 1; j >= 0 && events.get(j).tick() == kill.tick(); j--) {

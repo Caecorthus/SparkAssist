@@ -228,11 +228,14 @@ final class WitchRules {
     // ---- Fiend 魔人 ----
 
     /**
-     * 挨打致富: 300 coins gained in one round while the Fiend for the whole round. The Fiend has no task or starting
-     * money, so its only income is the gold for being hit (and for a bomb passed to it), and SparkFactionAPI's
-     * {@code sparkfactionapi:income} counts every coin credited this round.
-     * 整局都是魔人时，一局内获得 300 金币。魔人没有任务收入与开局金币，唯一收入是挨打（以及被转手炸弹）的赏金，而
-     * SparkFactionAPI 的 {@code sparkfactionapi:income} 计入本局入账的全部金币。
+     * 挨打致富: 300 coins gained in one round while the Fiend for the whole round, by SparkFactionAPI's
+     * {@code sparkfactionapi:income}, which counts every coin credited this round. The Fiend has no task or starting
+     * money; its gold comes from being hit while dormant (a hit its immunity cancels) and from a bomb it passes on
+     * when the new holder dies of it (SparkWitch's {@code FiendBombLedger}). The income also includes anything else
+     * credited, such as SparkTraits' Snowball bonus or eating a goldfish, which the record cannot tell apart.
+     * 整局都是魔人时，一局内获得 300 金币，按 SparkFactionAPI 的 {@code sparkfactionapi:income} 计（本局入账的全部金币）。
+     * 魔人没有任务收入与开局金币；它的金币来自休眠期间挨打（被其免疫抵消的攻击），以及把炸弹转手后新持有者被炸死
+     * （SparkWitch 的 {@code FiendBombLedger}）。入账也包括其他来源，例如 SparkTraits 雪球的加成或吃下金鱼，记录无法区分。
      */
     static boolean fiendIncome(AchievementContext context) {
         return context.timeline().roleHistory(context.self()).equals(List.of(FIEND))

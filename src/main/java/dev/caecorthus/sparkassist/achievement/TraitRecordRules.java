@@ -27,6 +27,8 @@ final class TraitRecordRules {
     /** actor = the killer, target = the victim; {@code stolen} coins (a third of the victim's). actor 为凶手；{@code stolen} 为夺取的金币。 */
     static final String PLUNDERER_STEAL = "sparktraits:plunderer_steal";
 
+    static final String POISON = "wathe:poison";
+
     /** The Showman's most for one kill: 10 witnesses × 8 coins. 作秀单次击杀的上限：10 名目击者 × 8 金币。 */
     static final int FULL_SHOWMAN_REWARD = 80;
     static final int BIG_PLUNDER = 100;
@@ -36,8 +38,11 @@ final class TraitRecordRules {
 
     /**
      * 我一定会回来的: after my Last Escape cancelled a death ({@code sparktraits:last_escape_triggered}), I kill with my
-     * own hand, later in the round, the player whose attack it was (its target).
+     * own hand, later in the round, the player whose attack it was (its target). "With my own hand" leaves out a
+     * poison death ({@link #POISON}), which is credited to the poisoner, and a Last Stand false death, after which they
+     * come back.
      * 我的绝处逢生取消了一次死亡（{@code sparktraits:last_escape_triggered}）之后，我在本局稍后亲手击杀当时出手的那名玩家（其 target）。
+     * “亲手”不含毒死（{@link #POISON}，记在下毒者名下）和背水一战的假死（之后对方会复活）。
      */
     static boolean killedWhoNearlyKilledMe(AchievementContext context) {
         UUID self = context.self();
@@ -45,6 +50,7 @@ final class TraitRecordRules {
         return context.myEvents(LAST_ESCAPE_TRIGGERED).stream().anyMatch(escape -> escape.target() != null
                 && !escape.target().equals(self)
                 && context.kills().stream().anyMatch(kill -> escape.target().equals(kill.target())
+                        && !timeline.isFakeDeath(kill) && !Rules.reason(kill, POISON)
                         && StrengthRecordRules.comesAfter(timeline, kill, escape)));
     }
 

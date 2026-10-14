@@ -74,19 +74,20 @@ final class NoellesKillerRules {
     // ---- Swapper 交换者 ----
 
     /**
-     * 借刀杀人: within 10 s of my swap as the Swapper, one of the two swapped players (not me) dies with a known faction
-     * other than killer, by anyone's hand but mine or by accident (no killer). Disconnects are not deaths.
-     * 以交换者身份交换后 10 秒内，被交换的两人之一（不是我）死亡，其阵营已知且不是杀手，凶手不是我（他人所杀或没有凶手的意外）。
-     * 断线不算死亡。
+     * 借刀杀人: within 10 s of my swap of two distinct players as the Swapper, one of them (not me) really dies with a
+     * known faction other than killer, by anyone's hand but mine or by accident (no killer). Disconnects are not
+     * deaths, and a Last Stand false death is not a real one.
+     * 以交换者身份交换两名不同玩家后 10 秒内，其中一人（不是我）真实死亡，其阵营已知且不是杀手，凶手不是我（他人所杀或没有凶手的意外）。
+     * 断线不算死亡，背水一战的假死也不是真实死亡。
      */
     static boolean swapThenSomeoneElseKills(AchievementContext context) {
         UUID self = context.self();
-        List<MatchEvent> deaths = context.timeline().deaths().stream()
+        List<MatchEvent> deaths = context.timeline().realDeaths().stream()
                 .filter(death -> !death.isDisconnect() && death.target() != null && !death.target().equals(self)
                         && !(self != null && self.equals(death.actor())) && victimNotKiller(context, death))
                 .toList();
-        return mySwaps(context).stream().anyMatch(swap -> deaths.stream().anyMatch(death ->
-                swapped(swap).contains(death.target())
+        return mySwaps(context).stream().filter(swap -> swapped(swap).size() == 2)
+                .anyMatch(swap -> deaths.stream().anyMatch(death -> swapped(swap).contains(death.target())
                         && death.tick() >= swap.tick() && death.tick() <= swap.tick() + SWAP_TO_DEATH_TICKS));
     }
 
@@ -304,8 +305,8 @@ final class NoellesKillerRules {
 
     /**
      * 隐形杀手: a player I made invisible with the backpack as the Phantom kills 2 players whose known faction is not
-     * killer, before that invisibility ends (its end record, at most 30 s).
-     * 我以幽灵身份用背包隐身的玩家，在隐身结束（结束记录，最多 30 秒）之前击杀 2 名阵营已知且不是杀手的玩家。
+     * killer, before that invisibility ends (its end record or their real death, at most 30 s).
+     * 我以幽灵身份用背包隐身的玩家，在隐身结束（结束记录或其本人真实死亡，最多 30 秒）之前击杀 2 名阵营已知且不是杀手的玩家。
      */
     static boolean invisibleAllyKillsTwo(AchievementContext context) {
         UUID self = context.self();
@@ -319,7 +320,9 @@ final class NoellesKillerRules {
             }
             int end = start.tick() + INVISIBILITY_TICKS;
             for (MatchEvent later : events.subList(i + 1, events.size())) {
-                if (later.isGlobal(PHANTOM_BACKPACK_ENDED) && invisible.equals(later.actor())) {
+                if (later.isGlobal(PHANTOM_BACKPACK_ENDED) && invisible.equals(later.actor())
+                        || later.is(MatchEvent.DEATH) && invisible.equals(later.target())
+                                && !context.timeline().isFakeDeath(later)) {
                     end = Math.min(end, later.tick());
                     break;
                 }
@@ -444,14 +447,16 @@ final class NoellesKillerRules {
     // ---- Last Escape 绝处逢生 ----
 
     /**
-     * 大难不死: Last Escape showed up among my owner-visible traits. It stays hidden from its holder until it triggers,
-     * and only an original killer role without Conscience or Impostor can hold or trigger it, so seeing it means I
+     * 大难不死: Last Escape showed up among my owner-visible traits, or the record has my
+     * {@link TraitRecordRules#LAST_ESCAPE_TRIGGERED} (actor = me). It stays hidden from its holder until it triggers,
+     * and only an original killer role without Conscience or Impostor can hold or trigger it, so either one means I
      * triggered it as a killer.
-     * 绝处逢生出现在我自身可见的词条里。它在触发前对持有者隐藏，且只有不带良知或内鬼的原生杀手身份才能持有和触发，
-     * 所以能看到它就说明我以杀手身份触发了它。
+     * 绝处逢生出现在我自身可见的词条里，或记录中有我的 {@link TraitRecordRules#LAST_ESCAPE_TRIGGERED}（actor 是我）。
+     * 它在触发前对持有者隐藏，且只有不带良知或内鬼的原生杀手身份才能持有和触发，所以两者之一就说明我以杀手身份触发了它。
      */
     static boolean triggeredLastEscape(AchievementContext context) {
-        return context.hadTrait(LAST_ESCAPE);
+        return context.hadTrait(LAST_ESCAPE) || context.self() != null
+                && !context.myEvents(TraitRecordRules.LAST_ESCAPE_TRIGGERED).isEmpty();
     }
 
     // ---- Shared 共用 ----

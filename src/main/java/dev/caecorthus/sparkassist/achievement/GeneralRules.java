@@ -43,6 +43,8 @@ final class GeneralRules {
     static final String PASSENGERS = "PASSENGERS";
     static final String TIME = "TIME";
     static final String LOOSE_END = "LOOSE_END";
+    /** Wathe's Loose End role. Wathe 的亡命徒身份。 */
+    static final String LOOSE_END_ROLE = "wathe:loose_end";
     static final String ALIVE = "ALIVE";
 
     /** 5 seconds. 5 秒。 */
@@ -205,32 +207,36 @@ final class GeneralRules {
     /**
      * 完美犯罪: the round opened with 2 or more killers, the killers won with me among the winners (on the killer
      * faction at the end, as the client saw it), and no player on the killer faction has any death record all round,
-     * a Last Stand false death or a disconnect included (complete record).
+     * a Last Stand false death included (complete record). A disconnect ({@link MatchEvent#isDisconnect}) is leaving,
+     * not dying, so it is ignored.
      * 开局有 2 名及以上杀手，杀手获胜且我是获胜者之一（客户端所见结束时在杀手阵营），并且整局没有任何杀手阵营玩家的死亡记录，
-     * 背水一战的假死和断线也算（完整记录）。
+     * 背水一战的假死也算（完整记录）。断线（{@link MatchEvent#isDisconnect}）是离开而不是死亡，不予理会。
      */
     static boolean killersWonUnscathed(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
         return context.won() && Factions.KILLER.equals(winningFaction(context))
                 && Factions.KILLER.equals(context.faction()) && timeline.isComplete()
                 && timeline.openingFactionCount(Factions.KILLER) >= MIN_OPENING_KILLERS
-                && timeline.deaths().stream().noneMatch(death -> Factions.KILLER.equals(timeline.victimFaction(death)));
+                && timeline.deaths().stream().noneMatch(death -> !death.isDisconnect()
+                        && Factions.KILLER.equals(timeline.victimFaction(death)));
     }
 
     /**
      * 平安到站: the round opened with 2 or more killers, the passengers won by wiping out the killers (Wathe's
      * {@code PASSENGERS}, not the time running out) with me among the winners (a 好人 at the end, as the client saw
-     * it), and no 好人 has any death record all round, a Last Stand false death or a disconnect included (complete
-     * record).
+     * it), and no 好人 has any death record all round, a Last Stand false death included (complete record). A
+     * disconnect ({@link MatchEvent#isDisconnect}) is leaving, not dying, so it is ignored.
      * 开局有 2 名及以上杀手，乘客通过消灭所有杀手获胜（Wathe 的 {@code PASSENGERS}，不是时间耗尽）且我是获胜者之一
-     * （客户端所见结束时是好人），并且整局没有任何好人的死亡记录，背水一战的假死和断线也算（完整记录）。
+     * （客户端所见结束时是好人），并且整局没有任何好人的死亡记录，背水一战的假死也算（完整记录）。断线
+     * （{@link MatchEvent#isDisconnect}）是离开而不是死亡，不予理会。
      */
     static boolean civiliansWonUnscathed(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
         return context.won() && PASSENGERS.equals(context.outcome().winStatus())
                 && Factions.isCivilian(context.faction()) && timeline.isComplete()
                 && timeline.openingFactionCount(Factions.KILLER) >= MIN_OPENING_KILLERS
-                && timeline.deaths().stream().noneMatch(death -> Factions.isCivilian(timeline.victimFaction(death)));
+                && timeline.deaths().stream().noneMatch(death -> !death.isDisconnect()
+                        && Factions.isCivilian(timeline.victimFaction(death)));
     }
 
     /**
@@ -342,12 +348,16 @@ final class GeneralRules {
 
     /**
      * 我命由我不由天: at the moment I became the last living 好人, 3 or more players of the killer faction were alive;
-     * from then on I triggered no Last Stand, was alive at {@code match_end}, and the 好人 won with me among the
-     * winners. If the time ran out, the round was decided at least 60 seconds after that moment. Complete record.
-     * Other players' factions are the ones the record shows (a living player's trait flip it never shows is
-     * invisible); mine is read by {@link #myFactionAt}.
-     * 在我成为最后一名存活好人的那一刻，场上有 3 名及以上杀手阵营玩家存活；此后我没有触发背水一战，{@code match_end} 时仍存活，
-     * 并且好人获胜、我是获胜者之一。若是时间耗尽获胜，胜负至少在那一刻之后 60 秒才判定。需要完整记录。
+     * I triggered no Last Stand at any point this round, never held {@link #LOOSE_END_ROLE}, was alive at
+     * {@code match_end}, and the 好人 won with me among the winners. If the time ran out, the round was decided at
+     * least 60 seconds after that moment. Complete record. A Last Stand before that moment rules it out too: it is
+     * what sets up SparkTraits' Final Moment (which turns its holder into a Loose End) once they become the last 好人.
+     * Other players' factions are the ones the record
+     * shows (a living player's trait flip it never shows is invisible); mine is read by {@link #myFactionAt}.
+     * 在我成为最后一名存活好人的那一刻，场上有 3 名及以上杀手阵营玩家存活；本局我从未触发背水一战、从未担任
+     * {@link #LOOSE_END_ROLE}，{@code match_end} 时仍存活，并且好人获胜、我是获胜者之一。若是时间耗尽获胜，胜负至少在那一刻之后
+     * 60 秒才判定。需要完整记录。那一刻之前的背水一战也不行：正是它让持有者在成为最后一名好人时进入 SparkTraits 的最终时刻
+     * （把持有者变成亡命徒）。
      * 其他玩家的阵营按记录给出的为准（记录里从未出现的存活玩家的词条阵营翻转看不到）；我的阵营按 {@link #myFactionAt} 读取。
      */
     static boolean defiedFate(AchievementContext context) {
@@ -355,7 +365,9 @@ final class GeneralRules {
         MatchTimeline timeline = context.timeline();
         Optional<MatchEvent> end = timeline.matchEnd();
         if (self == null || !context.won() || !Factions.isCivilian(winningFaction(context)) || end.isEmpty()
-                || !timeline.aliveAfter(end.get()).contains(self)) {
+                || !timeline.aliveAfter(end.get()).contains(self)
+                || !Rules.myGlobalEvents(context, MatchEvent.LAST_STAND_TRIGGERED).isEmpty()
+                || timeline.roleHistory(self).contains(LOOSE_END_ROLE)) {
             return false;
         }
         boolean wasLast = false;
@@ -370,7 +382,6 @@ final class GeneralRules {
             boolean last = alive.containsKey(self) && Factions.isCivilian(myFactionAt(context, event))
                     && othersIn(alive, self, Factions.CIVILIAN) == 0;
             if (last && !wasLast && count(alive, Factions.KILLER) >= DEFIANT_KILLERS
-                    && noLastStandFrom(context, event)
                     && (!TIME.equals(context.outcome().winStatus())
                             || decidedAt(end.get()) - event.tick() >= DEFIANCE_TICKS)) {
                 return true;
@@ -387,11 +398,6 @@ final class GeneralRules {
     private static boolean changesWhoIsAlive(MatchEvent event) {
         return event.is(MatchEvent.ROLE_ASSIGNED) || event.is(MatchEvent.ROLE_CHANGED) || event.is(MatchEvent.DEATH)
                 || event.is(MatchEvent.PLAYER_LEAVE) || event.isGlobal(MatchEvent.PATHOGEN_REVIVED);
-    }
-
-    private static boolean noLastStandFrom(AchievementContext context, MatchEvent from) {
-        return Rules.myGlobalEvents(context, MatchEvent.LAST_STAND_TRIGGERED).stream()
-                .noneMatch(trigger -> trigger.tick() >= from.tick());
     }
 
     /**

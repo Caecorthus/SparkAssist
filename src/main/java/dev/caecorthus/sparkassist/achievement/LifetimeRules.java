@@ -20,8 +20,8 @@ final class LifetimeRules {
 
     /**
      * The neutral roles that can win a round of their own: Noelle's Roles' Jester, Shadow Jester, Vulture, Corrupt
-     * Cop and Pathogen, SparkStrength's Taotie, and SparkWitch's Fiend, Insider and Murderous Witch.
-     * 能自己赢下对局的中立身份：Noelle's Roles 的小丑、影子小丑、秃鹫、黑警、病原体，SparkStrength 的饕餮，
+     * Cop, Pathogen and Taotie, and SparkWitch's Fiend, Insider and Murderous Witch.
+     * 能自己赢下对局的中立身份：Noelle's Roles 的小丑、影子小丑、秃鹫、黑警、病原体、饕餮，
      * 以及 SparkWitch 的魔人、内应、杀意魔女。
      */
     static final Set<String> WINNING_NEUTRAL_ROLES = Set.of(
@@ -39,17 +39,21 @@ final class LifetimeRules {
     }
 
     /**
-     * 墙头草: won at least once on each of the civilian, killer, neutral and witch factions, by my effective faction
-     * at the end of the round. The Murderous Witch is a neutral role on her own faction
-     * ({@link Factions#MURDEROUS_WITCH}), so her wins count as neutral.
-     * 以好人、杀手、中立、魔女阵营各获胜至少一次，按一局结束时我的实际阵营计。杀意魔女是自成一个阵营
-     * （{@link Factions#MURDEROUS_WITCH}）的中立身份，她的胜场算作中立。
+     * 墙头草: won at least once on each of the civilian, killer, neutral and witch factions. The civilian, killer and
+     * witch wins go by my effective faction at the end of the round; the neutral one is a round won while holding one
+     * of the {@link #WINNING_NEUTRAL_ROLES} ({@link LifetimeStats#winsHolding}), since a Loose Ends round or SparkTraits'
+     * Final Moment (which turns its holder into a Loose End) also leaves a winner on Wathe's neutral faction without a
+     * neutral role. The Murderous Witch is one of those roles, on her own faction ({@link Factions#MURDEROUS_WITCH}).
+     * 以好人、杀手、中立、魔女阵营各获胜至少一次。好人、杀手、魔女的胜场按一局结束时我的实际阵营计；中立的胜场指担任过
+     * {@link #WINNING_NEUTRAL_ROLES} 之一并获胜的一局（{@link LifetimeStats#winsHolding}），因为亡命徒模式和 SparkTraits 的
+     * 最终时刻（把持有者变成亡命徒）也会让获胜者处在 Wathe 的中立阵营，却没有中立身份。杀意魔女也是这些身份之一，自成一个阵营
+     * （{@link Factions#MURDEROUS_WITCH}）。
      */
     static boolean wonForEveryFaction(AchievementContext context) {
         LifetimeStats stats = context.stats();
         return stats.winsFor(Factions.CIVILIAN) >= 1
                 && stats.winsFor(Factions.KILLER) >= 1
-                && stats.winsFor(Factions.NEUTRAL) + stats.winsFor(Factions.MURDEROUS_WITCH) >= 1
+                && WINNING_NEUTRAL_ROLES.stream().anyMatch(role -> stats.winsHolding(role) >= 1)
                 && stats.winsFor(Factions.WITCH) >= 1;
     }
 

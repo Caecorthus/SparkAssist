@@ -23,6 +23,11 @@ final class WitchCivilianRules {
     static final String SEEKER = "sparkwitch:seeker";
 
     static final String SWORDFISH_STAB = "sparkwitch:swordfish_stab";
+    /**
+     * SparkTraits kills a living Impostor with this reason, without a killer, once no real killer is left alive.
+     * 一旦没有真正的杀手存活，SparkTraits 就以这个死因、在没有凶手的情况下杀死存活的内鬼。
+     */
+    static final String SELF_REALIZATION = "sparktraits:self_realization";
     static final String FACTOR_BACKLASH = "sparkwitch:factor_backlash";
     static final String FISHING_ROD = "sparkwitch:fishing_rod";
     static final String TASER = "sparkwitch:taser";
@@ -77,20 +82,32 @@ final class WitchCivilianRules {
     }
 
     /**
-     * 一竿清台: as the Fisher, a swordfish stab kills a killer-faction player after which no killer-faction player is
-     * left alive, and the round ends as a civilian win. Needs the complete record. A living player turned to the killer
-     * faction by a trait is invisible to the record, but they would have kept the civilians from winning.
-     * 以钓鱼佬身份用剑鱼刺杀一名杀手阵营玩家，此后场上不再有存活的杀手阵营玩家，且本局以好人获胜结束。需要完整记录。
-     * 被词条翻到杀手阵营的存活玩家在记录里看不到，但有他在好人就不会获胜。
+     * 一竿清台: as the Fisher, my swordfish stab is the last real death of a killer-faction player this round, and the
+     * round ends as a civilian win that is not the time running out (then killers were still alive, or the win was
+     * held back and not decided by my stab). Needs the complete record. A living Conscience killer is a 好人 although
+     * the record shows their killer role, so who is left alive is not checked. A living Impostor is on the killer
+     * faction without the record showing it, but SparkTraits kills them ({@link #SELF_REALIZATION}, no killer) as soon
+     * as no real killer is left, so that death comes after the last real killer's and is left out.
+     * 以钓鱼佬身份用剑鱼刺杀的一击，是本局杀手阵营玩家的最后一次真实死亡，且本局以好人获胜结束，但不是时间耗尽（那时还有杀手存活，
+     * 或胜利被拖住、并非由我这一击决定）。需要完整记录。存活的良知杀手是好人，记录里却显示其杀手身份，所以不检查谁还活着。
+     * 存活的内鬼属于杀手阵营，记录里却看不出来；但一旦没有真正的杀手存活，SparkTraits 就会让其死亡（{@link #SELF_REALIZATION}，
+     * 没有凶手），这次死亡在最后一名真正杀手的死亡之后，因此不计入。
      */
     static boolean swordfishClearsTheLastKiller(AchievementContext context) {
+        UUID self = context.self();
         MatchTimeline timeline = context.timeline();
-        if (!timeline.isComplete() || !Factions.isCivilian(winningFaction(context))) {
+        if (self == null || !timeline.isComplete() || !Factions.isCivilian(winningFaction(context))
+                || GeneralRules.TIME.equals(context.outcome().winStatus())) {
             return false;
         }
-        return context.kills().stream().anyMatch(kill -> swordfishKillAsFisher(context, kill)
-                && Factions.KILLER.equals(timeline.victimFaction(kill))
-                && !timeline.aliveFactionsAfter(kill).containsValue(Factions.KILLER));
+        MatchEvent last = null;
+        for (MatchEvent death : timeline.realDeaths()) {
+            if (Factions.KILLER.equals(timeline.victimFaction(death)) && !Rules.reason(death, SELF_REALIZATION)) {
+                last = death;
+            }
+        }
+        return last != null && self.equals(last.actor()) && !self.equals(last.target())
+                && swordfishKillAsFisher(context, last);
     }
 
     /**

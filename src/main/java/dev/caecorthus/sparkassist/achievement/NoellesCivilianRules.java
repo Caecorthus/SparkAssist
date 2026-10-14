@@ -70,9 +70,13 @@ final class NoellesCivilianRules {
     /** 30 seconds. 30 秒。 */
     static final int REPAIR_WINDOW_TICKS = 600;
     /**
-     * Wathe writes {@code match_end} after the round-end fade ({@code FADE_TIME} 40 + {@code FADE_PAUSE} 20 ticks), one
-     * tick after the win is decided.
-     * Wathe 在结束淡出（{@code FADE_TIME} 40 + {@code FADE_PAUSE} 20 tick）之后才写 {@code match_end}，比判定胜负晚一 tick。
+     * Wathe writes {@code match_end} exactly one round-end fade ({@code FADE_TIME} 40 + {@code FADE_PAUSE} 20 ticks)
+     * after the server tick that decided the round. A shop purchase is handled between server ticks, so a time cut
+     * recorded at tick T empties the clock before tick T + 1 decides the round, and {@code match_end} follows at T + 61;
+     * a purchase recorded at most this many ticks before {@code match_end} came after the round was decided.
+     * Wathe 在判定胜负的那个服务端 tick 之后，恰好经过一次结束淡出（{@code FADE_TIME} 40 + {@code FADE_PAUSE} 20 tick）才写
+     * {@code match_end}。商店购买在服务端 tick 之间处理，所以记录在 tick T 的减时会在 tick T + 1 判定胜负之前清空时间，
+     * {@code match_end} 随后在 T + 61 写入；记录时间距 {@code match_end} 不超过这么多 tick 的购买发生在胜负已定之后。
      */
     static final int ROUND_END_FADE_TICKS = 60;
     static final int ROUND_END_SLACK = 5;
@@ -340,11 +344,13 @@ final class NoellesCivilianRules {
     // ---- Conductor 列车长 ----
 
     /**
-     * 引狼入室: after a death of mine as the Conductor ({@code victim_role}), another player on the killer faction (best
-     * known effective faction at the pickup) picks up a master key. The pickup record has no owner, so the key is
-     * assumed to be the one I dropped (a second master key in one round is very rare).
-     * 我以列车长身份死亡（{@code victim_role}）后，另一名杀手阵营玩家（拾取时已知的实际阵营）捡起了一把万能钥匙。拾取记录不带
-     * 物主，因此默认那就是我掉落的钥匙（一局里出现第二把万能钥匙非常少见）。
+     * 引狼入室: after a death of mine as the Conductor ({@code victim_role}), another player on the killer faction at the
+     * pickup (by {@link StrengthRecordRules#factionAround}, which catches an Impostor or Conscience flip from a later
+     * death record) picks up a master key. The pickup record has no owner, so the key is assumed to be the one I
+     * dropped (a second master key in one round is very rare).
+     * 我以列车长身份死亡（{@code victim_role}）后，另一名拾取时属于杀手阵营的玩家（按 {@link StrengthRecordRules#factionAround}
+     * 判断，能从之后的死亡记录识别内鬼、良知造成的阵营翻转）捡起了一把万能钥匙。拾取记录不带物主，因此默认那就是我掉落的钥匙
+     * （一局里出现第二把万能钥匙非常少见）。
      */
     static boolean killerTookMyMasterKey(AchievementContext context) {
         UUID self = context.self();
@@ -359,7 +365,7 @@ final class NoellesCivilianRules {
                 dropped |= CONDUCTOR.equals(timeline.victimRole(event));
             } else if (dropped && event.is(MatchEvent.ITEM_PICKUP) && MASTER_KEY.equals(event.value("item"))
                     && event.actor() != null && !self.equals(event.actor())
-                    && Factions.KILLER.equals(timeline.factionAfter(event.actor(), event))) {
+                    && Factions.KILLER.equals(StrengthRecordRules.factionAround(timeline, event.actor(), event))) {
                 return true;
             }
         }
@@ -399,12 +405,15 @@ final class NoellesCivilianRules {
 
     /**
      * 提前下班: as the Timekeeper, buy 「减少45秒游戏时间」 ({@code noellesroles:timekeeper_reduce_time}) and the round ends
-     * on time ({@code TIME}) at once: Wathe writes {@code match_end} one round-end fade (60 ticks) after the win is
-     * decided, so the purchase must lie within that fade (plus 5 ticks) of {@code match_end}. A Last Stand revival
-     * pending at that moment delays the end and misses it.
+     * on time ({@code TIME}) at once: the purchase lies more than one round-end fade ({@link #ROUND_END_FADE_TICKS})
+     * before {@code match_end} (61 ticks when it decided the round in the next tick) and at most 5 ticks more. A
+     * purchase 60 ticks or less before {@code match_end} was made during the fade, after the round was already
+     * decided (e.g. by the time running out on its own), and does not count. A Last Stand revival pending at that
+     * moment delays the end and misses it.
      * 以计时员身份购买「减少45秒游戏时间」（{@code noellesroles:timekeeper_reduce_time}），本局随即以时间耗尽（{@code TIME}）结束：
-     * Wathe 在判定胜负后经过一次结束淡出（60 tick）才写 {@code match_end}，所以购买必须在 {@code match_end} 之前的这段淡出
-     * （另加 5 tick）之内。那一刻若有背水一战的复活尚未完成，结束会被推迟，因而判不到。
+     * 购买距 {@code match_end} 超过一次结束淡出（{@link #ROUND_END_FADE_TICKS}；下一 tick 就判定胜负时正好 61 tick），且最多再多
+     * 5 tick。距 {@code match_end} 不超过 60 tick 的购买发生在淡出期间、胜负已定之后（例如时间自然耗尽之后），不算。那一刻若有
+     * 背水一战的复活尚未完成，结束会被推迟，因而判不到。
      */
     static boolean timeCutEndedRound(AchievementContext context) {
         Optional<MatchEvent> end = context.timeline().matchEnd();
@@ -412,7 +421,7 @@ final class NoellesCivilianRules {
             return false;
         }
         int endTick = end.get().tick();
-        return myTimeCuts(context).stream().anyMatch(cut -> endTick - cut.tick() >= 0
+        return myTimeCuts(context).stream().anyMatch(cut -> endTick - cut.tick() > ROUND_END_FADE_TICKS
                 && endTick - cut.tick() <= ROUND_END_FADE_TICKS + ROUND_END_SLACK);
     }
 
@@ -421,17 +430,22 @@ final class NoellesCivilianRules {
      * (SparkWitch {@code TimekeeperCounter}; the lift itself is not recorded). A curse is a pocket-watch theft
      * ({@code sparkwitch:time_stealer_pocket_watch}, target = the victim) less than 35 s (its lethal chime) before the
      * purchase, whose victim has not died since, and that no earlier Timekeeper purchase already lifted. The lift only
-     * happens when the buyer is not on the killer faction, so a purchase while holding Impostor does not count.
+     * happens when the buyer is not on the killer faction, so a purchase while holding Impostor does not count. It also
+     * only happens while the round is live, so a purchase at most {@link #ROUND_END_FADE_TICKS} before
+     * {@code match_end} (during the round-end fade) does not count either.
      * 以计时员身份在窃时诅咒尚未生效时购买「减少45秒游戏时间」，从而解除诅咒（SparkWitch {@code TimekeeperCounter}；解除本身
      * 不写记录）。诅咒指购买前不到 35 秒（致死钟响）的一次怀表窃时（{@code sparkwitch:time_stealer_pocket_watch}，target
      * 为受害者），受害者此后没有死亡，也没有被更早的计时员购买解除。只有购买者不属于杀手阵营时才会解除，所以持有内鬼时的购买不算。
+     * 解除只在对局进行中发生，所以距 {@code match_end} 不超过 {@link #ROUND_END_FADE_TICKS} tick 的购买（结束淡出期间）也不算。
      */
     static boolean timeCutLiftedCurse(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
         List<MatchEvent> events = timeline.events();
+        Optional<MatchEvent> end = timeline.matchEnd();
         for (MatchEvent cut : myTimeCuts(context)) {
             if (Factions.KILLER.equals(timeline.factionAfter(context.self(), cut))
-                    || context.hadTraitAround(TraitRules.IMPOSTOR, cut.tick())) {
+                    || context.hadTraitAround(TraitRules.IMPOSTOR, cut.tick())
+                    || end.isPresent() && end.get().tick() - cut.tick() <= ROUND_END_FADE_TICKS) {
                 continue;
             }
             int position = indexOf(events, cut);
@@ -488,10 +502,13 @@ final class NoellesCivilianRules {
 
     /**
      * 弹无虚发: as the Vigilante, at least 2 revolver shots ({@code item_use} {@code wathe:revolver}; a miss has no target)
-     * in one round, every one of them killing the player it hit as a 非好人 in the same tick ({@code wathe:gun_shot}).
-     * Needs the whole record. Niko's extra burst shots write no {@code item_use} and are not shots here.
+     * in one round, every one of them killing the player it hit as a 非好人 in the same tick ({@code wathe:gun_shot}),
+     * and every {@code wathe:gun_shot} kill I made as the Vigilante that round was of a 非好人. Needs the whole record.
+     * Niko's extra burst shots write no {@code item_use}, so they are not counted as shots, but a 好人 they kill still
+     * spoils it.
      * 以义警身份在一局内用左轮手枪开枪（{@code item_use} {@code wathe:revolver}；打空没有 target）至少 2 次，且每一枪都在同一
-     * tick 击杀了所命中的非好人（{@code wathe:gun_shot}）。需要完整记录。Niko 的追加连射不写 {@code item_use}，这里不算开枪。
+     * tick 击杀了所命中的非好人（{@code wathe:gun_shot}），并且本局我以义警身份的每一次 {@code wathe:gun_shot} 击杀都是非好人。
+     * 需要完整记录。Niko 的追加连射不写 {@code item_use}，所以不算作开枪，但它们打死好人仍会破坏成就。
      */
     static boolean everyRevolverShotKilledOtherSide(AchievementContext context) {
         if (!context.timeline().isComplete()) {
@@ -500,10 +517,13 @@ final class NoellesCivilianRules {
         List<MatchEvent> shots = Rules.myItemUses(context, REVOLVER).stream()
                 .filter(shot -> Rules.iWas(context, shot, VIGILANTE))
                 .toList();
+        List<MatchEvent> gunKills = Rules.myKills(context, kill -> Rules.reason(kill, GUN_SHOT)
+                && Rules.killedAs(context, kill, VIGILANTE));
         return shots.size() >= REVOLVER_SHOTS && shots.stream().allMatch(shot -> shot.target() != null
                 && context.kills().stream().anyMatch(kill -> kill.tick() == shot.tick()
                         && shot.target().equals(kill.target()) && Rules.reason(kill, GUN_SHOT)
-                        && Rules.victimNonCivilian(context, kill)));
+                        && Rules.victimNonCivilian(context, kill)))
+                && gunKills.stream().allMatch(kill -> Rules.victimNonCivilian(context, kill));
     }
 
     /**
