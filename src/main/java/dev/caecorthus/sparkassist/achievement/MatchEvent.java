@@ -43,6 +43,50 @@ public record MatchEvent(String type, int tick, UUID actor, UUID target, Map<Str
      * {@code actor} 本局获得的金币总数（{@code amount}），在对局结束时写入一次。
      */
     public static final String INCOME = "sparkfactionapi:income";
+    /**
+     * The first event of a match: {@code game_mode}, {@code map_effect}, {@code player_count}.
+     * 对局的第一条事件：{@code game_mode}、{@code map_effect}、{@code player_count}。
+     */
+    public static final String MATCH_START = "match_start";
+    /**
+     * The match is over: {@code win_status} (Wathe {@code WinStatus} name) and, for a neutral win, the
+     * {@code winners} list. Only {@link #PLAYER_RESULT}s follow it.
+     * 对局结束：{@code win_status}（Wathe 的 {@code WinStatus} 名称），中立获胜时还有 {@code winners} 列表。之后只有
+     * {@link #PLAYER_RESULT}。
+     */
+    public static final String MATCH_END = "match_end";
+    /**
+     * One participant's result after {@link #MATCH_END}: {@code player}, {@code end_status}, {@code is_winner}.
+     * {@link #MATCH_END} 之后单名参与者的结算：{@code player}、{@code end_status}、{@code is_winner}。
+     */
+    public static final String PLAYER_RESULT = "player_result";
+    /** {@code actor} is connected for this match (at the start, or on joining); {@code pos}. {@code actor} 在本局连接（开局时或中途加入）。 */
+    public static final String PLAYER_JOIN = "player_join";
+    /** {@code actor} disconnected; {@code pos}. {@code actor} 断开连接。 */
+    public static final String PLAYER_LEAVE = "player_leave";
+    /**
+     * {@code actor} took {@code item} from the platter at {@code pos.x}/{@code pos.y}/{@code pos.z}; {@code poisoner}
+     * when that platter was poisoned.
+     * {@code actor} 从位于 {@code pos.x}/{@code pos.y}/{@code pos.z} 的餐盘拿走 {@code item}；餐盘被下毒时带 {@code poisoner}。
+     */
+    public static final String PLATTER_TAKE = "platter_take";
+
+    /**
+     * {@link #GLOBAL_EVENT} id: {@code actor}'s death just before it was SparkTraits' Last Stand false death; they come
+     * back about 5 seconds later.
+     * {@link #GLOBAL_EVENT} 的 id：{@code actor} 紧挨着的上一次死亡是 SparkTraits 背水一战的假死，约 5 秒后复活。
+     */
+    public static final String LAST_STAND_TRIGGERED = "sparktraits:last_stand_triggered";
+    /**
+     * {@link #GLOBAL_EVENT} id: the Pathogen ({@code actor}) brought {@code target} back to life with the T-Virus.
+     * {@link #GLOBAL_EVENT} 的 id：病原体（{@code actor}）用 T 病毒复活了 {@code target}。
+     */
+    public static final String PATHOGEN_REVIVED = "sparkstrength:pathogen_revived";
+    /**
+     * The {@code death_reason} Wathe gives a living player who disconnects mid-round.
+     * Wathe 给对局中途断线的存活玩家记的 {@code death_reason}。
+     */
+    public static final String ESCAPED = "wathe:escaped";
 
     public MatchEvent {
         values = values == null ? Map.of() : Map.copyOf(values);
@@ -50,6 +94,19 @@ public record MatchEvent(String type, int tick, UUID actor, UUID target, Map<Str
 
     public boolean is(String eventType) {
         return eventType.equals(type);
+    }
+
+    /** Whether this is a {@link #GLOBAL_EVENT} with this id. 是否为 id 为此值的 {@link #GLOBAL_EVENT}。 */
+    public boolean isGlobal(String eventId) {
+        return is(GLOBAL_EVENT) && eventId.equals(values.get("event"));
+    }
+
+    /**
+     * Whether this is a death Wathe wrote because a living player disconnected ({@link #ESCAPED}).
+     * 是否为存活玩家断线时 Wathe 写下的死亡（{@link #ESCAPED}）。
+     */
+    public boolean isDisconnect() {
+        return is(DEATH) && ESCAPED.equals(values.get("death_reason"));
     }
 
     public boolean has(String key) {

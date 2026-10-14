@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.achievement;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ public final class RoundTracker {
     private final List<String> roleChain = new ArrayList<>();
     private final List<String> poisonOverlays = new ArrayList<>();
     private final Set<UUID> depressionAttackers = new LinkedHashSet<>();
+    private final List<RoundFacts.TickSpan> explosiveNearby = new ArrayList<>();
     private TraitTimeline.Builder traits = new TraitTimeline.Builder();
 
     private boolean active;
@@ -37,6 +39,8 @@ public final class RoundTracker {
     private String deathReason;
     private int tasksCompleted;
     private int gunDrops;
+    // Whether the last observation while alive saw an explosive nearby. 存活时上一次观察是否看到附近有爆炸物。
+    private boolean explosiveSeen;
 
     public RoundTracker() {
         reset();
@@ -76,6 +80,7 @@ public final class RoundTracker {
         players = Math.max(players, observation.totalPlayers());
 
         if (observation.selfDead()) {
+            explosiveSeen = false;
             if (deathTick < 0 && !roleChain.isEmpty()) {
                 deathTick = Math.max(0, now - startWorldTime);
                 deathWorldTime = now;
@@ -85,8 +90,28 @@ public final class RoundTracker {
         } else if (roleId != null) {
             int alive = observation.alivePlayers();
             fewestAliveWhileAlive = fewestAliveWhileAlive == 0 ? alive : Math.min(fewestAliveWhileAlive, alive);
-            traits.observe(Math.max(0, now - startWorldTime), observation.traitIds());
+            long tick = Math.max(0, now - startWorldTime);
+            traits.observe(tick, observation.traitIds());
+            observeExplosive(tick, observation.explosiveNearby());
+        } else {
+            explosiveSeen = false;
         }
+    }
+
+    /**
+     * Grows the current explosive span while observations in a row see one, or starts a new span.
+     * 连续的观察都看到爆炸物时延长当前时段，否则开始新的时段。
+     */
+    private void observeExplosive(long tick, boolean nearby) {
+        if (nearby) {
+            if (explosiveSeen && !explosiveNearby.isEmpty()) {
+                RoundFacts.TickSpan last = explosiveNearby.removeLast();
+                explosiveNearby.add(new RoundFacts.TickSpan(last.fromTick(), Math.max(last.toTick(), tick)));
+            } else {
+                explosiveNearby.add(new RoundFacts.TickSpan(tick, tick));
+            }
+        }
+        explosiveSeen = nearby;
     }
 
     /**
@@ -140,10 +165,11 @@ public final class RoundTracker {
     }
 
     /**
-     * Ends tracking. Returns the facts when the round counts, otherwise empty.
-     * 结束跟踪。这一局算数时返回收集到的事实，否则返回空。
+     * Ends tracking at the local wall-clock time {@code settledAt} (null when unknown). Returns the facts when the
+     * round counts, otherwise empty.
+     * 在本机时间 {@code settledAt}（未知时为 null）结束跟踪。这一局算数时返回收集到的事实，否则返回空。
      */
-    public Optional<RoundFacts> finish() {
+    public Optional<RoundFacts> finish(LocalDateTime settledAt) {
         Optional<RoundFacts> facts = active && roundEndSeen && !roleChain.isEmpty()
                 ? Optional.of(new RoundFacts(
                         self,
@@ -158,7 +184,9 @@ public final class RoundTracker {
                         tasksCompleted,
                         gunDrops,
                         poisonOverlays,
-                        depressionAttackers))
+                        depressionAttackers,
+                        explosiveNearby,
+                        settledAt))
                 : Optional.empty();
         reset();
         return facts;
@@ -173,6 +201,7 @@ public final class RoundTracker {
         roleChain.clear();
         poisonOverlays.clear();
         depressionAttackers.clear();
+        explosiveNearby.clear();
         traits = new TraitTimeline.Builder();
         active = false;
         roundEndSeen = false;
@@ -188,5 +217,6 @@ public final class RoundTracker {
         deathReason = null;
         tasksCompleted = 0;
         gunDrops = 0;
+        explosiveSeen = false;
     }
 }

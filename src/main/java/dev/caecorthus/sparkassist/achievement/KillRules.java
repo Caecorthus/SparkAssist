@@ -237,38 +237,14 @@ final class KillRules {
      */
     static boolean killHalfTheOtherSide(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
-        Set<UUID> players = new HashSet<>();
-        for (MatchEvent event : timeline.events()) {
-            if (event.is(MatchEvent.ROLE_ASSIGNED) && event.uuid("player.uuid") != null) {
-                players.add(event.uuid("player.uuid"));
-            }
-        }
-        long killersAtStart = players.stream()
-                .filter(player -> Factions.KILLER.equals(timeline.baseFaction(timeline.openingRole(player))))
-                .count();
-        if (killersAtStart < 4) {
+        if (timeline.openingFactionCount(Factions.KILLER) < 4) {
             return false;
         }
-        Set<UUID> otherSide = new HashSet<>();
-        for (UUID player : players) {
-            if (!player.equals(context.self()) && timeline.roleHistory(player).stream()
-                    .anyMatch(role -> Factions.isNonCivilian(timeline.baseFaction(role)))) {
-                otherSide.add(player);
-            }
-        }
-        for (MatchEvent death : timeline.deaths()) {
-            addIfNonCivilian(otherSide, death.target(), death.value("victim_faction"), context.self());
-            addIfNonCivilian(otherSide, death.actor(), death.value("killer_faction"), context.self());
-        }
+        Set<UUID> otherSide = new HashSet<>(timeline.playersEverIn(Factions::isNonCivilian));
+        otherSide.remove(context.self());
         long killed = Rules.myKills(context, kill -> Rules.victimNonCivilian(context, kill)).stream()
                 .map(MatchEvent::target).distinct().count();
         return !otherSide.isEmpty() && killed * 2 >= otherSide.size();
-    }
-
-    private static void addIfNonCivilian(Set<UUID> otherSide, UUID player, String faction, UUID self) {
-        if (player != null && !player.equals(self) && Factions.isNonCivilian(faction)) {
-            otherSide.add(player);
-        }
     }
 
     // ---- Killed-role collections 击杀身份收集 ----

@@ -21,10 +21,15 @@ import java.util.TreeSet;
  * Killed-role sets are kept per kill group (see {@link RoleGroups}): {@link #killedRoles} never shrinks, while
  * {@link #streakKilledRoles} is emptied by {@link #resetStreak}, e.g. when the player dies in that group.
  * <p>
+ * Streaks ({@link #winStreak}, {@link #survivedWinStreak}, {@link #consumedSinceDeath}) only move on a settled round:
+ * leaving mid-round never settles, so it neither counts nor breaks anything (an intended leniency).
+ * <p>
  * 与已解锁成就一起保存的账号通用对局统计。只记录玩家怎么玩过，不记录离某个成就还差多少：
  * 没有任何字段以成就命名，所以翻看存档也看不出还剩什么没发现。较新版本 SparkAssist 写入的字段会原样保留并写回，降级不会丢失。
  * 击杀身份集合按击杀分组保存（见 {@link RoleGroups}）：{@link #killedRoles} 只增不减，{@link #streakKilledRoles}
  * 会被 {@link #resetStreak} 清空，例如玩家在该分组中死亡时。
+ * 连续类统计（{@link #winStreak}、{@link #survivedWinStreak}、{@link #consumedSinceDeath}）只在一局结算时变化：
+ * 中途退出的对局不结算，既不计入也不打断任何连续记录（有意从宽）。
  */
 public final class LifetimeStats {
     private static final String ROUNDS = "rounds";
@@ -39,8 +44,26 @@ public final class LifetimeStats {
     private static final String KILLED_ROLES = "killedRoles";
     private static final String STREAK_KILLED_ROLES = "streakKilledRoles";
     private static final String SAVES = "saves";
+    private static final String DEATH_REASONS = "deathReasons";
+    private static final String WIN_STREAK = "winStreak";
+    private static final String SURVIVED_WIN_STREAKS = "survivedWinStreaks";
+    private static final String CONSUMED_SINCE_DEATH = "consumedSinceDeath";
+    private static final String CONSUMED_ITEMS = "consumedItems";
+    private static final String FOOD_WITH_TRAITS = "foodWithTraits";
+    private static final String FISH_CAUGHT = "fishCaught";
+    private static final String RIVAL_KILLS = "rivalKills";
+    private static final String RIVAL_KILL_TRAITS = "rivalKillTraits";
+    private static final String ROLES_TAKEN = "rolesTaken";
     private static final Set<String> KNOWN_FIELDS = Set.of(ROUNDS, WINS, DEATHS, TASKS, ROLE_ROUNDS, ROLE_WINS,
-            FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES, SAVES);
+            FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES, SAVES, DEATH_REASONS, WIN_STREAK,
+            SURVIVED_WIN_STREAKS, CONSUMED_SINCE_DEATH, CONSUMED_ITEMS, FOOD_WITH_TRAITS, FISH_CAUGHT, RIVAL_KILLS,
+            RIVAL_KILL_TRAITS, ROLES_TAKEN);
+
+    /**
+     * The {@link #survivedWinStreak} scope every settled round is in, whatever the role.
+     * 每一局已结算的对局都属于的 {@link #survivedWinStreak} 范围，与身份无关。
+     */
+    public static final String ALL_ROUNDS = "all";
 
     private int rounds;
     private int wins;
@@ -55,6 +78,17 @@ public final class LifetimeStats {
     private final Map<String, Integer> saves = new TreeMap<>();
     private final Map<String, Set<String>> killedRoles = new TreeMap<>();
     private final Map<String, Set<String>> streakKilledRoles = new TreeMap<>();
+    private final Set<String> deathReasons = new TreeSet<>();
+    private int winStreak;
+    private final Map<String, Integer> survivedWinStreaks = new TreeMap<>();
+    private final Map<String, Integer> consumedSinceDeath = new TreeMap<>();
+    private final Map<String, Integer> consumedItems = new TreeMap<>();
+    private final Map<String, Integer> foodWithTraits = new TreeMap<>();
+    private final Map<String, Integer> fishCaught = new TreeMap<>();
+    private final Map<String, Integer> rivalKills = new TreeMap<>();
+    private final Map<String, Set<String>> rivalKillTraits = new TreeMap<>();
+    // Role → causes; a role taken without a recorded cause has an empty set. 身份 → 原因；没有记录原因时为空集合。
+    private final Map<String, Set<String>> rolesTaken = new TreeMap<>();
     // Written by a newer SparkAssist; kept as is. 较新版本写入的字段，原样保留。
     private final Map<String, JsonElement> laterFields = new TreeMap<>();
 
@@ -119,6 +153,106 @@ public final class LifetimeStats {
     /** Empties {@code group}'s streak set. 清空 {@code group} 的连续击杀身份集合。 */
     public void resetStreak(String group) {
         streakKilledRoles.remove(group);
+    }
+
+    /**
+     * Adds the death reason (e.g. {@code wathe:knife_stab}) of one of the player's deaths; a disconnect
+     * ({@link MatchEvent#ESCAPED}) is not a way to die and is ignored.
+     * 记入玩家一次死亡的死因（例如 {@code wathe:knife_stab}）；断线（{@link MatchEvent#ESCAPED}）不算死法，忽略。
+     */
+    public void recordDeathReason(String reason) {
+        if (reason != null && !reason.isBlank() && !MatchEvent.ESCAPED.equals(reason)) {
+            deathReasons.add(reason);
+        }
+    }
+
+    /**
+     * Moves the win streaks on by one settled round. {@link #winStreak} grows on a win and drops to 0 otherwise. Each
+     * {@link #survivedWinStreak} scope the player was in this round ({@link #ALL_ROUNDS} always, plus {@code groups},
+     * e.g. the {@link RoleGroups} groups at the end of the round) grows on a win they survived and drops to 0
+     * otherwise; scopes they were not in stay as they are.
+     * 按一局已结算的对局推进连胜。{@link #winStreak} 获胜时加一，否则归零。玩家本局所在的每个 {@link #survivedWinStreak}
+     * 范围（总是包括 {@link #ALL_ROUNDS}，再加上 {@code groups}，例如本局结束时所在的 {@link RoleGroups} 分组）在存活获胜时加一，
+     * 否则归零；本局不在的范围保持不变。
+     */
+    public void recordWinStreaks(boolean won, boolean survived, Collection<String> groups) {
+        winStreak = won ? winStreak + 1 : 0;
+        Set<String> scopes = new LinkedHashSet<>();
+        scopes.add(ALL_ROUNDS);
+        if (groups != null) {
+            groups.stream().filter(group -> group != null && !group.isBlank()).forEach(scopes::add);
+        }
+        for (String scope : scopes) {
+            if (won && survived) {
+                survivedWinStreaks.merge(scope, 1, Integer::sum);
+            } else {
+                survivedWinStreaks.remove(scope);
+            }
+        }
+    }
+
+    /** Empties every {@link #consumedSinceDeath} count, e.g. on dying. 清空所有 {@link #consumedSinceDeath} 计数，例如死亡时。 */
+    public void resetConsumedSinceDeath() {
+        consumedSinceDeath.clear();
+    }
+
+    /**
+     * Counts {@code count} things of {@code kind} ({@code food}, {@code drink}) consumed since the last death.
+     * 记入自上次死亡以来 {@code count} 次 {@code kind}（{@code food}、{@code drink}）的食用。
+     */
+    public void addConsumedSinceDeath(String kind, int count) {
+        addCount(consumedSinceDeath, kind, count);
+    }
+
+    /** Counts {@code count} of {@code itemId} eaten or drunk. 记入 {@code count} 次食用 {@code itemId}。 */
+    public void recordConsumedItem(String itemId, int count) {
+        addCount(consumedItems, itemId, count);
+    }
+
+    /**
+     * Counts {@code count} food eaten while holding the owner-visible trait {@code traitId}.
+     * 记入 {@code count} 次在持有自身可见词条 {@code traitId} 时吃下的食物。
+     */
+    public void recordFoodWithTrait(String traitId, int count) {
+        addCount(foodWithTraits, traitId, count);
+    }
+
+    /**
+     * Counts {@code count} casts that landed {@code catchName} (SparkWitch's catch name, e.g. {@code SALMON},
+     * {@code SKUNK} for nothing).
+     * 记入 {@code count} 次钓到 {@code catchName}（SparkWitch 的渔获名，例如 {@code SALMON}，空军为 {@code SKUNK}）。
+     */
+    public void recordFishCaught(String catchName, int count) {
+        addCount(fishCaught, catchName, count);
+    }
+
+    /**
+     * Counts one kill of a player on another faction made as {@code roleId}, with the owner-visible traits held
+     * around it.
+     * 记入一次以 {@code roleId} 身份击杀其他阵营玩家，以及当时持有的自身可见词条。
+     */
+    public void recordRivalKill(String roleId, Collection<String> traitIds) {
+        if (roleId == null || roleId.isBlank()) {
+            return;
+        }
+        rivalKills.merge(roleId, 1, Integer::sum);
+        addRoles(rivalKillTraits, roleId, traitIds);
+    }
+
+    /**
+     * Notes that the player was turned into {@code roleId} mid-round, by {@code cause} (a role-change cause id such as
+     * {@code sparkwitch:bewitched_promotion}, or null when none was recorded).
+     * 记下玩家在对局中途变成了 {@code roleId}，原因是 {@code cause}（身份变化原因 id，例如
+     * {@code sparkwitch:bewitched_promotion}；没有记录原因时为 null）。
+     */
+    public void recordRoleTaken(String roleId, String cause) {
+        if (roleId == null || roleId.isBlank()) {
+            return;
+        }
+        Set<String> causes = rolesTaken.computeIfAbsent(roleId, key -> new TreeSet<>());
+        if (cause != null && !cause.isBlank()) {
+            causes.add(cause);
+        }
     }
 
     public int rounds() {
@@ -198,6 +332,105 @@ public final class LifetimeStats {
         return view(streakKilledRoles, group);
     }
 
+    /** Every way the player has died (death reason ids), sorted. 玩家死过的所有方式（死因 id），已排序。 */
+    public Set<String> deathReasons() {
+        return Collections.unmodifiableSet(deathReasons);
+    }
+
+    /** Settled rounds won in a row, alive or not. 连续获胜的已结算局数，不论存活。 */
+    public int winStreak() {
+        return winStreak;
+    }
+
+    /**
+     * Rounds in a row won and survived within {@code scope}: {@link #ALL_ROUNDS} or a {@link RoleGroups} group.
+     * 在 {@code scope}（{@link #ALL_ROUNDS} 或某个 {@link RoleGroups} 分组）内连续存活并获胜的局数。
+     */
+    public int survivedWinStreak(String scope) {
+        return survivedWinStreaks.getOrDefault(scope, 0);
+    }
+
+    public Map<String, Integer> survivedWinStreaks() {
+        return Collections.unmodifiableMap(survivedWinStreaks);
+    }
+
+    /**
+     * Things of {@code kind} ({@code food}, {@code drink}) consumed since the player last died, across rounds.
+     * 自玩家上次死亡以来（跨局）{@code kind}（{@code food}、{@code drink}）的食用次数。
+     */
+    public int consumedSinceDeath(String kind) {
+        return consumedSinceDeath.getOrDefault(kind, 0);
+    }
+
+    public Map<String, Integer> consumedSinceDeath() {
+        return Collections.unmodifiableMap(consumedSinceDeath);
+    }
+
+    /** Times {@code itemId} was eaten or drunk. 吃喝 {@code itemId} 的次数。 */
+    public int consumedItem(String itemId) {
+        return consumedItems.getOrDefault(itemId, 0);
+    }
+
+    /** Every item ever eaten or drunk, with its count. 吃喝过的所有物品及次数。 */
+    public Map<String, Integer> consumedItems() {
+        return Collections.unmodifiableMap(consumedItems);
+    }
+
+    /** Food eaten while holding {@code traitId}. 持有 {@code traitId} 时吃下的食物数。 */
+    public int foodWithTrait(String traitId) {
+        return foodWithTraits.getOrDefault(traitId, 0);
+    }
+
+    public Map<String, Integer> foodWithTraits() {
+        return Collections.unmodifiableMap(foodWithTraits);
+    }
+
+    /** Casts that landed {@code catchName}. 钓到 {@code catchName} 的次数。 */
+    public int fishCaught(String catchName) {
+        return fishCaught.getOrDefault(catchName, 0);
+    }
+
+    /** Every catch ever landed, with its count. 钓到过的所有渔获及次数。 */
+    public Map<String, Integer> fishCaught() {
+        return Collections.unmodifiableMap(fishCaught);
+    }
+
+    /** Kills of players on another faction made as {@code roleId}. 以 {@code roleId} 身份击杀其他阵营玩家的次数。 */
+    public int rivalKillsAs(String roleId) {
+        return rivalKills.getOrDefault(roleId, 0);
+    }
+
+    public Map<String, Integer> rivalKills() {
+        return Collections.unmodifiableMap(rivalKills);
+    }
+
+    /**
+     * Every owner-visible trait held around a kill of a player on another faction made as {@code roleId}, sorted.
+     * 以 {@code roleId} 身份击杀其他阵营玩家时持有过的所有自身可见词条，已排序。
+     */
+    public Set<String> rivalKillTraitsAs(String roleId) {
+        return view(rivalKillTraits, roleId);
+    }
+
+    public Map<String, Set<String>> rivalKillTraits() {
+        return views(rivalKillTraits);
+    }
+
+    /** Whether the player was ever turned into {@code roleId} mid-round. 玩家是否曾在对局中途变成 {@code roleId}。 */
+    public boolean tookRole(String roleId) {
+        return rolesTaken.containsKey(roleId);
+    }
+
+    /** The recorded causes of becoming {@code roleId} mid-round, sorted. 中途变成 {@code roleId} 的已记录原因，已排序。 */
+    public Set<String> roleTakenCauses(String roleId) {
+        return view(rolesTaken, roleId);
+    }
+
+    /** Every role taken mid-round, with its recorded causes. 中途变成过的所有身份及其已记录原因。 */
+    public Map<String, Set<String>> rolesTaken() {
+        return views(rolesTaken);
+    }
+
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty(ROUNDS, rounds);
@@ -212,6 +445,16 @@ public final class LifetimeStats {
         json.add(KILLED_ROLES, roleSets(killedRoles));
         json.add(STREAK_KILLED_ROLES, roleSets(streakKilledRoles));
         json.add(SAVES, counts(saves));
+        json.add(DEATH_REASONS, strings(deathReasons));
+        json.addProperty(WIN_STREAK, winStreak);
+        json.add(SURVIVED_WIN_STREAKS, counts(survivedWinStreaks));
+        json.add(CONSUMED_SINCE_DEATH, counts(consumedSinceDeath));
+        json.add(CONSUMED_ITEMS, counts(consumedItems));
+        json.add(FOOD_WITH_TRAITS, counts(foodWithTraits));
+        json.add(FISH_CAUGHT, counts(fishCaught));
+        json.add(RIVAL_KILLS, counts(rivalKills));
+        json.add(RIVAL_KILL_TRAITS, roleSets(rivalKillTraits));
+        json.add(ROLES_TAKEN, roleSets(rolesTaken, true));
         laterFields.forEach((key, value) -> json.add(key, value.deepCopy()));
         return json;
     }
@@ -237,6 +480,16 @@ public final class LifetimeStats {
         readRoleSets(json.get(KILLED_ROLES), stats.killedRoles);
         readRoleSets(json.get(STREAK_KILLED_ROLES), stats.streakKilledRoles);
         readCounts(json.get(SAVES), stats.saves);
+        readStrings(json.get(DEATH_REASONS), stats.deathReasons);
+        stats.winStreak = count(json.get(WIN_STREAK));
+        readCounts(json.get(SURVIVED_WIN_STREAKS), stats.survivedWinStreaks);
+        readCounts(json.get(CONSUMED_SINCE_DEATH), stats.consumedSinceDeath);
+        readCounts(json.get(CONSUMED_ITEMS), stats.consumedItems);
+        readCounts(json.get(FOOD_WITH_TRAITS), stats.foodWithTraits);
+        readCounts(json.get(FISH_CAUGHT), stats.fishCaught);
+        readCounts(json.get(RIVAL_KILLS), stats.rivalKills);
+        readRoleSets(json.get(RIVAL_KILL_TRAITS), stats.rivalKillTraits);
+        readRoleSets(json.get(ROLES_TAKEN), stats.rolesTaken, true);
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (!KNOWN_FIELDS.contains(entry.getKey())) {
                 stats.laterFields.put(entry.getKey(), entry.getValue().deepCopy());
@@ -261,19 +514,45 @@ public final class LifetimeStats {
         return set == null ? Set.of() : Collections.unmodifiableSet(set);
     }
 
+    private static Map<String, Set<String>> views(Map<String, Set<String>> sets) {
+        Map<String, Set<String>> views = new TreeMap<>();
+        sets.forEach((key, set) -> views.put(key, Collections.unmodifiableSet(set)));
+        return Collections.unmodifiableMap(views);
+    }
+
+    private static void addCount(Map<String, Integer> counts, String key, int count) {
+        if (key != null && !key.isBlank() && count > 0) {
+            counts.merge(key, count, Integer::sum);
+        }
+    }
+
     private static JsonObject roleSets(Map<String, Set<String>> sets) {
+        return roleSets(sets, false);
+    }
+
+    /** {@code keepEmpty}: write keys whose set is empty too. {@code keepEmpty}：集合为空的键也写入。 */
+    private static JsonObject roleSets(Map<String, Set<String>> sets, boolean keepEmpty) {
         JsonObject json = new JsonObject();
         sets.forEach((group, roles) -> {
-            if (!roles.isEmpty()) {
-                JsonArray array = new JsonArray();
-                roles.forEach(array::add);
-                json.add(group, array);
+            if (keepEmpty || !roles.isEmpty()) {
+                json.add(group, strings(roles));
             }
         });
         return json;
     }
 
+    private static JsonArray strings(Set<String> values) {
+        JsonArray array = new JsonArray();
+        values.forEach(array::add);
+        return array;
+    }
+
     private static void readRoleSets(JsonElement element, Map<String, Set<String>> into) {
+        readRoleSets(element, into, false);
+    }
+
+    /** {@code keepEmpty}: keep keys whose array is empty. {@code keepEmpty}：数组为空的键也保留。 */
+    private static void readRoleSets(JsonElement element, Map<String, Set<String>> into, boolean keepEmpty) {
         if (element == null || !element.isJsonObject()) {
             return;
         }
@@ -281,10 +560,21 @@ public final class LifetimeStats {
             if (!entry.getValue().isJsonArray()) {
                 continue;
             }
-            for (JsonElement role : entry.getValue().getAsJsonArray()) {
-                if (role.isJsonPrimitive() && role.getAsJsonPrimitive().isString() && !role.getAsString().isBlank()) {
-                    into.computeIfAbsent(entry.getKey(), key -> new TreeSet<>()).add(role.getAsString());
-                }
+            Set<String> roles = new TreeSet<>();
+            readStrings(entry.getValue(), roles);
+            if (keepEmpty || !roles.isEmpty()) {
+                into.computeIfAbsent(entry.getKey(), key -> new TreeSet<>()).addAll(roles);
+            }
+        }
+    }
+
+    private static void readStrings(JsonElement element, Set<String> into) {
+        if (element == null || !element.isJsonArray()) {
+            return;
+        }
+        for (JsonElement value : element.getAsJsonArray()) {
+            if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString() && !value.getAsString().isBlank()) {
+                into.add(value.getAsString());
             }
         }
     }
