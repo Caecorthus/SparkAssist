@@ -50,7 +50,8 @@ public final class AchievementGalaxyScreen extends Screen {
     private static final int BOTTOM = 32;
     private static final int TOOLTIP_WIDTH = 200;
     private static final int HINT_X = 6;
-    private static final double MIN_ZOOM = 0.35;
+    // Low enough for the whole galaxy to fit a 1280×720 window at its automatic GUI scale. 足以在自动界面缩放的 1280×720 窗口中装下整个银河。
+    private static final double MIN_ZOOM = 0.2;
     private static final double MAX_ZOOM = 2.5;
     private static final double ZOOM_STEP = 1.15;
     // Drawn far back so the tabs, button and tooltips always cover it. 画在很靠后的深度，标签页、按钮和提示框总能盖住它。
