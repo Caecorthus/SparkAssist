@@ -54,10 +54,11 @@ public final class LifetimeStats {
     private static final String RIVAL_KILLS = "rivalKills";
     private static final String RIVAL_KILL_TRAITS = "rivalKillTraits";
     private static final String ROLES_TAKEN = "rolesTaken";
+    private static final String HELD_ROLE_WINS = "heldRoleWins";
     private static final Set<String> KNOWN_FIELDS = Set.of(ROUNDS, WINS, DEATHS, TASKS, ROLE_ROUNDS, ROLE_WINS,
             FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES, SAVES, DEATH_REASONS, WIN_STREAK,
             SURVIVED_WIN_STREAKS, CONSUMED_SINCE_DEATH, CONSUMED_ITEMS, FOOD_WITH_TRAITS, FISH_CAUGHT, RIVAL_KILLS,
-            RIVAL_KILL_TRAITS, ROLES_TAKEN);
+            RIVAL_KILL_TRAITS, ROLES_TAKEN, HELD_ROLE_WINS);
 
     /**
      * The {@link #survivedWinStreak} scope every settled round is in, whatever the role.
@@ -89,14 +90,17 @@ public final class LifetimeStats {
     private final Map<String, Set<String>> rivalKillTraits = new TreeMap<>();
     // Role → causes; a role taken without a recorded cause has an empty set. 身份 → 原因；没有记录原因时为空集合。
     private final Map<String, Set<String>> rolesTaken = new TreeMap<>();
+    // Wins counted for every distinct role held in the won round, not just the last. 获胜那局担任过的每个不同身份各记一胜，不只是最后一个。
+    private final Map<String, Integer> heldRoleWins = new TreeMap<>();
     // Written by a newer SparkAssist; kept as is. 较新版本写入的字段，原样保留。
     private final Map<String, JsonElement> laterFields = new TreeMap<>();
 
     /**
      * Adds one settled round. Every distinct role the player held counts one round; a win counts for the last role
-     * only, since that is the role that won. A null faction is counted in the totals only.
-     * 记入一局已结算的对局。本局担任过的每个不同角色各记一局；胜场只记在最后一个角色上，因为获胜的是它。
-     * 阵营为 null 时只计入总数。
+     * only, since that is the role that won, and separately for every distinct role held ({@link #winsHolding}). A
+     * null faction is counted in the totals only.
+     * 记入一局已结算的对局。本局担任过的每个不同角色各记一局；胜场只记在最后一个角色上，因为获胜的是它，
+     * 另外也给担任过的每个不同角色各记一胜（{@link #winsHolding}）。阵营为 null 时只计入总数。
      */
     public void recordRound(List<String> roleChain, String factionId, boolean won, boolean died, int tasksCompleted) {
         rounds++;
@@ -110,6 +114,7 @@ public final class LifetimeStats {
         new LinkedHashSet<>(roleChain).forEach(roleId -> roleRounds.merge(roleId, 1, Integer::sum));
         if (won && !roleChain.isEmpty()) {
             roleWins.merge(roleChain.getLast(), 1, Integer::sum);
+            new LinkedHashSet<>(roleChain).forEach(roleId -> heldRoleWins.merge(roleId, 1, Integer::sum));
         }
         if (factionId != null) {
             factionRounds.merge(factionId, 1, Integer::sum);
@@ -277,6 +282,20 @@ public final class LifetimeStats {
 
     public int winsAs(String roleId) {
         return roleWins.getOrDefault(roleId, 0);
+    }
+
+    /**
+     * Rounds won while holding {@code roleId} at some point, whatever role the round ended with (e.g. a Grand Witch
+     * who became a Wraith and won as a Curser). Saves from before this count existed start from {@link #winsAs}.
+     * 在某一时刻担任过 {@code roleId} 且获胜的局数，不论一局结束时是什么身份（例如大魔女变成冤魂、再以诅咒者获胜）。
+     * 这项统计出现之前的存档以 {@link #winsAs} 为起点。
+     */
+    public int winsHolding(String roleId) {
+        return heldRoleWins.getOrDefault(roleId, 0);
+    }
+
+    public Map<String, Integer> heldRoleWins() {
+        return Collections.unmodifiableMap(heldRoleWins);
     }
 
     public int roundsFor(String factionId) {
@@ -455,6 +474,7 @@ public final class LifetimeStats {
         json.add(RIVAL_KILLS, counts(rivalKills));
         json.add(RIVAL_KILL_TRAITS, roleSets(rivalKillTraits));
         json.add(ROLES_TAKEN, roleSets(rolesTaken, true));
+        json.add(HELD_ROLE_WINS, counts(heldRoleWins));
         laterFields.forEach((key, value) -> json.add(key, value.deepCopy()));
         return json;
     }
@@ -490,6 +510,12 @@ public final class LifetimeStats {
         readCounts(json.get(RIVAL_KILLS), stats.rivalKills);
         readRoleSets(json.get(RIVAL_KILL_TRAITS), stats.rivalKillTraits);
         readRoleSets(json.get(ROLES_TAKEN), stats.rolesTaken, true);
+        if (json.has(HELD_ROLE_WINS)) {
+            readCounts(json.get(HELD_ROLE_WINS), stats.heldRoleWins);
+        } else {
+            // A save from before this count: start from the wins by final role. 这项统计之前的存档：以按最终身份的胜场为起点。
+            stats.heldRoleWins.putAll(stats.roleWins);
+        }
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (!KNOWN_FIELDS.contains(entry.getKey())) {
                 stats.laterFields.put(entry.getKey(), entry.getValue().deepCopy());

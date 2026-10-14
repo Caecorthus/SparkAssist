@@ -165,7 +165,7 @@ final class WitchRules {
                 .filter(purchase -> BLINDNESS_ENTRY.equals(purchase.value("entry_id"))
                         && GRAND_WITCH.equals(context.roleAt(purchase.actor(), purchase)))
                 .toList();
-        return context.kills().stream().anyMatch(kill -> ACCOMPLICES.contains(context.timeline().killerRole(kill))
+        return context.kills().stream().anyMatch(kill -> isAccomplice(context.timeline().killerRole(kill))
                 && outsideWitchFaction(context.timeline().victimFaction(kill))
                 && blindness.stream().anyMatch(cast -> kill.tick() >= cast.tick()
                         && kill.tick() <= cast.tick() + BLINDNESS_TICKS));
@@ -179,7 +179,7 @@ final class WitchRules {
     static boolean survivedTheGrandWitch(AchievementContext context) {
         MatchTimeline timeline = context.timeline();
         return timeline.isComplete() && witchFactionWon(context) && !RoundRules.died(context)
-                && ACCOMPLICES.contains(timeline.finalRole(context.self()))
+                && isAccomplice(timeline.finalRole(context.self()))
                 && timeline.realDeaths().stream().anyMatch(death -> !death.isDisconnect()
                         && !Objects.equals(context.self(), death.target())
                         && GRAND_WITCH.equals(timeline.victimRole(death)));
@@ -273,11 +273,9 @@ final class WitchRules {
     // ---- Witch wins 魔女的胜利 ----
 
     /**
-     * 帽子戏法: 3 wins as the Grand Witch. {@link LifetimeStats#winsAs} credits a win to the role a round ended with;
-     * this round also counts when I held the Grand Witch but ended as something else (a Wraith, then a Curser). Such
-     * rounds in the past are not remembered (approximation).
-     * 以大魔女身份获胜 3 次。{@link LifetimeStats#winsAs} 把胜场记在一局结束时的身份上；本局若我当过大魔女但最终是别的身份
-     * （冤魂，再到诅咒者）也计入。以前的这类对局无从记起（近似）。
+     * 帽子戏法: 3 wins as the Grand Witch, counting rounds where I held the Grand Witch but ended as something else (a
+     * Wraith, then a Curser) — {@link LifetimeStats#winsHolding}.
+     * 以大魔女身份获胜 3 次；当过大魔女但最终是别的身份（冤魂，再到诅咒者）的获胜局也算（{@link LifetimeStats#winsHolding}）。
      */
     static boolean grandWitchHatTrick(AchievementContext context) {
         return winsHolding(context, GRAND_WITCH) >= HAT_TRICK_WINS;
@@ -285,10 +283,10 @@ final class WitchRules {
 
     /**
      * 瓦尔普吉斯之夜: a win as each of the Grand Witch, the Murderous Witch and the Bewitched line (the Bewitched or any
-     * role its promotion gives: the Accomplice and its variants are never drawn otherwise). Past wins count by the role
-     * a round ended with ({@link LifetimeStats#winsAs}); this round counts by any role I held.
-     * 分别以大魔女、杀意魔女和魔化使一系（魔化使或其晋升得到的任何身份：共犯及其变体不会以其他方式出现）各获胜一次。
-     * 以前的胜场按一局结束时的身份计（{@link LifetimeStats#winsAs}）；本局按我担任过的任何身份计。
+     * role its promotion gives: the Accomplice and its variants are never drawn otherwise), each counted by any role I
+     * held in the won round ({@link LifetimeStats#winsHolding}).
+     * 分别以大魔女、杀意魔女和魔化使一系（魔化使或其晋升得到的任何身份：共犯及其变体不会以其他方式出现）各获胜一次，
+     * 按获胜那局担任过的任何身份计（{@link LifetimeStats#winsHolding}）。
      */
     static boolean walpurgisNight(AchievementContext context) {
         return winsHolding(context, GRAND_WITCH) >= 1 && winsHolding(context, MURDEROUS_WITCH) >= 1
@@ -370,19 +368,18 @@ final class WitchRules {
                 || Factions.WITCH.equals(context.faction()));
     }
 
+    /** Whether {@code roleId} is the Accomplice or one of its variants; false for null. 是否为共犯或其变体；null 为否。 */
+    private static boolean isAccomplice(String roleId) {
+        return roleId != null && ACCOMPLICES.contains(roleId);
+    }
+
     private static boolean isWitchLeader(String roleId) {
         return GRAND_WITCH.equals(roleId) || MURDEROUS_WITCH.equals(roleId);
     }
 
-    /**
-     * Wins as {@code roleId}, this round counted: the lifetime wins credited to it as the role a round ended with,
-     * plus this round if I won holding it without ending as it.
-     * 以 {@code roleId} 获胜的次数（已计入本局）：按一局结束时身份累计的胜场，加上本局——若我获胜时担任过它但最终不是它。
-     */
+    /** Rounds won holding {@code roleId} at some point, this round counted. 担任过 {@code roleId} 且获胜的局数（已计入本局）。 */
     private static int winsHolding(AchievementContext context, String roleId) {
-        List<String> chain = context.facts().roleChain();
-        boolean heldButNotLast = context.won() && chain.contains(roleId) && !roleId.equals(context.role());
-        return context.stats().winsAs(roleId) + (heldButNotLast ? 1 : 0);
+        return context.stats().winsHolding(roleId);
     }
 
     /** My {@code role_changed} events (by {@code player}, else the actor). 我的 {@code role_changed} 事件。 */
