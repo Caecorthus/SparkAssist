@@ -4,54 +4,60 @@ import static java.util.Map.entry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * The achievement page drawn as a galaxy. Every achievement has a fixed star: level 1 on the outermost ring, each
- * higher level one ring further in, and {@link #CENTER} alone in the middle. Within a ring the stars are grouped by
- * theme into six {@link Arm}s, and the rings twist like a spiral galaxy.
+ * The achievement page drawn as a galaxy. Every achievement has a fixed star and {@link #CENTER} sits alone in the
+ * middle. The other stars are grouped by theme into six {@link Arm}s: each arm owns a slice of the disc, sized by how
+ * many stars it holds and twisted like a spiral galaxy, with a dark lane between neighbouring arms. Inside its slice a
+ * star settles near the stars it links with, whatever its level.
  * <p>
  * Each achievement links to one to three related achievements of the same or a higher level. The page shows every
  * earned achievement and every achievement an earned one links to, the latter with its condition but not its title;
  * the rest stays hidden. The middle star is earned by earning all the others and shows only once earned. Links decide only what is
  * shown: any achievement can be earned at any time.
  * <p>
- * 以银河绘制的成就页。每个成就都有固定的位置：1 级在最外圈，等级每高一级就往里一圈，{@link #CENTER} 独自位于正中。
- * 同一圈里的成就按主题分成六条 {@link Arm}，各圈像旋涡星系一样扭转。
+ * 以银河绘制的成就页。每个成就都有固定的位置，{@link #CENTER} 独自位于正中。其余成就按主题分成六条 {@link Arm}：
+ * 每条旋臂占圆盘的一个扇区，大小取决于它有多少成就，并像旋涡星系一样扭转，相邻旋臂之间隔着一道暗带。
+ * 在扇区内，成就不论等级，都落在与之相连的成就附近。
  * 每个成就连向一到三个同级或更高级的相关成就。成就页显示所有已达成的成就，以及已达成成就连向的成就（只显示条件，不显示标题）；
  * 其余的保持隐藏。正中的成就要达成其他所有成就才能获得，获得后才会出现。连线只决定显示什么：任何成就随时都能达成。
  */
 public final class AchievementGalaxy {
     public static final String CENTER = "tiny_victory";
 
-    // Ring radius per level in GUI pixels (index = level), and the lanes each ring is split into: the stars of a ring
-    // take its lanes in turn, LANE pixels apart, so a crowded ring holds twice as many. Stars are 26 px wide and kept
-    // at least GAP pixels apart; LANE must stay above GAP * √3 / 2 for two lanes to double a ring.
-    // 每个等级的圈半径，单位为 GUI 像素（下标即等级），以及每圈分成几道：同一圈的成就依次轮流占用各道，道与道相距 LANE 像素，
-    // 因此拥挤的圈能放下两倍的成就。成就宽 26 像素，中心至少相距 GAP 像素；LANE 必须大于 GAP × √3 / 2，两道才能让一圈容量翻倍。
-    private static final double[] RING = {0, 400, 348, 296, 258, 220, 0};
-    private static final int[] LANES = {1, 1, 2, 1, 1, 1, 1};
-    private static final double LANE = 28;
-    private static final double GAP = 31;
-    // Extra turn, in radians, of a ring at the very middle against the outermost one. 正中处的圈相对最外圈多转的角度（弧度）。
-    private static final double TWIST = 1.5;
-    // Rounds of reordering each arm toward the stars it links with, then at most this many rounds of swaps.
-    // 让每条旋臂内的成就靠近与之相连的成就的排序轮数，以及之后两两交换的最多轮数。
-    private static final int SORT_ROUNDS = 20;
-    private static final int UNTANGLE_ROUNDS = 30;
-    // Far more than all the links together are long. 远大于所有连线的总长。
-    private static final double CROSSING_COST = 1_000_000;
+    // Stars are 26 px wide and kept at least GAP pixels apart. Linked stars of one arm are drawn toward LINK pixels
+    // apart, linked stars of two arms toward CROSS_LINK. Each star is given about ROOM more pixels around it and the
+    // stars fill PACKING of the disc, which sets the galaxy's size; none comes closer to the middle than HOLE + GAP / 2,
+    // leaving room for the middle star and its halo.
+    // 成就宽 26 像素，中心至少相距 GAP 像素。同一旋臂里相连的成就趋向相距 LINK 像素，不同旋臂之间相连的趋向相距 CROSS_LINK。
+    // 每个成就周围再多留约 ROOM 像素，成就占满圆盘的 PACKING，由此决定银河的大小；离正中都不近于 HOLE + GAP / 2，
+    // 给正中的成就和它的光环留出位置。
+    private static final double GAP = 34;
+    private static final double LINK = 50;
+    private static final double CROSS_LINK = 80;
+    private static final double ROOM = 14;
+    private static final double PACKING = 0.78;
+    private static final double HOLE = 62;
+    // The dark lane between two arms, and the extra turn of an arm at the middle against the rim, both in radians.
+    // 相邻旋臂之间暗带的宽度，以及旋臂在正中处相对外缘多转的角度，单位均为弧度。
+    private static final double LANE = Math.toRadians(7);
+    private static final double TWIST = 1.1;
+    // Rounds of settling the stars along their links (pushing apart the ones too close every SPREAD_EVERY rounds),
+    // then at most this many rounds of pushing apart.
+    // 让成就沿连线就位的轮数（每 SPREAD_EVERY 轮推开一次太近的成就），以及之后最多推开的轮数。
+    private static final int SETTLE_ROUNDS = 500;
+    private static final int SPREAD_EVERY = 5;
+    private static final int SPREAD_ROUNDS = 400;
 
     /** Themes, in their order around the galaxy. 主题，按其在银河中的环绕顺序。 */
     public enum Arm {
@@ -321,7 +327,8 @@ public final class AchievementGalaxy {
     private static final Map<String, Arm> ARMS = arms();
     private static final Map<String, List<String>> LINKS = links();
     private static final Map<String, Star> STARS = layout(AchievementCatalog.all());
-    private static final double RADIUS = RING[1] + (LANES[1] - 1) * LANE / 2;
+    private static final double RADIUS = STARS.values().stream()
+            .mapToDouble(star -> Math.hypot(star.x(), star.y())).max().orElse(0);
 
     private AchievementGalaxy() {
     }
@@ -339,8 +346,9 @@ public final class AchievementGalaxy {
 
     /**
      * What the page shows: earned stars, stars shown but not yet earned, and the links between shown stars that touch
-     * an earned one.
+     * an earned one. Links into the middle are never drawn: the middle star shines alone once everything is earned.
      * 成就页显示的内容：已达成的、已显示但尚未达成的，以及显示中的成就之间、至少一端已达成的连线。
+     * 通向正中的连线从不画出：达成全部成就后，正中的成就独自亮起。
      */
     public record View(List<Star> earned, List<Star> shown, List<Link> links) {
         public boolean isEmpty() {
@@ -365,14 +373,6 @@ public final class AchievementGalaxy {
     /** The farthest any star's middle sits from the galaxy's middle. 任一成就中心到银河中心的最远距离。 */
     public static double radius() {
         return RADIUS;
-    }
-
-    /** The radius of a level's ring, between its lanes if it has several. 某等级所在圈的半径，分道时取各道正中。 */
-    public static double ring(int level) {
-        if (level < Achievement.MIN_LEVEL || level > Achievement.MAX_LEVEL) {
-            throw new IllegalArgumentException("level " + level);
-        }
-        return RING[level];
     }
 
     /** The page for this account. 该账号的成就页。 */
@@ -402,6 +402,9 @@ public final class AchievementGalaxy {
             }
             (unlocked.test(id) ? earned : notYet).add(STARS.get(id));
             for (String target : links(id)) {
+                if (target.equals(CENTER)) {
+                    continue;
+                }
                 boolean fromLit = unlocked.test(id);
                 boolean toLit = unlocked.test(target);
                 if (shown.contains(target) && (fromLit || toLit)) {
@@ -413,286 +416,200 @@ public final class AchievementGalaxy {
     }
 
     /**
-     * Lays the stars out. Each arm owns the same slice of every ring, wide enough for the ring where the arm is most
-     * crowded, so an arm runs straight from the rim to the middle before the twist turns it into a spiral. Inside each
-     * slice the stars are first sorted toward the stars they link with, then swapped pairwise while that removes link
-     * crossings or shortens the links.
-     * 排布成就。每条旋臂在每一圈上占同样的扇区，宽度足以容纳该旋臂最拥挤的那一圈，因此扭转之前每条旋臂都从外缘径直通向中心，
-     * 扭转后成为螺旋。每个扇区内先把成就挪向与之相连的成就，再两两交换，只要能减少连线交叉或缩短连线就保留。
+     * Lays the stars out: each arm's slice of the disc is sized by its share of the stars and twisted toward the middle;
+     * the stars settle by stress majorization, each pulled toward the distance the links put it from every other star,
+     * kept inside its slice, then pushed apart until no two are closer than {@link #GAP}. Every star starts from a spot
+     * seeded by its own id, nearer the middle the higher its level, so the same catalog always gives the same galaxy.
+     * 排布成就：每条旋臂在圆盘上的扇区按其成就数占比分配，并朝正中扭转；成就按应力优化就位，即每个成就都被拉向连线所定的、
+     * 与其他每个成就之间的距离，并保持在自己的扇区内，最后互相推开，直到任意两个都不近于 {@link #GAP}。
+     * 每个成就的起点由它自己的 id 决定，等级越高越靠近正中，因此同样的目录总会排出同样的银河。
      */
-    private static Map<String, Star> layout(List<Achievement> unsorted) {
-        // Worked in id order, so moving an entry within the catalog leaves the galaxy as it is.
-        // 按 id 顺序处理，因此在目录里挪动条目不会改变银河。
+    static Map<String, Star> layout(List<Achievement> unsorted) {
         List<Achievement> catalog = unsorted.stream().sorted(Comparator.comparing(Achievement::id)).toList();
-        Map<String, Achievement> byId = new HashMap<>();
-        catalog.forEach(achievement -> byId.put(achievement.id(), achievement));
-        // Links between stars on the rings; links into the middle are left out, as the middle is not placed yet.
-        // 环上成就之间的连线；指向正中的连线不计，因为正中还没摆放。
-        List<String[]> segments = new ArrayList<>();
-        Map<String, List<String>> neighbours = new HashMap<>();
-        for (Achievement achievement : catalog) {
-            for (String to : links(achievement.id())) {
-                if (!to.equals(CENTER)) {
-                    segments.add(new String[] {achievement.id(), to});
-                    neighbours.computeIfAbsent(achievement.id(), id -> new ArrayList<>()).add(to);
-                    neighbours.computeIfAbsent(to, id -> new ArrayList<>()).add(achievement.id());
-                }
-            }
-        }
-
-        Map<Arm, Double> sliceStart = new EnumMap<>(Arm.class);
-        Map<Arm, Double> sliceWidth = new EnumMap<>(Arm.class);
-        Map<Arm, Double> crowding = new EnumMap<>(Arm.class);
-        for (Arm arm : Arm.values()) {
-            double most = 0;
-            for (int level = Achievement.MIN_LEVEL; level < Achievement.MAX_LEVEL; level++) {
-                int ringLevel = level;
-                long members = catalog.stream()
-                        .filter(achievement -> achievement.level() == ringLevel && armOf(achievement.id()) == arm)
-                        .count();
-                most = Math.max(most, members / capacity(level));
-            }
-            crowding.put(arm, most);
-        }
-        double crowded = crowding.values().stream().mapToDouble(Double::doubleValue).sum();
-        double start = 0;
-        for (Arm arm : Arm.values()) {
-            sliceStart.put(arm, start);
-            sliceWidth.put(arm, crowding.get(arm) / crowded * 2 * Math.PI);
-            start += sliceWidth.get(arm);
-        }
-
-        Map<Integer, List<String>> rings = new LinkedHashMap<>();
-        for (int level = Achievement.MIN_LEVEL; level < Achievement.MAX_LEVEL; level++) {
-            int ringLevel = level;
-            rings.put(level, new ArrayList<>(catalog.stream()
-                    .filter(achievement -> achievement.level() == ringLevel)
-                    .sorted(Comparator.comparing((Achievement achievement) -> armOf(achievement.id())))
-                    .map(Achievement::id)
-                    .toList()));
-        }
-        Map<String, Double> angles = new HashMap<>();
-        rings.values().forEach(ring -> spread(ring, angles, sliceStart, sliceWidth));
-        for (int round = 0; round < SORT_ROUNDS; round++) {
-            for (List<String> ring : rings.values()) {
-                List<String> sorted = new ArrayList<>();
-                for (Arm arm : Arm.values()) {
-                    double middle = sliceStart.get(arm) + sliceWidth.get(arm) / 2;
-                    ring.stream().filter(id -> armOf(id) == arm)
-                            .sorted(Comparator.comparingDouble(id -> wrap(pull(id, neighbours, angles) - middle)))
-                            .forEach(sorted::add);
-                }
-                ring.clear();
-                ring.addAll(sorted);
-                spread(ring, angles, sliceStart, sliceWidth);
-            }
-        }
-
-        Untangler untangler = new Untangler(place(rings, angles, byId), segments);
-        untangler.run(rings);
-        Map<String, Star> placed = untangler.stars();
+        Map<String, Star> placed = new HashMap<>();
         catalog.stream().filter(achievement -> achievement.level() == Achievement.MAX_LEVEL)
                 .forEach(achievement -> placed.put(achievement.id(), new Star(achievement, 0, 0)));
+        List<Achievement> stars = catalog.stream().filter(achievement -> achievement.level() != Achievement.MAX_LEVEL)
+                .toList();
+        Layout layout = new Layout(stars);
+        layout.settle();
+        for (int i = 0; i < stars.size(); i++) {
+            placed.put(stars.get(i).id(), new Star(stars.get(i), layout.x[i], layout.y[i]));
+        }
         return Map.copyOf(placed);
     }
 
-    /**
-     * About how many stars fit on a level's ring: its innermost lane's length over {@link #GAP}, once per lane.
-     * 某等级的圈大约能放下多少个成就：最内道的周长除以 {@link #GAP}，每道各算一次。
-     */
-    private static double capacity(int level) {
-        double innermost = RING[level] - (LANES[level] - 1) * LANE / 2;
-        return 2 * Math.PI * innermost / GAP * LANES[level];
-    }
-
-    /** Spreads each arm's stars evenly over its slice of the ring. 把每条旋臂的成就均匀铺满它在这一圈上的扇区。 */
-    private static void spread(List<String> ring, Map<String, Double> angles, Map<Arm, Double> sliceStart,
-                               Map<Arm, Double> sliceWidth) {
-        for (Arm arm : Arm.values()) {
-            List<String> group = ring.stream().filter(id -> armOf(id) == arm).toList();
-            for (int i = 0; i < group.size(); i++) {
-                angles.put(group.get(i), sliceStart.get(arm) + (i + 0.5) / group.size() * sliceWidth.get(arm));
-            }
-        }
-    }
-
-    /**
-     * The stars of rings 1–5 at their angles, each ring turned by its twist; the stars of a ring take its lanes in turn.
-     * 1–5 圈的成就按各自角度就位，每圈按扭转角度转动；同一圈的成就依次轮流占用各道。
-     */
-    private static Map<String, Star> place(Map<Integer, List<String>> rings, Map<String, Double> angles,
-                                           Map<String, Achievement> byId) {
-        Map<String, Star> stars = new HashMap<>();
-        rings.forEach((level, ring) -> {
-            double twist = TWIST * (1 - RING[level] / RING[Achievement.MIN_LEVEL]);
-            for (int i = 0; i < ring.size(); i++) {
-                String id = ring.get(i);
-                double radius = RING[level] + (i % LANES[level] - (LANES[level] - 1) / 2.0) * LANE;
-                double angle = angles.get(id) - Math.PI / 2 + twist;
-                stars.put(id, new Star(byId.get(id), radius * Math.cos(angle), radius * Math.sin(angle)));
-            }
-        });
-        return stars;
-    }
-
-    /**
-     * Swaps stars of the same arm and ring while that makes the links less tangled: each crossing outweighs any amount
-     * of extra length. Two such stars trade places exactly, so a swap is judged by the links touching them alone.
-     * 交换同一圈、同一旋臂的成就，只要能让连线更不乱就保留：一处交叉比任何长度差都重要。
-     * 这样的两个成就恰好互换位置，因此只需看与它们相连的连线就能判断一次交换的好坏。
-     */
-    private static final class Untangler {
-        private final Map<String, Integer> index = new HashMap<>();
-        private final List<Achievement> achievements = new ArrayList<>();
+    private static final class Layout {
+        private final int count;
+        private final int[] arm;
         private final double[] x;
         private final double[] y;
-        private final int[][] segments;
-        private final int[][] touching;
-        private final boolean[] moving;
+        // The distance the links put between two stars, and how hard that pair pulls toward it.
+        // 连线决定的两个成就之间的距离，以及这一对向该距离靠拢的力度。
+        private final double[][] target;
+        private final double[][] weight;
+        private final double[] sliceMiddle = new double[Arm.values().length];
+        private final double[] sliceWidth = new double[Arm.values().length];
+        private final double rim;
 
-        Untangler(Map<String, Star> stars, List<String[]> links) {
-            stars.keySet().stream().sorted().forEach(id -> {
-                index.put(id, achievements.size());
-                achievements.add(stars.get(id).achievement());
-            });
-            x = new double[achievements.size()];
-            y = new double[achievements.size()];
-            stars.forEach((id, star) -> {
-                x[index.get(id)] = star.x();
-                y[index.get(id)] = star.y();
-            });
-            segments = new int[links.size()][];
-            List<List<Integer>> touches = new ArrayList<>();
-            achievements.forEach(achievement -> touches.add(new ArrayList<>()));
-            for (int s = 0; s < links.size(); s++) {
-                segments[s] = new int[] {index.get(links.get(s)[0]), index.get(links.get(s)[1])};
-                touches.get(segments[s][0]).add(s);
-                touches.get(segments[s][1]).add(s);
+        Layout(List<Achievement> stars) {
+            count = stars.size();
+            arm = new int[count];
+            x = new double[count];
+            y = new double[count];
+            Map<String, Integer> index = new HashMap<>();
+            for (int i = 0; i < count; i++) {
+                index.put(stars.get(i).id(), i);
+                arm[i] = armOf(stars.get(i).id()).ordinal();
             }
-            touching = touches.stream().map(list -> list.stream().mapToInt(Integer::intValue).toArray())
-                    .toArray(int[][]::new);
-            moving = new boolean[segments.length];
-        }
 
-        /**
-         * Swaps until no swap helps or the rounds run out. After the first round only pairs with a star that moved, or
-         * links to one that moved, in the round before are tried again; the rest found nothing better last time.
-         * 交换到再无改进或轮数用尽。第一轮之后，只重试含有上一轮移动过、或与移动过的成就相连的成就的组合；其余组合上一轮已经找不到更好的位置。
-         */
-        void run(Map<Integer, List<String>> rings) {
-            boolean[] restless = new boolean[achievements.size()];
-            Arrays.fill(restless, true);
-            boolean improved = true;
-            for (int round = 0; improved && round < UNTANGLE_ROUNDS; round++) {
-                improved = false;
-                boolean[] moved = new boolean[achievements.size()];
-                for (List<String> ring : rings.values()) {
-                    for (int i = 0; i < ring.size(); i++) {
-                        for (int j = i + 1; j < ring.size(); j++) {
-                            int p = index.get(ring.get(i));
-                            int q = index.get(ring.get(j));
-                            if (armOf(ring.get(i)) == armOf(ring.get(j)) && (restless[p] || restless[q])
-                                    && trySwap(p, q)) {
-                                Collections.swap(ring, i, j);
-                                stir(moved, p);
-                                stir(moved, q);
-                                improved = true;
-                            }
+            int[] members = new int[Arm.values().length];
+            for (int i = 0; i < count; i++) {
+                members[arm[i]]++;
+            }
+            double open = 2 * Math.PI - Arm.values().length * LANE;
+            double start = -Math.PI / 2;
+            for (int k = 0; k < members.length; k++) {
+                sliceWidth[k] = open * members[k] / Math.max(count, 1);
+                sliceMiddle[k] = start + sliceWidth[k] / 2;
+                start += sliceWidth[k] + LANE;
+            }
+            rim = Math.sqrt(count * (GAP + ROOM) * (GAP + ROOM) / PACKING / Math.PI + HOLE * HOLE);
+
+            target = new double[count][count];
+            for (double[] row : target) {
+                Arrays.fill(row, Double.POSITIVE_INFINITY);
+            }
+            for (int i = 0; i < count; i++) {
+                target[i][i] = 0;
+                for (String to : links(stars.get(i).id())) {
+                    Integer j = index.get(to);
+                    if (j != null && j != i) {
+                        double length = arm[i] == arm[j] ? LINK : CROSS_LINK;
+                        target[i][j] = Math.min(target[i][j], length);
+                        target[j][i] = target[i][j];
+                    }
+                }
+            }
+            // Shortest paths through the links; stars far apart along them, or not joined at all, are only asked to
+            // keep most of the disc between them. 沿连线的最短路径；沿连线相距很远或根本不相连的成就，只要求隔开大半个圆盘。
+            for (int k = 0; k < count; k++) {
+                for (int i = 0; i < count; i++) {
+                    for (int j = 0; j < count; j++) {
+                        if (target[i][k] + target[k][j] < target[i][j]) {
+                            target[i][j] = target[i][k] + target[k][j];
                         }
                     }
                 }
-                restless = moved;
             }
-        }
-
-        /** Marks a star and the stars it links with. 标记一个成就及与之相连的成就。 */
-        private void stir(boolean[] marks, int star) {
-            marks[star] = true;
-            for (int s : touching[star]) {
-                marks[segments[s][0]] = true;
-                marks[segments[s][1]] = true;
-            }
-        }
-
-        Map<String, Star> stars() {
-            Map<String, Star> stars = new HashMap<>();
-            index.forEach((id, i) -> stars.put(id, new Star(achievements.get(i), x[i], y[i])));
-            return stars;
-        }
-
-        private boolean trySwap(int p, int q) {
-            int[] moved = new int[touching[p].length + touching[q].length];
-            int count = 0;
-            for (int[] links : new int[][] {touching[p], touching[q]}) {
-                for (int s : links) {
-                    if (!moving[s]) {
-                        moving[s] = true;
-                        moved[count++] = s;
-                    }
+            weight = new double[count][count];
+            for (int i = 0; i < count; i++) {
+                for (int j = 0; j < count; j++) {
+                    target[i][j] = Math.min(target[i][j], rim * 0.9);
+                    weight[i][j] = i == j ? 0 : 1 / (target[i][j] * target[i][j]);
                 }
             }
-            double before = tangle(moved, count);
-            swap(p, q);
-            boolean better = tangle(moved, count) < before - 1e-9;
-            if (!better) {
-                swap(p, q);
-            }
+
             for (int i = 0; i < count; i++) {
-                moving[moved[i]] = false;
+                Random random = new Random(stars.get(i).id().hashCode());
+                double depth = (double) (stars.get(i).level() - Achievement.MIN_LEVEL) / (Achievement.MAX_LEVEL - 1);
+                double radius = HOLE + (rim - HOLE) * (1 - depth) * (0.6 + 0.4 * random.nextDouble());
+                double angle = middle(arm[i], radius) + (random.nextDouble() - 0.5) * sliceWidth[arm[i]] * 0.8;
+                x[i] = radius * Math.cos(angle);
+                y[i] = radius * Math.sin(angle);
+                keepInSlice(i);
             }
-            return better;
         }
 
-        private void swap(int p, int q) {
-            double px = x[p];
-            double py = y[p];
-            x[p] = x[q];
-            y[p] = y[q];
-            x[q] = px;
-            y[q] = py;
-        }
-
-        /** How tangled the moving links are with every link. 移动中的连线与所有连线的纠缠程度。 */
-        private double tangle(int[] moved, int count) {
-            double cost = 0;
-            for (int i = 0; i < count; i++) {
-                int[] a = segments[moved[i]];
-                cost += Math.hypot(x[a[0]] - x[a[1]], y[a[0]] - y[a[1]]);
-                for (int t = 0; t < segments.length; t++) {
-                    // A crossing between two moving links is met from both of them. 两条移动中的连线之间的交叉会从两边各遇到一次。
-                    if (t != moved[i] && crosses(a, segments[t])) {
-                        cost += moving[t] ? CROSSING_COST / 2 : CROSSING_COST;
+        void settle() {
+            for (int round = 0; round < SETTLE_ROUNDS; round++) {
+                for (int i = 0; i < count; i++) {
+                    double sumX = 0;
+                    double sumY = 0;
+                    double sumWeight = 0;
+                    for (int j = 0; j < count; j++) {
+                        if (j == i) {
+                            continue;
+                        }
+                        double dx = x[i] - x[j];
+                        double dy = y[i] - y[j];
+                        double distance = Math.sqrt(dx * dx + dy * dy);
+                        double reach = distance < 1e-9 ? 0 : target[i][j] / distance;
+                        sumX += weight[i][j] * (x[j] + reach * dx);
+                        sumY += weight[i][j] * (y[j] + reach * dy);
+                        sumWeight += weight[i][j];
                     }
+                    if (sumWeight > 0) {
+                        x[i] = sumX / sumWeight;
+                        y[i] = sumY / sumWeight;
+                    }
+                    keepInSlice(i);
+                }
+                if (round % SPREAD_EVERY == SPREAD_EVERY - 1) {
+                    spread(3);
                 }
             }
-            return cost;
+            spread(SPREAD_ROUNDS);
         }
 
-        private boolean crosses(int[] a, int[] b) {
-            if (a[0] == b[0] || a[0] == b[1] || a[1] == b[0] || a[1] == b[1]) {
-                return false;
+        /** Pushes apart every two stars closer than {@link #GAP}. 推开所有相距小于 {@link #GAP} 的两个成就。 */
+        private void spread(int rounds) {
+            for (int round = 0; round < rounds; round++) {
+                double[] pushX = new double[count];
+                double[] pushY = new double[count];
+                boolean crowded = false;
+                for (int i = 0; i < count; i++) {
+                    for (int j = i + 1; j < count; j++) {
+                        double dx = x[i] - x[j];
+                        double dy = y[i] - y[j];
+                        double distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance >= GAP - 0.05) {
+                            continue;
+                        }
+                        crowded = true;
+                        if (distance < 1e-9) {
+                            // Stacked stars part along a direction fixed by the pair. 重叠的成就沿由这一对决定的方向分开。
+                            double angle = i * 2.399 + j;
+                            dx = Math.cos(angle);
+                            dy = Math.sin(angle);
+                            distance = 1;
+                        }
+                        double push = (GAP - Math.sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]))) / 2
+                                / distance;
+                        pushX[i] += dx * push;
+                        pushY[i] += dy * push;
+                        pushX[j] -= dx * push;
+                        pushY[j] -= dy * push;
+                    }
+                }
+                if (!crowded) {
+                    return;
+                }
+                for (int i = 0; i < count; i++) {
+                    x[i] += pushX[i];
+                    y[i] += pushY[i];
+                    keepInSlice(i);
+                }
             }
-            return turn(b[0], b[1], a[0]) * turn(b[0], b[1], a[1]) < 0
-                    && turn(a[0], a[1], b[0]) * turn(a[0], a[1], b[1]) < 0;
         }
 
-        private double turn(int a, int b, int c) {
-            return (x[b] - x[a]) * (y[c] - y[a]) - (y[b] - y[a]) * (x[c] - x[a]);
+        /** The direction of an arm's slice at a distance from the middle. 旋臂扇区在离正中某距离处的方向。 */
+        private double middle(int arm, double radius) {
+            return sliceMiddle[arm] + TWIST * (1 - radius / rim);
         }
-    }
 
-    /** The mean direction of the stars this one links with, or its own angle. 与之相连的成就的平均方向，没有则为自身角度。 */
-    private static double pull(String id, Map<String, List<String>> neighbours, Map<String, Double> angles) {
-        double x = 0;
-        double y = 0;
-        for (String other : neighbours.getOrDefault(id, List.of())) {
-            Double angle = angles.get(other);
-            if (angle != null) {
-                x += Math.cos(angle);
-                y += Math.sin(angle);
-            }
+        /**
+         * Moves a star back inside the disc and its arm's slice, with half a {@link #GAP} to spare at the slice's edges.
+         * 把成就移回圆盘和其旋臂的扇区之内，扇区两侧各留半个 {@link #GAP}。
+         */
+        private void keepInSlice(int i) {
+            double radius = Math.min(Math.max(Math.hypot(x[i], y[i]), HOLE + GAP / 2), rim);
+            double middle = middle(arm[i], radius);
+            double half = Math.max(0, sliceWidth[arm[i]] / 2 - GAP / 2 / radius);
+            double offset = Math.min(Math.max(wrap(Math.atan2(y[i], x[i]) - middle), -half), half);
+            x[i] = radius * Math.cos(middle + offset);
+            y[i] = radius * Math.sin(middle + offset);
         }
-        return x == 0 && y == 0 ? angles.get(id) : Math.atan2(y, x);
     }
 
     /** {@code angle} folded into (-π, π]. 把 {@code angle} 折算到 (-π, π]。 */

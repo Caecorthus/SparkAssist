@@ -59,14 +59,12 @@ public final class AchievementGalaxyScreen extends Screen {
     private static final int DIM_Z = 200;
     private static final int LIT_LINK = 0xA0F2C14E;
     private static final int DIM_LINK = 0x80A8A8B8;
-    private static final int ORBIT = 0x22FFFFFF;
     private static final int HALO = 0x40F2C14E;
     private static final int NOT_EARNED_ICON = 0x99000000;
     private static final double LIT_WIDTH = 1;
     private static final double DIM_WIDTH = 1;
     private static final double DASH = 4;
     private static final double DASH_GAP = 3;
-    private static final double ORBIT_DOT_SPACING = 7;
     private static final String LEVEL_KEY = "advancements.sparkassist.achievement.level";
     private static final String PLACE_KEY = "advancements.sparkassist.achievement.place";
     private static final String LOCAL_WORLD_KEY = "advancements.sparkassist.achievement.place.local_world";
@@ -155,9 +153,6 @@ public final class AchievementGalaxyScreen extends Screen {
         context.getMatrices().scale((float) zoom, (float) zoom, 1);
         context.getMatrices().translate((float) -cameraX, (float) -cameraY, 0);
 
-        for (int level = Achievement.MIN_LEVEL; level < Achievement.MAX_LEVEL; level++) {
-            orbit(context, AchievementGalaxy.ring(level));
-        }
         for (AchievementGalaxy.Link link : view.links()) {
             AchievementGalaxy.Star from = link.from();
             AchievementGalaxy.Star to = link.to();
@@ -345,17 +340,6 @@ public final class AchievementGalaxyScreen extends Screen {
         double limit = AchievementGalaxy.radius();
         cameraX = MathHelper.clamp(cameraX, -limit, limit);
         cameraY = MathHelper.clamp(cameraY, -limit, limit);
-    }
-
-    private static void orbit(DrawContext context, double radius) {
-        int dots = (int) Math.round(2 * Math.PI * radius / ORBIT_DOT_SPACING);
-        double size = 1.2 / zoom;
-        for (int i = 0; i < dots; i++) {
-            double angle = 2 * Math.PI * i / dots;
-            double x = radius * Math.cos(angle);
-            double y = radius * Math.sin(angle);
-            quad(context, x - size / 2, y, x + size / 2, y, size, ORBIT);
-        }
     }
 
     private static void circle(DrawContext context, double x, double y, double radius, double width, int color) {
