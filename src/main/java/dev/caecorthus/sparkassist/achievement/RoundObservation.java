@@ -22,6 +22,9 @@ import java.util.Set;
  *                     有角色的玩家数
  * @param traitIds     the local player's owner-visible traits
  *                     本地玩家自己可见的词条
+ * @param explosiveNearby a live grenade, grenade drone or Potion Gunner shell is within
+ *                     {@link #EXPLOSIVE_RANGE_BLOCKS} of the local player (only looked for while they are alive)
+ *                     本地玩家 {@link #EXPLOSIVE_RANGE_BLOCKS} 格内有未爆的手雷、榴弹无人机或药炮手炮弹（只在其存活时查找）
  */
 public record RoundObservation(
         long worldTime,
@@ -31,8 +34,24 @@ public record RoundObservation(
         boolean selfDead,
         int alivePlayers,
         int totalPlayers,
-        Set<String> traitIds
+        Set<String> traitIds,
+        boolean explosiveNearby
 ) {
+    /** How close an explosive counts as nearby. 爆炸物离多近算在附近。 */
+    public static final double EXPLOSIVE_RANGE_BLOCKS = 15;
+
+    /**
+     * Entity type ids that count as explosives: Wathe's grenade, SparkStrength's M67 and grenade drone, and
+     * SparkWitch's Potion Gunner shell. Matched by id so SparkAssist needs neither mod at compile time.
+     * 算作爆炸物的实体类型 id：Wathe 的手雷、SparkStrength 的 M67 与榴弹无人机、SparkWitch 的药炮手炮弹。按 id 匹配，
+     * 因此 SparkAssist 编译时不依赖这些模组。
+     */
+    public static final Set<String> EXPLOSIVE_ENTITY_IDS = Set.of(
+            "wathe:grenade",
+            "sparkstrength:m67",
+            "sparkstrength:grenade_drone",
+            "sparkwitch:potion_shell");
+
     public RoundObservation {
         traitIds = traitIds == null ? Set.of() : Set.copyOf(traitIds);
     }

@@ -18,6 +18,7 @@ import dev.doctor4t.wathe.cca.GameRoundEndComponent;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.entity.PlayerBodyEntity;
 import dev.doctor4t.wathe.game.GameFunctions;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,9 @@ import java.util.UUID;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -61,7 +64,7 @@ public final class AchievementClientState {
         boolean live = status == GameWorldComponent.GameStatus.ACTIVE || status == GameWorldComponent.GameStatus.STOPPING;
         if (!live) {
             if (TRACKER.active()) {
-                TRACKER.finish().ifPresent(facts -> settle(client, game, facts));
+                TRACKER.finish(LocalDateTime.now()).ifPresent(facts -> settle(client, game, facts));
             }
             return;
         }
@@ -100,7 +103,8 @@ public final class AchievementClientState {
                 dead,
                 game.getAllAlivePlayers().size(),
                 game.getAllPlayers().size(),
-                traits));
+                traits,
+                !dead && explosiveNearby(client.world, player)));
         if (TRACKER.wantsDeathReason(worldTime)) {
             findOwnDeathReason(client, self);
         }
@@ -125,6 +129,19 @@ public final class AchievementClientState {
 
     public static void onPoisonOverlay(String translationKey) {
         TRACKER.onPoisonOverlay(translationKey);
+    }
+
+    /**
+     * Whether a live explosive ({@link RoundObservation#EXPLOSIVE_ENTITY_IDS}) is within
+     * {@link RoundObservation#EXPLOSIVE_RANGE_BLOCKS} of the player: a box query around them, then a distance check.
+     * 玩家 {@link RoundObservation#EXPLOSIVE_RANGE_BLOCKS} 格内是否有未爆的爆炸物（{@link RoundObservation#EXPLOSIVE_ENTITY_IDS}）：
+     * 先按方框查询玩家周围的实体，再检查距离。
+     */
+    private static boolean explosiveNearby(ClientWorld world, ClientPlayerEntity player) {
+        double range = RoundObservation.EXPLOSIVE_RANGE_BLOCKS;
+        return !world.getOtherEntities(player, player.getBoundingBox().expand(range), entity ->
+                RoundObservation.EXPLOSIVE_ENTITY_IDS.contains(EntityType.getId(entity.getType()).toString())
+                        && entity.squaredDistanceTo(player) <= range * range).isEmpty();
     }
 
     private static void findOwnDeathReason(MinecraftClient client, UUID self) {

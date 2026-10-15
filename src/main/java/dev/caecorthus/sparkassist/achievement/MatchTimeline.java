@@ -1,15 +1,21 @@
 package dev.caecorthus.sparkassist.achievement;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Queries over one settled round's match record, built once per round. Events keep record order (Wathe's sequence
@@ -21,11 +27,19 @@ import java.util.function.Function;
  * factions where the record carries them (a {@code death} has {@code victim_faction} / {@code killer_faction}),
  * otherwise the base faction of the role held at that time.
  * <p>
+ * Who is alive is rebuilt from the opening snapshot and the deaths, Last Stand false deaths and T-Virus revivals
+ * after it (see {@link #aliveAfter}). The record may have lost its tail: Wathe writes {@code match_end} after every
+ * gameplay event and SparkFactionAPI cuts oversized records from the end, so rules that need "all", "none" or "the
+ * last" must check {@link #isComplete} first.
+ * <p>
  * 一局已结算对局的记录查询，每局只构建一次。事件保持记录顺序（Wathe 序号顺序）和记录 tick（服务端开始对局后的世界 tick）。
  * 所有查询都能容忍没有记录（旧服务器不发送，时间线为空）和缺字段（服务器没装对应模组）。
  * 身份取自 Wathe 的 {@code role_assigned} 快照加上 SparkFactionAPI 的 {@code role_changed} 事件，所以 {@link #roleAt}
  * 是事件发生时玩家的身份，而不是最终身份。阵营在记录带有时取实际阵营（{@code death} 带 {@code victim_faction} /
  * {@code killer_faction}），否则取当时身份的基础阵营。
+ * 谁还活着由开局快照加上之后的死亡、背水一战假死与 T 病毒复活还原（见 {@link #aliveAfter}）。记录可能丢了末尾：
+ * Wathe 在所有对局事件之后才写 {@code match_end}，而 SparkFactionAPI 会从末尾截断超大的记录，所以需要"全部 / 没有 /
+ * 最后一个"的规则必须先检查 {@link #isComplete}。
  */
 public final class MatchTimeline {
     private final List<MatchEvent> events;
@@ -36,21 +50,37 @@ public final class MatchTimeline {
     private final Map<UUID, String> openingRoles = new LinkedHashMap<>();
     private final Map<UUID, List<RoleChange>> roleChanges = new HashMap<>();
     private final Map<UUID, List<TickWindow>> psychoWindows = new HashMap<>();
+    // Every player in Wathe's opening snapshot, in snapshot order. Wathe 开局快照中的所有玩家，按快照顺序。
+    private final Set<UUID> startingPlayers = new LinkedHashSet<>();
+    private final List<Integer> deathPositions = new ArrayList<>();
+    private final BitSet fakeDeaths = new BitSet();
+    private final List<AliveChange> aliveChanges = new ArrayList<>();
+    private final Set<UUID> openingAlive;
     private final int endTick;
+    private final boolean complete;
 
     private MatchTimeline(List<MatchEvent> events, Function<String, String> baseFactionOfRole) {
         this.events = List.copyOf(events);
         this.baseFactionOfRole = Objects.requireNonNull(baseFactionOfRole, "baseFactionOfRole");
         int last = 0;
+        boolean ended = false;
         for (int i = 0; i < this.events.size(); i++) {
             MatchEvent event = this.events.get(i);
             positions.putIfAbsent(event, i);
             last = Math.max(last, event.tick());
             readRoles(event, i);
+            if (event.is(MatchEvent.DEATH)) {
+                deathPositions.add(i);
+            }
+            ended |= event.is(MatchEvent.MATCH_END);
         }
         this.endTick = last;
+        this.complete = ended;
+        this.openingAlive = Collections.unmodifiableSet(new LinkedHashSet<>(startingPlayers));
         readPsycho();
         psychoWindows.replaceAll((player, windows) -> List.copyOf(windows));
+        readFakeDeaths();
+        readAlive();
     }
 
     /**
@@ -83,6 +113,24 @@ public final class MatchTimeline {
     /** The latest record tick, 0 without a record. 最晚的记录 tick；没有记录时为 0。 */
     public int endTick() {
         return endTick;
+    }
+
+    /**
+     * Whether the record reached {@code match_end}, i.e. no gameplay event is missing. Wathe writes {@code match_end}
+     * after every gameplay event (only the {@code player_result}s follow it), and SparkFactionAPI only ever cuts an
+     * oversized record from the end; without {@code match_end} the record was cut or never arrived. Rules whose
+     * condition says "all", "none" or "the last" must require it.
+     * 记录是否一直写到了 {@code match_end}，即没有缺失任何对局事件。Wathe 在所有对局事件之后才写 {@code match_end}
+     * （之后只有各 {@code player_result}），而 SparkFactionAPI 只会从末尾截断超大的记录；没有 {@code match_end}
+     * 说明记录被截断或根本没收到。条件里有"全部 / 没有 / 最后一个"的规则必须要求它。
+     */
+    public boolean isComplete() {
+        return complete;
+    }
+
+    /** The {@code match_end} event, if the record reached it. {@code match_end} 事件（若记录写到了它）。 */
+    public Optional<MatchEvent> matchEnd() {
+        return events.stream().filter(event -> event.is(MatchEvent.MATCH_END)).findFirst();
     }
 
     public List<MatchEvent> events(String type) {
@@ -195,6 +243,74 @@ public final class MatchTimeline {
         return resolvedFactions.get(roleId);
     }
 
+    /**
+     * The role {@code player} held right after {@code event}: like {@link #roleAt}, except that a
+     * {@code role_changed} event already shows its "to" role. Null when unknown.
+     * {@code event} 刚发生之后 {@code player} 的身份：与 {@link #roleAt} 相同，只是 {@code role_changed} 事件本身已显示变化后的身份。
+     * 未知时为 null。
+     *
+     * @throws IllegalArgumentException when {@code event} is not part of this timeline 事件不属于本时间线时
+     */
+    public String roleAfter(UUID player, MatchEvent event) {
+        int position = position(event);
+        return player == null ? null : roleBefore(player, position + 1);
+    }
+
+    /**
+     * Every player in Wathe's opening {@code role_assigned} snapshot, in snapshot order; empty without a record.
+     * Wathe 开局 {@code role_assigned} 快照中的所有玩家，按快照顺序；没有记录时为空。
+     */
+    public Set<UUID> startingPlayers() {
+        return openingAlive;
+    }
+
+    /**
+     * How many starting players each base faction had, by the base faction of their opening role (e.g. how many
+     * killers the round started with). Players whose faction is unknown are left out.
+     * 开局时各基础阵营的人数，按每名开局玩家开局身份的基础阵营计（例如本局开局有几名杀手）。阵营未知的玩家不计入。
+     */
+    public Map<String, Integer> openingFactionCounts() {
+        Map<String, Integer> counts = new TreeMap<>();
+        for (UUID player : startingPlayers) {
+            String faction = baseFaction(openingRole(player));
+            if (faction != null) {
+                counts.merge(faction, 1, Integer::sum);
+            }
+        }
+        return Collections.unmodifiableMap(counts);
+    }
+
+    /** How many starting players were on {@code factionId} by their opening role. 开局身份属于 {@code factionId} 的开局玩家数。 */
+    public int openingFactionCount(String factionId) {
+        return openingFactionCounts().getOrDefault(factionId, 0);
+    }
+
+    /**
+     * Players who were on a faction passing {@code factionTest} at some point: a starting player by the base faction
+     * of any role they held, or anyone by the effective faction a death record gives them ({@code victim_faction} /
+     * {@code killer_faction}). A trait flip shows up only through such a death record.
+     * 曾经属于满足 {@code factionTest} 的阵营的玩家：开局玩家按其担任过的任一身份的基础阵营判断，任何人按死亡记录中给出的
+     * 实际阵营（{@code victim_faction} / {@code killer_faction}）判断。词条造成的阵营翻转只能通过这类死亡记录看到。
+     */
+    public Set<UUID> playersEverIn(Predicate<String> factionTest) {
+        Set<UUID> players = new LinkedHashSet<>();
+        for (UUID player : startingPlayers) {
+            if (roleHistory(player).stream().anyMatch(role -> factionTest.test(baseFaction(role)))) {
+                players.add(player);
+            }
+        }
+        for (int position : deathPositions) {
+            MatchEvent death = events.get(position);
+            if (death.target() != null && factionTest.test(death.value("victim_faction"))) {
+                players.add(death.target());
+            }
+            if (death.actor() != null && factionTest.test(death.value("killer_faction"))) {
+                players.add(death.actor());
+            }
+        }
+        return Collections.unmodifiableSet(players);
+    }
+
     // ---- Deaths 死亡 ----
 
     public List<MatchEvent> deaths() {
@@ -240,6 +356,88 @@ public final class MatchTimeline {
         return death.actor() == null ? null : factionAt(death.actor(), death);
     }
 
+    /**
+     * Whether this death was SparkTraits' Last Stand false death: the same player's
+     * {@link MatchEvent#LAST_STAND_TRIGGERED} follows it in the same tick (SparkTraits writes it right after Wathe's
+     * death record), before any other death of theirs. The player comes back about 5 seconds later.
+     * 这次死亡是否为 SparkTraits 背水一战的假死：同一 tick 内、在此人下一次死亡之前，紧跟着此人的
+     * {@link MatchEvent#LAST_STAND_TRIGGERED}（SparkTraits 紧接在 Wathe 的死亡记录之后写入）。此人约 5 秒后复活。
+     */
+    public boolean isFakeDeath(MatchEvent death) {
+        return death.is(MatchEvent.DEATH) && fakeDeaths.get(position(death));
+    }
+
+    /**
+     * Deaths without the Last Stand false deaths, in order. A player revived by the T-Virus can still appear twice.
+     * 去掉背水一战假死之后的死亡，按时间顺序。被 T 病毒复活的玩家仍可能出现两次。
+     */
+    public List<MatchEvent> realDeaths() {
+        return deathPositions.stream().filter(position -> !fakeDeaths.get(position)).map(events::get).toList();
+    }
+
+    // ---- Who is alive 存活情况 ----
+
+    /**
+     * The players alive right after {@code event}. Starts from the opening snapshot ({@link #startingPlayers}); a
+     * death removes its target unless it is a Last Stand false death ({@link #isFakeDeath}); a
+     * {@link MatchEvent#PATHOGEN_REVIVED} brings its target back; a {@code player_leave} while a Last Stand revival is
+     * still pending makes that false death real, since the revival is then cancelled. A disconnect of a living player
+     * is a death with {@link MatchEvent#ESCAPED} ({@link MatchEvent#isDisconnect}), so it removes them too.
+     * {@code event} 刚发生之后存活的玩家。从开局快照（{@link #startingPlayers}）开始；每次死亡移除死者，背水一战假死
+     * （{@link #isFakeDeath}）除外；{@link MatchEvent#PATHOGEN_REVIVED} 让目标重新存活；背水一战复活尚未完成时的
+     * {@code player_leave} 会取消复活，使那次假死成真。存活玩家断线会记为死因 {@link MatchEvent#ESCAPED} 的死亡
+     * （{@link MatchEvent#isDisconnect}），同样会被移除。
+     *
+     * @throws IllegalArgumentException when {@code event} is not part of this timeline 事件不属于本时间线时
+     */
+    public Set<UUID> aliveAfter(MatchEvent event) {
+        return aliveThrough(position(event));
+    }
+
+    /**
+     * The players alive just before {@code event}, e.g. still including the victim of a death.
+     * {@code event} 发生前一刻存活的玩家，例如仍包含这次死亡的死者。
+     */
+    public Set<UUID> aliveBefore(MatchEvent event) {
+        return aliveThrough(position(event) - 1);
+    }
+
+    /**
+     * The players alive after every event up to record tick {@code tick} (record ticks never go backwards in record
+     * order); the starting players before the first event.
+     * 记录 tick {@code tick} 及之前的所有事件发生后存活的玩家（记录 tick 按记录顺序不会倒退）；第一条事件之前为开局玩家。
+     */
+    public Set<UUID> aliveAt(int tick) {
+        return aliveThrough(lastPositionAt(tick));
+    }
+
+    /**
+     * {@code player}'s best-known effective faction right after {@code event}: the latest faction a death record gave
+     * them ({@code victim_faction} for a death they survived or did not, {@code killer_faction} for a kill) since their
+     * last role change, otherwise the base faction of {@link #roleAfter}. A trait flip of a player who never appears
+     * in a death record afterwards is invisible here. Null when unknown.
+     * {@code event} 刚发生之后 {@code player} 已知的最准确的实际阵营：自其最近一次身份变化以来、最近一条死亡记录给出的阵营
+     * （作为死者的 {@code victim_faction} 或作为击杀者的 {@code killer_faction}），否则取 {@link #roleAfter} 的基础阵营。
+     * 之后没有出现在任何死亡记录里的玩家，其词条阵营翻转在这里看不到。未知时为 null。
+     */
+    public String factionAfter(UUID player, MatchEvent event) {
+        return factionThrough(player, position(event));
+    }
+
+    /**
+     * Each player alive right after {@code event} with their {@link #factionAfter} (null values when unknown), in
+     * snapshot order.
+     * {@code event} 刚发生之后每名存活玩家及其 {@link #factionAfter}（未知时值为 null），按快照顺序。
+     */
+    public Map<UUID, String> aliveFactionsAfter(MatchEvent event) {
+        return factionsThrough(position(event));
+    }
+
+    /** {@link #aliveFactionsAfter} at record tick {@code tick}. 记录 tick {@code tick} 时的 {@link #aliveFactionsAfter}。 */
+    public Map<UUID, String> aliveFactionsAt(int tick) {
+        return factionsThrough(lastPositionAt(tick));
+    }
+
     // ---- Psycho mode 疯魔模式 ----
 
     /**
@@ -254,6 +452,55 @@ public final class MatchTimeline {
     /** Whether {@code player} was in psycho mode at record tick {@code tick}. {@code player} 在记录 tick {@code tick} 时是否处于疯魔模式。 */
     public boolean inPsycho(UUID player, int tick) {
         return psychoWindows(player).stream().anyMatch(window -> window.contains(tick));
+    }
+
+    /** Everyone in psycho mode at record tick {@code tick}. 记录 tick {@code tick} 时处于疯魔模式的所有玩家。 */
+    public Set<UUID> inPsychoAt(int tick) {
+        Set<UUID> players = new LinkedHashSet<>();
+        psychoWindows.forEach((player, windows) -> {
+            if (windows.stream().anyMatch(window -> window.contains(tick))) {
+                players.add(player);
+            }
+        });
+        return Collections.unmodifiableSet(players);
+    }
+
+    /**
+     * The longest spans in which at least {@code atLeast} players other than {@code excluded} (null excludes nobody)
+     * were in psycho mode at once, in tick order, built from every player's {@link #psychoWindows} (every psycho
+     * kind is recorded).
+     * 除 {@code excluded}（为 null 时不排除任何人）以外、至少 {@code atLeast} 名玩家同时处于疯魔模式的最长时段，按 tick
+     * 顺序，由每名玩家的 {@link #psychoWindows} 合成（各种疯魔都有记录）。
+     *
+     * @throws IllegalArgumentException when {@code atLeast} is below 1 {@code atLeast} 小于 1 时
+     */
+    public List<TickWindow> concurrentPsychoWindows(int atLeast, UUID excluded) {
+        if (atLeast < 1) {
+            throw new IllegalArgumentException("atLeast must be at least 1: " + atLeast);
+        }
+        // Inclusive windows: a player counts from fromTick through toTick. 含两端：从 fromTick 到 toTick 都算在内。
+        TreeMap<Integer, Integer> deltas = new TreeMap<>();
+        psychoWindows.forEach((player, windows) -> {
+            if (!player.equals(excluded)) {
+                for (TickWindow window : windows) {
+                    deltas.merge(window.fromTick(), 1, Integer::sum);
+                    deltas.merge(window.toTick() + 1, -1, Integer::sum);
+                }
+            }
+        });
+        List<TickWindow> spans = new ArrayList<>();
+        int inPsycho = 0;
+        Integer openSince = null;
+        for (Map.Entry<Integer, Integer> delta : deltas.entrySet()) {
+            inPsycho += delta.getValue();
+            if (inPsycho >= atLeast && openSince == null) {
+                openSince = delta.getKey();
+            } else if (inPsycho < atLeast && openSince != null) {
+                spans.add(new TickWindow(openSince, delta.getKey() - 1));
+                openSince = null;
+            }
+        }
+        return List.copyOf(spans);
     }
 
     /**
@@ -271,13 +518,134 @@ public final class MatchTimeline {
 
     // ---- Building 构建 ----
 
+    /**
+     * How long a Last Stand false death lasts before the revival (SparkTraits {@code LastStandService.PENDING_TICKS}).
+     * 背水一战假死到复活之间的时长（SparkTraits {@code LastStandService.PENDING_TICKS}）。
+     */
+    static final int LAST_STAND_PENDING_TICKS = 100;
+
     private record RoleChange(int position, String from, String to) {
+    }
+
+    /** From {@code position} on, exactly {@code alive} are alive. 从 {@code position} 起恰好 {@code alive} 存活。 */
+    private record AliveChange(int position, int tick, Set<UUID> alive) {
+    }
+
+    private void readFakeDeaths() {
+        for (int position : deathPositions) {
+            MatchEvent death = events.get(position);
+            UUID victim = death.target();
+            if (victim == null) {
+                continue;
+            }
+            for (int next = position + 1; next < events.size(); next++) {
+                MatchEvent event = events.get(next);
+                if (event.tick() != death.tick() || event.is(MatchEvent.DEATH) && victim.equals(event.target())) {
+                    break;
+                }
+                if (event.isGlobal(MatchEvent.LAST_STAND_TRIGGERED) && victim.equals(event.actor())) {
+                    fakeDeaths.set(position);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void readAlive() {
+        Set<UUID> alive = new LinkedHashSet<>(startingPlayers);
+        // Players in a pending Last Stand revival, until the tick it is due. 背水一战复活尚未完成的玩家及其复活时刻。
+        Map<UUID, Integer> revivalDue = new HashMap<>();
+        for (int position = 0; position < events.size(); position++) {
+            MatchEvent event = events.get(position);
+            boolean changed = false;
+            if (event.is(MatchEvent.DEATH) && event.target() != null) {
+                if (fakeDeaths.get(position)) {
+                    revivalDue.put(event.target(), event.tick() + LAST_STAND_PENDING_TICKS);
+                } else {
+                    revivalDue.remove(event.target());
+                    changed = alive.remove(event.target());
+                }
+            } else if (event.isGlobal(MatchEvent.PATHOGEN_REVIVED) && event.target() != null) {
+                revivalDue.remove(event.target());
+                changed = alive.add(event.target());
+            } else if (event.is(MatchEvent.PLAYER_LEAVE) && event.actor() != null) {
+                Integer due = revivalDue.remove(event.actor());
+                changed = due != null && event.tick() <= due && alive.remove(event.actor());
+            }
+            if (changed) {
+                aliveChanges.add(new AliveChange(position, event.tick(),
+                        Collections.unmodifiableSet(new LinkedHashSet<>(alive))));
+            }
+        }
+    }
+
+    private Set<UUID> aliveThrough(int position) {
+        Set<UUID> alive = openingAlive;
+        for (AliveChange change : aliveChanges) {
+            if (change.position() > position) {
+                break;
+            }
+            alive = change.alive();
+        }
+        return alive;
+    }
+
+    /** The last event position at or before record tick {@code tick}, -1 before the first. 记录 tick 及之前最后一条事件的位置。 */
+    private int lastPositionAt(int tick) {
+        int last = -1;
+        for (int position = 0; position < events.size() && events.get(position).tick() <= tick; position++) {
+            last = position;
+        }
+        return last;
+    }
+
+    private String factionThrough(UUID player, int position) {
+        if (player == null) {
+            return null;
+        }
+        int changedAt = -1;
+        String role = openingRole(player);
+        for (RoleChange change : roleChanges.getOrDefault(player, List.of())) {
+            if (change.position() > position) {
+                break;
+            }
+            changedAt = change.position();
+            role = change.to();
+        }
+        for (int i = deathPositions.size() - 1; i >= 0; i--) {
+            int deathPosition = deathPositions.get(i);
+            if (deathPosition > position) {
+                continue;
+            }
+            if (deathPosition < changedAt) {
+                break;
+            }
+            MatchEvent death = events.get(deathPosition);
+            String recorded = player.equals(death.target()) ? death.value("victim_faction", null)
+                    : player.equals(death.actor()) ? death.value("killer_faction", null)
+                    : null;
+            if (recorded != null) {
+                return recorded;
+            }
+        }
+        return baseFaction(role);
+    }
+
+    private Map<UUID, String> factionsThrough(int position) {
+        Map<UUID, String> factions = new LinkedHashMap<>();
+        for (UUID player : aliveThrough(position)) {
+            factions.put(player, factionThrough(player, position));
+        }
+        return Collections.unmodifiableMap(factions);
     }
 
     private void readRoles(MatchEvent event, int position) {
         if (event.is(MatchEvent.ROLE_ASSIGNED)) {
             UUID player = event.uuid("player.uuid");
             String role = event.value("player.role", null);
+            if (player != null) {
+                startingPlayers.add(player);
+            }
             if (player != null && role != null) {
                 openingRoles.putIfAbsent(player, role);
                 String faction = Factions.fromWatheName(event.value("player.faction"));
