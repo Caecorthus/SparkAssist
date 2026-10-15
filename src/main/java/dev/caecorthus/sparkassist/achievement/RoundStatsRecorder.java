@@ -28,9 +28,11 @@ import java.util.UUID;
  *     <li>SparkWitch Fisher catches, kills of players on another faction per role (with the traits held around
  *     them), and roles the player was turned into mid-round with their causes.</li>
  * </ul>
- * "Died this round" means any death: the client saw the player dead at some point, or the record has a death of
- * theirs, including a Last Stand false death and a death undone by the T-Virus. A round left mid-way never settles,
- * so it never comes here and breaks no streak.
+ * "Died this round" (for the streaks, win streaks and food since the last death) means a real death, by the user's
+ * rule: a Last Stand false death does not count, a death undone by the T-Virus does. The record decides when it
+ * has a real death of the player's or is complete; otherwise a death the client saw counts, unless the record shows
+ * only a false death of theirs and they ended the round alive. A round left mid-way never settles, so it never
+ * comes here and breaks no streak.
  * Without a match record only the general counts change, except that a death the client saw still ends streaks,
  * judged by the role and faction the client saw last.
  * <p>
@@ -42,7 +44,8 @@ import java.util.UUID;
  * 和玩家结束时（死亡则为死亡时）所在的每个 {@link RoleGroups} 分组分别计；上次死亡以来的吃喝数（本局死亡则清空，且本局的不计入）、
  * 吃喝过的每种物品，以及进食时持有的每个自身可见词条的进食数；SparkWitch 钓鱼佬的渔获、按身份统计的对其他阵营的击杀（及当时持有的词条），
  * 以及玩家在对局中途变成的身份及其原因。
- * “本局死亡”指任何一次死亡：客户端某一刻看到玩家死亡，或记录里有玩家的死亡，包括背水一战的假死和被 T 病毒复活的死亡。
+ * （连续击杀、连胜和上次死亡以来的吃喝里的）“本局死亡”按用户定的规则指真正的死亡：背水一战的假死不算，被 T 病毒复活的
+ * 死亡算。记录里有玩家的真死亡、或记录完整时以记录为准；否则客户端看到的死亡算数，除非记录里只有玩家的一次假死且玩家结算时存活。
  * 中途退出的对局不会结算，不会走到这里，也不会打断任何连续记录。
  * 没有对局记录时只更新通用计数，但客户端看到的死亡仍会按客户端最后看到的身份与阵营结束连续击杀。
  */
@@ -72,7 +75,8 @@ public final class RoundStatsRecorder {
         }
         killedThisRound.forEach(stats::addKilledRoles);
 
-        Set<String> diedIn = groupsAtDeath(facts, timeline);
+        boolean died = diedForStreaks(facts, outcome, timeline);
+        Set<String> diedIn = died ? groupsAtDeath(facts, timeline) : Set.of();
         for (String group : RoleGroups.STREAK_GROUPS) {
             if (diedIn.contains(group)) {
                 stats.resetStreak(group);
@@ -81,7 +85,6 @@ public final class RoundStatsRecorder {
             }
         }
 
-        boolean died = facts.died() || timeline.deathOf(self).isPresent();
         recordDeathReasons(stats, facts, timeline);
         stats.recordWinStreaks(outcome.won(), !died,
                 died ? diedIn : RoleGroups.groupsOf(facts.finalRoleId(), facts.factionId()));
@@ -172,15 +175,35 @@ public final class RoundStatsRecorder {
     }
 
     /**
-     * The groups the player was in when they died this round, empty if they survived. The death record decides;
-     * whatever it cannot tell falls back to the role and faction the client saw last.
-     * 玩家本局死亡时所在的分组；存活则为空。以死亡记录为准，记录给不出的部分取客户端最后看到的身份与阵营。
+     * Whether the player died this round for the one-life counts (see the class doc): a Last Stand false death does not
+     * count, a death undone by the T-Virus does.
+     * 玩家本局是否算死亡（用于一命类统计，见类说明）：背水一战的假死不算，被 T 病毒复活的死亡算。
+     */
+    static boolean diedForStreaks(RoundFacts facts, RoundOutcome outcome, MatchTimeline timeline) {
+        UUID self = facts.self();
+        if (firstRealDeath(self, timeline).isPresent()) {
+            return true;
+        }
+        if (timeline.isComplete()) {
+            return false;
+        }
+        boolean onlyFalseDeath = timeline.deathOf(self).isPresent();
+        boolean endedAlive = outcome.participant(self)
+                .map(participant -> "ALIVE".equals(participant.endStatus())).orElse(false);
+        return facts.died() && !(onlyFalseDeath && endedAlive);
+    }
+
+    private static Optional<MatchEvent> firstRealDeath(UUID self, MatchTimeline timeline) {
+        return timeline.realDeaths().stream().filter(death -> self != null && self.equals(death.target())).findFirst();
+    }
+
+    /**
+     * The groups the player was in at their first real death this round (call only when they died). The death record
+     * decides; whatever it cannot tell falls back to the role and faction the client saw last.
+     * 玩家本局第一次真正死亡时所在的分组（只在玩家算死亡时调用）。以死亡记录为准，记录给不出的部分取客户端最后看到的身份与阵营。
      */
     private static Set<String> groupsAtDeath(RoundFacts facts, MatchTimeline timeline) {
-        Optional<MatchEvent> death = timeline.deathOf(facts.self());
-        if (death.isEmpty() && !facts.died()) {
-            return Set.of();
-        }
+        Optional<MatchEvent> death = firstRealDeath(facts.self(), timeline);
         String role = death.map(timeline::victimRole).orElse(null);
         String faction = death.map(timeline::victimFaction).orElse(null);
         return RoleGroups.groupsOf(
