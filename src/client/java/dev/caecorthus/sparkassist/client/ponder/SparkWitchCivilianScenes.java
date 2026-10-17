@@ -1329,25 +1329,32 @@ final class SparkWitchCivilianScenes {
     }
 
     /**
-     * Fiend (FiendRules, FiendImmunityService, FiendReactionService, FiendCooldownAura, FiendShopService,
-     * FiendMomentService, FiendMomentEffects, FiendMomentCrowbar, FiendDashService, FiendDashRules; client
-     * FiendMomentHighlightRules, WatheClientFiendHighlightMixin; Wathe CrowbarItem, DoorBlockEntity.blast): every kill
-     * on the dormant Fiend is cancelled except falling off the train (and a disconnect or /kill): the attacker's stab or
-     * shot happens, the Fiend stays standing. A knife stab pays 50 coins and 4 notes, a gunshot 50 coins and 5 s of
-     * Speed III (no particles) and raises the items of everyone else within 8 blocks to a 20 s cooldown. The 200-coin
-     * Fiend Moment (one per round) ends the immunity and gives Speed II and a crowbar; for its 2 minutes the Fiend sees
+     * Fiend (FiendRules, FiendImmunityService, FiendReactionService, FiendCooldownAura, FiendFeignService,
+     * FiendFeignRules, FiendFeignState, FiendShopService, FiendMomentService, FiendMomentEffects, FiendMomentCrowbar,
+     * FiendDashService, FiendDashRules; client FiendMomentHighlightRules, WatheClientFiendHighlightMixin; Wathe
+     * CrowbarItem, DoorBlockEntity.blast): every kill on the dormant Fiend is blocked except falling off the train (and
+     * a disconnect or /kill), and a blocked kill starts a 20 s feign death at once. A knife stab pays 50 coins and 4
+     * notes; a gunshot pays 50 coins, raises the items of everyone else within 8 blocks to a 20 s cooldown at once and
+     * gives 5 s of Speed III (no particles) when the Fiend revives. While feigning, a fake corpse lies where the Fiend
+     * stood (spawned there, as the Jester's is, so it lies a block further back than a kill's) and the Fiend is an
+     * unseen spectator that cannot move, act, speak or buy; when the time is up it revives on that spot and the corpse
+     * is gone. If a Vulture eats the fake corpse meanwhile, the Fiend dies for real. Before the Moment it also feigns
+     * for 5 s once 60 s have passed since the round start or its last revival. The 200-coin Fiend Moment (one per
+     * round) ends the immunity and the feigning and gives Speed II and a crowbar; for its 2 minutes the Fiend sees
      * every living player outlined in his colour through walls and everyone sees him (not while Cooling Oil blinds the
      * viewer, nor hidden Wraiths). The door's own right-click runs first, so the crowbar reaches a locked or jammed
-     * door (any door on a sneaking right-click) and blasts it open for good unless an Engineer repairs it (a swing and a
-     * loud pry), then cools down 5 s. Dash (ability key, moment only): 10 s of
-     * Speed IV, 30 s cooldown. Surviving the moment wins alone. Wathe draws no bullet line, only the muzzle flash; the
-     * outlines are boxes.
-     * 魔人：休眠时针对他的击杀全部被取消，只有掉下火车（以及断线、/kill）例外：对方照常出刀或开枪，魔人站着不倒。挨刀得
-     * 50 金币和 4 张便条，中枪得 50 金币和 5 秒速度 III（无粒子），并让 8 格内其他人的物品冷却提升到 20 秒。花 200 金币
-     * 买下魔人时刻（每局一次）会失去免疫，获得速度 II 和一把撬棍；时刻持续 2 分钟，期间魔人隔墙看到所有活人以他的颜色
-     * 描边，所有人也看得到他（被风油精糊眼的人和隐藏的冤魂除外）。门自己的右键先生效，所以撬棍只作用于上锁或卡住的门（潜行
-     * 右键时任何门都行），把门撬开且不再关上，除非工程师修好它（挥手，撬门声很响），之后冷却 5 秒。疾驰（技能键，仅限时刻中）：
-     * 10 秒速度 IV，冷却 30 秒。撑过时刻即独自获胜。Wathe 不画弹道线，只有枪口火光；描边用方框表示。
+     * door (any door on a sneaking right-click) and blasts it open for good unless an Engineer repairs it (a swing and
+     * a loud pry), then cools down 5 s. Dash (ability key, moment only): 10 s of Speed IV, 30 s cooldown. Surviving the
+     * moment wins alone. The demo shortens the feign; the outlines are boxes.
+     * 魔人：休眠时针对他的击杀都会被挡下，只有掉下火车（以及断线、/kill）例外；被挡下的击杀会立即让他假死 20 秒。挨刀得
+     * 50 金币和 4 张便条；中枪得 50 金币，立即让 8 格内其他人的物品冷却提升到 20 秒，复活时再给 5 秒速度 III（无粒子）。
+     * 假死时原地留下一具假尸体（与小丑一样生成在他站的地方，所以比击杀留下的尸体靠后一格），魔人成为别人看不见的旁观者，
+     * 不能移动、行动、说话或购买；时间到就在原地复活，尸体消失。假死期间尸体若被秃鹫吃掉，魔人就真的死亡。买下时刻前，
+     * 开局或上次复活后满 60 秒时他还会自动假死 5 秒。花 200 金币买下魔人时刻（每局一次）会失去免疫、不再假死，获得速度 II
+     * 和一把撬棍；时刻持续 2 分钟，期间魔人隔墙看到所有活人以他的颜色描边，所有人也看得到他（被风油精糊眼的人和隐藏的冤魂
+     * 除外）。门自己的右键先生效，所以撬棍只作用于上锁或卡住的门（潜行右键时任何门都行），把门撬开且不再关上，除非工程师修好
+     * 它（挥手，撬门声很响），之后冷却 5 秒。疾驰（技能键，仅限时刻中）：10 秒速度 IV，冷却 30 秒。撑过时刻即独自获胜。
+     * 演示缩短了假死时间；描边用方框表示。
      */
     private static void fiend(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_fiend", "魔人：挨打攒钱，买下魔人时刻");
@@ -1359,9 +1366,15 @@ final class SparkWitchCivilianScenes {
         ItemStack crowbar = stack("wathe:crowbar");
         ElementLink<ActorElement> fiend = Actors.enter(scene, crimson, Text.literal("魔人"), new Vec3d(3.0, 1, 1.5),
                 EAST, Direction.DOWN);
-        Vec3d shooterFeet = new Vec3d(0.6, 1, 1.5);
+        // The fake corpse, waiting unseen: FiendFeignService spawns it where the Fiend stands (the Jester's placement),
+        // so with Wathe's body renderer it lies a block further back than a kill's, its head on the Fiend's spot.
+        // 假尸体，先隐身等着：FiendFeignService 把它生成在魔人站的地方（与小丑相同），按 Wathe 的尸体渲染会比击杀的尸体
+        // 靠后一格，头正好在魔人站的位置。
+        ElementLink<ActorElement> fakeBody = Actors.enter(scene, crimson, null, new Vec3d(2.0, 1, 1.5), EAST,
+                Direction.DOWN);
+        Actors.vanish(scene, fakeBody);
         ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
-                shooterFeet, EAST, Direction.DOWN);
+                new Vec3d(0.6, 1, 1.5), EAST, Direction.DOWN);
         Actors.hold(scene, vigilante, revolver);
         scene.idle(5);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
@@ -1369,7 +1382,7 @@ final class SparkWitchCivilianScenes {
         Actors.hold(scene, killer, knife);
         scene.idle(15);
         scene.overlay().showText(80)
-                .text("休眠的魔人几乎杀不死：除了掉下火车，刀枪一般都要不了命")
+                .text("休眠的魔人杀不死：致命一击只会让你假死，只有掉下火车才会真死")
                 .independent()
                 .attachKeyFrame();
         scene.idle(10);
@@ -1380,19 +1393,22 @@ final class SparkWitchCivilianScenes {
         scene.idle(14);
         Actors.charge(scene, killer, false);
         Actors.swing(scene, killer);
-        scene.idle(30);
-        scene.overlay().showControls(shooterFeet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(revolver);
-        scene.idle(10);
-        // A levelled revolver's muzzle 0.85 ahead of an actor facing east, as REVOLVER_MUZZLE sits for one facing
-        // screen-right. 面朝东的演员手中端平左轮的枪口，在身前 0.85 格，与朝屏幕右侧时 REVOLVER_MUZZLE 的位置相同。
-        gunshotFlash(scene, new Vec3d(1.45, 2.05, 1.6));
-        Actors.lookPitch(scene, vigilante, -4);
-        scene.idle(3);
-        Actors.lookPitch(scene, vigilante, 0);
-        scene.idle(17);
+        // The blocked kill starts the feign at once: the Fiend turns spectator, unseen, and his fake corpse falls.
+        // ActorElement.fall cannot be undone, so the corpse is its own actor and the Fiend shows again at the revival.
+        // 被挡下的击杀立即开始假死：魔人变成别人看不见的旁观者，假尸体倒下。ActorElement.fall 无法撤销，所以尸体是单独的
+        // 演员，复活时魔人本人重新出现。
+        Actors.vanish(scene, fiend);
+        scene.addInstruction(ponder -> {
+            ActorElement corpse = ponder.resolve(fakeBody);
+            if (corpse != null) {
+                corpse.setVisible(true);
+            }
+        });
+        Actors.fall(scene, fakeBody);
+        scene.idle(34);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
-                .text("挨一刀 +50 金币和 4 张便条；中一枪 +50 金币并加速 5 秒")
+                .text("挨一刀 +50 金币和 4 张便条，随即假死 20 秒；中枪也 +50 金币，复活后加速 5 秒")
                 .independent()
                 .attachKeyFrame();
         scene.idle(30);
@@ -1401,6 +1417,25 @@ final class SparkWitchCivilianScenes {
         scene.idle(20);
         Actors.turn(scene, killer, WEST);
         scene.idle(50);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("假死时你倒地旁观，不能动、说话或购物；尸体被秃鹫吃掉就真死了")
+                .independent();
+        scene.idle(90);
+        // Time is up: the corpse is discarded and the Fiend stands again on his spot, leaving spectator mode.
+        // 时间到：尸体被移除，魔人离开旁观模式，在原地重新站起。
+        Actors.vanish(scene, fakeBody);
+        scene.addInstruction(ponder -> {
+            ActorElement revived = ponder.resolve(fiend);
+            if (revived != null) {
+                revived.setVisible(true);
+            }
+        });
+        scene.overlay().showText(90)
+                .text("时间到原地复活（演示缩短）；买时刻前每 60 秒还会自动假死 5 秒")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
         Actors.hold(scene, fiend, crowbar);
         // The moment's two-way outline lasts to the end. 时刻的双向描边一直持续到结束。
         Actors.highlight(scene, fiend, crimson, 436);
