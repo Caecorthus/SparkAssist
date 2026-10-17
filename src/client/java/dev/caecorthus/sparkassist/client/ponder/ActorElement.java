@@ -9,8 +9,6 @@ import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
@@ -661,8 +659,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
      */
     private static PlayerEntityModel<LivingEntity> bodyModel() {
         if (bodyModel == null) {
-            bodyModel = new PlayerEntityModel<>(TexturedModelData.of(
-                    PlayerEntityModel.getTexturedModelData(Dilation.NONE, false), 64, 64).createModel(), false);
+            bodyModel = ActorModelCompat.vanillaPlayerModel();
         }
         return bodyModel;
     }

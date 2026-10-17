@@ -3,6 +3,11 @@ package dev.caecorthus.sparkassist.client.ponder;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.model.Dilation;
+import net.minecraft.client.model.TexturedModelData;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.model.SkullEntityModel;
+import net.minecraft.entity.LivingEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,5 +45,22 @@ final class ActorModelCompat {
         } catch (ReflectiveOperationException | RuntimeException exception) {
             LOGGER.warn("Could not keep Entity Model Features animations off Ponder actors", exception);
         }
+    }
+
+    /**
+     * A wide player model baked straight from vanilla's model data, for the bodies the scenes draw themselves (corpses,
+     * sleepers). Model packs swap the entity model loader's player layer for an animated one, so nothing here goes
+     * through the loader; the geometry is the same as vanilla's PLAYER layer.
+     * 直接用原版模型数据烘焙的宽臂玩家模型，供场景自己绘制的身体（尸体、睡觉的人）使用。模型资源包会把实体模型加载器的
+     * 玩家层换成带动画的版本，所以这里不经过加载器；几何与原版 PLAYER 层相同。
+     */
+    static <T extends LivingEntity> PlayerEntityModel<T> vanillaPlayerModel() {
+        return new PlayerEntityModel<>(TexturedModelData.of(
+                PlayerEntityModel.getTexturedModelData(Dilation.NONE, false), 64, 64).createModel(), false);
+    }
+
+    /** The player head model baked the same way, for heads the scenes draw themselves. 同样方式烘焙的玩家头颅模型，供场景自己绘制的头颅使用。 */
+    static SkullEntityModel vanillaHeadModel() {
+        return new SkullEntityModel(SkullEntityModel.getHeadTexturedModelData().createModel());
     }
 }

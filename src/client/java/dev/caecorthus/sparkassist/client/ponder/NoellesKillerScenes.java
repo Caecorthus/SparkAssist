@@ -39,7 +39,6 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.model.SkullEntityModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
@@ -1678,8 +1677,7 @@ final class NoellesKillerScenes {
                 return;
             }
             if (model == null) {
-                model = new SkullEntityModel(MinecraftClient.getInstance().getEntityModelLoader()
-                        .getModelPart(EntityModelLayers.PLAYER_HEAD));
+                model = ActorModelCompat.vanillaHeadModel();
             }
             Vec3d at = from.lerp(to, time / ticks);
             MatrixStack ms = graphics.getMatrices();
@@ -1723,8 +1721,7 @@ final class NoellesKillerScenes {
                 return;
             }
             if (model == null) {
-                model = new PlayerEntityModel<>(MinecraftClient.getInstance().getEntityModelLoader()
-                        .getModelPart(EntityModelLayers.PLAYER), false);
+                model = ActorModelCompat.vanillaPlayerModel();
             }
             MatrixStack ms = graphics.getMatrices();
             ms.push();
