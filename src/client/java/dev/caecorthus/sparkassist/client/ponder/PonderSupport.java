@@ -24,6 +24,7 @@ public final class PonderSupport {
     public static void init() {
         if (isAvailable()) {
             SparkPonderPlugin.register();
+            ActorModelCompat.register();
         }
     }
 

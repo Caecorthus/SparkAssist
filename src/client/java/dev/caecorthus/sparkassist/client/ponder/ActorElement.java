@@ -15,7 +15,6 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -652,10 +651,15 @@ public final class ActorElement extends AnimatedSceneElementBase {
         }
     }
 
+    /**
+     * Baked straight from vanilla's player model data, not fetched from the entity model loader: model packs (Entity
+     * Model Features) swap the loader's player layer for an animated one, which pulls a lying body apart.
+     * 直接用原版玩家模型数据烘焙，而不从实体模型加载器获取：模型资源包（Entity Model Features）会把加载器的玩家层换成
+     * 带动画的版本，导致躺着的身体被拆散。
+     */
     private static PlayerEntityModel<LivingEntity> bodyModel() {
         if (bodyModel == null) {
-            bodyModel = new PlayerEntityModel<>(MinecraftClient.getInstance().getEntityModelLoader()
-                    .getModelPart(EntityModelLayers.PLAYER), false);
+            bodyModel = ActorModelCompat.vanillaPlayerModel();
         }
         return bodyModel;
     }
