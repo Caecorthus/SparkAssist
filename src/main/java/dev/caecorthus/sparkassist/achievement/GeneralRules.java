@@ -348,16 +348,19 @@ final class GeneralRules {
 
     /**
      * 我命由我不由天: at the moment I became the last living 好人, 3 or more players of the killer faction were alive;
-     * I triggered no Last Stand at any point this round, never held {@link #LOOSE_END_ROLE}, was alive at
-     * {@code match_end}, and the 好人 won with me among the winners. If the time ran out, the round was decided at
-     * least 60 seconds after that moment. Complete record. A Last Stand before that moment rules it out too: it is
-     * what sets up SparkTraits' Final Moment (which turns its holder into a Loose End) once they become the last 好人.
-     * Other players' factions are the ones the record
+     * I triggered no Last Stand at any point this round, never held {@link #LOOSE_END_ROLE} or
+     * {@link TraitRules#IMPOSTOR}, was alive at {@code match_end}, and the 好人 won with me among the winners. If the
+     * time ran out, the round was decided at least 60 seconds after that moment. Complete record. A Last Stand before
+     * that moment rules it out too: it is what sets up SparkTraits' Final Moment (which turns its holder into a Loose
+     * End) once they become the last 好人. An Impostor is on the killer side even though its role is a 好人 one, and
+     * {@link #myFactionAt} falls back to that role's base faction once my role changed or I died, so the trait itself
+     * rules it out. Other players' factions are the ones the record
      * shows (a living player's trait flip it never shows is invisible); mine is read by {@link #myFactionAt}.
      * 在我成为最后一名存活好人的那一刻，场上有 3 名及以上杀手阵营玩家存活；本局我从未触发背水一战、从未担任
-     * {@link #LOOSE_END_ROLE}，{@code match_end} 时仍存活，并且好人获胜、我是获胜者之一。若是时间耗尽获胜，胜负至少在那一刻之后
-     * 60 秒才判定。需要完整记录。那一刻之前的背水一战也不行：正是它让持有者在成为最后一名好人时进入 SparkTraits 的最终时刻
-     * （把持有者变成亡命徒）。
+     * {@link #LOOSE_END_ROLE}、从未持有 {@link TraitRules#IMPOSTOR}，{@code match_end} 时仍存活，并且好人获胜、我是获胜者之一。
+     * 若是时间耗尽获胜，胜负至少在那一刻之后 60 秒才判定。需要完整记录。那一刻之前的背水一战也不行：正是它让持有者在成为
+     * 最后一名好人时进入 SparkTraits 的最终时刻（把持有者变成亡命徒）。内鬼的身份虽是好人身份，实际却站在杀手一边；
+     * 而一旦我换过身份或死过，{@link #myFactionAt} 就退回该身份的基础阵营，所以直接以词条排除。
      * 其他玩家的阵营按记录给出的为准（记录里从未出现的存活玩家的词条阵营翻转看不到）；我的阵营按 {@link #myFactionAt} 读取。
      */
     static boolean defiedFate(AchievementContext context) {
@@ -367,7 +370,7 @@ final class GeneralRules {
         if (self == null || !context.won() || !Factions.isCivilian(winningFaction(context)) || end.isEmpty()
                 || !timeline.aliveAfter(end.get()).contains(self)
                 || !Rules.myGlobalEvents(context, MatchEvent.LAST_STAND_TRIGGERED).isEmpty()
-                || timeline.roleHistory(self).contains(LOOSE_END_ROLE)) {
+                || timeline.roleHistory(self).contains(LOOSE_END_ROLE) || context.hadTrait(TraitRules.IMPOSTOR)) {
             return false;
         }
         boolean wasLast = false;
