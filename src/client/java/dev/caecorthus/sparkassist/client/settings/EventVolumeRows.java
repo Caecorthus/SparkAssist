@@ -6,6 +6,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -51,47 +53,85 @@ final class EventVolumeRows {
      * @param whoKey      lang key of the role or trait, or null for a plain row / 角色或天赋名的 lang 键，普通行为 null
      * @param whoFallback English name used if that key is missing / 该键缺失时使用的英文名
      * @param colour      the role's guide colour as RGB, 0 for none / 角色在指南中的颜色，0 为无
+     * @param preview     a representative sound and the category the game plays it on / 代表性声音及其在游戏中的分类
      */
     record Row(EventSoundGroup group, Section section, String mod, @Nullable String whoKey, String whoFallback,
-               int colour) {
+               int colour, Sample preview) {
+    }
+
+    /** A sample: sound event id and its in-game category. 试听样本：声音事件 id 与游戏内分类。 */
+    record Sample(String sound, SoundCategory category) {
+        Identifier id() {
+            return Identifier.of(sound);
+        }
+    }
+
+    private static Sample sample(String sound, SoundCategory category) {
+        return new Sample(sound, category);
     }
 
     static final List<Row> ROWS = List.of(
-            plain(EventSoundGroup.TRAIN_INSIDE, Section.TRAIN_AND_ROUND, "wathe"),
-            plain(EventSoundGroup.TRAIN_OUTSIDE, Section.TRAIN_AND_ROUND, "wathe"),
-            plain(EventSoundGroup.TRAIN_HORN, Section.TRAIN_AND_ROUND, "wathe"),
-            plain(EventSoundGroup.BLACKOUT, Section.TRAIN_AND_ROUND, "wathe"),
-            plain(EventSoundGroup.ROUND_MUSIC, Section.TRAIN_AND_ROUND, "wathe"),
+            plain(EventSoundGroup.TRAIN_INSIDE, Section.TRAIN_AND_ROUND, "wathe",
+                    sample("wathe:ambient.train.inside", SoundCategory.AMBIENT)),
+            plain(EventSoundGroup.TRAIN_OUTSIDE, Section.TRAIN_AND_ROUND, "wathe",
+                    sample("wathe:ambient.train.outside", SoundCategory.AMBIENT)),
+            plain(EventSoundGroup.TRAIN_HORN, Section.TRAIN_AND_ROUND, "wathe",
+                    sample("wathe:ambient.train.horn", SoundCategory.AMBIENT)),
+            plain(EventSoundGroup.BLACKOUT, Section.TRAIN_AND_ROUND, "wathe",
+                    sample("wathe:ambient.blackout", SoundCategory.PLAYERS)),
+            plain(EventSoundGroup.ROUND_MUSIC, Section.TRAIN_AND_ROUND, "wathe",
+                    sample("wathe:ui.riser", SoundCategory.MASTER)),
 
-            plain(EventSoundGroup.PSYCHO_MODE, Section.ROLE_ANY, "wathe"),
+            plain(EventSoundGroup.PSYCHO_MODE, Section.ROLE_ANY, "wathe",
+                    sample("wathe:ambient.psycho_drone", SoundCategory.AMBIENT)),
+            plain(EventSoundGroup.SHIELD_CLANG, Section.ROLE_ANY, "wathe",
+                    sample("wathe:item.psycho.armour", SoundCategory.MASTER)),
 
             role(EventSoundGroup.BELL_RINGER_TOLL, Section.ROLE_KILLER, "sparkwitch",
-                    "announcement.role.bell_ringer", "Bell Ringer", 0x8C6D3F),
+                    "announcement.role.bell_ringer", "Bell Ringer", 0x8C6D3F,
+                    sample("sparkwitch:ambient.bell_ringer_toll", SoundCategory.PLAYERS)),
             role(EventSoundGroup.TIME_STEALER_CHIME, Section.ROLE_KILLER, "sparkwitch",
-                    "announcement.role.time_stealer", "Time Stealer", 0x2E8B7A),
+                    "announcement.role.time_stealer", "Time Stealer", 0x2E8B7A,
+                    sample("sparkwitch:ambient.time_stealer_chime", SoundCategory.PLAYERS)),
 
             role(EventSoundGroup.CORRUPT_COP_MOMENT, Section.ROLE_NEUTRAL, "noellesroles",
-                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264),
+                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
+                    sample("noellesroles:music.corrupt_cop_moment_1", SoundCategory.AMBIENT)),
             role(EventSoundGroup.ARROGANT_ASF_MUSIC, Section.ROLE_NEUTRAL, "sparkstrength",
-                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264),
+                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
+                    sample("sparkstrength:music.takediskrush", SoundCategory.AMBIENT)),
             role(EventSoundGroup.JESTER_MOMENT, Section.ROLE_NEUTRAL, "noellesroles",
-                    "announcement.role.jester", "Jester", 0xF8C8DC),
+                    "announcement.role.jester", "Jester", 0xF8C8DC,
+                    sample("noellesroles:ambient.jester_laugh", SoundCategory.MASTER)),
             role(EventSoundGroup.SHADOW_JESTER_FINALE, Section.ROLE_NEUTRAL, "sparkstrength",
-                    "announcement.role.shadow_jester", "Shadow Jester", 0xBE1E5A),
+                    "announcement.role.shadow_jester", "Shadow Jester", 0xBE1E5A,
+                    sample("sparkstrength:ambient.shadow_jester", SoundCategory.AMBIENT)),
             role(EventSoundGroup.VULTURE_CURSE, Section.ROLE_NEUTRAL, "sparkstrength",
-                    "announcement.role.vulture", "Vulture", 0xB56700),
+                    "announcement.role.vulture", "Vulture", 0xB56700,
+                    sample("sparkstrength:vulture.super_curse", SoundCategory.PLAYERS)),
+            role(EventSoundGroup.FIEND_MOMENT, Section.ROLE_NEUTRAL, "sparkwitch",
+                    "announcement.role.fiend", "Fiend", 0x8E1B3A,
+                    sample("sparkwitch:ambient.fiend_moment", SoundCategory.MASTER)),
 
             role(EventSoundGroup.PIG_CHASE, Section.ROLE_CIVILIAN, "sparkwitch",
-                    "announcement.role.pig_god", "Pig God", 0xF2A4FC),
+                    "announcement.role.pig_god", "Pig God", 0xF2A4FC,
+                    sample("sparkwitch:skill.pig_chase", SoundCategory.PLAYERS)),
             role(EventSoundGroup.SAINT_BELL, Section.ROLE_CIVILIAN, "sparkwitch",
-                    "announcement.role.saint", "Saint", 0xEEBC78),
+                    "announcement.role.saint", "Saint", 0xEEBC78,
+                    sample("sparkwitch:ambient.saint_bell", SoundCategory.PLAYERS)),
+            role(EventSoundGroup.HOLY_FLASH_TINNITUS, Section.ROLE_CIVILIAN, "sparkwitch",
+                    "announcement.role.saint", "Saint", 0xEEBC78,
+                    sample("sparkwitch:skill.holy_flash_tinnitus", SoundCategory.PLAYERS)),
 
             role(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, Section.TRAIT_CIVILIAN, "sparktraits",
-                    "trait.sparktraits.depression.name", "Depression", 0x6B7280),
+                    "trait.sparktraits.depression.name", "Depression", 0x6B7280,
+                    sample("sparktraits:depression.docile_to_rage", SoundCategory.AMBIENT)),
             role(EventSoundGroup.DEPRESSION_PSYCHO_MUSIC, Section.TRAIT_CIVILIAN, "sparktraits",
-                    "trait.sparktraits.depression.name", "Depression", 0x6B7280),
+                    "trait.sparktraits.depression.name", "Depression", 0x6B7280,
+                    sample("sparktraits:depression.blind_rage_chase", SoundCategory.AMBIENT)),
             role(EventSoundGroup.DEPRESSION_PSYCHO_ALERT, Section.TRAIT_CIVILIAN, "sparktraits",
-                    "trait.sparktraits.depression.name", "Depression", 0x6B7280)
+                    "trait.sparktraits.depression.name", "Depression", 0x6B7280,
+                    sample("sparktraits:depression.player_was_seen", SoundCategory.AMBIENT))
     );
 
     /**
@@ -106,22 +146,26 @@ final class EventVolumeRows {
     private EventVolumeRows() {
     }
 
-    private static Row plain(EventSoundGroup group, Section section, String mod) {
-        return new Row(group, section, mod, null, "", 0);
+    private static Row plain(EventSoundGroup group, Section section, String mod, Sample preview) {
+        return new Row(group, section, mod, null, "", 0, preview);
     }
 
     private static Row role(EventSoundGroup group, Section section, String mod, String whoKey, String whoFallback,
-                            int colour) {
-        return new Row(group, section, mod, whoKey, whoFallback, colour);
+                            int colour, Sample preview) {
+        return new Row(group, section, mod, whoKey, whoFallback, colour, preview);
     }
 
-    /** Rows whose mod is installed, grouped by section in display order. 已安装模组的行，按分节与显示顺序排列。 */
-    static List<List<Row>> visibleBySection(Predicate<String> modLoaded) {
+    /**
+     * Rows that pass {@code shown} (in game: the mod is installed and the sound manager knows the sample), grouped by
+     * section in display order.
+     * 通过 {@code shown} 的行（游戏中：模组已安装且声音管理器认识该样本），按分节与显示顺序排列。
+     */
+    static List<List<Row>> visibleBySection(Predicate<Row> shown) {
         List<List<Row>> sections = new ArrayList<>();
         for (Section section : Section.values()) {
             List<Row> rows = new ArrayList<>();
             for (Row row : ROWS) {
-                if (row.section() == section && modLoaded.test(row.mod())) {
+                if (row.section() == section && shown.test(row)) {
                     rows.add(row);
                 }
             }

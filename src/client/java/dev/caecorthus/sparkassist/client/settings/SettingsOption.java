@@ -22,6 +22,8 @@ public abstract class SettingsOption {
     @Nullable
     private Text detail;
     private int accent;
+    @Nullable
+    private SoundPreview preview;
 
     protected SettingsOption(String id, Text label, Text description, Text source, SettingsStore store) {
         this.id = Objects.requireNonNull(id);
@@ -74,6 +76,17 @@ public abstract class SettingsOption {
 
     public SettingsStore store() {
         return store;
+    }
+
+    /** A sample the row can play, or null. 该行可试听的声音，可为 null。 */
+    @Nullable
+    public SoundPreview preview() {
+        return preview;
+    }
+
+    public SettingsOption withPreview(@Nullable SoundPreview preview) {
+        this.preview = preview;
+        return this;
     }
 
     /** Greys the row out while {@code enabled} is false; {@code reason} explains why. 条件不满足时置灰并说明原因。 */

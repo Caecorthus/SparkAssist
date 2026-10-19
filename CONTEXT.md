@@ -46,8 +46,10 @@ _Avoid_: master volume (vanilla's), global volume
 **Audio page section**:
 How the **SparkDLC settings screen** lays out **Event sound group** rows: train and round sounds, then role moments by
 faction (any role, killers, neutrals, civilians, witch faction), then traits by category. A role row reads "role ·
-sound" with the role's guide colour; it is shown only while the mod that plays those sounds is installed. Sections fold,
-and the folded state is remembered in `sparkassist.json`.
+sound" with the role's guide colour; it is shown only while the mod that plays those sounds is installed and the sound
+manager knows its sample. Sections fold, and the folded state is remembered in `sparkassist.json`. Each row can play a
+**Sound preview**: one representative sound on its in-game category, through the normal sound system so every volume
+applies, one at a time and at most ten seconds.
 _Avoid_: sound category, channel, tab
 
 **Event sound catalog**:
