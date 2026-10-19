@@ -64,8 +64,6 @@
   "option.sparkassist.event_sound_volume.holy_flash_tinnitus.description": "The ringing only a player caught by a Holy Flash (an item from the Saint's shop) hears, fading out with the blindness (up to 10 seconds).",
   "option.sparkassist.event_sound_volume.shield_clang": "Shield Clang",
   "option.sparkassist.event_sound_volume.shield_clang.description": "The metallic clang when a protection triggers: a Psycho Mode shield layer, an Iron Man, Whiskey or Guardian shield, a Ninja parry; it also sounds when an Iron Man vial is applied. Some only the protected player hears, others carry about 80 blocks.",
-  "option.sparkassist.event_sound_volume.fiend_moment": "Fiend Moment",
-  "option.sparkassist.event_sound_volume.fiend_moment.description": "The wither roar every player hears when the Fiend Moment begins. Ordinary withers keep their volume.",
   "option.sparkassist.event_sound_volume.bell_ringer_toll.description": "The knell the Bell Ringer rings with Echo; everyone in the world hears it.",
   "option.sparkassist.event_sound_volume.time_stealer_chime.description": "The pocket watch chimes a player hears while their time is being stolen (or gifted), and the stop when it runs out. Nobody else hears them.",
   "option.sparkassist.event_sound_volume.grand_witch_ceremonial_sword_bgm.description": "The Grand Witch's ceremonial sword music. The current SparkWitch no longer plays it.",
