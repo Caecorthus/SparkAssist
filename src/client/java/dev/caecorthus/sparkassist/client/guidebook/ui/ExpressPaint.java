@@ -255,13 +255,18 @@ public final class ExpressPaint {
     /** 22x22 icon button = the panel recipe at 22 px (3 + 16 + 3); hover warms the body and coins the ring, no raise.
      * Hit area equals the visual. 22x22 图标按钮即 22 像素的面板配方；悬停只改底色与金币色环，不抬升；热区等于外观。 */
     public static void iconButton(DrawContext c, int x, int y, boolean hover) {
+        iconButton(c, x, y, hover, BOOK_ICON);
+    }
+
+    /** The same 22 px button with another 16 px icon (the settings gear). 同款 22 像素按钮，换用另一个 16 像素图标（设置齿轮）。 */
+    public static void iconButton(DrawContext c, int x, int y, boolean hover, Identifier icon) {
         int s = ICON_BUTTON_SIZE;
         dropShadow(c, x, y, s, s);
         roundedOutline(c, x, y, s, s, EDGE);
         c.fill(x + 1, y + 1, x + s - 1, y + s - 1, hover ? BUTTON_HOVER : BODY);
         bevel(c, x, y, s, s);
         ring(c, x, y, s, s, hover ? COIN : BRASS_HI, hover ? BRASS : BRASS_LO);
-        c.drawTexture(BOOK_ICON, x + 3, y + 3, 0, 0, 16, 16, 16, 16);
+        c.drawTexture(icon, x + 3, y + 3, 0, 0, 16, 16, 16, 16);
     }
 
     /** The book icon at exactly 2x (32x32), for the frontispiece. 扉页用的 2 倍书本图标。 */

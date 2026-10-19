@@ -14,6 +14,18 @@ _Avoid_: role feature, talent behavior, server rule
 The persisted local JSON settings for assist choices.
 _Avoid_: server config, game settings
 
+**SparkDLC settings screen**:
+The one screen, opened from vanilla Accessibility, the pause-menu gear or the Music & Sounds shortcut, that shows every
+SparkDLC client setting: SparkAssist's own, SparkWitch's scope settings through its public `ScopeSettingsApi`, and
+Wathe's snow settings. Laid out like Sodium's options (page tabs, grouped rows, a description panel); values apply at
+once, and each config file is written once per committed change. Server and admin settings never appear here.
+_Avoid_: config menu, mod menu, options screen (vanilla's)
+
+**Settings store**:
+One config file that settings rows write into (`sparkassist.json`, `sparkwitch-client.json`, `wathe.json`); the
+**SparkDLC settings screen** saves each touched store once per flush, and "Undo" puts back the values it opened with.
+_Avoid_: config manager, save target
+
 **Wathe instinct toggle**:
 A client interpretation of Wathe's `key.wathe.instinct` as hold or rising-edge toggle behavior.
 _Avoid_: instinct ability, highlight rule
@@ -174,6 +186,9 @@ _Avoid_: broad audio suppression, role rebalance, talent patch
 
 - **SparkAssist client settings** store one **Wathe instinct toggle** mode and
   one **Event sound volume** per **Event sound group**.
+- The **SparkDLC settings screen** is the only UI for **SparkAssist client settings**; it owns no values itself, and
+  a sibling mod's rows appear only while that mod answers through its public API (`SparkDlcSettingsApi` tells
+  SparkWitch to stop adding its own Accessibility rows).
 - Each **Event sound group** owns one or more identifiers in the
   **Event sound catalog**.
 - The **Client sound runtime** consults the **Event sound catalog** before

@@ -70,6 +70,9 @@ dependencies {
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-world:${project.cca_version}"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-scoreboard:${project.cca_version}"
+    // Wathe bundles MidnightLib; the settings screen writes Wathe's client config through it.
+    // Wathe 自带 MidnightLib；设置界面通过它写入 Wathe 的客户端配置。
+    modCompileOnly "maven.modrinth:midnightlib:${project.midnightlib_version}"
     modRuntimeOnly "maven.modrinth:midnightlib:${project.midnightlib_version}"
     modRuntimeOnly "me.lucko:fabric-permissions-api:0.3.1"
     modRuntimeOnly("dev.doctor4t:ratatouille:${project.ratatouille_version}") {
