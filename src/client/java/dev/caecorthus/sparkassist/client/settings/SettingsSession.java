@@ -1,6 +1,6 @@
 package dev.caecorthus.sparkassist.client.settings;
 
-import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +14,9 @@ import java.util.Set;
  */
 public final class SettingsSession {
     private final List<SettingsPage> pages;
-    private final Map<SettingsOption, Object> opened = new IdentityHashMap<>();
+    /** Keyed by identity (options don't override equals), in page order so Undo saves stores in a stable order.
+     * 以对象身份为键（选项不重写 equals），按页面顺序排列，撤销时各存储的保存顺序固定。 */
+    private final Map<SettingsOption, Object> opened = new LinkedHashMap<>();
     private final Set<SettingsStore> dirty = new LinkedHashSet<>();
 
     public SettingsSession(List<SettingsPage> pages) {

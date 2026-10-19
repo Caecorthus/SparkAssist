@@ -62,22 +62,97 @@ final class EventSoundCatalog {
                                 "ambient/dbd_jester"
                         )
                 ),
-                group(EventSoundGroup.TRAIN_OUTSIDE,
+                group(EventSoundGroup.TRAIN_INSIDE,
                         eventIds("wathe",
-                                "ambient.train.outside"
+                                "ambient.train.inside"
                         ),
                         resourceIds("wathe",
-                                "ambient/train_outside"
+                                "ambient/train_inside"
+                        )
+                ),
+                // The ship map's outside loop is the same kind of sound as the train's, not a horn.
+                // 船图的车外循环音与列车车外音是同一类声音，不是汽笛。
+                group(EventSoundGroup.TRAIN_OUTSIDE,
+                        eventIds("wathe",
+                                "ambient.train.outside",
+                                "ambient.ship.outside"
+                        ),
+                        resourceIds("wathe",
+                                "ambient/train_outside",
+                                "ambient/ship_outside"
                         )
                 ),
                 group(EventSoundGroup.TRAIN_HORN,
                         eventIds("wathe",
-                                "ambient.train.horn",
-                                "ambient.ship.outside"
+                                "ambient.train.horn"
                         ),
                         resourceIds("wathe",
-                                "ambient/train_horn",
-                                "ambient/ship_outside"
+                                "ambient/train_horn"
+                        )
+                ),
+                group(EventSoundGroup.BLACKOUT,
+                        eventIds("wathe",
+                                "ambient.blackout"
+                        ),
+                        resourceIds("wathe",
+                                "ambient/blackout"
+                        )
+                ),
+                group(EventSoundGroup.ROUND_MUSIC,
+                        eventIds("wathe",
+                                "ui.riser",
+                                "ui.piano",
+                                "ui.piano_stinger",
+                                "ui.piano_win",
+                                "ui.piano_lose"
+                        ),
+                        resourceIds("wathe",
+                                "ui/riser",
+                                "ui/piano",
+                                "ui/piano_stinger",
+                                "ui/piano_win",
+                                "ui/piano_lose"
+                        )
+                ),
+                group(EventSoundGroup.SHADOW_JESTER_FINALE,
+                        eventIds("sparkstrength",
+                                "ambient.shadow_jester"
+                        ),
+                        resourceIds("sparkstrength",
+                                "ambient/shadow_jester"
+                        )
+                ),
+                group(EventSoundGroup.VULTURE_CURSE,
+                        eventIds("sparkstrength",
+                                "vulture.super_curse",
+                                "vulture.super_curse_helium",
+                                "vulture.death_scream",
+                                "vulture.death_scream_helium"
+                        ),
+                        resourceIds("sparkstrength",
+                                "vulture/super_curse",
+                                "vulture/super_curse_helium",
+                                "vulture/death_scream",
+                                "vulture/death_scream_helium_1",
+                                "vulture/death_scream_helium_2"
+                        )
+                ),
+                group(EventSoundGroup.TIME_STEALER_CHIME,
+                        eventIds("sparkwitch",
+                                "ambient.time_stealer_chime",
+                                "ambient.time_stealer_final"
+                        ),
+                        resourceIds("sparkwitch",
+                                "ambient/time_stealer_chime",
+                                "ambient/time_stealer_final"
+                        )
+                ),
+                group(EventSoundGroup.SAINT_BELL,
+                        eventIds("sparkwitch",
+                                "ambient.saint_bell"
+                        ),
+                        resourceIds("sparkwitch",
+                                "ambient/saint_bell"
                         )
                 ),
                 group(EventSoundGroup.PIG_CHASE,

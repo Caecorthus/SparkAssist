@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -40,7 +41,7 @@ final class SettingsRowWidget extends ClickableWidget {
     }
 
     SettingsRowWidget(int x, int y, int width, SettingsOption option, Host host) {
-        super(x, y, width, HEIGHT, option.label());
+        super(x, y, width, HEIGHT, option.title());
         this.option = option;
         this.host = host;
     }
@@ -153,9 +154,25 @@ final class SettingsRowWidget extends ClickableWidget {
 
         int textY = y + (height - font.fontHeight) / 2 + 1;
         int controlLeft = renderControl(context, font, right - PAD, y, textY, enabled, hot);
-        int labelWidth = Math.max(0, controlLeft - VALUE_GAP - (x + PAD));
-        context.drawText(font, SettingsText.ellipsize(font, option.label(), labelWidth), x + PAD, textY,
-                enabled ? SettingsPalette.TEXT : SettingsPalette.TEXT_DISABLED, false);
+        int labelX = x + PAD;
+        if (option.accent() != 0) {
+            // The role's guide colour, ringed so dark colours (Corrupt Cop navy) still read on a dark row.
+            // 角色在指南中的颜色，加一圈浅色描边，深色（如黑警的藏青）在深色行上也看得清。
+            int dotY = y + height / 2 - 3;
+            context.fill(labelX, dotY, labelX + 6, dotY + 6, SettingsPalette.DOT_RING);
+            context.fill(labelX + 1, dotY + 1, labelX + 5, dotY + 5, option.accent());
+            labelX += 10;
+        }
+        int available = Math.max(0, controlLeft - VALUE_GAP - labelX);
+        OrderedText label = SettingsText.ellipsize(font, option.label(), available);
+        context.drawText(font, label, labelX, textY, enabled ? SettingsPalette.TEXT : SettingsPalette.TEXT_DISABLED,
+                false);
+        Text detail = option.detail();
+        int used = font.getWidth(label) + 5;
+        if (detail != null && available - used > 12) {
+            context.drawText(font, SettingsText.ellipsize(font, detail, available - used), labelX + used, textY,
+                    enabled ? SettingsPalette.TEXT_MUTED : SettingsPalette.TEXT_DISABLED, false);
+        }
     }
 
     /** Draws the control right-aligned at {@code right}; returns its left edge. 右对齐绘制控件，返回其左边缘。 */
@@ -214,7 +231,7 @@ final class SettingsRowWidget extends ClickableWidget {
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
         builder.put(NarrationPart.TITLE, Text.translatable("screen.sparkassist.settings.narration.row",
-                option.label(), option.valueText()));
+                option.title(), option.valueText()));
         if (option.enabled()) {
             builder.put(NarrationPart.USAGE, Text.translatable("screen.sparkassist.settings.narration.usage"));
         }
