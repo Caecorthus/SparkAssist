@@ -19,6 +19,9 @@ public abstract class SettingsOption {
     private final SettingsStore store;
     private BooleanSupplier enabled = () -> true;
     private Supplier<Text> disabledReason = () -> null;
+    @Nullable
+    private Text detail;
+    private int accent;
 
     protected SettingsOption(String id, Text label, Text description, Text source, SettingsStore store) {
         this.id = Objects.requireNonNull(id);
@@ -32,8 +35,32 @@ public abstract class SettingsOption {
         return id;
     }
 
+    /** The row name; for a role row, the role (the sound is in {@link #detail()}). 行名；角色行时为角色名。 */
     public Text label() {
         return label;
+    }
+
+    /** What the row controls, drawn after the label in grey, or null. 标签后灰色显示的具体内容，可为 null。 */
+    @Nullable
+    public Text detail() {
+        return detail;
+    }
+
+    /** The label and detail together, for the description panel and narration. 标签与具体内容合在一起，用于说明面板与旁白。 */
+    public Text title() {
+        return detail == null ? label : Text.translatable("screen.sparkassist.settings.title_with_detail", label, detail);
+    }
+
+    /** Opaque RGB of the dot drawn before the label (the role's guide colour), or 0 for none. 标签前圆点的颜色，0 为无。 */
+    public int accent() {
+        return accent;
+    }
+
+    /** Splits the row into "who · what" and marks it with a colour dot. 把行拆成「谁 · 什么」并加上颜色圆点。 */
+    public SettingsOption withDetail(@Nullable Text detail, int accentRgb) {
+        this.detail = detail;
+        this.accent = accentRgb == 0 ? 0 : 0xFF000000 | accentRgb;
+        return this;
     }
 
     public Text description() {

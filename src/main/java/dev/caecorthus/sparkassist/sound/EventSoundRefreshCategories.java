@@ -4,15 +4,16 @@ import java.util.List;
 import net.minecraft.sound.SoundCategory;
 
 /**
- * Refresh metadata for categories that can contain SparkAssist event sounds.
- * 可能包含 SparkAssist 事件音效的分类刷新元数据。
+ * Which category SparkAssist pokes so vanilla recalculates playing volumes. In 1.21.1 {@code SoundSystem
+ * .updateSoundVolume} recalculates every playing sound for any category except MASTER (MASTER only sets the listener
+ * gain), whatever the sounds' own categories, so one non-MASTER call covers event sounds on AMBIENT, MUSIC, PLAYERS
+ * and MASTER alike.
+ * SparkAssist 用来让原版重算正在播放音量的分类。在 1.21.1 中，对 MASTER 以外的任何分类调用
+ * {@code SoundSystem.updateSoundVolume} 都会重算所有正在播放的声音（MASTER 只设置监听器增益），与声音自身的分类无关，
+ * 因此一次非 MASTER 调用就覆盖了 AMBIENT、MUSIC、PLAYERS 乃至 MASTER 上的事件音效。
  */
 public final class EventSoundRefreshCategories {
-    private static final List<SoundCategory> REFRESH_CATEGORIES = List.of(
-            SoundCategory.AMBIENT,
-            SoundCategory.MUSIC,
-            SoundCategory.PLAYERS
-    );
+    private static final List<SoundCategory> REFRESH_CATEGORIES = List.of(SoundCategory.AMBIENT);
 
     private EventSoundRefreshCategories() {
     }

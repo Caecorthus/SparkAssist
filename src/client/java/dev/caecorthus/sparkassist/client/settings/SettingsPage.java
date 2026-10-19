@@ -24,10 +24,20 @@ public record SettingsPage(String id, Text title, List<Group> groups) {
         return groups.isEmpty();
     }
 
-    /** A titled block of rows inside a page. 页内带标题的一组行。 */
-    public record Group(Text title, List<SettingsOption> options) {
+    /**
+     * A titled block of rows inside a page. 页内带标题的一组行。
+     *
+     * @param id    stable within its page; "page/id" keys the remembered folded state / 页内稳定；「页/id」用于记住折叠状态
+     * @param title header text / 标题文字
+     */
+    public record Group(String id, Text title, List<SettingsOption> options) {
         public Group {
             options = List.copyOf(options);
         }
+    }
+
+    /** The key under which a group's folded state is remembered. 记录分组折叠状态所用的键。 */
+    public String groupKey(Group group) {
+        return id + "/" + group.id();
     }
 }

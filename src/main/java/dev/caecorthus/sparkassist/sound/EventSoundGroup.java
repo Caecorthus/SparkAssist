@@ -1,8 +1,9 @@
 package dev.caecorthus.sparkassist.sound;
 
 /**
- * Event-level sound groups exposed in SparkAssist's client settings.
- * SparkAssist 设置里暴露的事件级音量分组。
+ * Event-level sound groups exposed in SparkAssist's client settings. Serialized names are config keys and must not
+ * change; new groups are appended and default to full volume.
+ * SparkAssist 设置里暴露的事件级音量分组。序列化名称即配置键，不得更改；新分组追加在末尾，默认满音量。
  */
 public enum EventSoundGroup {
     PSYCHO_MODE("psycho_mode", "option.sparkassist.event_sound_volume.psycho_mode"),
@@ -19,7 +20,14 @@ public enum EventSoundGroup {
     BELL_RINGER_TOLL("bell_ringer_toll", "option.sparkassist.event_sound_volume.bell_ringer_toll"),
     DEPRESSION_PSYCHO_RANGE("depression_psycho_range", "option.sparkassist.event_sound_volume.depression_psycho_range"),
     DEPRESSION_PSYCHO_MUSIC("depression_psycho_music", "option.sparkassist.event_sound_volume.depression_psycho_music"),
-    DEPRESSION_PSYCHO_ALERT("depression_psycho_alert", "option.sparkassist.event_sound_volume.depression_psycho_alert");
+    DEPRESSION_PSYCHO_ALERT("depression_psycho_alert", "option.sparkassist.event_sound_volume.depression_psycho_alert"),
+    TRAIN_INSIDE("train_inside", "option.sparkassist.event_sound_volume.train_inside"),
+    BLACKOUT("blackout", "option.sparkassist.event_sound_volume.blackout"),
+    ROUND_MUSIC("round_music", "option.sparkassist.event_sound_volume.round_music"),
+    SHADOW_JESTER_FINALE("shadow_jester_finale", "option.sparkassist.event_sound_volume.shadow_jester_finale"),
+    VULTURE_CURSE("vulture_curse", "option.sparkassist.event_sound_volume.vulture_curse"),
+    TIME_STEALER_CHIME("time_stealer_chime", "option.sparkassist.event_sound_volume.time_stealer_chime"),
+    SAINT_BELL("saint_bell", "option.sparkassist.event_sound_volume.saint_bell");
 
     private final String serializedName;
     private final String translationKey;

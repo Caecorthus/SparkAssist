@@ -8,6 +8,7 @@ import dev.doctor4t.wathe.WatheConfig.SnowModeConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,33 +85,60 @@ public final class SparkDlcSettingsPages {
         foliage.enabledWhen(() -> SparkAssistClientSettings.guidebookDecor() != GuidebookDecor.OFF,
                 () -> Text.translatable("option.sparkassist.guidebook_foliage.needs_decor"));
         return new SettingsPage(GENERAL, Text.translatable("screen.sparkassist.settings.page.general"), List.of(
-                new SettingsPage.Group(Text.translatable("screen.sparkassist.settings.group.controls"),
+                new SettingsPage.Group("controls", Text.translatable("screen.sparkassist.settings.group.controls"),
                         List.of(instinct)),
-                new SettingsPage.Group(Text.translatable("screen.sparkassist.settings.group.guidebook"),
+                new SettingsPage.Group("guidebook", Text.translatable("screen.sparkassist.settings.group.guidebook"),
                         List.of(decor, foliage))));
     }
 
     private static SettingsPage audio() {
-        List<SettingsOption> volumes = new ArrayList<>();
-        for (EventSoundGroup group : EventSoundGroup.values()) {
-            volumes.add(eventVolume(group));
+        List<SettingsPage.Group> groups = new ArrayList<>();
+        SliderOption master = new SliderOption(
+                "event_volume.master",
+                Text.translatable("option.sparkassist.event_sound_volume.master"),
+                Text.translatable("option.sparkassist.event_sound_volume.master.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                0, 100, 1,
+                () -> (int) Math.round(SparkAssistClientSettings.eventSoundMasterVolume() * 100.0D),
+                percent -> SparkAssistClientSettings.setEventSoundMasterVolume(percent / 100.0D),
+                100,
+                SparkDlcSettingsPages::percent);
+        groups.add(new SettingsPage.Group("master",
+                Text.translatable("screen.sparkassist.settings.group.event_master"), List.of(master)));
+
+        List<List<EventVolumeRows.Row>> sections =
+                EventVolumeRows.visibleBySection(FabricLoader.getInstance()::isModLoaded);
+        EventVolumeRows.Section[] order = EventVolumeRows.Section.values();
+        for (int i = 0; i < order.length; i++) {
+            List<SettingsOption> volumes = new ArrayList<>();
+            for (EventVolumeRows.Row row : sections.get(i)) {
+                volumes.add(eventVolume(row));
+            }
+            groups.add(new SettingsPage.Group(order[i].id(), Text.translatable(order[i].titleKey()), volumes));
         }
-        return new SettingsPage(AUDIO, Text.translatable("screen.sparkassist.settings.page.audio"), List.of(
-                new SettingsPage.Group(Text.translatable("screen.sparkassist.settings.group.event_volume"), volumes)));
+        return new SettingsPage(AUDIO, Text.translatable("screen.sparkassist.settings.page.audio"), groups);
     }
 
-    static SliderOption eventVolume(EventSoundGroup group) {
-        return new SliderOption(
+    static SliderOption eventVolume(EventVolumeRows.Row row) {
+        EventSoundGroup group = row.group();
+        Text sound = Text.translatable(group.translationKey());
+        Text label = row.whoKey() == null ? sound : Text.translatableWithFallback(row.whoKey(), row.whoFallback());
+        SliderOption option = new SliderOption(
                 "event_volume." + group.serializedName(),
-                Text.translatable(group.translationKey()),
-                Text.translatable("option.sparkassist.event_sound_volume.description"),
-                SPARKASSIST,
+                label,
+                Text.translatable(group.translationKey() + ".description"),
+                modName(row.mod()),
                 SparkAssistClientSettings.STORE,
                 0, 100, 1,
                 () -> (int) Math.round(SparkAssistClientSettings.eventSoundVolume(group) * 100.0D),
                 percent -> SparkAssistClientSettings.setEventSoundVolume(group, percent / 100.0D),
                 100,
                 SparkDlcSettingsPages::percent);
+        if (row.whoKey() != null) {
+            option.withDetail(sound, row.colour());
+        }
+        return option;
     }
 
     private static SettingsPage scope() {
@@ -161,7 +189,7 @@ public final class SparkDlcSettingsPages {
                 SparkWitchScopeBridge.defaultScopedSensitivityPercent(),
                 SparkDlcSettingsPages::percent);
         return new SettingsPage(SCOPE, Text.translatable("screen.sparkassist.settings.page.scope"), List.of(
-                new SettingsPage.Group(Text.translatable("screen.sparkassist.settings.group.scope"),
+                new SettingsPage.Group("scope", Text.translatable("screen.sparkassist.settings.group.scope"),
                         List.of(mode, lens, sensitivity))));
     }
 
@@ -191,8 +219,15 @@ public final class SparkDlcSettingsPages {
         snowflakes.enabledWhen(() -> WatheClientSettings.snowMode() != SnowModeConfig.TURN_OFF,
                 () -> Text.translatable("option.sparkassist.wathe.snowflake_amount.needs_particles"));
         return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), List.of(
-                new SettingsPage.Group(Text.translatable("screen.sparkassist.settings.group.train_effects"),
+                new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
                         List.of(snowMode, snowflakes))));
+    }
+
+    /** The installed mod's display name, so a volume row says whose sounds it scales. 已安装模组的显示名。 */
+    private static Text modName(String modId) {
+        return Text.literal(FabricLoader.getInstance().getModContainer(modId)
+                .map(container -> container.getMetadata().getName())
+                .orElse(modId));
     }
 
     static Text percent(int value) {

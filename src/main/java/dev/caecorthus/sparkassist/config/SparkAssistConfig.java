@@ -2,7 +2,11 @@ package dev.caecorthus.sparkassist.config;
 
 import com.google.gson.JsonObject;
 import dev.caecorthus.sparkassist.sound.EventSoundGroup;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import net.minecraft.util.TranslatableOption;
 
 /**
@@ -15,11 +19,15 @@ public final class SparkAssistConfig {
     private static final String EVENT_SOUND_VOLUMES = "eventSoundVolumes";
     private static final String GUIDEBOOK_DECOR = "guidebookDecor";
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
+    private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
+    private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
     private boolean guidebookFoliage = true;
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
+    private double eventSoundMasterVolume = 1.0D;
+    private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -47,6 +55,17 @@ public final class SparkAssistConfig {
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
             config.setGuidebookFoliage(json.get(GUIDEBOOK_FOLIAGE).getAsBoolean());
         }
+        if (json.has(EVENT_SOUND_MASTER_VOLUME) && json.get(EVENT_SOUND_MASTER_VOLUME).isJsonPrimitive()
+                && json.get(EVENT_SOUND_MASTER_VOLUME).getAsJsonPrimitive().isNumber()) {
+            config.setEventSoundMasterVolume(json.get(EVENT_SOUND_MASTER_VOLUME).getAsDouble());
+        }
+        if (json.has(COLLAPSED_SETTINGS_GROUPS) && json.get(COLLAPSED_SETTINGS_GROUPS).isJsonArray()) {
+            for (JsonElement element : json.getAsJsonArray(COLLAPSED_SETTINGS_GROUPS)) {
+                if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+                    config.setSettingsGroupCollapsed(element.getAsString(), true);
+                }
+            }
+        }
         if (json.has(EVENT_SOUND_VOLUMES) && json.get(EVENT_SOUND_VOLUMES).isJsonObject()) {
             JsonObject eventVolumes = json.getAsJsonObject(EVENT_SOUND_VOLUMES);
             for (String key : eventVolumes.keySet()) {
@@ -67,8 +86,12 @@ public final class SparkAssistConfig {
             eventVolumes.addProperty(group.serializedName(), eventSoundVolume(group));
         }
         json.add(EVENT_SOUND_VOLUMES, eventVolumes);
+        json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        JsonArray collapsed = new JsonArray();
+        collapsedSettingsGroups.forEach(collapsed::add);
+        json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
         return json;
     }
 
@@ -108,6 +131,36 @@ public final class SparkAssistConfig {
             return;
         }
         eventSoundVolumes.put(group, clampVolume(eventSoundVolume));
+    }
+
+    /** Multiplies every group's volume; it never reaches sounds outside the catalog. 乘在所有分组上，不影响目录外的声音。 */
+    public double eventSoundMasterVolume() {
+        return eventSoundMasterVolume;
+    }
+
+    public void setEventSoundMasterVolume(double volume) {
+        this.eventSoundMasterVolume = clampVolume(volume);
+    }
+
+    /** What the sound runtime applies: the group's volume times the master. 声音运行时实际使用的值：分组音量乘以总音量。 */
+    public double effectiveEventSoundVolume(EventSoundGroup group) {
+        return clampVolume(eventSoundVolume(group) * eventSoundMasterVolume);
+    }
+
+    /** Settings-screen sections the player folded, as "page/group" ids. 玩家在设置界面折叠的分节。 */
+    public boolean settingsGroupCollapsed(String id) {
+        return id != null && collapsedSettingsGroups.contains(id);
+    }
+
+    public void setSettingsGroupCollapsed(String id, boolean collapsed) {
+        if (id == null || id.isBlank()) {
+            return;
+        }
+        if (collapsed) {
+            collapsedSettingsGroups.add(id);
+        } else {
+            collapsedSettingsGroups.remove(id);
+        }
     }
 
     private void setAllEventSoundVolumes(double eventSoundVolume) {

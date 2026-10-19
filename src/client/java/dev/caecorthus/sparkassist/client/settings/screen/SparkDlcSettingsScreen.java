@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.settings.screen;
 
+import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
 import dev.caecorthus.sparkassist.client.settings.SettingsOption;
 import dev.caecorthus.sparkassist.client.settings.SettingsPage;
 import dev.caecorthus.sparkassist.client.settings.SettingsSession;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -27,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class SparkDlcSettingsScreen extends GameOptionsScreen implements SettingsRowWidget.Host {
     private static final Text TITLE = Text.translatable("screen.sparkassist.settings.title");
-    private static final int GROUP_HEADER_HEIGHT = 14;
     private static final int GROUP_GAP = 6;
     private static final int ROW_GAP = 1;
     private static final int SCROLLBAR_WIDTH = 3;
@@ -40,9 +41,13 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     private static String lastPageId = SparkDlcSettingsPages.GENERAL;
 
     private final SettingsSession session;
+    /** Headers and rows of the current page, top to bottom, with their offsets in the list. 当前页的标题与行及其偏移。 */
+    private final List<ClickableWidget> listItems = new ArrayList<>();
+    private final List<Integer> itemOffsets = new ArrayList<>();
     private final List<SettingsRowWidget> rows = new ArrayList<>();
-    private final List<Integer> rowOffsets = new ArrayList<>();
-    private final List<GroupHeader> headers = new ArrayList<>();
+    /** The header to focus after a fold rebuilt the list. 折叠导致重建后要聚焦的标题。 */
+    @Nullable
+    private String refocusGroup;
     private int pageIndex;
     private double scroll;
     private int contentHeight;
@@ -52,9 +57,6 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     private SettingsFlatButton undoButton;
     @Nullable
     private SettingsFlatButton resetButton;
-
-    private record GroupHeader(Text title, int offset) {
-    }
 
     public SparkDlcSettingsScreen(Screen parent) {
         this(parent, null);
@@ -91,9 +93,9 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     @Override
     protected void init() {
         layout = SettingsLayout.of(this.width, this.height);
+        listItems.clear();
+        itemOffsets.clear();
         rows.clear();
-        rowOffsets.clear();
-        headers.clear();
 
         initTabs();
         initRows();
@@ -123,25 +125,60 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
         int offset = 0;
         if (page != null) {
             for (SettingsPage.Group group : page.groups()) {
-                if (!headers.isEmpty()) {
+                if (!listItems.isEmpty()) {
                     offset += GROUP_GAP;
                 }
-                headers.add(new GroupHeader(group.title(), offset));
-                offset += GROUP_HEADER_HEIGHT;
+                String key = page.groupKey(group);
+                boolean collapsed = SparkAssistClientSettings.settingsGroupCollapsed(key);
+                SettingsGroupHeaderWidget header = new SettingsGroupHeaderWidget(layout.listX(), layout.listWidth(),
+                        group.title(), key, collapsed, group.options().size(), () -> toggleGroup(key), this);
+                addListItem(header, offset);
+                offset += SettingsGroupHeaderWidget.HEIGHT;
+                if (collapsed) {
+                    continue;
+                }
                 for (SettingsOption option : group.options()) {
                     SettingsRowWidget row = new SettingsRowWidget(layout.listX(), 0, layout.listWidth(), option, this);
                     rows.add(row);
-                    rowOffsets.add(offset);
-                    this.addSelectableChild(row);
+                    addListItem(row, offset);
                     offset += SettingsRowWidget.HEIGHT + ROW_GAP;
                 }
             }
         }
         contentHeight = Math.max(0, offset - ROW_GAP);
-        int rowWidth = scrollable() ? layout.listWidth() - SCROLLBAR_WIDTH - 2 : layout.listWidth();
-        rows.forEach(row -> row.setWidth(rowWidth));
+        int itemWidth = scrollable() ? layout.listWidth() - SCROLLBAR_WIDTH - 2 : layout.listWidth();
+        listItems.forEach(item -> item.setWidth(itemWidth));
         scroll = clampScroll(scroll);
         positionRows();
+    }
+
+    private void addListItem(ClickableWidget item, int offset) {
+        listItems.add(item);
+        itemOffsets.add(offset);
+        this.addSelectableChild(item);
+    }
+
+    /** Folds or unfolds a section; remembered in sparkassist.json, not part of Undo. 折叠或展开分节；记入配置，不受撤销影响。 */
+    private void toggleGroup(String key) {
+        SparkAssistClientSettings.setSettingsGroupCollapsed(key, !SparkAssistClientSettings.settingsGroupCollapsed(key));
+        SparkAssistClientSettings.save();
+        refocusGroup = key;
+        this.clearAndInit();
+    }
+
+    @Override
+    protected void setInitialFocus() {
+        String key = refocusGroup;
+        refocusGroup = null;
+        if (key != null) {
+            for (ClickableWidget item : listItems) {
+                if (item instanceof SettingsGroupHeaderWidget header && header.key().equals(key)) {
+                    this.setFocused(header);
+                    return;
+                }
+            }
+        }
+        super.setInitialFocus();
     }
 
     private void initFooterButtons() {
@@ -202,18 +239,18 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     }
 
     private void positionRows() {
-        for (int i = 0; i < rows.size(); i++) {
-            rows.get(i).setY(layout.listTop() + rowOffsets.get(i) - (int) scroll);
+        for (int i = 0; i < listItems.size(); i++) {
+            listItems.get(i).setY(layout.listTop() + itemOffsets.get(i) - (int) scroll);
         }
     }
 
-    private void ensureVisible(SettingsRowWidget row) {
-        int index = rows.indexOf(row);
+    private void ensureVisible(ClickableWidget item) {
+        int index = listItems.indexOf(item);
         if (index < 0) {
             return;
         }
-        int top = rowOffsets.get(index);
-        int bottom = top + SettingsRowWidget.HEIGHT;
+        int top = itemOffsets.get(index);
+        int bottom = top + item.getHeight();
         int viewport = layout.listViewportHeight();
         double target = scroll;
         if (top < scroll) {
@@ -244,8 +281,8 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     @Override
     public void setFocused(@Nullable Element focused) {
         super.setFocused(focused);
-        if (focused instanceof SettingsRowWidget row) {
-            ensureVisible(row);
+        if (focused instanceof ClickableWidget item && listItems.contains(item)) {
+            ensureVisible(item);
         }
     }
 
@@ -297,16 +334,9 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     private void renderList(DrawContext context, int mouseX, int mouseY, float delta) {
         context.enableScissor(layout.listX(), layout.listTop(), layout.listX() + layout.listWidth(),
                 layout.listBottom());
-        for (GroupHeader header : headers) {
-            int y = layout.listTop() + header.offset() - (int) scroll;
-            if (y + GROUP_HEADER_HEIGHT > layout.listTop() && y < layout.listBottom()) {
-                context.drawText(this.textRenderer, header.title(), layout.listX() + 2, y + 4,
-                        SettingsPalette.TEXT_MUTED, false);
-            }
-        }
-        for (SettingsRowWidget row : rows) {
-            if (row.getY() + row.getHeight() > layout.listTop() && row.getY() < layout.listBottom()) {
-                row.render(context, mouseX, mouseY, delta);
+        for (ClickableWidget item : listItems) {
+            if (item.getY() + item.getHeight() > layout.listTop() && item.getY() < layout.listBottom()) {
+                item.render(context, mouseX, mouseY, delta);
             }
         }
         context.disableScissor();
@@ -365,7 +395,7 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     }
 
     private List<Line> describe(SettingsOption option, int width) {
-        List<Line> lines = new ArrayList<>(wrap(option.label(), width, SettingsPalette.TEXT));
+        List<Line> lines = new ArrayList<>(wrap(option.title(), width, SettingsPalette.TEXT));
         lines.add(new Line(null, 0));
         lines.addAll(wrap(option.description(), width, SettingsPalette.TEXT_BODY));
         Text valueDescription = option.valueDescription();

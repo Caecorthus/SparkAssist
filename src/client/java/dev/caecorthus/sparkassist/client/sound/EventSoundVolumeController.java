@@ -35,7 +35,7 @@ public final class EventSoundVolumeController {
                 eventId,
                 selectedSoundId,
                 originalVolume,
-                config.eventSoundVolume(group)
+                config.effectiveEventSoundVolume(group)
         );
     }
 

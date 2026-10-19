@@ -44,6 +44,24 @@ public final class SparkAssistClientSettings {
         EventSoundVolumeController.refreshPlayingSounds();
     }
 
+    public static double eventSoundMasterVolume() {
+        return config().eventSoundMasterVolume();
+    }
+
+    public static void setEventSoundMasterVolume(double volume) {
+        config().setEventSoundMasterVolume(volume);
+        EventSoundVolumeController.refreshPlayingSounds();
+    }
+
+    /** Folded sections of the settings screen, kept across runs. 设置界面中被折叠的分节，跨次运行保留。 */
+    public static boolean settingsGroupCollapsed(String id) {
+        return config().settingsGroupCollapsed(id);
+    }
+
+    public static void setSettingsGroupCollapsed(String id, boolean collapsed) {
+        config().setSettingsGroupCollapsed(id, collapsed);
+    }
+
     public static GuidebookDecor guidebookDecor() {
         return config().guidebookDecor();
     }

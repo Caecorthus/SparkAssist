@@ -15,6 +15,7 @@ final class SettingsPalette {
     static final int ROW_HOVER_WASH = 0x20FFFFFF;
     static final int PANEL = 0xB0181818;
     static final int SEPARATOR = 0x40FFFFFF;
+    static final int DOT_RING = 0x70FFFFFF;
 
     static final int TEXT = 0xFFFFFFFF;
     static final int TEXT_BODY = 0xFFD0D0D0;

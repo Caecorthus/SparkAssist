@@ -38,6 +38,18 @@ _Avoid_: master volume, music volume, global sound volume
 A named settings row that maps one assist volume slider to one family of event sounds.
 _Avoid_: sound category, channel
 
+**Event sound master volume**:
+One more `0.0..1.0` multiplier applied on top of every **Event sound group**'s volume; like the groups, it never
+touches a sound outside the **Event sound catalog**.
+_Avoid_: master volume (vanilla's), global volume
+
+**Audio page section**:
+How the **SparkDLC settings screen** lays out **Event sound group** rows: train and round sounds, then role moments by
+faction (any role, killers, neutrals, civilians, witch faction), then traits by category. A role row reads "role ·
+sound" with the role's guide colour; it is shown only while the mod that plays those sounds is installed. Sections fold,
+and the folded state is remembered in `sparkassist.json`.
+_Avoid_: sound category, channel, tab
+
 **Event sound catalog**:
 The explicit whitelist of sound-event identifiers and selected resource identifiers that SparkAssist may scale.
 _Avoid_: all mod sounds, auto-discovered sounds
