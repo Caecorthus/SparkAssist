@@ -109,9 +109,6 @@ final class EventVolumeRows {
             role(EventSoundGroup.VULTURE_CURSE, Section.ROLE_NEUTRAL, "sparkstrength",
                     "announcement.role.vulture", "Vulture", 0xB56700,
                     sample("sparkstrength:vulture.super_curse", SoundCategory.PLAYERS)),
-            role(EventSoundGroup.FIEND_MOMENT, Section.ROLE_NEUTRAL, "sparkwitch",
-                    "announcement.role.fiend", "Fiend", 0x8E1B3A,
-                    sample("sparkwitch:ambient.fiend_moment", SoundCategory.MASTER)),
 
             role(EventSoundGroup.PIG_CHASE, Section.ROLE_CIVILIAN, "sparkwitch",
                     "announcement.role.pig_god", "Pig God", 0xF2A4FC,

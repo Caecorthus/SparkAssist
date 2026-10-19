@@ -64,8 +64,6 @@
   "option.sparkassist.event_sound_volume.holy_flash_tinnitus.description": "被圣光弹（圣徒商店的道具）闪到的玩家自己听到的耳鸣，随致盲时间渐弱，最长 10 秒。",
   "option.sparkassist.event_sound_volume.shield_clang": "护盾触发",
   "option.sparkassist.event_sound_volume.shield_clang.description": "疯魔护盾、铁人、威士忌或守护护盾被触发，或忍者格挡时的金属声；铁人药剂生效时也会响。有的只有被保护的人听得到，有的约 80 格内都能听到。",
-  "option.sparkassist.event_sound_volume.fiend_moment": "魔人时刻",
-  "option.sparkassist.event_sound_volume.fiend_moment.description": "魔人时刻开始时每位玩家都会听到的凋灵咆哮。普通凋灵的声音不受影响。",
   "option.sparkassist.event_sound_volume.bell_ringer_toll.description": "敲钟人发动「回响」时敲响的丧钟，全场都能听到。",
   "option.sparkassist.event_sound_volume.time_stealer_chime.description": "时间被窃取（或被赠予）的玩家自己听到的怀表鸣响，以及时间耗尽时的停摆声。旁人听不到。",
   "option.sparkassist.event_sound_volume.grand_witch_ceremonial_sword_bgm.description": "大魔女仪礼剑的背景音乐。当前版本的 SparkWitch 已不再播放。",
