@@ -27,7 +27,10 @@ public enum EventSoundGroup {
     SHADOW_JESTER_FINALE("shadow_jester_finale", "option.sparkassist.event_sound_volume.shadow_jester_finale"),
     VULTURE_CURSE("vulture_curse", "option.sparkassist.event_sound_volume.vulture_curse"),
     TIME_STEALER_CHIME("time_stealer_chime", "option.sparkassist.event_sound_volume.time_stealer_chime"),
-    SAINT_BELL("saint_bell", "option.sparkassist.event_sound_volume.saint_bell");
+    SAINT_BELL("saint_bell", "option.sparkassist.event_sound_volume.saint_bell"),
+    HOLY_FLASH_TINNITUS("holy_flash_tinnitus", "option.sparkassist.event_sound_volume.holy_flash_tinnitus"),
+    SHIELD_CLANG("shield_clang", "option.sparkassist.event_sound_volume.shield_clang"),
+    FIEND_MOMENT("fiend_moment", "option.sparkassist.event_sound_volume.fiend_moment");
 
     private final String serializedName;
     private final String translationKey;

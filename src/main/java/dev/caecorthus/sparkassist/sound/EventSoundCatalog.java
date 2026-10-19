@@ -147,6 +147,31 @@ final class EventSoundCatalog {
                                 "ambient/time_stealer_final"
                         )
                 ),
+                group(EventSoundGroup.HOLY_FLASH_TINNITUS,
+                        eventIds("sparkwitch",
+                                "skill.holy_flash_tinnitus"
+                        ),
+                        resourceIds("sparkwitch",
+                                "skill/holy_flash_tinnitus"
+                        )
+                ),
+                group(EventSoundGroup.SHIELD_CLANG,
+                        eventIds("wathe",
+                                "item.psycho.armour"
+                        ),
+                        resourceIds("wathe",
+                                "item/psycho_armour"
+                        )
+                ),
+                // The Fiend Moment plays vanilla wither-spawn audio under SparkWitch's own id; only that id is
+                // cataloged so ordinary withers keep their volume.
+                // 魔人时刻以 SparkWitch 自己的 id 播放原版凋灵生成音频；这里只登记该 id，普通凋灵的音量保持不变。
+                group(EventSoundGroup.FIEND_MOMENT,
+                        eventIds("sparkwitch",
+                                "ambient.fiend_moment"
+                        ),
+                        List.of()
+                ),
                 group(EventSoundGroup.SAINT_BELL,
                         eventIds("sparkwitch",
                                 "ambient.saint_bell"

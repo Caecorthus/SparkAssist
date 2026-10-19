@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
 import dev.caecorthus.sparkassist.client.settings.SettingsOption;
 import dev.caecorthus.sparkassist.client.settings.SettingsPage;
 import dev.caecorthus.sparkassist.client.settings.SettingsSession;
+import dev.caecorthus.sparkassist.client.settings.SoundPreview;
 import dev.caecorthus.sparkassist.client.settings.SparkDlcSettingsPages;
 import java.util.ArrayList;
 import java.util.List;
@@ -221,6 +222,7 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
 
     private void showPage(int index) {
         session.flush();
+        SoundPreview.stopAll();
         pageIndex = index;
         SettingsPage page = page();
         if (page != null) {
@@ -403,6 +405,11 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
             lines.add(new Line(null, 0));
             lines.addAll(wrap(valueDescription, width, SettingsPalette.TEXT_BODY));
         }
+        if (option.preview() != null) {
+            lines.add(new Line(null, 0));
+            lines.addAll(wrap(Text.translatable("screen.sparkassist.settings.preview_hint"), width,
+                    SettingsPalette.TEXT_MUTED));
+        }
         Text reason = option.disabledReason();
         if (reason != null) {
             lines.add(new Line(null, 0));
@@ -421,14 +428,22 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        SoundPreview.tick();
+    }
+
+    @Override
     public void close() {
         session.flush();
+        SoundPreview.stopAll();
         super.close();
     }
 
     @Override
     public void removed() {
         session.flush();
+        SoundPreview.stopAll();
         super.removed();
     }
 }

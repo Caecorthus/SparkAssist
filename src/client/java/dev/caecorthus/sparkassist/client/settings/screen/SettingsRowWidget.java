@@ -3,6 +3,7 @@ package dev.caecorthus.sparkassist.client.settings.screen;
 import dev.caecorthus.sparkassist.client.settings.ChoiceOption;
 import dev.caecorthus.sparkassist.client.settings.SettingsOption;
 import dev.caecorthus.sparkassist.client.settings.SliderOption;
+import dev.caecorthus.sparkassist.client.settings.SoundPreview;
 import dev.caecorthus.sparkassist.client.settings.ToggleOption;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -26,6 +27,9 @@ final class SettingsRowWidget extends ClickableWidget {
     private static final int PAD = 6;
     private static final int TRACK_WIDTH = 64;
     private static final int VALUE_GAP = 6;
+    /** Fixed slot for a slider's value, wide enough for "200%", so the preview button never moves. 滑块数值的固定宽度。 */
+    private static final int VALUE_SLOT = 26;
+    private static final int PREVIEW_SIZE = 11;
 
     private final SettingsOption option;
     private final Host host;
@@ -71,6 +75,11 @@ final class SettingsRowWidget extends ClickableWidget {
             return true;
         }
         boolean back = button == GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+        SoundPreview preview = option.preview();
+        if (preview != null && !back && inPreviewButton(mouseX, mouseY)) {
+            preview.toggle();
+            return true;
+        }
         if (option instanceof ToggleOption toggle && !back) {
             toggle.toggle();
             host.changed(option, true);
@@ -128,6 +137,9 @@ final class SettingsRowWidget extends ClickableWidget {
             choice.cycle(left ? -1 : 1);
         } else if (option instanceof SliderOption slider && (left || right)) {
             slider.nudge((left ? -1 : 1) * (Screen.hasShiftDown() ? 10 : 1));
+        } else if (press && option.preview() != null) {
+            option.preview().toggle();
+            return true;
         } else {
             return false;
         }
@@ -135,8 +147,13 @@ final class SettingsRowWidget extends ClickableWidget {
         return true;
     }
 
+    private double lastMouseX;
+    private double lastMouseY;
+
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
         TextRenderer font = MinecraftClient.getInstance().textRenderer;
         int x = getX();
         int y = getY();
@@ -190,10 +207,16 @@ final class SettingsRowWidget extends ClickableWidget {
             context.fill(thumbX, trackY - 5, thumbX + 3, trackY + 5, !enabled ? SettingsPalette.TEXT_DISABLED
                     : hot ? SettingsPalette.THUMB_HOT : SettingsPalette.THUMB);
             Text value = slider.valueText();
+            int slotLeft = trackLeft - VALUE_GAP - VALUE_SLOT;
             int valueX = trackLeft - VALUE_GAP - font.getWidth(value);
             context.drawText(font, value, valueX, textY,
                     enabled ? SettingsPalette.TEXT : SettingsPalette.TEXT_DISABLED, false);
-            return valueX;
+            SoundPreview preview = option.preview();
+            if (preview == null) {
+                return Math.min(valueX, slotLeft);
+            }
+            renderPreviewButton(context, previewLeft(), y + (height - PREVIEW_SIZE) / 2, preview.playing(), enabled);
+            return previewLeft();
         }
 
         Text value = option.valueText();
@@ -215,6 +238,32 @@ final class SettingsRowWidget extends ClickableWidget {
         return option instanceof ChoiceOption<?> ? valueX - 8 : valueX;
     }
 
+    private int previewLeft() {
+        return getX() + width - PAD - TRACK_WIDTH - VALUE_GAP - VALUE_SLOT - 4 - PREVIEW_SIZE;
+    }
+
+    private boolean inPreviewButton(double mouseX, double mouseY) {
+        int left = previewLeft();
+        int top = getY() + (height - PREVIEW_SIZE) / 2;
+        return mouseX >= left - 2 && mouseX < left + PREVIEW_SIZE + 2 && mouseY >= top - 2
+                && mouseY < top + PREVIEW_SIZE + 2;
+    }
+
+    /** A small square button: ▶ to play a sample, ■ while it plays. 小方按钮：▶ 试听，播放中显示 ■。 */
+    private void renderPreviewButton(DrawContext context, int x, int y, boolean playing, boolean enabled) {
+        boolean hot = isHovered() && inPreviewButton(lastMouseX, lastMouseY);
+        int ink = playing ? SettingsPalette.ACCENT : hot ? SettingsPalette.TEXT
+                : enabled ? SettingsPalette.TEXT_MUTED : SettingsPalette.TEXT_DISABLED;
+        context.drawBorder(x, y, PREVIEW_SIZE, PREVIEW_SIZE, playing || hot ? ink : SettingsPalette.PREVIEW_EDGE);
+        if (playing) {
+            context.fill(x + 3, y + 3, x + PREVIEW_SIZE - 3, y + PREVIEW_SIZE - 3, ink);
+        } else {
+            for (int i = 0; i < 3; i++) {
+                context.fill(x + 4 + i, y + 3 + i, x + 5 + i, y + PREVIEW_SIZE - 3 - i, ink);
+            }
+        }
+    }
+
     /** A 3 px chevron pointing left ({@code -1}) or right ({@code 1}). 指向左或右的 3 像素箭头。 */
     private static void arrow(DrawContext context, int x, int centreY, int direction, int color) {
         for (int i = 0; i < 3; i++) {
@@ -233,7 +282,9 @@ final class SettingsRowWidget extends ClickableWidget {
         builder.put(NarrationPart.TITLE, Text.translatable("screen.sparkassist.settings.narration.row",
                 option.title(), option.valueText()));
         if (option.enabled()) {
-            builder.put(NarrationPart.USAGE, Text.translatable("screen.sparkassist.settings.narration.usage"));
+            builder.put(NarrationPart.USAGE, Text.translatable(option.preview() != null
+                    ? "screen.sparkassist.settings.narration.usage_preview"
+                    : "screen.sparkassist.settings.narration.usage"));
         }
     }
 }

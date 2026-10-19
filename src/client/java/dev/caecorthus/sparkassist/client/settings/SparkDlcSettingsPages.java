@@ -107,8 +107,8 @@ public final class SparkDlcSettingsPages {
         groups.add(new SettingsPage.Group("master",
                 Text.translatable("screen.sparkassist.settings.group.event_master"), List.of(master)));
 
-        List<List<EventVolumeRows.Row>> sections =
-                EventVolumeRows.visibleBySection(FabricLoader.getInstance()::isModLoaded);
+        List<List<EventVolumeRows.Row>> sections = EventVolumeRows.visibleBySection(row ->
+                FabricLoader.getInstance().isModLoaded(row.mod()) && preview(row).available());
         EventVolumeRows.Section[] order = EventVolumeRows.Section.values();
         for (int i = 0; i < order.length; i++) {
             List<SettingsOption> volumes = new ArrayList<>();
@@ -138,7 +138,12 @@ public final class SparkDlcSettingsPages {
         if (row.whoKey() != null) {
             option.withDetail(sound, row.colour());
         }
+        option.withPreview(preview(row));
         return option;
+    }
+
+    private static SoundPreview preview(EventVolumeRows.Row row) {
+        return new SoundPreview(row.preview().id(), row.preview().category());
     }
 
     private static SettingsPage scope() {
