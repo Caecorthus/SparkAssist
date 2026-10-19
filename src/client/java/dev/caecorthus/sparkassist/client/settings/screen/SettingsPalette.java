@@ -3,15 +3,17 @@ package dev.caecorthus.sparkassist.client.settings.screen;
 import dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette;
 
 /**
- * Colours of the settings screen: Sodium-like translucent black rows with one accent, the guide's brass, on the
+ * Colours of the settings screen: Sodium-like translucent dark rows with one accent, the guide's brass, on the
  * selected tab, slider fill and keyboard focus.
- * 设置界面的颜色：类似 Sodium 的半透明黑色行，只用一个强调色——指南的黄铜色——标出选中页签、滑块填充与键盘焦点。
+ * 设置界面的颜色：类似 Sodium 的半透明深色行，只用一个强调色——指南的黄铜色——标出选中页签、滑块填充与键盘焦点。
  */
 final class SettingsPalette {
-    static final int ROW = 0x90000000;
-    static final int ROW_HOVER = 0xB0101010;
-    static final int ROW_HOVER_WASH = 0x18FFFFFF;
-    static final int PANEL = 0x90000000;
+    // Dark grey rather than black, so rows keep their shape over a black night sky or an unlit carriage.
+    // 用深灰而不是纯黑，在漆黑的夜空或没开灯的车厢前，行的轮廓依然清楚。
+    static final int ROW = 0xB0181818;
+    static final int ROW_HOVER = 0xC82A2A2A;
+    static final int ROW_HOVER_WASH = 0x20FFFFFF;
+    static final int PANEL = 0xB0181818;
     static final int SEPARATOR = 0x40FFFFFF;
 
     static final int TEXT = 0xFFFFFFFF;
