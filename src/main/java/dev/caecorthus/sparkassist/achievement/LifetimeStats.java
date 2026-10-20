@@ -55,10 +55,12 @@ public final class LifetimeStats {
     private static final String RIVAL_KILL_TRAITS = "rivalKillTraits";
     private static final String ROLES_TAKEN = "rolesTaken";
     private static final String HELD_ROLE_WINS = "heldRoleWins";
+    private static final String NON_CIVILIAN_KILLS = "nonCivilianKills";
+    private static final String BLACKOUT_NON_CIVILIAN_KILLS = "blackoutNonCivilianKills";
     private static final Set<String> KNOWN_FIELDS = Set.of(ROUNDS, WINS, DEATHS, TASKS, ROLE_ROUNDS, ROLE_WINS,
             FACTION_ROUNDS, FACTION_WINS, CONSUMED, KILLED_ROLES, STREAK_KILLED_ROLES, SAVES, DEATH_REASONS, WIN_STREAK,
             SURVIVED_WIN_STREAKS, CONSUMED_SINCE_DEATH, CONSUMED_ITEMS, FOOD_WITH_TRAITS, FISH_CAUGHT, RIVAL_KILLS,
-            RIVAL_KILL_TRAITS, ROLES_TAKEN, HELD_ROLE_WINS);
+            RIVAL_KILL_TRAITS, ROLES_TAKEN, HELD_ROLE_WINS, NON_CIVILIAN_KILLS, BLACKOUT_NON_CIVILIAN_KILLS);
 
     /**
      * The {@link #survivedWinStreak} scope every settled round is in, whatever the role.
@@ -92,6 +94,10 @@ public final class LifetimeStats {
     private final Map<String, Set<String>> rolesTaken = new TreeMap<>();
     // Wins counted for every distinct role held in the won round, not just the last. 获胜那局担任过的每个不同身份各记一胜，不只是最后一个。
     private final Map<String, Integer> heldRoleWins = new TreeMap<>();
+    // Death reason → kills of 非好人; the blackout map counts only those made while the lights were out.
+    // 死因 → 击杀非好人的次数；停电那份只计灯灭期间的击杀。
+    private final Map<String, Integer> nonCivilianKills = new TreeMap<>();
+    private final Map<String, Integer> blackoutNonCivilianKills = new TreeMap<>();
     // Written by a newer SparkAssist; kept as is. 较新版本写入的字段，原样保留。
     private final Map<String, JsonElement> laterFields = new TreeMap<>();
 
@@ -257,6 +263,18 @@ public final class LifetimeStats {
         Set<String> causes = rolesTaken.computeIfAbsent(roleId, key -> new TreeSet<>());
         if (cause != null && !cause.isBlank()) {
             causes.add(cause);
+        }
+    }
+
+    /**
+     * Counts one kill of a 非好人 (a player whose effective faction at death was a real faction other than civilian)
+     * with death reason {@code reason}, also in the blackout counts when it was made during a blackout.
+     * 记入一次以死因 {@code reason} 击杀非好人（死亡时实际阵营为好人以外的真实阵营的玩家）；若发生在停电期间，也记入停电计数。
+     */
+    public void recordNonCivilianKill(String reason, boolean duringBlackout) {
+        addCount(nonCivilianKills, reason, 1);
+        if (duringBlackout) {
+            addCount(blackoutNonCivilianKills, reason, 1);
         }
     }
 
@@ -435,6 +453,27 @@ public final class LifetimeStats {
         return views(rivalKillTraits);
     }
 
+    /** Kills of 非好人 with death reason {@code reason}. 以死因 {@code reason} 击杀非好人的次数。 */
+    public int nonCivilianKills(String reason) {
+        return nonCivilianKills.getOrDefault(reason, 0);
+    }
+
+    public Map<String, Integer> nonCivilianKills() {
+        return Collections.unmodifiableMap(nonCivilianKills);
+    }
+
+    /**
+     * Kills of 非好人 with death reason {@code reason} made during a blackout.
+     * 停电期间以死因 {@code reason} 击杀非好人的次数。
+     */
+    public int blackoutNonCivilianKills(String reason) {
+        return blackoutNonCivilianKills.getOrDefault(reason, 0);
+    }
+
+    public Map<String, Integer> blackoutNonCivilianKills() {
+        return Collections.unmodifiableMap(blackoutNonCivilianKills);
+    }
+
     /** Whether the player was ever turned into {@code roleId} mid-round. 玩家是否曾在对局中途变成 {@code roleId}。 */
     public boolean tookRole(String roleId) {
         return rolesTaken.containsKey(roleId);
@@ -475,6 +514,8 @@ public final class LifetimeStats {
         json.add(RIVAL_KILL_TRAITS, roleSets(rivalKillTraits));
         json.add(ROLES_TAKEN, roleSets(rolesTaken, true));
         json.add(HELD_ROLE_WINS, counts(heldRoleWins));
+        json.add(NON_CIVILIAN_KILLS, counts(nonCivilianKills));
+        json.add(BLACKOUT_NON_CIVILIAN_KILLS, counts(blackoutNonCivilianKills));
         laterFields.forEach((key, value) -> json.add(key, value.deepCopy()));
         return json;
     }
@@ -516,6 +557,8 @@ public final class LifetimeStats {
             // A save from before this count: start from the wins by final role. 这项统计之前的存档：以按最终身份的胜场为起点。
             stats.heldRoleWins.putAll(stats.roleWins);
         }
+        readCounts(json.get(NON_CIVILIAN_KILLS), stats.nonCivilianKills);
+        readCounts(json.get(BLACKOUT_NON_CIVILIAN_KILLS), stats.blackoutNonCivilianKills);
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (!KNOWN_FIELDS.contains(entry.getKey())) {
                 stats.laterFields.put(entry.getKey(), entry.getValue().deepCopy());
