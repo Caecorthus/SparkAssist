@@ -26,7 +26,8 @@ import java.util.UUID;
  *     <li>food and drink since the last death (emptied by a death this round, which also keeps this round's from
  *     counting), every item consumed, and food eaten per owner-visible trait held around the meal;</li>
  *     <li>SparkWitch Fisher catches, kills of players on another faction per role (with the traits held around
- *     them), and roles the player was turned into mid-round with their causes.</li>
+ *     them), and roles the player was turned into mid-round with their causes;</li>
+ *     <li>kills of 非好人 per death reason, and separately those made during a blackout.</li>
  * </ul>
  * "Died this round" (for the streaks, win streaks and food since the last death) means a real death, by the user's
  * rule: a Last Stand false death does not count, a death undone by the T-Virus does. The record decides when it
@@ -43,7 +44,7 @@ import java.util.UUID;
  * 否则取尸体上的死因；断线不算）；连胜（{@link LifetimeStats#recordWinStreaks}）：存活连胜按 {@link LifetimeStats#ALL_ROUNDS}
  * 和玩家结束时（死亡则为死亡时）所在的每个 {@link RoleGroups} 分组分别计；上次死亡以来的吃喝数（本局死亡则清空，且本局的不计入）、
  * 吃喝过的每种物品，以及进食时持有的每个自身可见词条的进食数；SparkWitch 钓鱼佬的渔获、按身份统计的对其他阵营的击杀（及当时持有的词条），
- * 以及玩家在对局中途变成的身份及其原因。
+ * 玩家在对局中途变成的身份及其原因，以及按死因统计的对非好人的击杀（停电期间的另计一份）。
  * （连续击杀、连胜和上次死亡以来的吃喝里的）“本局死亡”按用户定的规则指真正的死亡：背水一战的假死不算，被 T 病毒复活的
  * 死亡算。记录里有玩家的真死亡、或记录完整时以记录为准；否则客户端看到的死亡算数，除非记录里只有玩家的一次假死且玩家结算时存活。
  * 中途退出的对局不会结算，不会走到这里，也不会打断任何连续记录。
@@ -93,6 +94,7 @@ public final class RoundStatsRecorder {
         recordFishCaught(stats, self, timeline);
         recordRivalKills(stats, facts, timeline);
         recordRolesTaken(stats, self, timeline);
+        recordNonCivilianKills(stats, self, timeline);
     }
 
     private static void recordConsumed(LifetimeStats stats, UUID self, MatchTimeline timeline) {
@@ -160,6 +162,22 @@ public final class RoundStatsRecorder {
 
     private static boolean isFaction(String factionId) {
         return factionId != null && !factionId.isBlank() && !Factions.NONE.equals(factionId);
+    }
+
+    /**
+     * Kills whose victim was a 非好人 at death ({@link Rules#victimNonCivilian}), by death reason, flagged when made
+     * during a blackout ({@link StrengthRecordRules#inBlackout}). A Last Stand false death is not a kill.
+     * 死者死亡时为非好人（{@link Rules#victimNonCivilian}）的击杀，按死因计，停电期间（{@link StrengthRecordRules#inBlackout}）的另作标记。
+     * 背水一战的假死不算击杀。
+     */
+    private static void recordNonCivilianKills(LifetimeStats stats, UUID self, MatchTimeline timeline) {
+        List<StrengthRecordRules.Blackout> blackouts = StrengthRecordRules.blackouts(timeline);
+        for (MatchEvent kill : timeline.killsBy(self)) {
+            if (!timeline.isFakeDeath(kill) && Factions.isNonCivilian(timeline.victimFaction(kill))) {
+                stats.recordNonCivilianKill(kill.value(Rules.DEATH_REASON, null),
+                        StrengthRecordRules.inBlackout(blackouts, kill));
+            }
+        }
     }
 
     private static void recordRolesTaken(LifetimeStats stats, UUID self, MatchTimeline timeline) {

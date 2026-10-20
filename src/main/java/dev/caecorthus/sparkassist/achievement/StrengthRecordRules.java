@@ -10,10 +10,12 @@ import java.util.UUID;
 
 /**
  * Achievements read from the record events SparkStrength writes for them (contract S8-S14): blackout edges, a
- * flashlight beating the blackout, the capture device's owner, tablet meetings and Bandit throwing axes. Servers
- * without that SparkStrength never write these events, so every rule here simply finds nothing. "As role X" is my real
- * role at that event from the match record.
- * 依据 SparkStrength 专为成就写下的记录事件（契约 S8-S14）判断的成就：停电边沿、手电筒挡下停电、捕捉装置的主人、平板会议与强盗飞斧。
+ * flashlight beating the blackout, the capture device's owner, tablet meetings and Bandit throwing axes; plus the
+ * Undercover's tomahawk kills, which are plain deaths with a SparkStrength death reason. Servers without that
+ * SparkStrength never write these events, so every rule here simply finds nothing. "As role X" is my real role at that
+ * event from the match record.
+ * 依据 SparkStrength 专为成就写下的记录事件（契约 S8-S14）判断的成就：停电边沿、手电筒挡下停电、捕捉装置的主人、平板会议与强盗飞斧；
+ * 另有卧底的战术斧击杀，它们是带 SparkStrength 死因的普通死亡记录。
  * 没有该版本 SparkStrength 的服务器不会写这些事件，因此这里的规则只是什么也找不到。“以 X 身份”指对局记录中该事件发生时我的真实身份。
  */
 final class StrengthRecordRules {
@@ -45,8 +47,18 @@ final class StrengthRecordRules {
     static final String THROWING_AXE_THROW = "sparkstrength:throwing_axe_throw";
     /** S14: the axe {@code throw_id} hit target; {@code killed} whether that hit killed. S14：飞斧命中 target。 */
     static final String THROWING_AXE_HIT = "sparkstrength:throwing_axe_hit";
+    /**
+     * The death reason of a tactical tomahawk kill. SparkStrength hands the tomahawk only to the real Undercover, the
+     * first time its CQCM mask goes on (stage 2), and nobody else can hold it, so a kill with this reason is always made
+     * as the Undercover after putting the mask on (taking the mask off later does not end stage 2).
+     * 战术斧击杀的死因。SparkStrength 只在真卧底第一次戴上 CQCM 面具（进入第二阶段）时发给它战术斧，别人拿不到，
+     * 所以带这个死因的击杀一定是以卧底身份、戴上面具之后做出的（之后摘下面具也不会退出第二阶段）。
+     */
+    static final String TOMAHAWK = "sparkstrength:tomahawk";
 
     static final int AXE_KILLS = 2;
+    static final int TOMAHAWK_KILLS = 10;
+    static final int TOMAHAWK_KILLS_IN_ONE_DARK_ROUND = 5;
     /** 45 seconds. 45 秒。 */
     static final int SABOTEUR_WINDOW_TICKS = 900;
     static final int SABOTEUR_KILLS = 3;
@@ -171,7 +183,44 @@ final class StrengthRecordRules {
         return context.kills().stream().anyMatch(kill -> Rules.reason(kill, NoellesCivilianRules.KNIFE_STAB)
                 && Rules.killedAs(context, kill, NoellesCivilianRules.VETERAN)
                 && Rules.victimNonCivilian(context, kill)
-                && blackouts.stream().anyMatch(blackout -> blackout.window().contains(kill.tick())));
+                && inBlackout(blackouts, kill));
+    }
+
+    // ---- Undercover 卧底 ----
+
+    /**
+     * 花盆剑圣: tomahawk ({@link #TOMAHAWK}) kills of 10 非好人, counted across rounds
+     * ({@link LifetimeStats#nonCivilianKills}; a Last Stand false death is not a kill).
+     * 累计用战术斧（{@link #TOMAHAWK}）击杀 10 名非好人，可跨局（{@link LifetimeStats#nonCivilianKills}；背水一战的假死不算击杀）。
+     */
+    static boolean tomahawkKillsOverall(AchievementContext context) {
+        return context.stats().nonCivilianKills(TOMAHAWK) >= TOMAHAWK_KILLS;
+    }
+
+    /**
+     * 夜魔: as 花盆剑圣, counting only the kills made during a blackout
+     * ({@link LifetimeStats#blackoutNonCivilianKills}, by {@link #inBlackout}).
+     * 同花盆剑圣，但只算停电期间的击杀（{@link LifetimeStats#blackoutNonCivilianKills}，按 {@link #inBlackout} 判断）。
+     */
+    static boolean tomahawkKillsInTheDarkOverall(AchievementContext context) {
+        return context.stats().blackoutNonCivilianKills(TOMAHAWK) >= TOMAHAWK_KILLS;
+    }
+
+    /**
+     * 梦魇: as the Undercover, tomahawk 5 different 非好人 during blackouts in one round (any number of blackouts; a
+     * Last Stand false death is not a kill).
+     * 以卧底身份在一局内的停电期间用战术斧击杀 5 名不同的非好人（可分布在多次停电中；背水一战的假死不算击杀）。
+     */
+    static boolean tomahawkNightmare(AchievementContext context) {
+        MatchTimeline timeline = context.timeline();
+        List<Blackout> blackouts = blackouts(timeline);
+        return Rules.myKills(context, kill -> Rules.reason(kill, TOMAHAWK)
+                        && Rules.killedAs(context, kill, KillRules.UNDERCOVER)
+                        && Rules.victimNonCivilian(context, kill)
+                        && !timeline.isFakeDeath(kill)
+                        && inBlackout(blackouts, kill)).stream()
+                .map(MatchEvent::target).filter(Objects::nonNull).distinct().count()
+                >= TOMAHAWK_KILLS_IN_ONE_DARK_ROUND;
     }
 
     // ---- Master Saboteur 破坏大师 ----
@@ -239,6 +288,11 @@ final class StrengthRecordRules {
             blackouts.add(new Blackout(start, null, Math.max(start.tick(), timeline.endTick())));
         }
         return List.copyOf(blackouts);
+    }
+
+    /** Whether {@code event} falls inside one of {@code blackouts}. {@code event} 是否落在某次停电之内。 */
+    static boolean inBlackout(List<Blackout> blackouts, MatchEvent event) {
+        return blackouts.stream().anyMatch(blackout -> blackout.window().contains(event.tick()));
     }
 
     /**
