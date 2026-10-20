@@ -48,9 +48,9 @@ final class GadgetRules {
 
     /**
      * 我炸我自己: die by a grenade I threw: a {@code wathe:grenade} death credited to myself that follows my own throw,
-     * either an M67 whose 5 s fuse ends at that death or a Wathe grenade (which goes off on impact) at most 10 s
+     * either an M67 whose 3.5 s fuse ends at that death or a Wathe grenade (which goes off on impact) at most 10 s
      * before it. An M67 dropped by my drone is not a throw.
-     * 被自己扔出的手雷炸死：一次记在我自己名下的 {@code wathe:grenade} 死亡，且之前有我本人的投掷——引信 5 秒正好在这次死亡时结束的
+     * 被自己扔出的手雷炸死：一次记在我自己名下的 {@code wathe:grenade} 死亡，且之前有我本人的投掷——引信 3.5 秒正好在这次死亡时结束的
      * M67，或者在其之前不超过 10 秒的 Wathe 手雷（撞击即爆）。无人机投下的 M67 不算投掷。
      */
     static boolean killedByMyOwnGrenade(AchievementContext context) {

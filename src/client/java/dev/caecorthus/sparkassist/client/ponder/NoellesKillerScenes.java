@@ -679,13 +679,13 @@ final class NoellesKillerScenes {
      * with the tablet in the main hand the Bomber connects from the tablet's drone section and flies it (0.5 blocks a
      * tick sideways, 0.4 up) from its own view while the body stands still. Held drones and tablets are hidden from
      * other living players; the drone itself is seen by all. A left click drops the M67 (straight down while
-     * hovering): 5 s later it blows up and usually kills within 5 blocks by path (walls and closed doors shield),
+     * hovering): 3.5 s later it blows up and usually kills within 5 blocks by path (walls and closed doors shield),
      * breaking drones caught in it too; meanwhile each viewer sees the grenade outlined red within 5 blocks of it and
      * yellow within 7. A right click disconnects and leaves the drone hovering; the owner right-clicks it to put it
      * back in a free hotbar slot. Flying drains 2% a second, hovering 1%.
      * 投弹无人机：炸弹客开局自带一架，在背包里把 M67 挂到它上面。放置和驾驶都要等开局 90 秒。右键地面放下；主手拿平板在
      * “无人机”分区连接，即以无人机视角飞行（横向每 tick 0.5 格、上升 0.4 格），本体站着不动。手里的无人机和平板对其他活人
-     * 隐藏；无人机本身人人可见。左键投下 M67（悬停时竖直落下）：5 秒后爆炸，沿路径一般炸死 5 格内的人（墙与关着的门能挡），
+     * 隐藏；无人机本身人人可见。左键投下 M67（悬停时竖直落下）：3.5 秒后爆炸，沿路径一般炸死 5 格内的人（墙与关着的门能挡），
      * 范围内的无人机也会被炸坏；其间每名观察者离手雷 5 格内看到红色描边，7 格内黄色。右键断开连接，无人机原地悬停；主人右键
      * 它即可收回到快捷栏空位。飞行每秒耗电 2%，悬停 1%。
      */
@@ -746,25 +746,25 @@ final class NoellesKillerScenes {
         scene.world().modifyEntity(drone, entity -> droneData(entity, "PAYLOAD", false));
         ElementLink<ThrownElement> grenade = Actors.toss(scene, armedM67(), new Vec3d(3.0, 2.33, 6.2), drop, 7, 0,
                 true, ThrownElement.Flight.UPRIGHT);
-        scene.overlay().showText(40)
-                .text("左键投下 M67：5 秒后爆炸")
+        scene.overlay().showText(35)
+                .text("左键投下 M67：3.5 秒后爆炸")
                 .independent()
                 .attachKeyFrame();
         scene.idle(7);
         // The warning outline lasts the whole fuse. 警示描边持续整个引信时间。
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, grenade,
-                new Box(2.8, 1.0, 6.0, 3.2, 1.3, 6.4), 93);
+                new Box(2.8, 1.0, 6.0, 3.2, 1.3, 6.4), 63);
         scene.idle(5);
         flyDrone(scene, drone, new Vec3d(4.0, 0, -4.0), 12);
-        scene.idle(38);
-        scene.overlay().showText(80)
+        scene.idle(28);
+        scene.overlay().showText(60)
                 .text("附近的人看得到它的描边：5 格内红色，7 格内黄色")
                 .independent()
                 .attachKeyFrame();
         Actors.walk(scene, runs, new Vec3d(4.4, 0, 1.6), 24);
         Actors.walk(scene, flees, new Vec3d(4.6, 0, -5.8), 28);
-        scene.idle(50);
-        // The M67 went off 100 ticks after the drop. M67 在投下 100 tick 后爆炸。
+        scene.idle(30);
+        // The M67 went off 70 ticks after the drop. M67 在投下 70 tick 后爆炸。
         Actors.remove(scene, grenade);
         Vec3d burst = drop.add(0, 0.1, 0);
         Effects.burst(scene, WatheParticles.BIG_EXPLOSION, burst, 1, 0);

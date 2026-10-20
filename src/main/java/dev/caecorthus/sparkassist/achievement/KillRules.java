@@ -45,7 +45,7 @@ final class KillRules {
     static final String GAS_BOMB = "noellesroles:gas_bomb";
 
     /** An M67 goes off this many ticks after it is thrown or dropped. M67 投出或投下后经过这么多 tick 爆炸。 */
-    static final int GRENADE_FUSE_TICKS = 100;
+    static final int GRENADE_FUSE_TICKS = 70;
     static final int GRENADE_FUSE_SLACK = 2;
     static final double POINT_BLANK_BLOCKS = 12;
     static final double CALIBRATED_BLOCKS = 50;
