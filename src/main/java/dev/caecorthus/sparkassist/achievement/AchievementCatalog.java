@@ -689,9 +689,11 @@ public final class AchievementCatalog {
     }
 
     /**
-     * Whether every other achievement is unlocked, counting those earned this round. Achievements added later raise
-     * the bar only for players who have not earned this one yet; an unlock is never taken back.
-     * 是否已解锁其他所有成就，本局达成的也算在内。以后新增的成就只会提高尚未获得此成就的玩家的门槛；已解锁的成就永不收回。
+     * Whether every other achievement is unlocked anywhere, counting those earned this round. An unlock is never
+     * taken back: once an achievement is added, earlier unlocks of this one stay but count as expired until earned
+     * again ({@link AchievementStanding}).
+     * 是否已在任意地点解锁其他所有成就，本局达成的也算在内。解锁永不收回：新增成就后，此前的这条解锁会保留，
+     * 但在再次获得之前视为过期（{@link AchievementStanding}）。
      */
     static boolean earnedAllOthers(AchievementContext context) {
         return ALL.stream()

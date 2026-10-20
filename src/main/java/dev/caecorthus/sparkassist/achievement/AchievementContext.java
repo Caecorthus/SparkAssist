@@ -59,8 +59,8 @@ public record AchievementContext(
     }
 
     /**
-     * Whether the achievement is unlocked, counting those this round has already earned.
-     * 该成就是否已解锁，本局已达成的也算在内。
+     * Whether the achievement is unlocked in any place, counting those this round has already earned.
+     * 该成就是否在任何地点解锁过，本局已达成的也算在内。
      */
     public boolean isUnlocked(String id) {
         return ledger.isUnlocked(id) || earnedThisRound.contains(id);

@@ -1248,6 +1248,7 @@
   "advancements.sparkassist.achievement.level": "Level %s",
   "advancements.sparkassist.achievement.place": "获得地点：%s",
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
+  "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
   "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
 }

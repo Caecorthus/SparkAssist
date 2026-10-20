@@ -1248,6 +1248,7 @@
   "advancements.sparkassist.achievement.level": "Level %s",
   "advancements.sparkassist.achievement.place": "Earned at: %s",
   "advancements.sparkassist.achievement.place.local_world": "Local world",
+  "advancements.sparkassist.achievement.place.separator": ", ",
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
   "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
 }
