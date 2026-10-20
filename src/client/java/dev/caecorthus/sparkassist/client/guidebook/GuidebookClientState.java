@@ -70,8 +70,7 @@ public final class GuidebookClientState {
 
     public static GuidebookEntryPoint entryPoint(MinecraftClient client) {
         boolean roundHud = WatheClient.trainComponent != null && WatheClient.trainComponent.hasHud();
-        boolean spectator = client.player != null && client.player.isSpectator();
-        return GuidebookEntryPoint.resolve(roundHud, WatheClient.isPlayerAliveAndInSurvival(), spectator);
+        return GuidebookEntryPoint.resolve(roundHud, WatheClient.isPlayerAliveAndInSurvival());
     }
 
     public static void disconnect() {

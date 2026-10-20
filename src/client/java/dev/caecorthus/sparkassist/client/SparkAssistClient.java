@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.achievement.AchievementAdvancements;
 import dev.caecorthus.sparkassist.client.achievement.AchievementClientState;
 import dev.caecorthus.sparkassist.client.config.SparkAssistConfigManager;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookClientState;
+import dev.caecorthus.sparkassist.client.guidebook.GuidebookInventoryButton;
 import dev.caecorthus.sparkassist.client.ponder.PonderSupport;
 import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import net.fabricmc.api.ClientModInitializer;
@@ -18,6 +19,7 @@ public final class SparkAssistClient implements ClientModInitializer {
         configManager = SparkAssistConfigManager.load();
         PonderSupport.init();
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
+        GuidebookInventoryButton.register();
         ClientTickEvents.END_CLIENT_TICK.register(AchievementClientState::tick);
         // A server with no advancements of its own never sends the update that would restore the page.
         // 自身没有任何进度的服务器不会发送更新包，因此加入时主动补上成就页。
