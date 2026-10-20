@@ -207,19 +207,19 @@ final class SparkStrengthKillerItemScenes {
      * or 10 for a Bomber; in a match it is locked for the first 90 s. Holding right-click (the bow pose) pulls the pin;
      * after 20 charge ticks letting go throws it, earlier is a cancel with a 2 s cooldown (SparkTraits can shorten
      * both). Thrown hard (2.25 blocks a tick: level, it first lands about 13 blocks out), it bounces off floors and walls
-     * and rolls; the scene aims 77 degrees down and follows M67Physics tick by tick. 5 s after the throw it blows up
+     * and rolls; the scene aims 77 degrees down and follows M67Physics tick by tick. 3.5 s after the throw it blows up
      * (one big explosion, 100 smoke and 100 fragments) and
      * usually kills every living player within 5 blocks by path (walls and closed doors shield), the thrower included,
      * breaking drones too. Each viewer sees the grenade outlined red within 5 blocks of it and yellow within 7, by
      * distance only. 10 s cooldown after a throw. Not hidden in hand.
      * M67 手雷：凡是卖 Wathe 手雷的商店都会多卖它，25 金币，炸弹客 10 金币；对局中开局 90 秒内不能用。按住右键（拉弓姿势）
      * 拉环，蓄力 20 tick 后松手扔出，更早松手算取消，冷却 2 秒（SparkTraits 可缩短两者）。出手很猛（每 tick 2.25 格，平着扔
-     * 约 13 格外才第一次落地），会在地面和墙上弹跳、滚动；演示朝下 77 度扔，逐 tick 按 M67Physics 走位。扔出 5 秒后爆炸
+     * 约 13 格外才第一次落地），会在地面和墙上弹跳、滚动；演示朝下 77 度扔，逐 tick 按 M67Physics 走位。扔出 3.5 秒后爆炸
      * （1 个大爆炸、100 个烟雾和 100 个碎片），沿路径一般炸死 5 格内所有活人（墙和关着的门能挡），扔的人也不例外，范围内的
      * 无人机同样被炸坏。每名观察者离它 5 格内看到红色描边、7 格内黄色，只按距离判断。投掷后冷却 10 秒。拿在手里别人看得见。
      */
     private static void m67(SceneBuilder scene, SceneBuildingUtil util) {
-        scene.title("sparkstrength_m67", "M67 手雷：拉环、扔出、5 秒后爆炸");
+        scene.title("sparkstrength_m67", "M67 手雷：拉环、扔出、3.5 秒后爆炸");
         NoellesKillerScenes.wideStage(scene);
         Text civilian = Text.literal("平民");
         ItemStack m67 = stack("sparkstrength:m67");
@@ -278,21 +278,21 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(10);
         // The outline lasts the rest of the fuse. 描边持续到引信结束。
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, grenade,
-                new Box(rest.x - 0.2, rest.y, rest.z - 0.2, rest.x + 0.2, rest.y + 0.3, rest.z + 0.2), 72);
-        scene.overlay().showText(80)
-                .text("出手很猛：落地后还会弹起、滚动，碰到墙也会弹开；扔出 5 秒后爆炸")
+                new Box(rest.x - 0.2, rest.y, rest.z - 0.2, rest.x + 0.2, rest.y + 0.3, rest.z + 0.2), 42);
+        scene.overlay().showText(60)
+                .text("出手很猛：落地后还会弹起、滚动，碰到墙也会弹开；扔出 3.5 秒后爆炸")
                 .independent()
                 .attachKeyFrame();
-        scene.idle(20);
+        scene.idle(6);
         Actors.lookPitch(scene, killer, 0);
         Actors.walk(scene, runs, new Vec3d(4.8, 0, 1.2), 24);
-        scene.idle(10);
+        scene.idle(6);
         scene.overlay().showText(80)
                 .text("每个人按自己离它的距离看到描边：5 格内红色，7 格内黄色；不管掩体（盲人看不到）")
                 .independent(40)
                 .attachKeyFrame();
-        scene.idle(42);
-        // The M67 went off 100 ticks after the throw. M67 在扔出 100 tick 后爆炸。
+        scene.idle(30);
+        // The M67 went off 70 ticks after the throw. M67 在扔出 70 tick 后爆炸。
         Actors.remove(scene, grenade);
         Vec3d burst = rest.add(0, 0.1, 0);
         Effects.burst(scene, WatheParticles.BIG_EXPLOSION, burst, 1, 0);
