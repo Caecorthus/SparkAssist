@@ -3,14 +3,19 @@ package dev.caecorthus.sparkassist.achievement;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * One account's local achievement save: what was unlocked, in unlock order and where, plus the {@link LifetimeStats}.
+ * Each place (server or local world) earns an achievement once, so one achievement can have an unlock per place.
  * Ids the current catalog no longer knows are kept, so a downgrade or a removed achievement never loses data.
  * 单个账号的本地成就存档：按解锁顺序记录已解锁的成就及获得地点，以及 {@link LifetimeStats}。
+ * 每个地点（服务器或本地世界）各能获得一次同一个成就，所以一个成就可以在每个地点各有一条解锁记录。
  * 当前目录里已不存在的 id 也会保留，降级或删掉某个成就都不会丢数据。
  */
 public final class AchievementLedger {
@@ -25,7 +30,8 @@ public final class AchievementLedger {
     private static final String STATS = "stats";
 
     // Insertion order is unlock order. 插入顺序即解锁顺序。
-    private final Map<String, Unlock> unlocked = new LinkedHashMap<>();
+    private final Map<Key, Unlock> unlocked = new LinkedHashMap<>();
+    private final Set<String> ids = new HashSet<>();
     private final LifetimeStats stats;
 
     private AchievementLedger(LifetimeStats stats) {
@@ -36,19 +42,30 @@ public final class AchievementLedger {
         return new AchievementLedger(new LifetimeStats());
     }
 
+    /** Whether it was unlocked anywhere. 是否在任何地点解锁过。 */
     public boolean isUnlocked(String id) {
-        return unlocked.containsKey(id);
+        return ids.contains(id);
     }
 
     /**
-     * Records an unlock at {@code epochMillis} in {@code place} (null when unknown); false when it was already unlocked.
-     * 记录在 {@code epochMillis} 时于 {@code place} 解锁（未知时为 null）；已解锁过则返回 false。
+     * Records an unlock at {@code epochMillis} in {@code place} (null when unknown). A place keeps one unlock per
+     * achievement: earning it there again (微小胜利 after it expired) moves that unlock to the new time, as the latest.
+     * False when the id is blank or this place already has an unlock at least that recent.
+     * 记录在 {@code epochMillis} 时于 {@code place} 解锁（未知时为 null）。每个地点同一成就只记一条：在那里再次获得
+     * （过期后的微小胜利）会把那条记录移到新的时间，排在最后。id 为空，或该地点已有不早于此时间的记录时返回 false。
      */
     public boolean unlock(String id, long epochMillis, Place place) {
-        if (id == null || id.isBlank() || unlocked.containsKey(id)) {
+        if (id == null || id.isBlank()) {
             return false;
         }
-        unlocked.put(id, new Unlock(id, epochMillis, place));
+        Key key = new Key(id, place);
+        Unlock earlier = unlocked.get(key);
+        if (earlier != null && earlier.epochMillis() >= epochMillis) {
+            return false;
+        }
+        unlocked.remove(key);
+        unlocked.put(key, new Unlock(id, epochMillis, place));
+        ids.add(id);
         return true;
     }
 
@@ -129,17 +146,26 @@ public final class AchievementLedger {
     public record Unlock(String id, long epochMillis, Place place) {
     }
 
+    private record Key(String id, Place place) {
+    }
+
     /**
      * Where an unlock happened: {@code server} is the server address as this client joined it, or null for
-     * {@link #LOCAL_WORLD}, a world this client hosts itself.
+     * {@link #LOCAL_WORLD}, a world this client hosts itself. Addresses are kept in lower case without the default
+     * port, so the same server typed two ways is one place.
      * 解锁发生的地点：{@code server} 是本客户端加入时使用的服务器地址；为 null 表示 {@link #LOCAL_WORLD}，即本客户端自己运行的世界。
+     * 地址统一为小写并去掉默认端口，同一台服务器换种写法仍是同一个地点。
      */
     public record Place(String server) {
         public static final Place LOCAL_WORLD = new Place(null);
+        private static final String DEFAULT_PORT = ":25565";
 
         public Place {
             if (server != null) {
-                server = server.trim();
+                server = server.trim().toLowerCase(Locale.ROOT);
+                if (server.endsWith(DEFAULT_PORT) && server.length() > DEFAULT_PORT.length()) {
+                    server = server.substring(0, server.length() - DEFAULT_PORT.length());
+                }
                 if (server.isEmpty()) {
                     throw new IllegalArgumentException("blank server address");
                 }

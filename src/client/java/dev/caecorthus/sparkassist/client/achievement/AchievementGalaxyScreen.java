@@ -1,10 +1,14 @@
 package dev.caecorthus.sparkassist.client.achievement;
 
 import dev.caecorthus.sparkassist.achievement.Achievement;
+import dev.caecorthus.sparkassist.achievement.AchievementCatalog;
 import dev.caecorthus.sparkassist.achievement.AchievementGalaxy;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
+import dev.caecorthus.sparkassist.achievement.AchievementStanding;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import net.minecraft.advancement.AdvancementDisplay;
@@ -22,6 +26,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -30,10 +35,14 @@ import org.joml.Matrix4f;
 /**
  * The achievement page, full screen: the {@link AchievementGalaxy} on a starry sky, dragged to move and scrolled to
  * zoom. The advancement tabs run along the top, so another tab is one click away; picking one goes back to the
- * vanilla screen on that tab. Hovering a star shows its title, level and condition, and where it was earned; a star
- * not earned yet shows "???" for its title.
+ * vanilla screen on that tab. Hovering a star shows its title, level and condition, and every place it was earned,
+ * this one in gold; a star not earned yet shows "???" for its title. The frame says where it was earned
+ * ({@link AchievementStanding}): vanilla gold here, light blue only elsewhere. The middle star has its own four:
+ * gold here, red here but expired, blue elsewhere, purple elsewhere but expired.
  * 全屏的成就页：星空上的 {@link AchievementGalaxy}，拖动平移、滚轮缩放。进度标签页排在顶部，点其他标签页会回到原版界面的那一页。
- * 鼠标悬停在成就上会显示标题、等级、条件以及获得地点；尚未达成的成就标题显示为“???”。
+ * 鼠标悬停在成就上会显示标题、等级、条件以及所有获得地点，当前所在地点为金色；尚未达成的成就标题显示为“???”。
+ * 边框表示在哪里获得（{@link AchievementStanding}）：在这里获得为原版金色，只在别处获得为淡蓝色。正中的微小胜利有自己的四种：
+ * 在这里获得为金色，在这里获得但已过期为红色，在别处获得为蓝色，在别处获得但已过期为紫色。
  */
 public final class AchievementGalaxyScreen extends Screen {
     public static final int SPACE = 0xFF07060D;
@@ -59,7 +68,14 @@ public final class AchievementGalaxyScreen extends Screen {
     private static final int DIM_Z = 200;
     private static final int LIT_LINK = 0xA0F2C14E;
     private static final int DIM_LINK = 0x80A8A8B8;
-    private static final int HALO = 0x40F2C14E;
+    private static final int HALO_ALPHA = 0x40000000;
+    private static final int GOLD = 0xF2C14E;
+    // Tints over vanilla's grey "not obtained" frame; earned here keeps vanilla's gold frame untinted.
+    // 叠在原版灰色“未获得”边框上的染色；在这里获得的保持原版金色边框，不染色。
+    private static final int ELSEWHERE = 0xA8DCFF;
+    private static final int CENTER_ELSEWHERE = 0x4C8CFF;
+    private static final int CENTER_EXPIRED_ELSEWHERE = 0xB46EFF;
+    private static final int CENTER_EXPIRED_HERE = 0xFF4A4A;
     private static final int NOT_EARNED_ICON = 0x99000000;
     private static final double LIT_WIDTH = 1;
     private static final double DIM_WIDTH = 1;
@@ -68,6 +84,7 @@ public final class AchievementGalaxyScreen extends Screen {
     private static final String LEVEL_KEY = "advancements.sparkassist.achievement.level";
     private static final String PLACE_KEY = "advancements.sparkassist.achievement.place";
     private static final String LOCAL_WORLD_KEY = "advancements.sparkassist.achievement.place.local_world";
+    private static final String PLACE_SEPARATOR_KEY = "advancements.sparkassist.achievement.place.separator";
     private static final String HIDDEN_TITLE = "???";
     private static final String NOT_YET_KEY = "advancements.sparkassist.achievement.not_yet";
     private static final String HINT_KEY = "gui.sparkassist.achievements.hint";
@@ -82,6 +99,8 @@ public final class AchievementGalaxyScreen extends Screen {
     private final ClientAdvancementManager advancements;
     private final Screen parent;
     private AchievementGalaxy.View view;
+    private AchievementLedger.Place here;
+    private Map<String, AchievementStanding> standings;
 
     public AchievementGalaxyScreen(ClientAdvancementManager advancements, Screen parent) {
         super(Text.translatable("gui.advancements"));
@@ -110,7 +129,10 @@ public final class AchievementGalaxyScreen extends Screen {
     }
 
     private void refresh() {
-        view = AchievementGalaxy.view(AchievementStorage.ledger(client));
+        AchievementLedger ledger = AchievementStorage.ledger(client);
+        view = AchievementGalaxy.view(ledger);
+        here = AchievementClientState.place(client);
+        standings = AchievementStanding.of(AchievementCatalog.all(), ledger, here);
     }
 
     @Override
@@ -164,28 +186,60 @@ public final class AchievementGalaxyScreen extends Screen {
         }
         for (AchievementGalaxy.Star star : view.earned()) {
             if (star.achievement().crown()) {
-                circle(context, star.x(), star.y(), STAR_SIZE * 0.8, 2 / zoom, HALO);
-                circle(context, star.x(), star.y(), STAR_SIZE * 1.0, 1 / zoom, HALO);
+                int tint = tint(star.achievement(), standing(star));
+                int halo = HALO_ALPHA | (tint < 0 ? GOLD : tint);
+                circle(context, star.x(), star.y(), STAR_SIZE * 0.8, 2 / zoom, halo);
+                circle(context, star.x(), star.y(), STAR_SIZE * 1.0, 1 / zoom, halo);
             }
         }
         context.draw();
-        view.shown().forEach(star -> drawStar(context, star, false));
-        view.earned().forEach(star -> drawStar(context, star, true));
+        view.shown().forEach(star -> drawStar(context, star, AchievementStanding.NOT_EARNED));
+        view.earned().forEach(star -> drawStar(context, star, standing(star)));
         context.getMatrices().pop();
     }
 
-    private void drawStar(DrawContext context, AchievementGalaxy.Star star, boolean earned) {
+    private AchievementStanding standing(AchievementGalaxy.Star star) {
+        return standings.getOrDefault(star.achievement().id(), AchievementStanding.HERE);
+    }
+
+    private void drawStar(DrawContext context, AchievementGalaxy.Star star, AchievementStanding standing) {
         int x = (int) Math.round(star.x());
         int y = (int) Math.round(star.y());
-        AdvancementObtainedStatus status = earned ? AdvancementObtainedStatus.OBTAINED : AdvancementObtainedStatus.UNOBTAINED;
+        boolean earned = standing != AchievementStanding.NOT_EARNED;
+        int tint = earned ? tint(star.achievement(), standing) : -1;
+        AdvancementObtainedStatus status = earned && tint < 0
+                ? AdvancementObtainedStatus.OBTAINED
+                : AdvancementObtainedStatus.UNOBTAINED;
+        if (tint >= 0) {
+            context.setShaderColor((tint >> 16 & 0xFF) / 255f, (tint >> 8 & 0xFF) / 255f, (tint & 0xFF) / 255f, 1);
+        }
         context.drawGuiTexture(status.getFrameTexture(frame(star.achievement())),
                 x - STAR_SIZE / 2, y - STAR_SIZE / 2, STAR_SIZE, STAR_SIZE);
+        if (tint >= 0) {
+            context.setShaderColor(1, 1, 1, 1);
+        }
         int iconX = x - ICON_SIZE / 2;
         int iconY = y - ICON_SIZE / 2;
         context.drawItemWithoutEntity(AchievementAdvancements.icon(star.achievement().icon()), iconX, iconY);
         if (!earned) {
             context.fill(RenderLayer.getGui(), iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, DIM_Z, NOT_EARNED_ICON);
         }
+    }
+
+    /**
+     * The RGB tint for an earned star's frame, or -1 for vanilla's untinted gold.
+     * 已获得成就边框的 RGB 染色；为 -1 时使用原版不染色的金色。
+     */
+    private static int tint(Achievement achievement, AchievementStanding standing) {
+        if (!achievement.id().equals(AchievementGalaxy.CENTER)) {
+            return standing.here() ? -1 : ELSEWHERE;
+        }
+        return switch (standing) {
+            case EXPIRED_HERE -> CENTER_EXPIRED_HERE;
+            case ELSEWHERE -> CENTER_ELSEWHERE;
+            case EXPIRED_ELSEWHERE -> CENTER_EXPIRED_ELSEWHERE;
+            default -> -1;
+        };
     }
 
     private static AdvancementFrame frame(Achievement achievement) {
@@ -236,17 +290,23 @@ public final class AchievementGalaxyScreen extends Screen {
         if (!earned) {
             lines.add(Text.translatable(NOT_YET_KEY).formatted(Formatting.DARK_GRAY).asOrderedText());
         } else {
-            ledger.unlocks().stream()
+            List<Text> places = ledger.unlocks().stream()
                     .filter(unlock -> unlock.id().equals(achievement.id()) && unlock.place() != null)
-                    .findFirst()
-                    .ifPresent(unlock -> lines.add(Text.translatable(PLACE_KEY, place(unlock.place()))
-                            .formatted(Formatting.DARK_GRAY).asOrderedText()));
+                    .map(unlock -> place(unlock.place()))
+                    .toList();
+            if (!places.isEmpty()) {
+                lines.addAll(textRenderer.wrapLines(Text.translatable(PLACE_KEY,
+                        Texts.join(places, Text.translatable(PLACE_SEPARATOR_KEY))).formatted(Formatting.DARK_GRAY),
+                        TOOLTIP_WIDTH));
+            }
         }
         return lines;
     }
 
-    private static Text place(AchievementLedger.Place place) {
-        return place.isLocalWorld() ? Text.translatable(LOCAL_WORLD_KEY) : Text.literal(place.server());
+    /** The place's name, in gold when it is where the player is now. 地点名称；是玩家当前所在地点时为金色。 */
+    private Text place(AchievementLedger.Place place) {
+        Text name = place.isLocalWorld() ? Text.translatable(LOCAL_WORLD_KEY) : Text.literal(place.server());
+        return Objects.equals(place, here) ? name.copy().formatted(Formatting.GOLD) : name;
     }
 
     // ---- Input 输入 ----

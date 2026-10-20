@@ -165,6 +165,7 @@ public final class AchievementClientState {
         }
         MatchTimeline timeline = MatchTimeline.of(outcome.events(), SparkFactionAchievementBridge::baseFaction);
         AchievementLedger ledger = AchievementStorage.ledger(client);
+        AchievementLedger.Place place = place(client);
         try {
             RoundStatsRecorder.record(ledger.stats(), facts, outcome, timeline);
         } catch (RuntimeException exception) {
@@ -175,9 +176,9 @@ public final class AchievementClientState {
         List<Achievement> earned = AchievementEvaluator.newlyEarned(
                 AchievementCatalog.all(),
                 new AchievementContext(facts, outcome, timeline, ledger.stats(), ledger),
+                place,
                 (achievement, exception) -> LOGGER.warn("Achievement {} failed to evaluate", achievement.id(), exception));
         long now = System.currentTimeMillis();
-        AchievementLedger.Place place = place(client);
         earned.forEach(achievement -> ledger.unlock(achievement.id(), now, place));
         AchievementStorage.save();
         AchievementAdvancements.announce(client, earned);
@@ -188,7 +189,7 @@ public final class AchievementClientState {
      * as entered in the server list or Direct Connect; null when neither is known.
      * 本客户端自己运行游戏时（包括对局域网开放的世界）为本地世界，否则为服务器列表或直接连接里填写的地址；两者都不知道时为 null。
      */
-    private static AchievementLedger.Place place(MinecraftClient client) {
+    static AchievementLedger.Place place(MinecraftClient client) {
         if (client.isIntegratedServerRunning()) {
             return AchievementLedger.Place.LOCAL_WORLD;
         }
