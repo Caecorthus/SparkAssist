@@ -10,8 +10,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
 /**
- * Compact book entry used by both the limited inventory and pause menu.
- * 受限背包和暂停菜单共用的小型书本入口。
+ * Compact book entry used by the limited inventory and, at the top-right corner, by every other inventory screen.
+ * 受限背包与其他背包界面（位于右上角）共用的小型书本入口。
  */
 public final class GuidebookOpenButton extends ButtonWidget {
     public static final int SIZE = 22;

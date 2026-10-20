@@ -14,7 +14,6 @@
     "GunDropPayloadMixin",
     "KeyBindingMixin",
     "LimitedInventoryScreenMixin",
-    "MinecraftClientMixin",
     "PoisonOverlayPayloadMixin",
     "PonderCaptionMixin",
     "PonderSceneCaptionMixin",
