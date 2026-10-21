@@ -11,19 +11,15 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
-import dev.doctor4t.wathe.index.WatheProperties;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
 import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
-import net.createmod.ponder.api.scene.Selection;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -51,7 +47,11 @@ final class WatheShopScenes {
         item("wathe:poison_vial", scene("wathe/bar", WatheShopScenes::poisonVial));
         item("wathe:scorpion", scene("wathe/bedroom", WatheShopScenes::scorpion));
         item("wathe:body_bag", scene("wathe/aisle", WatheShopScenes::bodyBag));
-        item("wathe:blackout", scene("wathe/lit_carriage", WatheShopScenes::blackout));
+        // No wathe:blackout demo: SparkStrength took the blackout out of every shop (SabotageShopFilter) and moved the
+        // lights to the killers' tablet; that sabotage is the sparkstrength:circuit_breaker demo
+        // (SparkStrengthKillerItemScenes::circuitBreaker).
+        // 没有 wathe:blackout 的演示：SparkStrength 已把停电器从所有商店下架（SabotageShopFilter），关灯改由杀手的平板发动；
+        // 灯光破坏见 sparkstrength:circuit_breaker 演示（SparkStrengthKillerItemScenes::circuitBreaker）。
         // With SparkStrength a NoellesRoles Serial Killer's psycho mode hands out twin pistols instead of the bat; that
         // scene is appended only when both mods are loaded, so plain Wathe keeps the bat demo alone.
         // 装了 SparkStrength 时，NoellesRoles 连环杀手的疯魔模式改发两把手枪而不是球棒；仅在两个模组都加载时追加该场景，
@@ -456,88 +456,6 @@ final class WatheShopScenes {
                 .independent();
         scene.idle(100);
         scene.markAsFinished();
-    }
-
-    /**
-     * Blackout (PlayerShopComponent.useBlackout, WorldBlackoutComponent): bought in the shop, it fires at once with
-     * nothing in the inventory. Every lamp goes out, by default for 30-40 s, with a countdown; most players go blind,
-     * while killers, the witch faction and Veterans get night vision (some roles are spared). An Engineer can restore
-     * power early. Killers usually share a 5 min cooldown. Ponder keeps its world fully
-     * lit, so the scene dims its stage (StageLights) to stand in for the darkness.
-     * 停电：在商店购买后立刻生效，不占物品栏。所有灯熄灭，默认 30～40 秒，屏幕显示倒计时；大多数人失明，杀手、魔女
-     * 阵营和老兵获得夜视（部分身份不受影响）。工程师能提前恢复供电。杀手一般共用 5 分钟冷却。Ponder 场景始终满亮度，所以由场景调暗舞台（StageLights）来表示黑暗。
-     */
-    private static void blackout(SceneBuilder scene, SceneBuildingUtil util) {
-        scene.title("wathe_blackout", "停电：全车熄灯");
-        WatheItemScenes.setStage(scene, util);
-        Selection lamps = util.select().position(1, 2, 5).add(util.select().position(4, 2, 5))
-                .add(util.select().position(5, 2, 1)).add(util.select().position(5, 2, 4));
-        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
-                new Vec3d(2.0, 1, 2.4), SCREEN_RIGHT, Direction.DOWN);
-        ElementLink<ActorElement> other = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
-                new Vec3d(2.8, 1, 4.6), SCREEN_LEFT, Direction.DOWN);
-        scene.idle(10);
-        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
-                new Vec3d(5.0, 1, 0.9), SCREEN_RIGHT, Direction.DOWN);
-        Actors.hold(scene, killer, stack("wathe:knife"));
-        scene.idle(15);
-        scene.overlay().showControls(new Vec3d(5.0, 3.6, 0.9), Pointing.DOWN, 60)
-                .withItem(stack("wathe:blackout"));
-        scene.overlay().showText(80)
-                .text("杀手在商店（按 E 打开背包）买下【停电器】：立刻生效，不占物品栏")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(90);
-        scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
-        StageLights.lights(scene, false);
-        scene.overlay().showText(90)
-                .colored(PonderPalette.RED)
-                .text("全车的灯一起熄灭，一般持续 30～40 秒，屏幕下方会显示倒计时")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(100);
-        Actors.turn(scene, other, NORTH);
-        scene.overlay().showText(90)
-                .text("大多数人会失明，只看得清身边一点、不能疾跑；杀手、魔女阵营和老兵有夜视")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(50);
-        Actors.turn(scene, other, SCREEN_LEFT);
-        scene.idle(50);
-        Actors.walk(scene, killer, new Vec3d(-1.8, 0, 0.3), 25);
-        scene.idle(27);
-        Actors.turn(scene, killer, SCREEN_RIGHT);
-        scene.idle(6);
-        Actors.charge(scene, killer, true);
-        scene.idle(15);
-        Actors.charge(scene, killer, false);
-        Actors.swing(scene, killer);
-        Actors.fall(scene, victim);
-        scene.overlay().showText(80)
-                .text("趁黑动手，好人很难看清是谁干的")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(90);
-        scene.world().modifyBlocks(lamps, state -> lamp(state, true), false);
-        StageLights.lights(scene, true);
-        scene.overlay().showText(90)
-                .text("时间一到灯会自动恢复（工程师能提前修好）；杀手一般共用 5 分钟冷却")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(100);
-        scene.overlay().showText(70)
-                .text("停电期间按开关也没用：灯没电")
-                .independent();
-        scene.idle(80);
-        scene.markAsFinished();
-    }
-
-    /** A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。 */
-    private static BlockState lamp(BlockState state, boolean on) {
-        if (state.contains(Properties.LIT)) {
-            state = state.with(Properties.LIT, on);
-        }
-        return state.contains(WatheProperties.ACTIVE) ? state.with(WatheProperties.ACTIVE, on) : state;
     }
 
     /**
