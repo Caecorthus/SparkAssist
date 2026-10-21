@@ -5,10 +5,13 @@ import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_RIGHT;
+import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SOUTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
+import dev.doctor4t.wathe.index.WatheProperties;
+import java.util.Comparator;
 import java.util.List;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
@@ -16,12 +19,18 @@ import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.element.EntityElement;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -29,12 +38,12 @@ import net.minecraft.util.math.Vec3d;
 
 /**
  * Demos for SparkStrength's killer and neutral items (Morphling, Bomber, Vulture, Pathogen, the Serial Killer's
- * psycho pistols, the M67), opened by holding W over the item and from the role's guide page; each needs NoellesRoles
- * and SparkStrength. Effects the server plays (a blast, a sneeze, a revive) or only some players see (a mark, a
+ * psycho pistols, the M67) and for the killers' lights sabotage with the circuit breaker, opened by holding W over the
+ * item and from the guide; each needs NoellesRoles and SparkStrength. Effects the server plays (a blast, a sneeze, a revive) or only some players see (a mark, a
  * carrier's outline, the trap's smoke) are scripted here and the captions say who sees what; times the game takes
  * longer over are shortened and the captions say so.
- * SparkStrength 杀手与中立阵营物品的演示（变形者、炸弹客、秃鹫、病原体、连环杀手的疯魔手枪、M67），在物品上按住 W
- * 或从职业指南页打开；都需要 NoellesRoles 与 SparkStrength。服务端播放的效果（爆炸、喷嚏、复活）或只有部分人看得到的
+ * SparkStrength 杀手与中立阵营物品的演示（变形者、炸弹客、秃鹫、病原体、连环杀手的疯魔手枪、M67），以及杀手的灯光破坏与
+ * 电闸，在物品上按住 W 或从指南书打开；都需要 NoellesRoles 与 SparkStrength。服务端播放的效果（爆炸、喷嚏、复活）或只有部分人看得到的
  * 效果（标记、带毒者轮廓、陷阱冒烟）由这里用脚本补上，并在字幕里说明谁能看到；游戏里耗时更长的过程做了缩短，字幕会注明。
  */
 final class SparkStrengthKillerItemScenes {
@@ -43,6 +52,25 @@ final class SparkStrengthKillerItemScenes {
     private static final int CARRIER_DARK_GREEN = 0x1E8C1E;
     /** PathogenRules.TEAMMATE_COLOR: a fellow Pathogen, through walls. 病原体同伴（隔墙可见）的颜色。 */
     private static final int PATHOGEN_TEAMMATE = 0x00E5A0;
+    /** Sprinting pace during a round (Wathe's 0.1), about 0.216 blocks a tick. 对局中的疾跑速度，约每 tick 0.216 格。 */
+    private static final double SPRINT = 0.216;
+    /**
+     * The circuit breaker on the lit_carriage stage: on the far right-hand wall beside its right lamp, facing into the
+     * carriage (north), about head height. lit_carriage 舞台上的电闸：装在右后方那面墙上、右边那盏灯旁边，朝向车厢（朝北），
+     * 约在头部高度。
+     */
+    private static final BlockPos BREAKER = new BlockPos(2, 2, 5);
+    /**
+     * The breaker's panel as CircuitBreakerBlock shapes it facing north (2-14 px wide, 1-15 px high, 10-16 px deep),
+     * a little larger. CircuitBreakerBlock 朝北时的面板范围（宽 2-14、高 1-15、深 10-16 像素），略放大。
+     */
+    private static final Box BREAKER_BOX = new Box(2.1, 2.04, 5.6, 2.9, 2.96, 6.0);
+    /** The four wall lamps of the lit_carriage stage. lit_carriage 舞台上的四盏壁灯。 */
+    private static final List<BlockPos> CARRIAGE_LAMPS = List.of(new BlockPos(1, 2, 5), new BlockPos(4, 2, 5),
+            new BlockPos(5, 2, 1), new BlockPos(5, 2, 4));
+    /** SabotageRules.RESTORE_STAGGER_MIN_TICKS and _MAX_TICKS. 来电时每盏灯错开的最短与最长等待（tick）。 */
+    private static final int RESTORE_MIN_TICKS = 5;
+    private static final int RESTORE_MAX_TICKS = 40;
 
     private SparkStrengthKillerItemScenes() {
     }
@@ -66,6 +94,10 @@ final class SparkStrengthKillerItemScenes {
                 scene("wathe/aisle", SparkStrengthKillerItemScenes::serialPistols));
         item("sparkstrength:serial_left_pistol", NOELLES_STRENGTH,
                 scene("wathe/aisle", SparkStrengthKillerItemScenes::serialPistols));
+        // The lights sabotage is triggered from the tablet, so its demo hangs on the breaker everyone repairs.
+        // 灯光破坏从平板发动，所以演示挂在大家都要去修的电闸上。
+        item("sparkstrength:circuit_breaker", NOELLES_STRENGTH,
+                scene("wathe/lit_carriage", SparkStrengthKillerItemScenes::circuitBreaker));
         // timedBombTrap and serialPistols also join the noellesroles:timed_bomb and wathe:psycho_mode demos
         // (NoellesKillerScenes / WatheShopScenes.register). 两者也分别加入定时炸弹与疯魔模式的演示。
     }
@@ -849,6 +881,204 @@ final class SparkStrengthKillerItemScenes {
                 .independent();
         scene.idle(100);
         scene.markAsFinished();
+    }
+
+    /**
+     * Lights sabotage and the circuit breaker (SparkStrength SabotageService.handleTrigger, SabotageAccess,
+     * SabotageRules, SabotageShopFilter, JunctionBoxBlock / JunctionBoxService, LightsSabotageService,
+     * SabotageBlackoutEffectsMixin, BlackoutNightVision, BreakerRepairService, CircuitBreakerBlock; client
+     * SabotageSkyLight, SabotageOutlineRenderer, BreakerRepairScreen; Wathe WorldBlackoutComponent). Wathe's shop
+     * blackout is gone from every shop; killers trigger the lights for free on the tablet's sabotage page (tablet in
+     * the hotbar), once a lights junction box has been pried open with a lockpick and hacked with the tablet (45 s
+     * later it is ready; maps without junction boxes unlock it about 90 s into the round). Only one sabotage runs at a
+     * time. Every lamp goes out and the client blocks sky light inside the train, so the carriage is dark, but nobody
+     * is blinded (the Blindness call is skipped), so sprinting works as usual; killers (Impostor included), the witch
+     * faction, Veterans and the Undercover keep Wathe's Night Vision. On a map with circuit breakers the lights stay
+     * out until one is repaired: every breaker trips (its lever drops) and pulses red through walls for everyone, and
+     * any living player (killers too) can right-click one to open the repair panel, flip the tripped switches back
+     * (3-5 of 8; a Master Saboteur's outage adds 2) and hold the main lever 2 s (3 s for a Master Saboteur). Lamps then
+     * come back nearest the breaker first, 5-40 ticks apart by distance, and the team cooldown is 2.5 min from that
+     * moment (90 s after the Engineer's remote Sabotage Repair). Maps without breakers get Wathe's 30-40 s timer.
+     * Ponder keeps its world fully lit, so the stage is dimmed (StageLights) and the outline is a box; the breaker is
+     * the real SparkStrength block, set by name since SparkAssist does not compile against SparkStrength.
+     * 灯光破坏与电闸：Wathe 商店的停电器已从所有商店下架；杀手在平板的「破坏」页免费发动（平板要在快捷栏里），前提是有人
+     * 先用开锁器撬开一个灯光接线箱、再用平板入侵它（解锁 45 秒后才能用；没有接线箱的地图在开局约 90 秒后自动解锁）。同一时间
+     * 只能有一个破坏。所有灯熄灭，客户端屏蔽车厢内的天空光照，车厢一片漆黑，但没人会失明（跳过了施加失明），所以照常能疾跑；
+     * 杀手（含内鬼）、魔女阵营、老兵与卧底照样获得 Wathe 的夜视。有电闸的地图会一直黑到有人修好电闸：所有电闸跳闸（拉杆落下），
+     * 对所有人隔墙红色闪烁；任何存活玩家（杀手也行）右键电闸打开维修面板，把跳闸的空开拨回（8 个里 3～5 个；破坏大师开的
+     * 多 2 个），再按住主闸 2 秒（破坏大师开的要 3 秒）。之后离电闸近的灯先亮，按距离相隔 5～40 tick，团队冷却从这一刻起算
+     * 2.5 分钟（工程师远程破坏维修后为 90 秒）。没有电闸的地图按 Wathe 原有的 30～40 秒计时来电。Ponder 场景始终满亮度，所以
+     * 调暗舞台（StageLights），红色描边用方框表示；电闸是真正的 SparkStrength 方块，因为 SparkAssist 不依赖 SparkStrength
+     * 编译，所以按名字取得方块和属性。
+     */
+    private static void circuitBreaker(SceneBuilder scene, SceneBuildingUtil util) {
+        scene.title("sparkstrength_circuit_breaker", "灯光破坏与修电闸");
+        // Mounted before the stage drops in, so it comes down with the walls. 在舞台落下之前装好，随墙一起落下。
+        scene.world().setBlock(BREAKER, breaker(), false);
+        WatheItemScenes.setStage(scene, util);
+        ItemStack tablet = stack("sparkstrength:tablet");
+        Vec3d fixerStart = new Vec3d(0.8, 1, 0.9);
+        Vec3d atBreaker = new Vec3d(2.5, 1, 4.1);
+        ElementLink<ActorElement> fixer = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), fixerStart,
+                SCREEN_RIGHT, Direction.DOWN);
+        scene.idle(10);
+        Vec3d killerStart = new Vec3d(5.0, 1, 0.9);
+        ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"), killerStart,
+                SCREEN_RIGHT, Direction.DOWN);
+        Actors.hold(scene, killer, tablet);
+        scene.idle(15);
+        scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 60).rightClick().withItem(tablet);
+        scene.overlay().showText(90)
+                .text("杀手右键【平板电脑】，在「破坏」页免费发动灯光破坏（商店的【停电器】已下架）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(100);
+        scene.overlay().showText(90)
+                .text("灯光破坏一般要先解锁：用【开锁器】撬开灯光接线箱，再拿平板入侵它（演示略过这一步）")
+                .independent();
+        scene.idle(100);
+
+        for (BlockPos pos : CARRIAGE_LAMPS) {
+            scene.world().modifyBlock(pos, state -> lamp(state, false), false);
+        }
+        scene.world().modifyBlock(BREAKER, state -> tripped(state, true), false);
+        StageLights.lights(scene, false);
+        scene.overlay().showText(80)
+                .colored(PonderPalette.RED)
+                .text("全车的灯一起熄灭，车厢里一片漆黑")
+                .independent()
+                .attachKeyFrame();
+        // Breakers trip, and show their outline, the moment the lights go out. 熄灯的同时电闸跳闸并显示描边。
+        outlined(scene, 10);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        outlined(scene, 80);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.RED)
+                .text("电闸跳闸了：所有人都能隔墙看到它的红框（方框示意）")
+                .independent()
+                .attachKeyFrame();
+        outlined(scene, 100);
+        scene.overlay().showText(90)
+                .text("没人会失明，照常能疾跑；杀手、老兵等少数身份有夜视")
+                .independent()
+                .attachKeyFrame();
+        outlined(scene, 6);
+        Vec3d run = atBreaker.subtract(fixerStart);
+        int runTicks = (int) Math.round(run.length() / SPRINT);
+        Actors.walk(scene, fixer, run, runTicks);
+        Vec3d killerSpot = new Vec3d(4.0, 1, 2.0);
+        Actors.walk(scene, killer, killerSpot.subtract(killerStart), 30);
+        outlined(scene, runTicks);
+        Actors.turn(scene, fixer, SOUTH);
+        outlined(scene, 30 - runTicks);
+        Actors.turn(scene, killer, facing(killerSpot, atBreaker));
+        outlined(scene, 64);
+        scene.overlay().showText(80)
+                .text("一般任何活着的玩家都能去修，杀手也可以")
+                .independent();
+        outlined(scene, 90);
+
+        scene.overlay().showControls(new Vec3d(2.5, 3.3, 5.7), Pointing.DOWN, 30).rightClick();
+        outlined(scene, 10);
+        // Using a block swings the arm on the client. 对方块使用时客户端会挥手。
+        Actors.swing(scene, fixer);
+        scene.overlay().showText(90)
+                .text("右键电闸打开维修面板：把跳闸的空开（一般 3～5 个）逐个拨回")
+                .independent()
+                .attachKeyFrame();
+        outlined(scene, 100);
+        scene.overlay().showText(80)
+                .text("再按住主闸，直到电压表进入绿区（一般约 2 秒；实际几秒就能修好，演示放慢了）")
+                .independent();
+        outlined(scene, 90);
+
+        scene.world().modifyBlock(BREAKER, state -> tripped(state, false), false);
+        scene.overlay().showText(90)
+                .colored(PonderPalette.GREEN)
+                .text("来电了：离修好的电闸越近的灯越先亮")
+                .independent()
+                .attachKeyFrame();
+        int relit = restoreLamps(scene);
+        StageLights.lights(scene, true);
+        scene.idle(Math.max(0, 100 - relit));
+        Actors.leave(scene, killer, Direction.UP);
+        scene.overlay().showText(100)
+                .text("修好后杀手一般要等 2.5 分钟才能再破坏（工程师远程修好时只要 90 秒）")
+                .independent()
+                .attachKeyFrame();
+        scene.idle(110);
+        scene.overlay().showText(100)
+                .text("同一时间只能有一个破坏；没有电闸的旧地图不用修，一般 30～40 秒后自动来电")
+                .independent();
+        scene.idle(110);
+        scene.markAsFinished();
+    }
+
+    /**
+     * Wait {@code ticks} with the tripped breaker's red outline up (SabotageOutlineRenderer's BREAKER_RED, drawn as a
+     * box). 等待 ticks，期间跳闸电闸的红色描边一直显示（SabotageOutlineRenderer 的 BREAKER_RED，用方框表示）。
+     */
+    private static void outlined(SceneBuilder scene, int ticks) {
+        if (ticks <= 0) {
+            return;
+        }
+        scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, BREAKER, BREAKER_BOX, ticks);
+        scene.idle(ticks);
+    }
+
+    /**
+     * Light the lamps back up as LightsSabotageService.repair times them (SabotageRules.restoreDelay): each waits 5
+     * ticks plus up to 35 more by its distance from the breaker over the farthest lamp's, so the nearest comes on
+     * first. Returns the ticks it took.
+     * 像 LightsSabotageService.repair 那样给每盏灯定时（SabotageRules.restoreDelay）：每盏灯等 5 tick，再按它到电闸的距离与
+     * 最远那盏灯距离之比最多多等 35 tick，所以最近的先亮。返回用掉的 tick 数。
+     */
+    private static int restoreLamps(SceneBuilder scene) {
+        Vec3d origin = Vec3d.ofCenter(BREAKER);
+        double farthest = CARRIAGE_LAMPS.stream().mapToDouble(pos -> Vec3d.ofCenter(pos).distanceTo(origin)).max()
+                .orElse(0);
+        List<BlockPos> nearestFirst = CARRIAGE_LAMPS.stream()
+                .sorted(Comparator.comparingDouble(pos -> Vec3d.ofCenter(pos).distanceTo(origin))).toList();
+        int elapsed = 0;
+        for (BlockPos pos : nearestFirst) {
+            double share = farthest <= 0 ? 0 : Math.min(1, Vec3d.ofCenter(pos).distanceTo(origin) / farthest);
+            int delay = RESTORE_MIN_TICKS + (int) Math.round(share * (RESTORE_MAX_TICKS - RESTORE_MIN_TICKS));
+            if (delay > elapsed) {
+                scene.idle(delay - elapsed);
+                elapsed = delay;
+            }
+            scene.world().modifyBlock(pos, state -> lamp(state, true), false);
+        }
+        return elapsed;
+    }
+
+    /** A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。 */
+    private static BlockState lamp(BlockState state, boolean on) {
+        if (state.contains(Properties.LIT)) {
+            state = state.with(Properties.LIT, on);
+        }
+        return state.contains(WatheProperties.ACTIVE) ? state.with(WatheProperties.ACTIVE, on) : state;
+    }
+
+    /**
+     * SparkStrength's circuit breaker facing north, not tripped. SparkAssist does not compile against SparkStrength,
+     * so the block is looked up by id. SparkStrength 的电闸，朝北、未跳闸；SparkAssist 不依赖 SparkStrength 编译，所以按 id 取方块。
+     */
+    private static BlockState breaker() {
+        BlockState state = Registries.BLOCK.get(Identifier.of("sparkstrength", "circuit_breaker")).getDefaultState();
+        if (state.contains(Properties.HORIZONTAL_FACING)) {
+            state = state.with(Properties.HORIZONTAL_FACING, Direction.NORTH);
+        }
+        return tripped(state, false);
+    }
+
+    /**
+     * CircuitBreakerBlock.TRIPPED, found by name on the block's own state manager: a lights sabotage drops the lever,
+     * a repair puts it back. 按名字从方块自己的状态管理器取得 CircuitBreakerBlock.TRIPPED：灯光破坏让拉杆落下，修好后复位。
+     */
+    private static BlockState tripped(BlockState state, boolean tripped) {
+        return state.getBlock().getStateManager().getProperty("tripped") instanceof BooleanProperty property
+                ? state.with(property, tripped) : state;
     }
 
     /** The point {@code distance} blocks from {@code from} along {@code yaw}. 从 from 沿 yaw 方向 distance 格处的点。 */

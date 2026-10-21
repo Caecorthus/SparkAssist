@@ -368,17 +368,23 @@ final class SparkStrengthCivilianItemScenes {
 
     /**
      * Flashlight (SparkStrength FlashlightItem, FlashlightBlackoutService, AttendantFlashlightService,
-     * FlashlightBeamRules and the client flashlight renderer; Wathe WorldBlackoutComponent): every Attendant gets one
-     * at the start; it is not hidden in hand. A right-click toggles it (a swing, an action-bar note). While a lit
-     * flashlight is held in either hand, the blackout's blindness, which Wathe refreshes every tick for non-killers,
-     * is cancelled (killers and Veterans get Night Vision instead); switching it on mid-blackout clears the blindness
-     * at once. Every client draws a lit flashlight as a real cone of light along the holder's look, about 28 blocks
-     * long (not while an Iris shader pack is on; a blind viewer's fog hides it beyond a few blocks); Ponder cannot run
-     * that shader, so the beam is drawn as lines. The stage is dimmed (StageLights) as in the blackout demo.
-     * 手电筒：乘务员开局就有；拿在手上不隐藏。右键开关（会挥手，动作栏有提示）。主手或副手拿着开着的手电时，Wathe 每 tick
-     * 给非杀手刷新的停电失明会被取消（杀手和老兵则获得夜视）；停电中途打开也会立刻解除失明。每个客户端都会把开着的手电
-     * 沿持有者视线画成约 28 格长的真实光锥（开着 Iris 光影包时不画；失明者的迷雾会遮住几格外的光）；Ponder 跑不了那个
-     * 着色器，所以光束用线条表示。舞台像停电演示一样调暗（StageLights）。
+     * FlashlightBeamRules and the client flashlight renderer; SparkStrength LightsSabotageService,
+     * SabotageBlackoutEffectsMixin, client SabotageSkyLight): every Attendant gets one at the start; it is not hidden
+     * in hand. A right-click toggles it (a swing, an action-bar note). The only blackout left is the killers' lights
+     * sabotage (Wathe's shop blackout is gone, SabotageShopFilter), and it blinds nobody: the lamps go out and the
+     * client blocks sky light inside the train, so the carriage is simply dark, while killers, Veterans and a few
+     * others get Night Vision. FlashlightBlackoutService has nothing to cancel during it (its old anti-blindness only
+     * mattered for Wathe's own blackout). Every client draws a lit flashlight, held in either hand, as a real cone of
+     * light along the holder's look, about 28 blocks long (not while an Iris shader pack is on), lighting the blocks
+     * and players it reaches; Ponder cannot run that shader, so the beam is drawn as lines. The stage is dimmed
+     * (StageLights) for the darkness; the killer's tablet stands for the sabotage (SparkStrengthKillerItemScenes::
+     * circuitBreaker).
+     * 手电筒：乘务员开局就有；拿在手上不隐藏。右键开关（会挥手，动作栏有提示）。现在唯一的停电是杀手的灯光破坏（Wathe 商店的
+     * 停电器已下架，SabotageShopFilter），它不让任何人失明：灯熄灭、客户端屏蔽车厢内的天空光照，车厢只是一片漆黑；杀手、老兵
+     * 等少数身份获得夜视。灯光破坏期间 FlashlightBlackoutService 没有失明可取消（以前的防失明只对 Wathe 自己的停电有用）。
+     * 主手或副手拿着开着的手电时，每个客户端都会沿持有者视线画出约 28 格长的真实光锥（开着 Iris 光影包时不画），照亮光照到的
+     * 方块和玩家；Ponder 跑不了那个着色器，所以光束用线条表示。舞台调暗（StageLights）表示黑暗；杀手手里的平板代表发动破坏
+     * （见 SparkStrengthKillerItemScenes::circuitBreaker）。
      */
     private static void flashlight(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("ss_flashlight", "手电筒：停电时照亮前方");
@@ -404,10 +410,10 @@ final class SparkStrengthCivilianItemScenes {
                 NORTH, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 50)
-                .withItem(stack("wathe:blackout"));
+        scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 50).rightClick()
+                .withItem(stack("sparkstrength:tablet"));
         scene.overlay().showText(80)
-                .text("杀手开了停电：全车熄灯，杀手有夜视，其他大多数人都会失明")
+                .text("杀手用平板发动灯光破坏：全车熄灯，车厢一片漆黑；没人会失明，但没有夜视就看不清")
                 .independent()
                 .attachKeyFrame();
         scene.idle(20);
@@ -424,7 +430,7 @@ final class SparkStrengthCivilianItemScenes {
         Beam beam = beamOn(scene, attendant, 10, 6, 6);
         scene.overlay().showText(100)
                 .colored(PonderPalette.GREEN)
-                .text("打开手电并拿在手上（主手副手都行）就不会被停电致盲；停电中途打开也会立刻解除失明")
+                .text("打开手电拿在手上（主手副手都行），漆黑的车厢里也能看清前方")
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
@@ -447,7 +453,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
-                .text("停电时开着手电很显眼：有夜视的杀手远远就能看到这道光，失明的人一般只看得到身边几格")
+                .text("停电时开着手电很显眼：有夜视的杀手远远就能看到这道光")
                 .independent();
         scene.idle(100);
         scene.overlay().showControls(attendantSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(on);
@@ -457,7 +463,7 @@ final class SparkStrengthCivilianItemScenes {
         beamOff(scene, beam);
         Actors.lookPitch(scene, attendant, 0);
         scene.overlay().showText(80)
-                .text("关掉手电或换成别的东西，下一刻又会被停电致盲")
+                .text("关掉手电或换成别的东西，眼前又是一片漆黑")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
@@ -921,14 +927,15 @@ final class SparkStrengthCivilianItemScenes {
      * WorldBlackoutComponent): each takes effect when someone drinks a base spirit holding it, at once when the glass
      * is iced. Rum: Speed II for 10 s, no particles. Tequila: 12 s of No Collision, so the drinker and other players
      * pass through each other, though players are solid to each other once a round is 30 s old (SparkStrength
-     * PlayerCollisionGraceRules). Gin: clears Blindness, gives Night Vision and Gin Immunity
-     * for 20 s, which cancels the blackout's blindness. Vodka: 20 s of Stimulation (sprinting costs no stamina);
+     * PlayerCollisionGraceRules). Gin: Night Vision for 20 s, so the drinker sees in the dark of a lights sabotage
+     * (it also clears Blindness and grants Gin Immunity, which cancels a blackout's blindness, but the lights sabotage
+     * blinds nobody; power coming back clears everyone's Night Vision, Wathe removeBlackoutEffects). Vodka: 20 s of Stimulation (sprinting costs no stamina);
      * running item cooldowns drop to 60% at once and cooldowns set meanwhile are cut to 80%; at the end stamina
      * empties and the drinker is exhausted for about 15 s (SparkStrength drops NoellesRoles' Slowness II). The glass
      * adds 20% sanity and every spirit another 20%. Times shown are SparkStrength's; special liqueur doubles them.
      * 酒保的烈酒（按 SparkStrength 调整后）：有人喝下调了它的基酒时生效，加了冰块就立刻生效。朗姆酒：速度 II 10 秒，不冒粒子。
-     * 龙舌兰：12 秒无碰撞，和别的玩家能互相穿过（开局 30 秒后玩家之间本是实心的）。金酒：解除失明，给夜视和金酒免疫 20 秒，免疫让停电不再
-     * 致盲。伏特加：20 秒亢奋（疾跑不耗体力）；正在进行的物品冷却立刻剩 60%，期间新设的冷却打 8 折；结束时体力清零并进入
+     * 龙舌兰：12 秒无碰撞，和别的玩家能互相穿过（开局 30 秒后玩家之间本是实心的）。金酒：夜视 20 秒，灯光破坏的黑暗里
+     * 也看得清（还会解除失明并给金酒免疫，免疫能挡掉停电失明，但灯光破坏本来就不致盲；来电时 Wathe 会清掉所有人的夜视）。伏特加：20 秒亢奋（疾跑不耗体力）；正在进行的物品冷却立刻剩 60%，期间新设的冷却打 8 折；结束时体力清零并进入
      * 疲惫约 15 秒（SparkStrength 去掉了 NoellesRoles 的缓慢 II）。这杯酒本身回 20% 理智，每种烈酒再多回 20%。时长为 SparkStrength 数值，特调利口酒
      * 会翻倍。
      */
@@ -959,7 +966,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.walk(scene, walker, diagonal.multiply(WALK * dash), dash);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
-                .text("朗姆酒：速度 II，默认 10 秒（不冒效果粒子）")
+                .text("朗姆酒：速度 II，10 秒（不冒效果粒子）")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
@@ -987,7 +994,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.walk(scene, tequilaDrinker, diagonal.multiply(through), (int) Math.round(through / WALK));
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
-                .text("龙舌兰：默认 12 秒内不和别人碰撞，能直接从人身上穿过去，别人也能穿过你")
+                .text("龙舌兰：12 秒内不和别人碰撞，能直接从人身上穿过去，别人也能穿过你")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
@@ -995,11 +1002,11 @@ final class SparkStrengthCivilianItemScenes {
         Actors.leave(scene, blocker, Direction.UP);
         scene.idle(20);
 
-        Vec3d blindSpot = new Vec3d(2.0, 1, 2.0);
+        Vec3d victimSpot = new Vec3d(2.0, 1, 2.0);
         Vec3d ginSpot = new Vec3d(4.0, 1, 1.0);
         Vec3d killerStart = new Vec3d(2.0, 1, 4.6);
         Vec3d killerSpot = new Vec3d(2.0, 1, 3.1);
-        ElementLink<ActorElement> blind = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), blindSpot,
+        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), victimSpot,
                 NORTH, Direction.DOWN);
         ElementLink<ActorElement> ginDrinker = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 ginSpot, SCREEN_RIGHT, Direction.DOWN);
@@ -1010,25 +1017,25 @@ final class SparkStrengthCivilianItemScenes {
                 NORTH, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 40)
-                .withItem(stack("wathe:blackout"));
+        scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 40).rightClick()
+                .withItem(stack("sparkstrength:tablet"));
         scene.idle(10);
         scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
         StageLights.lights(scene, false);
         scene.overlay().showText(80)
-                .text("停电了：大多数人都会失明")
+                .text("杀手发动灯光破坏：车厢一片漆黑，没有夜视的人几乎看不清")
                 .independent()
                 .attachKeyFrame();
         scene.idle(30);
-        Actors.turn(scene, blind, SCREEN_LEFT);
+        Actors.turn(scene, victim, SCREEN_LEFT);
         scene.idle(30);
         drink(scene, ginDrinker, ginSpot, gin);
         scene.overlay().showText(100)
                 .colored(PonderPalette.GREEN)
-                .text("金酒：立刻解除失明并获得夜视，默认 20 秒内停电也不会再让你失明")
+                .text("金酒：夜视 20 秒，停电时也能看清")
                 .independent()
                 .attachKeyFrame();
-        Actors.turn(scene, blind, NORTH);
+        Actors.turn(scene, victim, NORTH);
         scene.idle(30);
         Actors.walk(scene, killer, killerSpot.subtract(killerStart), 20);
         scene.idle(25);
@@ -1036,10 +1043,10 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         Actors.charge(scene, killer, false);
         Actors.swing(scene, killer);
-        Actors.fall(scene, blind);
+        Actors.fall(scene, victim);
         scene.idle(40);
         scene.overlay().showText(90)
-                .text("你看得清是谁摸黑下的手，失明的人却几乎什么也看不见")
+                .text("你看得清是谁摸黑下的手，没有夜视的人却几乎什么也看不见")
                 .independent()
                 .attachKeyFrame();
         scene.idle(30);
@@ -1049,7 +1056,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(48);
         scene.world().modifyBlocks(lamps, state -> lamp(state, true), false);
         StageLights.lights(scene, true);
-        Actors.leave(scene, blind, Direction.UP);
+        Actors.leave(scene, victim, Direction.UP);
         Actors.leave(scene, ginDrinker, Direction.UP);
         scene.idle(25);
 
@@ -1062,7 +1069,7 @@ final class SparkStrengthCivilianItemScenes {
         drink(scene, vodkaDrinker, vodkaStart, vodka);
         scene.overlay().showText(85)
                 .colored(PonderPalette.GREEN)
-                .text("伏特加：默认亢奋 20 秒，这期间疾跑不消耗体力")
+                .text("伏特加：亢奋 20 秒，这期间疾跑不消耗体力")
                 .independent()
                 .attachKeyFrame();
         Vec3d[] lap = {new Vec3d(-3.6, 0, 0), new Vec3d(0, 0, 3.6), new Vec3d(3.6, 0, 0), new Vec3d(0, 0, -3.6)};

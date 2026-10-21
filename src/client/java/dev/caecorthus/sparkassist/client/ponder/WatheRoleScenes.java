@@ -32,12 +32,14 @@ final class WatheRoleScenes {
     }
 
     /**
-     * Veteran on Spark (SparkStrength VeteranKnifeService, VeteranRules, InnocentKnifeKillRules,
-     * VeteranBlackoutService): right-click stabs at once within 3 blocks, silent, no cooldown; 2 stabs per knife,
+     * Veteran on Spark (SparkStrength VeteranKnifeService, VeteranRules, InnocentKnifeKillRules; Wathe
+     * WorldBlackoutComponent): right-click stabs at once within 3 blocks, silent, no cooldown; 2 stabs per knife,
      * then the knife is gone; the shop sells another for 300. Stabbing an innocent kills the Veteran too. During a
-     * blackout every player within 10 blocks is outlined through walls.
+     * blackout the Veteran gets Wathe's Night Vision and nothing more: SparkStrength's old through-wall outlines are
+     * gone (VeteranBlackoutService now only covers a Coroner disguised as a Veteran).
      * Spark 上的老兵：右键立即刺杀 3 格内的人，无声、无冷却；每把刀刺 2 次后消失，商店 300 金币可再买一把。刺死好人
-     * 自己也会死。停电时能隔墙看到 10 格内所有玩家的轮廓。
+     * 自己也会死。停电时老兵只有 Wathe 给的夜视：SparkStrength 以前的隔墙轮廓已删除（VeteranBlackoutService 现在只管
+     * 伪装成老兵的验尸官）。
      */
     private static void veteran(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_veteran", "老兵：两次无声刺杀");
@@ -95,10 +97,8 @@ final class WatheRoleScenes {
                 new Vec3d(1.2, 1, 1.4), SCREEN_LEFT, Direction.DOWN);
         scene.idle(15);
         StageLights.lights(scene, false);
-        Actors.highlight(scene, civilian, RoleColors.VETERAN, 80);
-        Actors.highlight(scene, lurker, RoleColors.VETERAN, 80);
         scene.overlay().showText(80)
-                .text("停电时老兵有夜视，还能隔墙看到 10 格内大多数人的轮廓（方框示意）")
+                .text("停电时老兵有夜视：漆黑的车厢里也看得清周围的人")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);

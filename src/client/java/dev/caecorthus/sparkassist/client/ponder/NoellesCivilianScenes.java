@@ -48,11 +48,11 @@ import net.minecraft.util.math.random.Random;
 /**
  * Demos for NoellesRoles' civilian roles, opened only from the role's guide page; each needs NoellesRoles. They
  * follow the Spark server stack, as the guide does: SparkStrength retunes the Bartender's drinks and adds the
- * Engineer's power restoration, the Toxicologist's Blue Vitriol (with SparkTraits' blue poison), the Professor's
+ * Engineer's Sabotage Repair, the Toxicologist's Blue Vitriol (with SparkTraits' blue poison), the Professor's
  * serums, the Bodyguard's vest and shield, the Coroner's body bag and disguise, the Detective's magnifier and the
  * glow on a Noisemaker's killer.
  * NoellesRoles 平民阵营职业的演示，只从该职业的指南页打开；都需要 NoellesRoles。与指南书一致，按 Spark 服务器的实际规则
- * 演示：SparkStrength 调整了酒保的酒效，并加入了工程师的电力恢复系统、毒理学家的蓝矾（配合 SparkTraits 的蓝毒）、
+ * 演示：SparkStrength 调整了酒保的酒效，并加入了工程师的破坏维修、毒理学家的蓝矾（配合 SparkTraits 的蓝毒）、
  * 教授的试剂、保镖的防弹衣与盾牌、验尸官的采尸袋与伪装、侦探的放大镜，以及杀死大嗓门的人身上的发光。
  */
 final class NoellesCivilianScenes {
@@ -412,17 +412,23 @@ final class NoellesCivilianScenes {
     }
 
     /**
-     * Engineer's power restoration (SparkStrength EngineerShopService, EngineerPowerRestorationService,
-     * EngineerRules): a 300-coin entry in the Engineer's shop that can only be bought during a blackout. Buying it ends
-     * the blackout at once: lamps return to their state before it, night vision and blindness are cleared for everyone
-     * (whatever their source), and the price is split
-     * among the living killers, whose blackout cooldown becomes 90 s. Ponder keeps its world fully lit, so the stage is
-     * dimmed (StageLights) as in the blackout demo.
-     * 工程师的电力恢复系统：工程师商店里 300 金币的条目，只能在停电时购买（否则买不成）。买下立刻结束停电：灯恢复停电前
-     * 的状态，所有人的夜视和失明被清除；这笔钱平分给存活的杀手，杀手的停电冷却变为 90 秒。Ponder 场景始终满亮度，所以和停电演示一样调暗舞台。
+     * Engineer's Sabotage Repair (SparkStrength EngineerShopService, EngineerSabotageRepairService, EngineerRules,
+     * EngineSabotageService.repairRemotely, SabotageService.onLightsRepairedRemotely, SabotageRules): a 250-coin entry
+     * in the Engineer's shop that only goes through while a sabotage is on (otherwise the purchase fails with a note).
+     * It ends the current lights or engine sabotage at once from anywhere, in any phase: for the lights Wathe's
+     * blackout is reset (every lamp back on together) and everyone's Night Vision and Blindness are cleared. The price
+     * paid is split among the living killers (nobody gets it when the sabotage was an Undercover's own), and the team
+     * cooldown after a remote repair is 90 s instead of the 2.5 min after a breaker or engine repair. The killer
+     * triggers the lights from the tablet (SparkStrengthKillerItemScenes::circuitBreaker). Ponder keeps its world fully
+     * lit, so the stage is dimmed (StageLights).
+     * 工程师的破坏维修：工程师商店里 250 金币的条目，只有破坏正在进行时才买得成（否则提示买不了）。买下立刻在任何位置、
+     * 任何阶段结束当前的灯光破坏或动力破坏：灯光破坏时重置 Wathe 停电（所有灯一起亮），并清除所有人的夜视与失明。付的钱
+     * 平分给存活的杀手（卧底自己开的破坏则谁也不给）；远程修好后团队冷却为 90 秒，而修电闸或修动力装置后是 2.5 分钟。
+     * 杀手用平板发动灯光破坏（见 SparkStrengthKillerItemScenes::circuitBreaker）。Ponder 场景始终满亮度，所以调暗舞台
+     * （StageLights）。
      */
     private static void engineerPower(SceneBuilder scene, SceneBuildingUtil util) {
-        scene.title("role_engineer_power", "工程师：电力恢复系统");
+        scene.title("role_engineer_power", "工程师：破坏维修");
         WatheItemScenes.setStage(scene, util);
         Selection lamps = util.select().position(1, 2, 5).add(util.select().position(4, 2, 5))
                 .add(util.select().position(5, 2, 1)).add(util.select().position(5, 2, 4));
@@ -436,18 +442,20 @@ final class NoellesCivilianScenes {
         scene.idle(10);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(4.4, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
-        Actors.hold(scene, killer, stack("wathe:knife"));
+        ItemStack tablet = stack("sparkstrength:tablet");
+        Actors.hold(scene, killer, tablet);
         scene.idle(15);
-        scene.overlay().showControls(new Vec3d(4.4, 3.6, 0.8), Pointing.DOWN, 50)
-                .withItem(stack("wathe:blackout"));
+        scene.overlay().showControls(new Vec3d(4.4, 3.6, 0.8), Pointing.DOWN, 50).rightClick().withItem(tablet);
         scene.overlay().showText(80)
-                .text("杀手开了停电：全车熄灯，大多数人看不清")
+                .text("杀手用【平板电脑】发动了灯光破坏：全车熄灯，一片漆黑")
                 .independent()
                 .attachKeyFrame();
         scene.idle(20);
         scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
         StageLights.lights(scene, false);
-        scene.idle(70);
+        scene.idle(10);
+        Actors.hold(scene, killer, stack("wathe:knife"));
+        scene.idle(60);
         Vec3d killerSpot = new Vec3d(3.4, 1, 1.3);
         Actors.walk(scene, killer, killerSpot.subtract(4.4, 1, 0.8), 30);
         scene.idle(32);
@@ -456,7 +464,7 @@ final class NoellesCivilianScenes {
         scene.overlay().showControls(engineerSpot.add(0, 2.6, 0), Pointing.DOWN, 70)
                 .withItem(stack("sparkstrength:power_restoration"));
         scene.overlay().showText(70)
-                .text("停电时，工程师能在商店花 300 金币买【电力恢复系统】")
+                .text("有破坏正在进行时，工程师能在商店买【破坏维修】（250 金币）")
                 .independent()
                 .attachKeyFrame();
         scene.idle(80);
@@ -467,7 +475,7 @@ final class NoellesCivilianScenes {
         Actors.hold(scene, killer, ItemStack.EMPTY);
         scene.overlay().showText(80)
                 .colored(PonderPalette.GREEN)
-                .text("停电立刻结束：灯恢复原状，所有人的失明和夜视都被解除")
+                .text("当前的灯光破坏或动力破坏立刻被远程修好，不管进行到哪一步")
                 .independent()
                 .attachKeyFrame();
         scene.idle(15);
@@ -479,12 +487,12 @@ final class NoellesCivilianScenes {
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(20);
         scene.overlay().showText(90)
-                .text("代价：这 300 金币会平分给存活的杀手，杀手的停电冷却变成 90 秒")
+                .text("代价：付的钱一般平分给活着的杀手；之后杀手的破坏冷却只有 90 秒（平时修好后是 2.5 分钟）")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
         scene.overlay().showText(70)
-                .text("只能在停电时买；买一次就等于送杀手 300 金币，别乱用")
+                .text("没有破坏时买不了；每买一次，杀手一般就白得 250 金币，别乱用")
                 .independent();
         scene.idle(80);
         scene.markAsFinished();
