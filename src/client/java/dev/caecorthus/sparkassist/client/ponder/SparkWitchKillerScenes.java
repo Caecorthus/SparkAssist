@@ -153,8 +153,6 @@ final class SparkWitchKillerScenes {
                 scene("sparkwitch/ray_wall", SparkWitchKillerScenes::murderousWitch));
         role("sparkassist:roles/sparkwitch/saboteur", List.of("sparkwitch"),
                 scene("wathe/lit_carriage", SparkWitchKillerScenes::saboteur));
-        role("sparkassist:roles/sparkwitch/black_raven", List.of("sparkwitch", "noellesroles"),
-                scene("wathe/aisle", SparkWitchKillerScenes::blackRaven));
         role("sparkassist:roles/sparkwitch/time_stealer", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchKillerScenes::timeStealer));
         role("sparkassist:roles/sparkwitch/witch_maiden", List.of("sparkwitch"),
@@ -182,9 +180,6 @@ final class SparkWitchKillerScenes {
 
         // Items whose use a demo above already shows; holding W over the item plays that demo.
         // 上面的演示已经演示过用法的物品；在物品上按住 W 即可播放对应演示。
-        for (String id : List.of("sparkwitch:feather_blade", "sparkwitch:black_raven_mask")) {
-            item(id, List.of("sparkwitch", "noellesroles"), scene("wathe/aisle", SparkWitchKillerScenes::blackRaven));
-        }
         item("sparkwitch:time_stealer_pocket_watch", List.of("sparkwitch"),
                 scene("wathe/aisle", SparkWitchKillerScenes::timeStealer));
         item("sparkwitch:poison_apple", List.of("sparkwitch"),
@@ -367,95 +362,6 @@ final class SparkWitchKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.markAsFinished();
-    }
-
-    /**
-     * Black Raven (FeatherBladeItem, BlackRavenRules, BlackRavenMarkRuntime, BlackRavenInstinctClientHooks,
-     * BlackRavenMaskItem, BlackRavenDisguiseRules, ConductorDisguiseAdapter): right-click with the Feather Blade (not
-     * hidden; the client returns success, so the arm swings) marks the aimed player within 3 blocks; only the marking
-     * Raven sees the outline and the victim is told nothing; 20 s later the victim is killed (knife death, not forced),
-     * 60 s cooldown. The Raven Mask (hidden in hand) opens the list of absent good roles; a disguise keeps the look,
-     * stashes the blade and hands out that role's kit (the Conductor's master key). A mark already placed still kills.
-     * 黑羽鸦：手持羽刃（不隐藏；客户端返回成功，所以会挥手）右键，标记 3 格内准星对准的玩家；只有标记者能看到描边，被标记者
-     * 不会收到任何提示；20 秒后被标记者死亡（刀杀，非强制），冷却 60 秒。鸦羽假面（手持隐藏）打开未登场好人身份名单；伪装
-     * 不改外观，收起羽刃，发放该身份的道具（列车长的万能钥匙）。已经打出的标记照样致死。
-     */
-    private static void blackRaven(SceneBuilder scene, SceneBuildingUtil util) {
-        scene.title("role_black_raven", "黑羽鸦：羽刃标记与伪装");
-        WatheItemScenes.stage(scene);
-        ElementLink<ActorElement> victim = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
-                new Vec3d(2.6, 1, 4.4), SCREEN_RIGHT, Direction.DOWN);
-        scene.idle(5);
-        int ravenColor = RoleColors.of("sparkwitch:black_raven", 0x51445F);
-        ElementLink<ActorElement> raven = Actors.enter(scene, ravenColor, Text.literal("黑羽鸦"),
-                new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
-        Actors.hold(scene, raven, stack("sparkwitch:feather_blade"));
-        scene.idle(20);
-        scene.overlay().showText(70)
-                .text("黑羽鸦开局带着羽刃，拿在手里别人看得见")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(80);
-        Actors.walk(scene, raven, new Vec3d(-1.4, 0, 1.4), 22);
-        scene.idle(26);
-        scene.overlay().showControls(new Vec3d(4.4, 3.6, 2.6), Pointing.DOWN, 30).rightClick()
-                .withItem(stack("sparkwitch:feather_blade"));
-        scene.idle(10);
-        Actors.swing(scene, raven);
-        // The outline lasts until the mark settles: the idles until the fall add up to 525 ticks, and the box ends a
-        // few ticks early so its fade-out does not take the lying shape.
-        // 描边持续到标记结算：直到倒下前的 idle 共 525 tick，方框提前几 tick 结束，免得淡出时变成躺倒的形状。
-        Actors.highlight(scene, victim, ravenColor, 520);
-        scene.overlay().showText(80)
-                .text("准星对准 3 格内的人右键，挥一下手就打上了标记")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(90);
-        scene.overlay().showText(80)
-                .text("描边只有你看得见（方框示意），对方毫无察觉")
-                .independent();
-        scene.idle(30);
-        Actors.walk(scene, raven, new Vec3d(1.4, 0, -1.4), 22);
-        scene.idle(60);
-        Actors.turn(scene, raven, SCREEN_RIGHT);
-        Actors.walk(scene, victim, new Vec3d(-0.8, 0, 0.8), 40);
-        scene.overlay().showText(70)
-                .text("标记后羽刃一般冷却 60 秒，先离开现场")
-                .independent();
-        scene.idle(80);
-        Actors.hold(scene, raven, stack("sparkwitch:black_raven_mask"));
-        scene.idle(10);
-        scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick()
-                .withItem(stack("sparkwitch:black_raven_mask"));
-        scene.idle(10);
-        Actors.swing(scene, raven);
-        scene.overlay().showText(90)
-                .text("鸦羽假面（其他活人看不见）：右键选一个本局没人拿到的好人身份")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(100);
-        Actors.hold(scene, raven, stack("noellesroles:master_key"));
-        scene.overlay().showText(90)
-                .text("外观不变；羽刃收起，换上那个身份的道具，比如列车长的万能钥匙")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(100);
-        scene.overlay().showText(35)
-                .text("……标记 20 秒后（演示缩短了时间）")
-                .independent();
-        scene.idle(45);
-        Actors.fall(scene, victim);
-        scene.overlay().showText(80)
-                .colored(PonderPalette.RED)
-                .text("目标一般当场倒下，而你已经换了一副身份")
-                .independent()
-                .attachKeyFrame();
-        scene.idle(90);
-        scene.overlay().showText(80)
-                .text("疯魔护盾等保护能挡下这一刀；羽刃不分敌我，别标到队友")
-                .independent();
-        scene.idle(90);
         scene.markAsFinished();
     }
 

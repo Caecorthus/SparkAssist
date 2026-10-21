@@ -105,7 +105,12 @@ final class RoleSkillRules {
                 ride.bool("has_speed") && Rules.iWas(context, ride, VULTURE));
     }
 
-    /** 逮到你了: a civilian Black Raven perceives a 非好人. 善良黑羽鸦感知到非好人。 */
+    /**
+     * 逮到你了: a Black Raven on the civilian side perceives a 非好人. Since the Raven became a police role
+     * (2026-10-21) that is every Black Raven; the recorded {@code actor_faction} still decides.
+     * 好人一方的黑羽鸦感知到非好人。黑羽鸦自 2026-10-21 改为警职后，所有黑羽鸦都在好人一方；仍以记录中的
+     * {@code actor_faction} 为准。
+     */
     static boolean civilianRavenPerceivesOtherSide(AchievementContext context) {
         return context.myEvents(BLACK_RAVEN_PERCEIVED).stream().anyMatch(perceived ->
                 Factions.isCivilian(perceived.value("actor_faction")) && Factions.isNonCivilian(perceived.value("faction")));

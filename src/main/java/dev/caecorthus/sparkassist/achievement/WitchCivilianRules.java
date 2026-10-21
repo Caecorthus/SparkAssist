@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkassist.achievement;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -21,6 +22,21 @@ final class WitchCivilianRules {
     static final String EMMA = "sparkwitch:emma";
     static final String CONTROL_EXPERT = "sparkwitch:control_expert";
     static final String SEEKER = "sparkwitch:seeker";
+
+    /**
+     * The seven police roles 七种武器 names in its description. The Black Raven, police since 2026-10-21, is in
+     * {@link RoleGroups#POLICE_ROLES} but not here, so the achievement keeps the seven roles it lists.
+     * 七种武器描述中列出的七个警职。黑羽鸦自 2026-10-21 起属于 {@link RoleGroups#POLICE_ROLES}，但不在此列，
+     * 因此该成就仍只要求描述里的七个身份。
+     */
+    static final Set<String> SEVEN_WEAPONS_ROLES = Set.of(
+            "wathe:vigilante",
+            "wathe:veteran",
+            "sparkwitch:judge",
+            EMMA,
+            CONTROL_EXPERT,
+            SEEKER,
+            "sparkwitch:usec");
 
     static final String SWORDFISH_STAB = "sparkwitch:swordfish_stab";
     /**
@@ -233,14 +249,14 @@ final class WitchCivilianRules {
     // ---- Police collection 警职收集 ----
 
     /**
-     * 七种武器: ever killed a 非好人 as each of the 7 police roles, across rounds. A kill counts when the victim's
-     * faction was known and differed from mine ({@link LifetimeStats#rivalKillsAs}); police are always on the civilian
-     * side (SparkTraits never gives them Impostor), so that is a kill of a 非好人.
-     * 累计分别以 7 个警职身份各击杀过一名非好人，可跨局。死者阵营已知且与我不同的击杀才计入（{@link LifetimeStats#rivalKillsAs}）；
-     * 警职永远站在好人一方（SparkTraits 从不给警职内鬼），所以这就是击杀非好人。
+     * 七种武器: ever killed a 非好人 as each of the 7 {@link #SEVEN_WEAPONS_ROLES}, across rounds. A kill counts when
+     * the victim's faction was known and differed from mine ({@link LifetimeStats#rivalKillsAs}); police are always
+     * on the civilian side (SparkTraits never gives them Impostor), so that is a kill of a 非好人.
+     * 累计分别以 7 个 {@link #SEVEN_WEAPONS_ROLES} 身份各击杀过一名非好人，可跨局。死者阵营已知且与我不同的击杀才计入
+     * （{@link LifetimeStats#rivalKillsAs}）；警职永远站在好人一方（SparkTraits 从不给警职内鬼），所以这就是击杀非好人。
      */
     static boolean policeKillWithEveryRole(AchievementContext context) {
-        return RoleGroups.POLICE_ROLES.stream().allMatch(role -> context.stats().rivalKillsAs(role) >= 1);
+        return SEVEN_WEAPONS_ROLES.stream().allMatch(role -> context.stats().rivalKillsAs(role) >= 1);
     }
 
     // ---- Helpers 辅助 ----

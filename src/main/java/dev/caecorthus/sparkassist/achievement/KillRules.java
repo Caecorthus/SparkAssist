@@ -276,7 +276,7 @@ final class KillRules {
         return killedTwoThirds(context.stats().killedRoles(RoleGroups.GRAND_WITCH), wanted);
     }
 
-    /** 2/3 of {@code roles}, rounded up: 15 of 22, 5 of 7, 20 of 29. {@code roles} 的 2/3，向上取整。 */
+    /** 2/3 of {@code roles}, rounded up: 14 of 21, 6 of 8, 20 of 29. {@code roles} 的 2/3，向上取整。 */
     static int twoThirds(Set<String> roles) {
         return (roles.size() * 2 + 2) / 3;
     }

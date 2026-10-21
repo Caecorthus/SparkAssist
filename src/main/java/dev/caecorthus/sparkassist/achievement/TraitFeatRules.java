@@ -205,9 +205,9 @@ final class TraitFeatRules {
     }
 
     /**
-     * 十八般武艺: across rounds, as one of the 22 killer roles, killed a player of another faction while holding each of
+     * 十八般武艺: across rounds, as one of the 21 killer roles, killed a player of another faction while holding each of
      * the 18 killer traits ({@link LifetimeStats#rivalKillTraitsAs}).
-     * 累计以 22 个杀手身份之一，分别在持有 18 个杀手词条中的每一个时击杀过其他阵营的玩家（{@link LifetimeStats#rivalKillTraitsAs}）。
+     * 累计以 21 个杀手身份之一，分别在持有 18 个杀手词条中的每一个时击杀过其他阵营的玩家（{@link LifetimeStats#rivalKillTraitsAs}）。
      */
     static boolean everyKillerTrait(AchievementContext context) {
         return heldAtRivalKills(context, RoleGroups.KILLER_ROLES).containsAll(KILLER_TRAITS);

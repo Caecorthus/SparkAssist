@@ -22,9 +22,9 @@ public final class RoleGroups {
     public static final String GRAND_WITCH_ROLE = "sparkwitch:grand_witch";
 
     /**
-     * The seven police roles (警职). Corrupt Cop and Insider are not police here, even though SparkFactionAPI's
-     * police registry lists them.
-     * 七个警职身份。黑警和内应在这里不算警职，尽管 SparkFactionAPI 的警察注册表包含它们。
+     * The eight police roles (警职); the Black Raven is a police variant since 2026-10-21. Corrupt Cop and Insider
+     * are not police here, even though SparkFactionAPI's police registry lists them.
+     * 八个警职身份；黑羽鸦自 2026-10-21 起是警察变体。黑警和内应在这里不算警职，尽管 SparkFactionAPI 的警察注册表包含它们。
      */
     public static final Set<String> POLICE_ROLES = Set.of(
             "wathe:vigilante",
@@ -33,9 +33,10 @@ public final class RoleGroups {
             "sparkwitch:emma",
             "sparkwitch:control_expert",
             "sparkwitch:seeker",
-            "sparkwitch:usec");
+            "sparkwitch:usec",
+            "sparkwitch:black_raven");
 
-    /** All 22 killer-faction roles of Wathe, Noelle's Roles and SparkWitch. Wathe、Noelle's Roles 与 SparkWitch 的全部 22 个杀手身份。 */
+    /** All 21 killer-faction roles of Wathe, Noelle's Roles and SparkWitch. Wathe、Noelle's Roles 与 SparkWitch 的全部 21 个杀手身份。 */
     public static final Set<String> KILLER_ROLES = Set.of(
             "wathe:killer",
             "noellesroles:swapper",
@@ -51,7 +52,6 @@ public final class RoleGroups {
             "noellesroles:poisoner",
             "noellesroles:bandit",
             "sparkwitch:ninja",
-            "sparkwitch:black_raven",
             "sparkwitch:witch_maiden",
             "sparkwitch:hunter",
             "sparkwitch:kidnapper",
