@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client;
 
+import dev.caecorthus.sparkassist.achievement.AchievementGalaxy;
 import dev.caecorthus.sparkassist.client.achievement.AchievementAdvancements;
 import dev.caecorthus.sparkassist.client.achievement.AchievementClientState;
 import dev.caecorthus.sparkassist.client.config.SparkAssistConfigManager;
@@ -10,13 +11,21 @@ import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SparkAssistClient implements ClientModInitializer {
+    private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/Achievements");
+
     private static SparkAssistConfigManager configManager;
 
     @Override
     public void onInitializeClient() {
         configManager = SparkAssistConfigManager.load();
+        // Lay the achievement galaxy out now, off the render thread. 现在就在渲染线程之外排布成就银河。
+        Thread galaxy = new Thread(SparkAssistClient::layOutGalaxy, "SparkAssist galaxy layout");
+        galaxy.setDaemon(true);
+        galaxy.start();
         PonderSupport.init();
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
         GuidebookInventoryButton.register();
@@ -34,5 +43,14 @@ public final class SparkAssistClient implements ClientModInitializer {
 
     public static SparkAssistConfigManager configManager() {
         return configManager;
+    }
+
+    private static void layOutGalaxy() {
+        try {
+            AchievementGalaxy.warmUp();
+        } catch (LinkageError exception) {
+            // Opening the page then fails too, as it would have without this thread. 之后打开成就页同样会失败，与没有这个线程时一样。
+            LOGGER.error("Could not lay out the achievement galaxy", exception);
+        }
     }
 }

@@ -378,6 +378,16 @@ public final class AchievementGalaxy {
         return RADIUS;
     }
 
+    /**
+     * Lays the galaxy out if that has not happened yet: the class does it once, as it loads, in about half a second.
+     * The client calls this on a background thread at startup so that opening the page does not stall; a page opened
+     * before it finishes waits for it.
+     * 如果银河还没排布，就现在排布：这个类在加载时排布一次，约需半秒。客户端在启动时于后台线程调用它，打开成就页时就不会卡顿；
+     * 在它完成之前打开的成就页会等它排完。
+     */
+    public static void warmUp() {
+    }
+
     /** The page for this account. 该账号的成就页。 */
     public static View view(AchievementLedger ledger) {
         return view(ledger::isUnlocked);
