@@ -38,15 +38,12 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.model.SkullEntityModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
@@ -1696,13 +1693,12 @@ final class NoellesKillerScenes {
 
     /**
      * A Morphling in corpse mode as MorphlingCorpseRendererMixin draws it: Wathe's body transforms at full tilt (no
-     * fall), so face down towards {@code yaw} with the feet a block behind where it stands, and no name.
+     * fall), so face down towards {@code yaw} with the feet a block behind where it stands, and no name. Drawn by
+     * ActorElement.lying with the vanilla-baked model a fallen actor uses.
      * 尸体伪装中的变形者，按 MorphlingCorpseRendererMixin 绘制：直接套用 Wathe 尸体的变换（没有倒下动画），朝 yaw 脸朝下，
-     * 脚在站立处后方一格，不显示名字。
+     * 脚在站立处后方一格，不显示名字。由 ActorElement.lying 绘制，与倒地演员共用同一个原版烘焙模型。
      */
     private static final class Corpse extends AnimatedSceneElementBase {
-        @Nullable
-        private static PlayerEntityModel<LivingEntity> model;
         private final int color;
         private final Vec3d feet;
         private final float yaw;
@@ -1720,33 +1716,10 @@ final class NoellesKillerScenes {
             if (fade <= 0.01f) {
                 return;
             }
-            if (model == null) {
-                model = ActorModelCompat.vanillaPlayerModel();
-            }
             MatrixStack ms = graphics.getMatrices();
             ms.push();
             ms.translate(feet.x, feet.y, feet.z);
-            ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - yaw));
-            ms.translate(0, 0.15, 0);
-            ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90));
-            ms.scale(-0.9375f, -0.9375f, 0.9375f);
-            ms.translate(0, -1.501, 0);
-            model.setVisible(true);
-            model.child = false;
-            model.riding = false;
-            model.sneaking = false;
-            model.handSwingProgress = 0;
-            model.leftArmPose = BipedEntityModel.ArmPose.EMPTY;
-            model.rightArmPose = BipedEntityModel.ArmPose.EMPTY;
-            model.getHead().resetTransform();
-            model.body.resetTransform();
-            model.rightArm.resetTransform();
-            model.leftArm.resetTransform();
-            model.rightLeg.resetTransform();
-            model.leftLeg.resetTransform();
-            model.hat.copyTransform(model.head);
-            model.render(ms, buffer.getBuffer(RenderLayer.getEntityCutoutNoCull(ActorSkins.of(color))),
-                    lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+            ActorElement.lying(ms, buffer, ActorSkins.of(color), yaw, -90, lightCoordsFromFade(fade));
             ms.pop();
         }
     }
