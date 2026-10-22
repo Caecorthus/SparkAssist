@@ -6,6 +6,7 @@ import dev.caecorthus.sparkassist.achievement.AchievementGalaxy;
 import dev.caecorthus.sparkassist.achievement.AchievementLedger;
 import dev.caecorthus.sparkassist.achievement.AchievementStanding;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,6 +99,9 @@ public final class AchievementGalaxyScreen extends Screen {
 
     private final ClientAdvancementManager advancements;
     private final Screen parent;
+    // One icon per achievement while the screen is open, not one per star per frame.
+    // 界面打开期间每个成就只建一个图标，而不是每帧每颗星新建一个。
+    private final Map<String, ItemStack> icons = new HashMap<>();
     private AchievementGalaxy.View view;
     private AchievementLedger.Place here;
     private Map<String, AchievementStanding> standings;
@@ -175,9 +179,13 @@ public final class AchievementGalaxyScreen extends Screen {
         context.getMatrices().scale((float) zoom, (float) zoom, 1);
         context.getMatrices().translate((float) -cameraX, (float) -cameraY, 0);
 
+        Bounds seen = seen();
         for (AchievementGalaxy.Link link : view.links()) {
             AchievementGalaxy.Star from = link.from();
             AchievementGalaxy.Star to = link.to();
+            if (!seen.touches(from.x(), from.y(), to.x(), to.y())) {
+                continue;
+            }
             if (link.lit()) {
                 line(context, from.x(), from.y(), to.x(), to.y(), LIT_WIDTH / zoom, LIT_LINK);
             } else {
@@ -185,7 +193,7 @@ public final class AchievementGalaxyScreen extends Screen {
             }
         }
         for (AchievementGalaxy.Star star : view.earned()) {
-            if (star.achievement().crown()) {
+            if (star.achievement().crown() && seen.touches(star.x(), star.y())) {
                 int tint = tint(star.achievement(), standing(star));
                 int halo = HALO_ALPHA | (tint < 0 ? GOLD : tint);
                 circle(context, star.x(), star.y(), STAR_SIZE * 0.8, 2 / zoom, halo);
@@ -193,9 +201,43 @@ public final class AchievementGalaxyScreen extends Screen {
             }
         }
         context.draw();
-        view.shown().forEach(star -> drawStar(context, star, AchievementStanding.NOT_EARNED));
-        view.earned().forEach(star -> drawStar(context, star, standing(star)));
+        List<AchievementGalaxy.Star> notYet = seen.stars(view.shown());
+        notYet.forEach(star -> drawStar(context, star, AchievementStanding.NOT_EARNED));
+        seen.stars(view.earned()).forEach(star -> drawStar(context, star, standing(star)));
+        // Stars sit at least 33.9 px apart (AchievementGalaxyTest), too far for a 16 px shade to reach another star's
+        // 26 px frame, so the shades can all go in one batch after the stars.
+        // 成就之间至少相距 33.9 像素（AchievementGalaxyTest），16 像素的遮罩够不到别的成就 26 像素的边框，
+        // 因此所有遮罩可以在成就画完之后一次画完。
+        context.draw(() -> notYet.forEach(star -> shade(context, star)));
         context.getMatrices().pop();
+    }
+
+    /**
+     * The part of the galaxy on screen, in galaxy pixels, widened by a star's halo and a line's width so that nothing
+     * partly on screen is skipped.
+     * 屏幕上可见的银河范围（以银河像素计），向外放宽一个成就光环和一条线的宽度，以免跳过部分可见的东西。
+     */
+    private Bounds seen() {
+        double margin = STAR_SIZE + 2 / zoom;
+        return new Bounds(cameraX - centerX() / zoom - margin, cameraY - centerY() / zoom - margin,
+                cameraX + (width - centerX()) / zoom + margin, cameraY + (height - centerY()) / zoom + margin);
+    }
+
+    private record Bounds(double left, double top, double right, double bottom) {
+        boolean touches(double x, double y) {
+            return touches(x, y, x, y);
+        }
+
+        /** Whether the box around the segment overlaps these bounds. 线段的外接框是否与此范围重叠。 */
+        boolean touches(double x1, double y1, double x2, double y2) {
+            return Math.max(x1, x2) >= left && Math.min(x1, x2) <= right
+                    && Math.max(y1, y2) >= top && Math.min(y1, y2) <= bottom;
+        }
+
+        /** The stars whose middles lie inside these bounds. 中心落在此范围内的成就。 */
+        List<AchievementGalaxy.Star> stars(List<AchievementGalaxy.Star> stars) {
+            return stars.stream().filter(star -> touches(star.x(), star.y())).toList();
+        }
     }
 
     private AchievementStanding standing(AchievementGalaxy.Star star) {
@@ -218,12 +260,18 @@ public final class AchievementGalaxyScreen extends Screen {
         if (tint >= 0) {
             context.setShaderColor(1, 1, 1, 1);
         }
-        int iconX = x - ICON_SIZE / 2;
-        int iconY = y - ICON_SIZE / 2;
-        context.drawItemWithoutEntity(AchievementAdvancements.icon(star.achievement().icon()), iconX, iconY);
-        if (!earned) {
-            context.fill(RenderLayer.getGui(), iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, DIM_Z, NOT_EARNED_ICON);
-        }
+        context.drawItemWithoutEntity(icon(star.achievement()), x - ICON_SIZE / 2, y - ICON_SIZE / 2);
+    }
+
+    private ItemStack icon(Achievement achievement) {
+        return icons.computeIfAbsent(achievement.id(), id -> AchievementAdvancements.icon(achievement.icon()));
+    }
+
+    /** Darkens the icon of a star not earned yet. 压暗尚未达成的成就的图标。 */
+    private static void shade(DrawContext context, AchievementGalaxy.Star star) {
+        int iconX = (int) Math.round(star.x()) - ICON_SIZE / 2;
+        int iconY = (int) Math.round(star.y()) - ICON_SIZE / 2;
+        context.fill(RenderLayer.getGui(), iconX, iconY, iconX + ICON_SIZE, iconY + ICON_SIZE, DIM_Z, NOT_EARNED_ICON);
     }
 
     /**
@@ -475,15 +523,18 @@ public final class AchievementGalaxyScreen extends Screen {
         void draw(DrawContext context, int width, int height, double offsetX, double offsetY) {
             int shiftX = (int) Math.floor(-offsetX * drift);
             int shiftY = (int) Math.floor(-offsetY * drift);
-            for (int i = 0; i < stars.length; i += 3) {
-                int color = stars[i + 2];
-                int size = color >>> 24 == 0xC0 ? 2 : 1;
-                for (int x = Math.floorMod(stars[i] + shiftX, tile); x < width; x += tile) {
-                    for (int y = Math.floorMod(stars[i + 1] + shiftY, tile); y < height; y += tile) {
-                        context.fill(x, y, x + size, y + size, color);
+            // One batch for the whole sky, not one draw per star. 整片星空一次画完，而不是每颗星各画一次。
+            context.draw(() -> {
+                for (int i = 0; i < stars.length; i += 3) {
+                    int color = stars[i + 2];
+                    int size = color >>> 24 == 0xC0 ? 2 : 1;
+                    for (int x = Math.floorMod(stars[i] + shiftX, tile); x < width; x += tile) {
+                        for (int y = Math.floorMod(stars[i + 1] + shiftY, tile); y < height; y += tile) {
+                            context.fill(x, y, x + size, y + size, color);
+                        }
                     }
                 }
-            }
+            });
         }
     }
 }
