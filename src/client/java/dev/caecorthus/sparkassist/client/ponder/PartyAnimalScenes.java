@@ -50,13 +50,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Demos for the NoellesRoles Party Animal's SparkStrength kit: the Party Balloon and the summoned Partygoer, opened
  * from the role's guide page (the balloon scene also by holding W over the balloon); they need NoellesRoles and
- * SparkStrength, and the Partygoer scene also SparkWitch, whose Role Skill 2 key summons it. The Partygoer is SparkStrength's own entity drawn by its own renderer, and the player it carries rides
- * it, so SparkStrength's carry pose applies. Its brain runs only on the server, so the scenes walk it along the route
- * it would plan. It hunts and carries several times faster than shown; the captions say the demo is slowed.
+ * SparkStrength, and the Partygoer scene also SparkWitch, whose Role Skill 2 key summons it. The Partygoer is
+ * SparkStrength's own entity drawn by its own renderer, and the player it holds rides it, so SparkStrength's hold pose
+ * applies. Its brain runs only on the server, so the scenes walk it along the route it would plan. It hunts and carries
+ * several times faster than shown; the captions say the demo is slowed.
  * NoellesRoles 派对狂的 SparkStrength 技能演示：派对气球与召唤出来的派对客，从该职业的指南页打开（气球场景也可在气球上
- * 按住 W 播放）；需要 NoellesRoles 与 SparkStrength，派对客场景还需要 SparkWitch（用它的“职业技能 2”键召唤）。派对客是 SparkStrength 自己的实体，由它自己的渲染器绘制，被扛的玩家
- * 真的骑在它身上，所以套用的是 SparkStrength 的扛人姿势。它的大脑只在服务端运行，所以场景按它会规划的路线移动它。它追人
- * 和扛人比演示快好几倍，字幕会注明演示放慢了。
+ * 按住 W 播放）；需要 NoellesRoles 与 SparkStrength，派对客场景还需要 SparkWitch（用它的“职业技能 2”键召唤）。派对客是
+ * SparkStrength 自己的实体，由它自己的渲染器绘制，被抱住的玩家真的骑在它身上，所以套用的是 SparkStrength 的抱人姿势。它的
+ * 大脑只在服务端运行，所以场景按它会规划的路线移动它。它追人和带人走比演示快好几倍，字幕会注明演示放慢了。
  */
 final class PartyAnimalScenes {
     private static final List<String> NOELLES_STRENGTH = List.of("noellesroles", "sparkstrength");
@@ -182,17 +183,17 @@ final class PartyAnimalScenes {
      * PartygoerWeaponHits, PartygoerCorpseService): unlocked by 2 tasks; the second skill key opens the room picker
      * (rooms = keyed cabin doors), and summoning costs 50 coins, undiscounted. It appears at the spawn room's centre
      * with 20 poof particles and a loud clip, hunts the prey nearest by path at about Speed II, pushing closed room
-     * doors 2-3 cells ahead open, and grabs within 1.1 blocks: the prey rides on its arms while it runs for the
-     * destination room at about Speed IV. Anything that can kill a player kills it in one hit; its passenger is set
-     * down at the nearest standable cell, the killer (not its summoner) gets 25 coins and 20% sanity, no gun is
-     * dropped, and it leaves a Wathe body in its own skin where it stood. 60 s cooldown once it is gone.
+     * doors 2-3 cells ahead open, and grabs within 1.1 blocks: the prey stands held in front of its chest while it
+     * runs for the destination room at about Speed IV. Anything that can kill a player kills it in one hit; its
+     * passenger is set down at the nearest standable cell, the killer (not its summoner) gets 25 coins and 20% sanity,
+     * no gun is dropped, and it leaves a Wathe body in its own skin where it stood. 60 s cooldown once it is gone.
      * Here the near cabin is the spawn room, the far one the destination; a Vigilante shoots it in the back, so it is
-     * nearer than the player it carries in front (nearest wins).
+     * nearer than the player it holds in front (nearest wins).
      * 派对客：做完 2 个任务解锁；第二技能键打开选房界面（房间 = 带钥匙的客房门），召唤花 50 金币、不打折。它在出生房间中心
      * 登场，冒出 20 个烟雾粒子并发出响亮的音效，以约速度 II 追按路程最近的猎物，前方 2~3 格内关着的房门会被推开，1.1 格内
-     * 抓住：猎物骑在它伸出的双臂上，它以约速度 IV 跑向终点房间。任何能杀死玩家的东西都能一击打死它；被扛的人被放到最近的可
+     * 抓住：猎物站着被它抱在胸前，它以约速度 IV 跑向终点房间。任何能杀死玩家的东西都能一击打死它；被抱的人被放到最近的可
      * 站立格，击杀者（召唤者除外）得 25 金币和 20% 理智，不会掉枪，原地留下一具派对客皮肤的 Wathe 尸体。离场后冷却 60 秒。
-     * 演示中近处客房是出生房间，远处是终点房间；义警从背后开枪，所以派对客比它身前扛着的人更近（最近者命中）。
+     * 演示中近处客房是出生房间，远处是终点房间；义警从背后开枪，所以派对客比它身前抱着的人更近（最近者命中）。
      */
     private static void partygoer(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_party_animal_partygoer", "派对狂：召唤派对客");
@@ -208,8 +209,8 @@ final class PartyAnimalScenes {
         ElementLink<ActorElement> host = Actors.enter(scene, PARTY_ANIMAL, Text.literal("派对狂"),
                 new Vec3d(7.6, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        // Balloon-marked: yellow on the Party Animal's screen for the rest of the scene, carried or not.
-        // 被塞了气球：此后整个场景在派对狂屏幕上都是黄色，被扛着时也一样。
+        // Balloon-marked: yellow on the Party Animal's screen for the rest of the scene, held or not.
+        // 被塞了气球：此后整个场景在派对狂屏幕上都是黄色，被抱住时也一样。
         ElementLink<Partygoer> goer = new ElementLinkImpl<>(Partygoer.class);
         // 1289 ticks: to the end of the scene. 1289 tick：直到场景结束。
         scene.addInstruction(new MarkOutline(prey, goer, BALLOON_YELLOW, 1289));
@@ -267,7 +268,7 @@ final class PartyAnimalScenes {
         carry(scene, goer, RoleColors.CIVILIAN);
         scene.overlay().showText(50)
                 .colored(PonderPalette.RED)
-                .text("贴到目标身边就把人扛起来，扛向终点房间（演示放慢）")
+                .text("贴到目标身边就把人抱住，带向终点房间（演示放慢）")
                 .independent()
                 .attachKeyFrame();
         Vec3d fall = new Vec3d(4.8, 1, 2.2);
@@ -275,7 +276,7 @@ final class PartyAnimalScenes {
         turn(scene, goer, away);
         scene.idle(4);
         // Carrying is slowed to about 0.06 blocks a tick (Speed IV is about 0.39); it reaches `fall` as the shot lands.
-        // 扛人放慢到每 tick 约 0.06 格（速度 IV 约 0.39）；中枪时正好走到 fall。
+        // 带人走放慢到每 tick 约 0.06 格（速度 IV 约 0.39）；中枪时正好走到 fall。
         walk(scene, goer, fall.subtract(1.9, 1, 1.7), 49);
         scene.idle(10);
         WatheItemScenes.openDoor(scene, NEAR_DOOR, false);
@@ -286,9 +287,9 @@ final class PartyAnimalScenes {
         // The far door is now within three cells of its path. 远处的门进入它前方三格之内。
         WatheItemScenes.openDoor(scene, FAR_DOOR, true);
         scene.idle(9);
-        // The shot (WatheItemScenes.shoot) reaches it from behind, before the player it carries in front, and kills it
+        // The shot (WatheItemScenes.shoot) reaches it from behind, before the player it holds in front, and kills it
         // that tick; the player is set down at the centre of its cell, (4, 2).
-        // 开枪（同 WatheItemScenes.shoot）从背后打中它，先于它身前扛着的人，当 tick 打死；被扛的人落在它所在格 (4, 2) 的中心。
+        // 开枪（同 WatheItemScenes.shoot）从背后打中它，先于它身前抱着的人，当 tick 打死；被抱的人落在它所在格 (4, 2) 的中心。
         Actors.lookPitch(scene, vigilante, -4);
         scene.overlay().showLine(PonderPalette.RED, vigilanteFeet.add(forward(aim).multiply(0.85)).add(0, 1.05, 0),
                 fall.add(0, 1.3, 0), 6);
@@ -305,7 +306,7 @@ final class PartyAnimalScenes {
         WatheItemScenes.openDoor(scene, FAR_DOOR, false);
         scene.idle(13);
         scene.overlay().showText(80)
-                .text("它扛着的人被放了下来，毫发无伤")
+                .text("它抱着的人被放了下来，毫发无伤")
                 .independent()
                 .attachKeyFrame();
         scene.idle(20);
@@ -322,13 +323,13 @@ final class PartyAnimalScenes {
                 .independent();
         scene.idle(100);
         scene.overlay().showText(90)
-                .text("被扛着的人能转头、说话，但动不了也下不来，只能喊人来救")
+                .text("被抱住的人能转头、说话，但动不了也挣不脱，只能喊人来救")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
-                .text("没人拦的话，它会扛进终点房间吃掉：5 秒起，每层护盾多 5 秒")
+                .text("没人拦的话，它会抱进终点房间吃掉：5 秒起，每层护盾多 5 秒")
                 .independent();
         scene.idle(100);
         scene.overlay().showText(100)
@@ -394,15 +395,15 @@ final class PartyAnimalScenes {
         apply(scene, goer, element -> element.turnTo(yaw));
     }
 
-    /** Pick up a player in {@code color}: it now rides the Partygoer's arms. 扛起 color 色的玩家：此后骑在派对客双臂上。 */
+    /** Grab a player in {@code color}: they now stand held in its arms. 抱住 color 色的玩家：此后站在派对客怀里。 */
     private static void carry(SceneBuilder scene, ElementLink<Partygoer> goer, int color) {
         apply(scene, goer, element -> element.carry(color));
     }
 
     /**
-     * Killed: the body falls, and the player it carried stands at once at {@code setDown} facing {@code yaw}
+     * Killed: the body falls, and the player it held stands at once at {@code setDown} facing {@code yaw}
      * (PartygoerService.releasePassenger: the centre of the Partygoer's cell).
-     * 被打死：尸体倒下，被扛的人立刻站到 setDown、朝 yaw（releasePassenger：派对客所在格的中心）。
+     * 被打死：尸体倒下，被抱的人立刻站到 setDown、朝 yaw（releasePassenger：派对客所在格的中心）。
      */
     private static void die(SceneBuilder scene, ElementLink<Partygoer> goer, ElementLink<ActorElement> carried,
                             Vec3d setDown, float yaw) {
@@ -440,17 +441,14 @@ final class PartyAnimalScenes {
 
     /**
      * The balloon mark's yellow outline on the Party Animal's screen (a box, as {@link Actors#highlight} draws one):
-     * around the marked player while they stand, and around them on the Partygoer's arms while it carries them.
-     * 派对狂屏幕上气球标记的黄色描边（与 Actors.highlight 一样画成方框）：站着时框住被标记的人，被派对客扛着时框住它双臂上的人。
+     * around the marked player, on their own or held in the Partygoer's arms.
+     * 派对狂屏幕上气球标记的黄色描边（与 Actors.highlight 一样画成方框）：框住被标记的人，自己站着或被派对客抱着都一样。
      */
     private static final class MarkOutline extends TickingInstruction {
         private final ElementLink<ActorElement> marked;
         private final ElementLink<Partygoer> goer;
         private final int color;
-        // One outline each, so switching does not slide a box across the stage.
-        // 两种状态各用一个描边，切换时方框不会滑过舞台。
-        private final Object standing = new Object();
-        private final Object carried = new Object();
+        private final Object slot = new Object();
 
         MarkOutline(ElementLink<ActorElement> marked, ElementLink<Partygoer> goer, int color, int ticks) {
             super(false, ticks);
@@ -464,29 +462,34 @@ final class PartyAnimalScenes {
             super.tick(scene);
             Partygoer carrier = scene.resolve(goer);
             ActorElement actor = scene.resolve(marked);
+            Vec3d feet;
             if (carrier != null && carrier.isCarrying()) {
-                scene.getOutliner().chaseAABB(carried, carrier.carriedBox()).lineWidth(1 / 16f).colored(color);
+                feet = carrier.heldFeet();
             } else if (actor != null && actor.isVisible()) {
-                Vec3d at = actor.position();
-                scene.getOutliner().chaseAABB(standing,
-                        new Box(at.x - 0.4, at.y, at.z - 0.4, at.x + 0.4, at.y + 1.95, at.z + 0.4))
-                        .lineWidth(1 / 16f).colored(color);
+                feet = actor.position();
+            } else {
+                return;
             }
+            scene.getOutliner().chaseAABB(slot,
+                    new Box(feet.x - 0.4, feet.y, feet.z - 0.4, feet.x + 0.4, feet.y + 1.95, feet.z + 0.4))
+                    .lineWidth(1 / 16f).colored(color);
         }
     }
 
     /**
      * SparkStrength's Partygoer, a PartygoerEntity drawn by PartygoerEntityRenderer: the wide player model in the
      * Partygoer skin, arms out like a zombie, legs swinging with its steps. It never joins a world: like
-     * {@link ActorPlayer} it is posed here each tick. A carried player is an {@link ActorPlayer} riding it, drawn where
-     * PartygoerEntity seats a passenger, so SparkStrength's PartygoerCarriedPoseMixin lays it across the arms. Killed,
+     * {@link ActorPlayer} it is posed here each tick. A held player is an {@link ActorPlayer} riding it, drawn where
+     * PartygoerEntity places a passenger, so SparkStrength draws the hold as in a round: PartygoerCarriedPoseMixin
+     * keeps the player standing rather than seated, and PartygoerModel lowers and spreads the arms around them. Killed,
      * it becomes the Wathe body PartygoerCorpseService spawns where it stood: Partygoer skin, falling face down along
      * its facing with the feet a block behind (Wathe's body renderer), as the Jester's fake body does. SparkAssist does
      * not build against SparkStrength, so the entity comes from the registry and its state field is found by name;
      * without them nothing is drawn but the body.
      * SparkStrength 的派对客：由 PartygoerEntityRenderer 绘制的 PartygoerEntity，宽手臂玩家模型配派对客皮肤，像僵尸那样
-     * 伸着双臂，走路时双腿摆动。它从不加入世界：与 ActorPlayer 一样每 tick 在这里摆好姿态。被扛的人是骑在它身上的
-     * ActorPlayer，画在 PartygoerEntity 安放乘客的位置，于是 SparkStrength 的 PartygoerCarriedPoseMixin 会让他横躺在双臂上。
+     * 伸着双臂，走路时双腿摆动。它从不加入世界：与 ActorPlayer 一样每 tick 在这里摆好姿态。被抱的人是骑在它身上的
+     * ActorPlayer，画在 PartygoerEntity 安放乘客的位置，于是 SparkStrength 会像对局中一样画出抱人的样子：
+     * PartygoerCarriedPoseMixin 让他站着而不是坐着，PartygoerModel 把双臂放低并张开抱住他。
      * 被打死后变成 PartygoerCorpseService 在原地生成的 Wathe 尸体：派对客皮肤，沿朝向脸朝下倒下，脚在后方一格（Wathe 尸体
      * 渲染器），与小丑的假尸体相同。SparkAssist 不依赖 SparkStrength 编译，所以实体从注册表取得、状态字段按名字查找；找不到
      * 时只画尸体。
@@ -500,12 +503,13 @@ final class PartyAnimalScenes {
         /** PartygoerBrain.TURN_DEGREES_PER_TICK. 每 tick 转向角度。 */
         private static final float TURN_SPEED = 30;
         /**
-         * Where a carried player's feet ride: PartygoerEntity.CARRY_ATTACHMENT (1.05 up, 0.55 ahead) less a player's
-         * own vehicle attachment (0.6 up). 被扛玩家的脚所在处：CARRY_ATTACHMENT（上 1.05、前 0.55）减去玩家自身的
-         * 骑乘挂点（上 0.6）。
+         * Where a held player's feet ride: PartygoerEntity.CARRY_ATTACHMENT (0.6 up, 0.5 ahead, turned with the body)
+         * less a player's own vehicle attachment (0.6 up), so on the floor in front of its chest.
+         * 被抱玩家的脚所在处：CARRY_ATTACHMENT（上 0.6、前 0.5，随身体朝向旋转）减去玩家自身的骑乘挂点（上 0.6），
+         * 即它胸前的地面上。
          */
-        private static final double SEAT_HEIGHT = 1.05 - 0.6;
-        private static final double SEAT_AHEAD = 0.55;
+        private static final double SEAT_HEIGHT = 0.6 - 0.6;
+        private static final double SEAT_AHEAD = 0.5;
         private static final float FALL_TICKS = 20;
         @Nullable
         private static Field stateField;
@@ -520,7 +524,7 @@ final class PartyAnimalScenes {
         private float previousYaw;
         private float targetYaw;
         private byte state;
-        /** The carried player's colour, or -1 for none. 被扛玩家的颜色，-1 表示没有。 */
+        /** The held player's colour, or -1 for none. 被抱玩家的颜色，-1 表示没有。 */
         private int carried;
         private float fall;
         private int age;
@@ -571,16 +575,9 @@ final class PartyAnimalScenes {
             return carried >= 0 && fall < 0;
         }
 
-        /**
-         * Around the carried player, lying across the arms (PartygoerCarriedPoseMixin: centred 0.55 above the seat,
-         * along the Partygoer's left-right axis). 框住横躺在双臂上的被扛者（以座位上方 0.55 为中心，沿派对客的左右方向）。
-         */
-        Box carriedBox() {
-            Vec3d ahead = forward(yaw);
-            Vec3d centre = position.add(ahead.multiply(SEAT_AHEAD)).add(0, SEAT_HEIGHT + 0.55, 0);
-            double x = 0.95 * Math.abs(ahead.z) + 0.35 * Math.abs(ahead.x);
-            double z = 0.95 * Math.abs(ahead.x) + 0.35 * Math.abs(ahead.z);
-            return new Box(centre.x - x, centre.y - 0.35, centre.z - z, centre.x + x, centre.y + 0.35, centre.z + z);
+        /** The held player's feet, in front of its chest. 被抱者的脚，在它胸前。 */
+        Vec3d heldFeet() {
+            return position.add(forward(yaw).multiply(SEAT_AHEAD)).add(0, SEAT_HEIGHT, 0);
         }
 
         void die() {
@@ -675,7 +672,7 @@ final class PartyAnimalScenes {
             setState(goer, state);
         }
 
-        /** The carried player, facing the way the Partygoer does, legs still. 被扛的人，与派对客朝向相同，双腿不动。 */
+        /** The held player, facing the way the Partygoer does, legs still. 被抱的人，与派对客朝向相同，双腿不动。 */
         private void seat(ActorPlayer passenger, Vec3d seat) {
             passenger.setPosition(seat);
             passenger.prevX = seat.x;
@@ -737,7 +734,7 @@ final class PartyAnimalScenes {
             return entity;
         }
 
-        /** The carried player, mounted on first use. 被扛的人，首次使用时骑上去。 */
+        /** The held player, mounted on first use. 被抱的人，首次使用时骑上去。 */
         @Nullable
         private ActorPlayer rider(LivingEntity goer) {
             if (carried < 0 || entityWorld == null) {
