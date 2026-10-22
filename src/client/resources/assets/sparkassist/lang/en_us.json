@@ -679,7 +679,7 @@
   "sparkassist.ponder.role_black_raven.text_7": "……标记 20 秒后（演示缩短了时间）",
   "sparkassist.ponder.role_black_raven.text_8": "杀手一般当场倒下，而你已经换了一副身份",
   "sparkassist.ponder.role_black_raven.text_9": "疯魔护盾等保护能挡下这一刀，挡下后冷却也不返还",
-  "sparkassist.ponder.role_black_raven.text_10": "羽刃不分敌我：标记的人若是好人，他倒下时你也会小脑而死",
+  "sparkassist.ponder.role_black_raven.text_10": "羽刃不分敌我：标记的人若是好人，他倒下时你默认也会小脑而死",
   "sparkassist.ponder.role_insider.header": "内应：中立万能钥匙",
   "sparkassist.ponder.role_insider.text_1": "内应开局拿到一把中立万能钥匙，别人看不见你手里的它",
   "sparkassist.ponder.role_insider.text_2": "右键列车门或上锁的房门就能打开（被卡住的门不行）",

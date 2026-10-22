@@ -870,7 +870,7 @@ final class SparkWitchCivilianScenes {
         scene.idle(90);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
-                .text("羽刃不分敌我：标记的人若是好人，他倒下时你也会小脑而死")
+                .text("羽刃不分敌我：标记的人若是好人，他倒下时你默认也会小脑而死")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
