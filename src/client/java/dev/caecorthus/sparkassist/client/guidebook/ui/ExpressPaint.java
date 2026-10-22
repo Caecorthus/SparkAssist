@@ -261,11 +261,15 @@ public final class ExpressPaint {
     /** The same 22 px button with another 16 px icon (the settings gear). 同款 22 像素按钮，换用另一个 16 像素图标（设置齿轮）。 */
     public static void iconButton(DrawContext c, int x, int y, boolean hover, Identifier icon) {
         int s = ICON_BUTTON_SIZE;
-        dropShadow(c, x, y, s, s);
-        roundedOutline(c, x, y, s, s, EDGE);
-        c.fill(x + 1, y + 1, x + s - 1, y + s - 1, hover ? BUTTON_HOVER : BODY);
-        bevel(c, x, y, s, s);
-        ring(c, x, y, s, s, hover ? COIN : BRASS_HI, hover ? BRASS : BRASS_LO);
+        // The body goes out as one batch and the icon after it, so the body never covers the icon.
+        // 按钮主体一次提交，图标随后绘制，主体不会盖住图标。
+        c.draw(() -> {
+            dropShadow(c, x, y, s, s);
+            roundedOutline(c, x, y, s, s, EDGE);
+            c.fill(x + 1, y + 1, x + s - 1, y + s - 1, hover ? BUTTON_HOVER : BODY);
+            bevel(c, x, y, s, s);
+            ring(c, x, y, s, s, hover ? COIN : BRASS_HI, hover ? BRASS : BRASS_LO);
+        });
         c.drawTexture(icon, x + 3, y + 3, 0, 0, 16, 16, 16, 16);
     }
 

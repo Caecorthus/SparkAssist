@@ -47,8 +47,12 @@ public final class GuidebookDecorApi {
             return;
         }
         PixelSink sink = new DrawContextSink(context);
-        Ornaments.innerLine(sink, x, y, width, height);
-        Ornaments.cornerPlates(sink, x, y, width, height);
+        // The callers draw their cards outside a batch, so batch the frame here rather than flush every fill.
+        // 调用方不在绘制批次中画卡片，因此在这里把边框合为一批，而不是每个 fill 各提交一次。
+        context.draw(() -> {
+            Ornaments.innerLine(sink, x, y, width, height);
+            Ornaments.cornerPlates(sink, x, y, width, height);
+        });
     }
 
     /**

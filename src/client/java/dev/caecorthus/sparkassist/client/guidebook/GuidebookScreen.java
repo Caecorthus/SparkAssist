@@ -1306,8 +1306,10 @@ public final class GuidebookScreen extends Screen {
     }
 
     private String chineseString(String key) {
-        String fallback = Text.translatable(key).getString();
-        return chineseTranslations == null ? fallback : chineseTranslations.get(key, fallback);
+        // Search runs this a few times per entry per keystroke: build the fallback only when Chinese lacks the key.
+        // 搜索时每次按键会对每个条目调用数次：只有中文表缺少该键时才构造回退文字。
+        return chineseTranslations != null && chineseTranslations.hasTranslation(key)
+                ? chineseTranslations.get(key) : Text.translatable(key).getString();
     }
 
     /** Everything that invalidates the geometry. 所有会使几何失效的输入。 */
