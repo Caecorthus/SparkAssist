@@ -574,12 +574,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
      */
     private void nameTag(PonderLevel world, MatrixStack ms, VertexConsumerProvider buffer, float pt) {
         TextRenderer font = MinecraftClient.getInstance().textRenderer;
-        ms.scale(1, -1, 1);
-        if (world.scene != null) {
-            PonderScene.SceneTransform transform = world.scene.getTransform();
-            ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-transform.yRotation.getValue(pt)));
-            ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-transform.xRotation.getValue(pt)));
-        }
+        SpriteElement.faceCamera(world, ms, pt);
         ms.scale(NAME_SCALE, NAME_SCALE, NAME_SCALE);
         OrderedText text = name.asOrderedText();
         font.drawWithOutline(text, -font.getWidth(text) / 2f, -font.fontHeight, 0xFF000000 | readable(color), 0xFF000000,

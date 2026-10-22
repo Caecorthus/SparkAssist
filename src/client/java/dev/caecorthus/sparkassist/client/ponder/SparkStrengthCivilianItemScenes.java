@@ -51,7 +51,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 /**
@@ -1394,7 +1393,7 @@ final class SparkStrengthCivilianItemScenes {
 
     /** A thrown item's flight as a camera-facing sprite, gone on arrival. 投掷物飞行（朝向镜头的物品图片），到达即消失。 */
     private static void throwSprite(SceneBuilder scene, ItemStack stack, Vec3d from, Vec3d to, int ticks) {
-        Flight flight = new Flight(stack, from, to, ticks);
+        SpriteElement flight = SpriteElement.item(stack, from, to, ticks, false);
         scene.addInstruction(ponder -> {
             Actors.placeAtOnce(ponder, flight);
         });
@@ -1639,61 +1638,6 @@ final class SparkStrengthCivilianItemScenes {
             ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
             ms.scale(0.4f, 0.4f, 0.4f);
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED,
-                    lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
-            ms.pop();
-        }
-    }
-
-    /**
-     * A thrown item in flight (a capsule, an aroma orb): a camera-facing item sprite, as vanilla's
-     * FlyingItemEntityRenderer draws thrown items, on a straight scripted path, gone on arrival.
-     * 飞行中的投掷物（胶囊、香薰）：像原版 FlyingItemEntityRenderer 那样始终朝向镜头的物品图片，沿脚本直线飞行，到达即消失。
-     */
-    private static final class Flight extends AnimatedSceneElementBase {
-        private final ItemStack stack;
-        private final Vec3d from;
-        private final Vec3d to;
-        private final int ticks;
-        private int age;
-
-        private Flight(ItemStack stack, Vec3d from, Vec3d to, int ticks) {
-            this.stack = stack.copy();
-            this.from = from;
-            this.to = to;
-            this.ticks = Math.max(1, ticks);
-        }
-
-        @Override
-        public void reset(@Nullable PonderScene scene) {
-            age = 0;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            age++;
-        }
-
-        @Override
-        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
-                                  float pt) {
-            float time = age + pt;
-            if (fade <= 0.01f || time >= ticks) {
-                return;
-            }
-            Vec3d at = from.lerp(to, time / ticks);
-            MatrixStack ms = graphics.getMatrices();
-            ms.push();
-            ms.translate(at.x, at.y, at.z);
-            // Undo Ponder's camera (its two rotations and the GUI y flip), then flip back so y points up on screen.
-            // 抵消 Ponder 的镜头（两次旋转与 GUI 的 y 翻转），再翻转回来，使 y 在屏幕上朝上。
-            ms.scale(1, -1, 1);
-            if (world.scene != null) {
-                PonderScene.SceneTransform transform = world.scene.getTransform();
-                ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-transform.yRotation.getValue(pt)));
-                ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-transform.xRotation.getValue(pt)));
-            }
-            ms.scale(1, -1, 1);
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND,
                     lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
             ms.pop();
         }

@@ -37,8 +37,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -92,6 +90,11 @@ final class SparkWitchKillerScenes {
             EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, 0xFF8F6B52);
     /** The grappling hook chain's dark steel link colour (NinjaGrapplingHookEntityRenderer.DARK_STEEL). 钩爪铁链的深色钢链节颜色。 */
     private static final int CHAIN_STEEL = 0x4A4C54;
+    /** The hook head's own texture, drawn as a 0.5 square (NinjaGrapplingHookEntityRenderer.renderHead). 钩头自己的贴图，画成边长 0.5 的方块。 */
+    private static final Identifier HOOK_HEAD = Identifier.of("sparkwitch", "textures/entity/ninja_grappling_hook.png");
+    private static final float HOOK_HEAD_SIZE = 0.5f;
+    /** Half the hook entity's 0.25 height: the head is drawn at its centre. 钩爪实体 0.25 高度的一半：钩头画在其中心。 */
+    private static final double HOOK_CENTRE = 0.125;
     /**
      * Where vanilla puts the hand holding a line in third person (FishingBobberEntityRenderer.getHandPos, which
      * NinjaGrapplingHookEntityRenderer ports): 0.45 below the eyes, 0.8 ahead and 0.35 to the side.
@@ -641,7 +644,7 @@ final class SparkWitchKillerScenes {
         Actors.hold(scene, ninja, ItemStack.EMPTY);
         // Spawned 0.1 below the eyes (PersistentProjectileEntity), it meets the target's box after about 4.4 blocks.
         // 在眼睛下方 0.1 处生成（PersistentProjectileEntity），飞约 4.4 格碰到目标的碰撞箱。
-        sprite(scene, Sprite.item(stack("sparkwitch:ninja_shuriken"), feet.add(0, EYES - 0.1, 0),
+        sprite(scene, SpriteElement.item(stack("sparkwitch:ninja_shuriken"), feet.add(0, EYES - 0.1, 0),
                 new Vec3d(2.7, 1 + EYES - 0.1, 4.3), 4, false));
         scene.idle(4);
         Effects.burst(scene, ParticleTypes.CRIT, new Vec3d(2.4, 2.25, 4.6), 10, 0.15);
@@ -669,7 +672,7 @@ final class SparkWitchKillerScenes {
                 .withItem(stack("sparkwitch:ninja_grappling_hook"));
         scene.idle(10);
         Actors.swing(scene, ninja);
-        ElementLink<Sprite> hook = sprite(scene, Sprite.hookHead(feet.add(0, EYES, 0), latch, 3));
+        ElementLink<SpriteElement> hook = sprite(scene, hookHead(feet.add(0, EYES, 0), latch, 3));
         Chain chain = chain(scene, ninja, feet.add(0, EYES, 0), latch, 3);
         scene.idle(45);
         scene.overlay().showText(90)
@@ -1087,7 +1090,7 @@ final class SparkWitchKillerScenes {
         Vec3d muzzle = feet.add(0, EYES - 0.1, 0);
         Vec3d impact = new Vec3d(2.9, muzzle.y, 4.1);
         ItemStack shell = stack("sparkwitch:tr_shell");
-        sprite(scene, Sprite.item(shell, muzzle, impact, 2, false));
+        sprite(scene, SpriteElement.item(shell, muzzle, impact, 2, false));
         trail(scene, SHELL_TRAIL, muzzle, impact, 2, 0, 4, 1);
         trail(scene, ParticleTypes.SMOKE, muzzle, impact, 2, 0, 1, 0.5f);
         backblast(scene, feet.add(0, EYES, 0), SCREEN_RIGHT);
@@ -2046,8 +2049,8 @@ final class SparkWitchKillerScenes {
     }
 
     /** Show {@code sprite} in the scene. 在场景中显示 sprite。 */
-    static ElementLink<Sprite> sprite(SceneBuilder scene, Sprite sprite) {
-        ElementLink<Sprite> link = new ElementLinkImpl<>(Sprite.class);
+    static ElementLink<SpriteElement> sprite(SceneBuilder scene, SpriteElement sprite) {
+        ElementLink<SpriteElement> link = new ElementLinkImpl<>(SpriteElement.class);
         scene.addInstruction(ponder -> {
             Actors.placeAtOnce(ponder, sprite);
             ponder.linkElement(sprite, link);
@@ -2055,9 +2058,9 @@ final class SparkWitchKillerScenes {
         return link;
     }
 
-    private static void unsprite(SceneBuilder scene, ElementLink<Sprite> link) {
+    private static void unsprite(SceneBuilder scene, ElementLink<SpriteElement> link) {
         scene.addInstruction(ponder -> {
-            Sprite sprite = ponder.resolve(link);
+            SpriteElement sprite = ponder.resolve(link);
             if (sprite != null) {
                 sprite.setVisible(false);
             }
@@ -2065,97 +2068,14 @@ final class SparkWitchKillerScenes {
     }
 
     /**
-     * A picture that always faces the viewer, moving from {@code from} to {@code to} over {@code ticks}, then held there
-     * or gone: a thrown item as vanilla's FlyingItemEntityRenderer draws the Shuriken, or the hook head's own texture as
-     * NinjaGrapplingHookEntityRenderer.renderHead draws it (a 0.5 square around the hook's centre).
-     * 始终朝向观看者的图片，在 ticks 内从 from 移到 to，之后停在那里或消失：像原版 FlyingItemEntityRenderer 绘制手里剑那样的
-     * 投掷物，或像 NinjaGrapplingHookEntityRenderer.renderHead 那样用钩头自己的贴图绘制（以钩爪中心为中心、边长 0.5 的方块）。
+     * The Ninja's hook head flying from {@code from} to the latch point {@code to}, where it stays: the hook's own
+     * texture as NinjaGrapplingHookEntityRenderer.renderHead draws it, a 0.5 square around the hook's centre.
+     * 从 from 飞到钩点 to 并停在那里的忍者钩头：像 NinjaGrapplingHookEntityRenderer.renderHead 那样用钩爪自己的贴图绘制，
+     * 是以钩爪中心为中心、边长 0.5 的方块。
      */
-    static final class Sprite extends AnimatedSceneElementBase {
-        private static final Identifier HOOK_HEAD = Identifier.of("sparkwitch", "textures/entity/ninja_grappling_hook.png");
-        private static final float HOOK_HEAD_SIZE = 0.5f;
-        /** Half the hook entity's 0.25 height: the head is drawn at its centre. 钩爪实体 0.25 高度的一半：钩头画在其中心。 */
-        private static final double HOOK_CENTRE = 0.125;
-        @Nullable
-        private final ItemStack stack;
-        private final Vec3d from;
-        private final Vec3d to;
-        private final int ticks;
-        private final boolean stays;
-        private int age;
-
-        private Sprite(@Nullable ItemStack stack, Vec3d from, Vec3d to, int ticks, boolean stays) {
-            this.stack = stack == null ? null : stack.copy();
-            this.from = from;
-            this.to = to;
-            this.ticks = Math.max(1, ticks);
-            this.stays = stays;
-        }
-
-        static Sprite item(ItemStack stack, Vec3d from, Vec3d to, int ticks, boolean stays) {
-            return new Sprite(stack, from, to, ticks, stays);
-        }
-
-        /** The hook head flying from {@code from} to the latch point {@code to}, where it stays. 从 from 飞到钩点 to 并停在那里的钩头。 */
-        static Sprite hookHead(Vec3d from, Vec3d to, int ticks) {
-            return new Sprite(null, from.add(0, HOOK_CENTRE, 0), to.add(0, HOOK_CENTRE, 0), ticks, true);
-        }
-
-        @Override
-        public void reset(@Nullable PonderScene scene) {
-            age = 0;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            age++;
-        }
-
-        @Override
-        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
-                                  float pt) {
-            float time = age + pt;
-            if (fade <= 0.01f || time >= ticks && !stays) {
-                return;
-            }
-            Vec3d at = from.lerp(to, Math.min(1, time / ticks));
-            MatrixStack ms = graphics.getMatrices();
-            ms.push();
-            ms.translate(at.x, at.y, at.z);
-            // Undo Ponder's camera (its two rotations and the GUI y flip), then flip back so y points up on screen.
-            // 抵消 Ponder 的镜头（两次旋转与 GUI 的 y 翻转），再翻转回来，使 y 在屏幕上朝上。
-            ms.scale(1, -1, 1);
-            if (world.scene != null) {
-                PonderScene.SceneTransform transform = world.scene.getTransform();
-                ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-transform.yRotation.getValue(pt)));
-                ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-transform.xRotation.getValue(pt)));
-            }
-            ms.scale(1, -1, 1);
-            int light = lightCoordsFromFade(fade);
-            if (stack != null) {
-                MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND, light,
-                        OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
-            } else {
-                ms.scale(HOOK_HEAD_SIZE, HOOK_HEAD_SIZE, HOOK_HEAD_SIZE);
-                MatrixStack.Entry entry = ms.peek();
-                VertexConsumer consumer = buffer.getBuffer(RenderLayer.getEntityCutoutNoCull(HOOK_HEAD));
-                corner(consumer, entry, light, 0, 0, 0, 1);
-                corner(consumer, entry, light, 1, 0, 1, 1);
-                corner(consumer, entry, light, 1, 1, 1, 0);
-                corner(consumer, entry, light, 0, 1, 0, 0);
-            }
-            ms.pop();
-        }
-
-        private static void corner(VertexConsumer consumer, MatrixStack.Entry entry, int light, float x, float y,
-                                   float u, float v) {
-            consumer.vertex(entry, x - 0.5f, y - 0.5f, 0)
-                    .color(0xFFFFFFFF)
-                    .texture(u, v)
-                    .overlay(OverlayTexture.DEFAULT_UV)
-                    .light(light)
-                    .normal(entry, 0, 1, 0);
-        }
+    private static SpriteElement hookHead(Vec3d from, Vec3d to, int ticks) {
+        return SpriteElement.picture(HOOK_HEAD, HOOK_HEAD_SIZE, from.add(0, HOOK_CENTRE, 0), to.add(0, HOOK_CENTRE, 0),
+                ticks, true);
     }
 
     /**

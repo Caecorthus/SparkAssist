@@ -1093,7 +1093,7 @@ final class SparkWitchItemScenes {
         int flight = Math.max(1, (int) Math.ceil(muzzle.distanceTo(impact) / 2.5));
         DustParticleEffect dust = new DustParticleEffect(
                 new Vector3f((color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f, (color & 0xFF) / 255f), 1.0f);
-        SparkWitchKillerScenes.sprite(scene, SparkWitchKillerScenes.Sprite.item(shell, muzzle, impact, flight, false));
+        SparkWitchKillerScenes.sprite(scene, SpriteElement.item(shell, muzzle, impact, flight, false));
         SparkWitchKillerScenes.trail(scene, dust, muzzle, impact, flight, 0, 4, 1);
         SparkWitchKillerScenes.trail(scene, ParticleTypes.SMOKE, muzzle, impact, flight, 0, 1, 0.5f);
         SparkWitchKillerScenes.backblast(scene, new Vec3d(muzzle.x, muzzle.y + 0.1, muzzle.z), yaw);
