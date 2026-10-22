@@ -6,6 +6,7 @@
     "AccessibilityOptionsScreenMixin",
     "ActorBlindGateMixin",
     "ActorJesterMomentMixin",
+    "ActorMuzzleMixin",
     "ActorTextureMixin",
     "AdvancementsScreenMixin",
     "ClientAdvancementManagerMixin",

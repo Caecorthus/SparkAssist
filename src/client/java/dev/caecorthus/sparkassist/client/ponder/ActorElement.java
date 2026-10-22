@@ -2,7 +2,6 @@ package dev.caecorthus.sparkassist.client.ponder;
 
 import dev.caecorthus.sparkassist.ponder.ActorMovement;
 import dev.doctor4t.wathe.cca.PlayerPsychoComponent;
-import dev.doctor4t.wathe.client.WatheClient;
 import net.createmod.ponder.api.level.PonderLevel;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
@@ -147,7 +146,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         age = 0;
         swingTicks = -1;
         fall = -1;
-        dropPlayer();
+        player = null;
     }
 
     // ------------------------------------------------------------------ state, set by instructions / 状态（由指令设置）
@@ -626,23 +625,10 @@ public final class ActorElement extends AnimatedSceneElementBase {
             return null;
         }
         if (player == null || playerWorld != world) {
-            dropPlayer();
             player = new ActorPlayer(world, color);
             playerWorld = world;
         }
         return player;
-    }
-
-    /**
-     * Let go of the drawn entity. Wathe keeps a muzzle position per gun-holding player in a static map, which would
-     * otherwise hold every replaced actor and its world.
-     * 释放绘制用的实体。Wathe 在静态表中为每个持枪玩家记录枪口位置，不移除的话会一直持有被替换的演员及其世界。
-     */
-    private void dropPlayer() {
-        if (player != null && WatheClient.particleMap != null) {
-            WatheClient.particleMap.remove(player);
-        }
-        player = null;
     }
 
     private void stopStride() {
