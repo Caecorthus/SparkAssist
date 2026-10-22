@@ -378,7 +378,6 @@ public final class GuidebookDecorator implements AutoCloseable {
         frontPlate.close();
         watermark.close();
         endSeal.close();
-        PlateArtLoader.clear();
         readerOverlay.close();
         directoryOverlay.close();
     }
