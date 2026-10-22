@@ -1278,14 +1278,7 @@ final class NoellesKillerScenes {
         Vec3d head = feet.add(-MathHelper.sin(radians) * 1.8, 0, MathHelper.cos(radians) * 1.8);
         Box box = new Box(Math.min(feet.x, head.x) - 0.3, feet.y, Math.min(feet.z, head.z) - 0.3,
                 Math.max(feet.x, head.x) + 0.3, feet.y + 0.4, Math.max(feet.z, head.z) + 0.3);
-        Object slot = new Object();
-        scene.addInstruction(new TickingInstruction(false, ticks) {
-            @Override
-            public void tick(PonderScene ponder) {
-                super.tick(ponder);
-                ponder.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
-            }
-        });
+        Actors.outline(scene, box, color, ticks);
     }
 
     /**

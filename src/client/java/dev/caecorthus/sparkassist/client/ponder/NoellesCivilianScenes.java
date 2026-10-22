@@ -22,8 +22,6 @@ import net.createmod.ponder.api.element.ElementLink;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.api.scene.Selection;
-import net.createmod.ponder.foundation.PonderScene;
-import net.createmod.ponder.foundation.instruction.TickingInstruction;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -1819,15 +1817,7 @@ final class NoellesCivilianScenes {
     private static void glowBody(SceneBuilder scene, Vec3d feet, float yaw, int ticks) {
         float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
         Vec3d head = feet.add(-MathHelper.sin(radians) * BODY_LENGTH, 0.5, MathHelper.cos(radians) * BODY_LENGTH);
-        Box body = new Box(feet, head).expand(0.35, 0, 0.35);
-        Object slot = new Object();
-        scene.addInstruction(new TickingInstruction(false, ticks) {
-            @Override
-            public void tick(PonderScene ponder) {
-                super.tick(ponder);
-                ponder.getOutliner().chaseAABB(slot, body).lineWidth(1 / 16f).colored(GLOWING_WHITE);
-            }
-        });
+        Actors.outline(scene, new Box(feet, head).expand(0.35, 0, 0.35), GLOWING_WHITE, ticks);
     }
 
     /** A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。 */

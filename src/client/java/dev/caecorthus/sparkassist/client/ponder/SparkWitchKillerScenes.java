@@ -2344,15 +2344,8 @@ final class SparkWitchKillerScenes {
     private static void gateOutline(SceneBuilder scene, Vec3d pos, Direction facing, int color, int ticks) {
         double halfX = facing.getAxis() == Direction.Axis.X ? 0.3 : 0.6;
         double halfZ = facing.getAxis() == Direction.Axis.Z ? 0.3 : 0.6;
-        Box box = new Box(pos.x - halfX, pos.y, pos.z - halfZ, pos.x + halfX, pos.y + 2.3, pos.z + halfZ);
-        Object slot = new Object();
-        scene.addInstruction(new TickingInstruction(false, ticks) {
-            @Override
-            public void tick(PonderScene ponder) {
-                super.tick(ponder);
-                ponder.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
-            }
-        });
+        Actors.outline(scene, new Box(pos.x - halfX, pos.y, pos.z - halfZ, pos.x + halfX, pos.y + 2.3, pos.z + halfZ),
+                color, ticks);
     }
 
     /**

@@ -1885,8 +1885,8 @@ final class SparkWitchCivilianScenes {
     private static void bodyOutline(SceneBuilder scene, Vec3d feet, float yaw, int color, int ticks) {
         float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
         Vec3d head = feet.add(-MathHelper.sin(radians) * BODY_LENGTH, 0, MathHelper.cos(radians) * BODY_LENGTH);
-        scene.addInstruction(new Outline(new Box(feet.x, feet.y, feet.z, head.x, feet.y + 0.4, head.z)
-                .expand(0.35, 0, 0.35), color, ticks));
+        Actors.outline(scene, new Box(feet.x, feet.y, feet.z, head.x, feet.y + 0.4, head.z).expand(0.35, 0, 0.35),
+                color, ticks);
     }
 
     /**
@@ -2263,28 +2263,6 @@ final class SparkWitchCivilianScenes {
         @Override
         public boolean isComplete() {
             return stopped || super.isComplete();
-        }
-    }
-
-    /**
-     * A fixed illustrated outline box in {@code color} for {@code ticks}, drawn like Actors.highlight's.
-     * 固定位置的示意描边方框，颜色为 color，持续 ticks，画法与 Actors.highlight 相同。
-     */
-    private static final class Outline extends TickingInstruction {
-        private final Box box;
-        private final int color;
-        private final Object slot = new Object();
-
-        private Outline(Box box, int color, int ticks) {
-            super(false, ticks);
-            this.box = box;
-            this.color = color;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            super.tick(scene);
-            scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
     }
 

@@ -1109,7 +1109,7 @@ final class SparkWitchItemScenes {
         double half = size / 2.0;
         Box box = new Box(Math.max(0, centre.x - half), 1.0, Math.max(0, centre.z - half),
                 Math.min(PLATE, centre.x + half), 1.05, Math.min(PLATE, centre.z + half));
-        scene.addInstruction(new Outline(box, color, ticks));
+        Actors.outline(scene, box, color, ticks);
     }
 
     /** The horizontal look of {@code yaw}. yaw 的水平朝向。 */
@@ -1171,28 +1171,6 @@ final class SparkWitchItemScenes {
             at = new Vec3d(x, grounded ? floor : next.y, z);
             velocity = new Vec3d(vx * drag, grounded ? 0 : (velocity.y - 0.08) * 0.98, vz * drag);
             actor.slideTo(at);
-        }
-    }
-
-    /**
-     * A fixed illustrated outline box in {@code color} for {@code ticks}, drawn like Actors.highlight's.
-     * 固定位置的示意描边方框，颜色为 color，持续 ticks，画法与 Actors.highlight 相同。
-     */
-    private static final class Outline extends TickingInstruction {
-        private final Box box;
-        private final int color;
-        private final Object slot = new Object();
-
-        Outline(Box box, int color, int ticks) {
-            super(false, ticks);
-            this.box = box;
-            this.color = color;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            super.tick(scene);
-            scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
     }
 }
