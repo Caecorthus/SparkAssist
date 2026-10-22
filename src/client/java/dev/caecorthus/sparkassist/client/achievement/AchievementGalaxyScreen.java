@@ -102,6 +102,7 @@ public final class AchievementGalaxyScreen extends Screen {
     // One icon per achievement while the screen is open, not one per star per frame.
     // 界面打开期间每个成就只建一个图标，而不是每帧每颗星新建一个。
     private final Map<String, ItemStack> icons = new HashMap<>();
+    private List<AchievementLedger.Unlock> unlocks;
     private AchievementGalaxy.View view;
     private AchievementLedger.Place here;
     private Map<String, AchievementStanding> standings;
@@ -134,8 +135,16 @@ public final class AchievementGalaxyScreen extends Screen {
 
     private void refresh() {
         AchievementLedger ledger = AchievementStorage.ledger(client);
+        List<AchievementLedger.Unlock> latest = ledger.unlocks();
+        AchievementLedger.Place place = AchievementClientState.place(client);
+        // The page is built from the unlocks and the place alone, so it only changes when they do.
+        // 成就页只由解锁记录和所在地点决定，因此只有它们变了，页面才会变。
+        if (view != null && latest.equals(unlocks) && Objects.equals(place, here)) {
+            return;
+        }
+        unlocks = latest;
+        here = place;
         view = AchievementGalaxy.view(ledger);
-        here = AchievementClientState.place(client);
         standings = AchievementStanding.of(AchievementCatalog.all(), ledger, here);
     }
 
