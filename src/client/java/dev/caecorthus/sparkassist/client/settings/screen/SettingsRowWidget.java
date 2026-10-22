@@ -34,6 +34,8 @@ final class SettingsRowWidget extends ClickableWidget {
     private final SettingsOption option;
     private final Host host;
     private boolean dragging;
+    // An arrow key moved the slider and the value is not saved yet. 方向键移动了滑块，数值尚未保存。
+    private boolean nudged;
 
     /** What the row needs from its screen. 行对所在界面的需求。 */
     interface Host {
@@ -137,12 +139,27 @@ final class SettingsRowWidget extends ClickableWidget {
             choice.cycle(left ? -1 : 1);
         } else if (option instanceof SliderOption slider && (left || right)) {
             slider.nudge((left ? -1 : 1) * (Screen.hasShiftDown() ? 10 : 1));
+            // A held arrow repeats, so the value is saved once when the key comes up.
+            // 按住方向键会连发，因此松开按键时才保存一次。
+            nudged = true;
+            host.changed(option, false);
+            return true;
         } else if (press && option.preview() != null) {
             option.preview().toggle();
             return true;
         } else {
             return false;
         }
+        host.changed(option, true);
+        return true;
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (!nudged || (keyCode != GLFW.GLFW_KEY_LEFT && keyCode != GLFW.GLFW_KEY_RIGHT)) {
+            return false;
+        }
+        nudged = false;
         host.changed(option, true);
         return true;
     }

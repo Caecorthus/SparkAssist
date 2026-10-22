@@ -20,6 +20,7 @@ import dev.doctor4t.wathe.entity.PlayerBodyEntity;
 import dev.doctor4t.wathe.game.GameFunctions;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.registry.Registries;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -48,6 +50,9 @@ public final class AchievementClientState {
     private static Object recordAtStart;
     private static Set<String> traits = Set.of();
     private static int traitPollCountdown;
+    // The types behind RoundObservation.EXPLOSIVE_ENTITY_IDS that this client knows, resolved once.
+    // RoundObservation.EXPLOSIVE_ENTITY_IDS 中本客户端已注册的实体类型，只解析一次。
+    private static Set<EntityType<?>> explosiveTypes;
 
     private AchievementClientState() {
     }
@@ -138,10 +143,29 @@ public final class AchievementClientState {
      * 先按方框查询玩家周围的实体，再检查距离。
      */
     private static boolean explosiveNearby(ClientWorld world, ClientPlayerEntity player) {
+        Set<EntityType<?>> types = explosiveTypes();
         double range = RoundObservation.EXPLOSIVE_RANGE_BLOCKS;
         return !world.getOtherEntities(player, player.getBoundingBox().expand(range), entity ->
-                RoundObservation.EXPLOSIVE_ENTITY_IDS.contains(EntityType.getId(entity.getType()).toString())
-                        && entity.squaredDistanceTo(player) <= range * range).isEmpty();
+                types.contains(entity.getType()) && entity.squaredDistanceTo(player) <= range * range).isEmpty();
+    }
+
+    /**
+     * The nearby check runs every tick for every entity around the player, so it compares these types rather than
+     * build an id string per entity.
+     * 附近检查每 tick 都会遍历玩家周围的每个实体，因此比较这些类型，而不是为每个实体拼出 id 字符串。
+     */
+    private static Set<EntityType<?>> explosiveTypes() {
+        if (explosiveTypes == null) {
+            Set<EntityType<?>> types = new HashSet<>();
+            for (String id : RoundObservation.EXPLOSIVE_ENTITY_IDS) {
+                Identifier parsed = Identifier.tryParse(id);
+                if (parsed != null && Registries.ENTITY_TYPE.containsId(parsed)) {
+                    types.add(Registries.ENTITY_TYPE.get(parsed));
+                }
+            }
+            explosiveTypes = Set.copyOf(types);
+        }
+        return explosiveTypes;
     }
 
     private static void findOwnDeathReason(MinecraftClient client, UUID self) {

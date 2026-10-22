@@ -1,8 +1,11 @@
 package dev.caecorthus.sparkassist.client.settings;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +22,12 @@ final class SparkWitchScopeBridge {
 
     static final String PICTURE_IN_PICTURE = "picture_in_picture";
 
+    // Looked up once in resolve(); the settings screen reads these every frame.
+    // 在 resolve() 中只查找一次；设置界面每帧都会读取。
+    private static final Map<String, Method> METHODS = new HashMap<>();
+
     private static boolean resolved;
     private static boolean available;
-    private static Class<?> api;
 
     private SparkWitchScopeBridge() {
     }
@@ -39,16 +45,16 @@ final class SparkWitchScopeBridge {
             return false;
         }
         try {
-            api = Class.forName(API_CLASS);
+            Class<?> api = Class.forName(API_CLASS);
             for (String name : List.of("scopeMode", "scopeModes", "defaultScopeMode", "pictureInPictureSuppressed",
                     "lensResolutionPercent", "lensResolutionChoices", "defaultLensResolutionPercent",
                     "scopedSensitivityPercent", "scopedSensitivityMin", "scopedSensitivityMax",
                     "scopedSensitivityStep", "defaultScopedSensitivityPercent", "save")) {
-                api.getMethod(name);
+                METHODS.put(name, api.getMethod(name));
             }
-            api.getMethod("setScopeMode", String.class);
-            api.getMethod("setLensResolutionPercent", int.class);
-            api.getMethod("setScopedSensitivityPercent", int.class);
+            METHODS.put("setScopeMode", api.getMethod("setScopeMode", String.class));
+            METHODS.put("setLensResolutionPercent", api.getMethod("setLensResolutionPercent", int.class));
+            METHODS.put("setScopedSensitivityPercent", api.getMethod("setScopedSensitivityPercent", int.class));
             return true;
         } catch (ReflectiveOperationException | LinkageError exception) {
             // An older SparkWitch keeps its scope rows in vanilla Accessibility, so nothing is lost.
@@ -134,14 +140,13 @@ final class SparkWitchScopeBridge {
             return fallback;
         }
         try {
-            Object result = argumentType == null
-                    ? api.getMethod(name).invoke(null)
-                    : api.getMethod(name, argumentType).invoke(null, argument);
+            Method method = METHODS.get(name);
+            Object result = argumentType == null ? method.invoke(null) : method.invoke(null, argument);
             if (type == Void.class) {
                 return fallback;
             }
             return type.isInstance(result) ? type.cast(result) : fallback;
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | RuntimeException e) {
+        } catch (IllegalAccessException | InvocationTargetException | RuntimeException e) {
             LOGGER.warn("SparkWitch scope settings call {} failed; hiding the scope page", name, e);
             available = false;
             return fallback;
