@@ -171,8 +171,8 @@ public final class GuidebookScreen extends Screen {
     @Override
     protected void init() {
         boolean firstLayout = !initialized;
-        catalog = GuidebookRuntimeCatalog.load(client);
-        chineseTranslations = TranslationStorage.load(client.getResourceManager(), List.of("zh_cn"), false);
+        catalog = GuidebookResources.catalog(client);
+        chineseTranslations = GuidebookResources.chineseTranslations(client);
         if (!initialized) {
             expandedNodes.addAll(session.expandedNodeIds());
             directoryScroll = session.leftScroll();
@@ -1241,8 +1241,9 @@ public final class GuidebookScreen extends Screen {
     @Override
     public void removed() {
         rememberView();
-        // Textures come back lazily on the next frame; an embedded guide is reused across inventory opens.
-        // 纹理在下一帧惰性重建；嵌入式指南在多次打开背包之间会被复用。
+        // Textures come back lazily on the next frame if this guide is shown again; Wathe builds a new inventory, and
+        // with it a new embedded guide, on every open.
+        // 若本指南再次显示，纹理会在下一帧惰性重建；Wathe 每次打开背包都会新建背包界面及其中的嵌入式指南。
         decorator.close();
     }
 
