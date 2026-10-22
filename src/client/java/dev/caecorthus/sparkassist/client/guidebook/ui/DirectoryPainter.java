@@ -254,11 +254,6 @@ public final class DirectoryPainter {
 
     // ================================================================ drawing / 绘制
 
-    public static void draw(DrawContext c, TextRenderer f, Model m) {
-        drawChrome(c, f, m);
-        drawRows(c, f, m);
-    }
-
     /**
      * Panel, band, search well and footer: everything under the rows. The screen draws the decoration layer
      * (the sigil under the last row) after this and {@link #drawRows} after that, so the layer sits between body and
