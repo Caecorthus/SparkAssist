@@ -26,6 +26,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -426,7 +427,8 @@ public final class ActorElement extends AnimatedSceneElementBase {
         if (isDown()) {
             ms.push();
             ms.translate(at.x, at.y, at.z);
-            lying(ms, buffer, bodyYaw, -90 * bounceOut(Math.min(FALL_TICKS, fall + pt) / FALL_TICKS), light);
+            lying(ms, buffer, ActorSkins.of(color), bodyYaw,
+                    -90 * bounceOut(Math.min(FALL_TICKS, fall + pt) / FALL_TICKS), light);
             ms.pop();
             return;
         }
@@ -434,7 +436,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
             ms.push();
             ms.translate(bedHead.getX() + 0.5 - bedFacing.getOffsetX() * BED_REACH, bedHead.getY() + BED_HEIGHT,
                     bedHead.getZ() + 0.5 - bedFacing.getOffsetZ() * BED_REACH);
-            lying(ms, buffer, bedFacing.getOpposite().asRotation(), 90, light);
+            lying(ms, buffer, ActorSkins.of(color), bedFacing.getOpposite().asRotation(), 90, light);
             ms.pop();
             return;
         }
@@ -514,13 +516,15 @@ public final class ActorElement extends AnimatedSceneElementBase {
     }
 
     /**
-     * A player lying flat, feet at the origin, tipped {@code angle} degrees about the feet away from standing: -90 is
-     * Wathe's body (PlayerBodyEntityRenderer: face down towards {@code yaw}, arms at the sides), +90 a sleeper on the
-     * back with the head away from {@code yaw}. Lifted in step with the tip so the model rests on the surface.
-     * 平躺的玩家，脚在原点，绕脚从站立倾倒 angle 度：-90 是 Wathe 的尸体（PlayerBodyEntityRenderer：朝 yaw 脸朝下扑倒，
-     * 双臂贴身），+90 是仰面睡觉、头朝 yaw 反方向的人。随倾倒同步抬高，让模型落在表面上。
+     * A player in {@code skin} lying flat, feet at the origin, tipped {@code angle} degrees about the feet away from
+     * standing: -90 is Wathe's body (PlayerBodyEntityRenderer: face down towards {@code yaw}, arms at the sides), +90 a
+     * sleeper on the back with the head away from {@code yaw}. Lifted in step with the tip so the model rests on the
+     * surface.
+     * 穿着 skin 平躺的玩家，脚在原点，绕脚从站立倾倒 angle 度：-90 是 Wathe 的尸体（PlayerBodyEntityRenderer：朝 yaw
+     * 脸朝下扑倒，双臂贴身），+90 是仰面睡觉、头朝 yaw 反方向的人。随倾倒同步抬高，让模型落在表面上。
      */
-    private void lying(MatrixStack ms, VertexConsumerProvider buffer, float yaw, float angle, int light) {
+    static void lying(MatrixStack ms, VertexConsumerProvider buffer, Identifier skin, float yaw, float angle,
+                      int light) {
         ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180 - yaw));
         ms.translate(0, Math.abs(angle) / 90 * 0.15f, 0);
         ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(angle));
@@ -541,7 +545,7 @@ public final class ActorElement extends AnimatedSceneElementBase {
         model.rightLeg.resetTransform();
         model.leftLeg.resetTransform();
         model.hat.copyTransform(model.head);
-        model.render(ms, buffer.getBuffer(RenderLayer.getEntityCutoutNoCull(ActorSkins.of(color))), light,
+        model.render(ms, buffer.getBuffer(RenderLayer.getEntityCutoutNoCull(skin)), light,
                 OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
     }
 
