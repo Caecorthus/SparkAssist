@@ -30,9 +30,4 @@ public final class DecorSettings {
     public static boolean debugZones() {
         return DEBUG_ZONES;
     }
-
-    /** A value that changes whenever any decoration setting changes, for layer cache keys. 设置变化即变的缓存键成分。 */
-    public static int revision() {
-        return SparkAssistClientSettings.guidebookDecor().ordinal() * 2 + (SparkAssistClientSettings.guidebookFoliage() ? 1 : 0);
-    }
 }

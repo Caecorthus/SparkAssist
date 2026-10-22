@@ -116,6 +116,16 @@ public final class Actors {
     }
 
     /**
+     * A fixed {@code box} in {@code color} for {@code ticks}, drawn like {@link #highlight}'s: an outline or a mark
+     * only some viewers see (a body, a gate, a picked room, a blast's footprint), illustrated.
+     * 固定位置的 color 色方框 box，持续 ticks，画法与 highlight 相同：示意只有部分人看得到的描边或标记（尸体、门、选中的房间、
+     * 爆炸范围）。
+     */
+    public static void outline(SceneBuilder scene, Box box, int color, int ticks) {
+        scene.addInstruction(new Outline(box, color, ticks));
+    }
+
+    /**
      * Throw {@code stack} from {@code from} to {@code to} over {@code ticks}, {@code arc} blocks above the straight
      * line at mid-flight; it stays where it lands until {@link #remove}d if {@code stays}.
      * 在 ticks 内把 stack 从 from 抛到 to，飞行中点高出直线 arc 格；stays 为 true 时落地后留在原处，直到 remove。
@@ -253,6 +263,24 @@ public final class Actors {
             Box box = actor.isDown()
                     ? new Box(at.x - 1, at.y, at.z - 1, at.x + 1, at.y + 0.4, at.z + 1)
                     : new Box(at.x - 0.4, at.y, at.z - 0.4, at.x + 0.4, at.y + 1.95, at.z + 0.4);
+            scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
+        }
+    }
+
+    private static final class Outline extends TickingInstruction {
+        private final Box box;
+        private final int color;
+        private final Object slot = new Object();
+
+        Outline(Box box, int color, int ticks) {
+            super(false, ticks);
+            this.box = box;
+            this.color = color;
+        }
+
+        @Override
+        public void tick(PonderScene scene) {
+            super.tick(scene);
             scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
     }

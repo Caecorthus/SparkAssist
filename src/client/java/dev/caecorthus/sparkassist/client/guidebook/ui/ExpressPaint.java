@@ -36,10 +36,7 @@ public final class ExpressPaint {
     private static final String[] FOLD_UP = {"..#..", ".#.#.", "#...#"};
     private static final String[] CLEAR = {"#...#", ".#.#.", "..#..", ".#.#.", "#...#"};
     private static final String[] CHEVRON_SMALL = {"#..", "##.", "###", "##.", "#.."};
-    private static final String[] CHECK = {"....#", "...#.", "#.#..", ".#...", "....."};
     private static final String[] PLAY = {"#..", "##.", "###", "##.", "#.."};
-    private static final String[] HOURGLASS = {"#####", ".#.#.", "..#..", ".###.", "#####"};
-    private static final String[] PADLOCK = {".###.", ".#.#.", ".#.#.", "#####", "#####", "#####", "#####"};
     private static final String[] BULLET = {".#.", "###", ".#."};
 
     private ExpressPaint() {
@@ -109,36 +106,6 @@ public final class ExpressPaint {
     /** 14x14 icon hit-box wash with cut corners. 14x14 图标热区底色（切角）。 */
     public static void iconWash(DrawContext c, int bx, int by, int col) {
         roundedFill(c, bx, by, ICON_BOX, ICON_BOX, col);
-    }
-
-    /**
-     * Section header on dark (row 11): brass label without shadow, optional right tail in its own styles, and an
-     * engraved rule drawn only after a non-empty label and only when it is at least 12 px long.
-     * 暗底分节标题（行高 11）：无阴影黄铜标签、可选的右侧尾注（保留自身样式），刻线仅在标签非空且长度不少于 12 像素时绘制。
-     *
-     * @return the end x of the label / 标签结束的横坐标
-     */
-    public static int sectionHeader(DrawContext c, TextRenderer f, Text label, int x, int y, int x2,
-                                    @Nullable Text tail, boolean tailShadow) {
-        String plain = label.getString();
-        int tailWidth = tail == null ? 0 : f.getWidth(tail);
-        boolean showTail = tail != null && f.getWidth(plain) + 4 + tailWidth <= x2 - x;
-        int end = x - 4;
-        if (!plain.isEmpty()) {
-            String shown = ellipsize(f, plain, x2 - x);
-            c.drawText(f, shown, x, y + 1, HEADING, false);
-            end = x + f.getWidth(shown);
-        }
-        int ruleEnd = x2;
-        if (showTail) {
-            c.drawText(f, tail, x2 - tailWidth, y + 1, GLYPH, tailShadow);
-            ruleEnd = x2 - tailWidth - 4;
-        }
-        if (!plain.isEmpty() && ruleEnd - (end + 4) >= 12) {
-            c.fill(end + 4, y + 5, ruleEnd, y + 6, BRASS_LO);
-            c.fill(end + 4, y + 6, ruleEnd, y + 7, EDGE);
-        }
-        return end;
     }
 
     // ================================================================ rows / scroll / 行与滚动
@@ -407,22 +374,8 @@ public final class ExpressPaint {
         bitmap(c, x, y, col, CHEVRON_SMALL);
     }
 
-    public static void check(DrawContext c, int x, int y, int col) {
-        bitmap(c, x, y, col, CHECK);
-    }
-
     public static void play(DrawContext c, int x, int y, int col) {
         bitmap(c, x, y, col, PLAY);
-    }
-
-    public static void hourglass(DrawContext c, int x, int y, int col) {
-        bitmap(c, x, y, col, HOURGLASS);
-    }
-
-    /** 5x7 padlock; the keyhole (x+2, y+4..y+6) is filled with {@code hole}, the surface behind it. 挂锁，钥匙孔填底色。 */
-    public static void padlock(DrawContext c, int x, int y, int col, int hole) {
-        bitmap(c, x, y, col, PADLOCK);
-        c.fill(x + 2, y + 4, x + 3, y + 6, hole);
     }
 
     public static void bullet(DrawContext c, int x, int y, int col) {

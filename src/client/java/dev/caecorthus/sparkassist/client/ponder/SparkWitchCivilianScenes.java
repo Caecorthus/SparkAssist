@@ -1061,7 +1061,7 @@ final class SparkWitchCivilianScenes {
         Actors.swing(scene, saint);
         Actors.hold(scene, saint, ItemStack.EMPTY);
         Vec3d burst = new Vec3d(1.8, 1.1, 5.2);
-        throwSprite(scene, new SpriteFlight(flash, new Vec3d(6.2, 2.5, 0.8), burst.add(0, -0.1, 0), 15, 0.8, null));
+        throwSprite(scene, SpriteElement.thrown(flash, new Vec3d(6.2, 2.5, 0.8), burst.add(0, -0.1, 0), 15, 0.8, null));
         scene.idle(15);
         // HolyFlashEntity.burst, 0.1 above the floor it hit. 在被击中的地面上方 0.1 处爆开。
         spawnParticles(scene, WatheParticles.BIG_EXPLOSION, burst, 1, Vec3d.ZERO, 0);
@@ -1418,7 +1418,7 @@ final class SparkWitchCivilianScenes {
         // 0.3 a side, pulled 0.2 back (PerfumerKitService.impactPoint), and the mist settles onto the floor below.
         // 以每 tick 1.5 格扔出，药瓶一 tick 内就砸中他：在路径进入他每边扩 0.3 的碰撞箱处、再后退 0.2 碎裂，雾气落到下方地面。
         Vec3d impact = new Vec3d(4.15, 2.25, 2.7);
-        throwSprite(scene, new SpriteFlight(oil, new Vec3d(4.5, 2.4, 2.45), impact, 2, 0, null));
+        throwSprite(scene, SpriteElement.thrown(oil, new Vec3d(4.5, 2.4, 2.45), impact, 2, 0, null));
         scene.idle(2);
         coolingOilBurst(scene, oil, impact, new Vec3d(impact.x, 1.2, impact.z));
         scene.overlay().showText(90)
@@ -1779,14 +1779,14 @@ final class SparkWitchCivilianScenes {
      */
     private static void throwShockDevice(SceneBuilder scene, ItemStack device, Vec3d from, Vec3d to, int ticks) {
         throwSprite(scene,
-                new SpriteFlight(device, from, to, ticks, (from.y - to.y) / 4, ParticleTypes.ELECTRIC_SPARK));
+                SpriteElement.thrown(device, from, to, ticks, (from.y - to.y) / 4, ParticleTypes.ELECTRIC_SPARK));
     }
 
     /**
      * A thrown item's flight as a camera-facing sprite (vanilla's FlyingItemEntityRenderer), gone on landing.
      * 投掷物的飞行：始终朝向镜头的物品图片（原版 FlyingItemEntityRenderer），落地即消失。
      */
-    private static void throwSprite(SceneBuilder scene, SpriteFlight flight) {
+    private static void throwSprite(SceneBuilder scene, SpriteElement flight) {
         scene.addInstruction(ponder -> {
             Actors.placeAtOnce(ponder, flight);
         });
@@ -1885,8 +1885,8 @@ final class SparkWitchCivilianScenes {
     private static void bodyOutline(SceneBuilder scene, Vec3d feet, float yaw, int color, int ticks) {
         float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
         Vec3d head = feet.add(-MathHelper.sin(radians) * BODY_LENGTH, 0, MathHelper.cos(radians) * BODY_LENGTH);
-        scene.addInstruction(new Outline(new Box(feet.x, feet.y, feet.z, head.x, feet.y + 0.4, head.z)
-                .expand(0.35, 0, 0.35), color, ticks));
+        Actors.outline(scene, new Box(feet.x, feet.y, feet.z, head.x, feet.y + 0.4, head.z).expand(0.35, 0, 0.35),
+                color, ticks);
     }
 
     /**
@@ -2004,81 +2004,6 @@ final class SparkWitchCivilianScenes {
                 return hitStage;
             }
             return Math.max(CLEAR, hitStage - 1 - (age - HOLD_TICKS) / HEAL_STEP_TICKS);
-        }
-    }
-
-    /**
-     * A thrown item in flight (a Shock Device, a Holy Flash): the item drawn facing the camera on a fixed arc, with an
-     * optional client trail (ShockDeviceEntity's electric spark on about 30% of ticks); scripted, so every replay lands
-     * in the same spot.
-     * 飞行中的投掷物（电击装置、圣光弹）：沿固定弧线、始终朝向镜头绘制的物品，可带客户端拖尾（ShockDeviceEntity 约 30% 的
-     * tick 冒一颗电火花）；轨迹由脚本决定，每次重播都落在同一处。
-     */
-    private static final class SpriteFlight extends AnimatedSceneElementBase {
-        private static final float TRAIL_CHANCE = 0.3f;
-        private final ItemStack stack;
-        private final Vec3d from;
-        private final Vec3d to;
-        private final int ticks;
-        /** The arc's rise over the straight line at mid-flight. 弧线中点高出直线的高度。 */
-        private final double arc;
-        @Nullable
-        private final ParticleEffect trail;
-        private int age;
-
-        /** @param trail the trail particle, or null for none / 拖尾粒子，没有则为 null */
-        private SpriteFlight(ItemStack stack, Vec3d from, Vec3d to, int ticks, double arc,
-                             @Nullable ParticleEffect trail) {
-            this.stack = stack.copy();
-            this.from = from;
-            this.to = to;
-            this.ticks = Math.max(1, ticks);
-            this.arc = arc;
-            this.trail = trail;
-        }
-
-        @Override
-        public void reset(@Nullable PonderScene scene) {
-            age = 0;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            age++;
-            if (trail != null && age < ticks && scene.getWorld().random.nextFloat() < TRAIL_CHANCE) {
-                Vec3d at = at(age);
-                scene.getWorld().addParticle(trail, at.x, at.y, at.z, 0, 0, 0);
-            }
-        }
-
-        private Vec3d at(float time) {
-            float t = Math.min(1, time / ticks);
-            return from.lerp(to, t).add(0, arc * 4 * t * (1 - t), 0);
-        }
-
-        @Override
-        protected void renderLast(PonderLevel world, VertexConsumerProvider buffer, DrawContext graphics, float fade,
-                                  float pt) {
-            float time = age + pt;
-            if (fade <= 0.01f || time >= ticks) {
-                return;
-            }
-            Vec3d at = at(time);
-            MatrixStack ms = graphics.getMatrices();
-            ms.push();
-            ms.translate(at.x, at.y, at.z);
-            // Undo Ponder's camera (its two rotations and the GUI y flip), then flip back so y points up on screen.
-            // 抵消 Ponder 的镜头（两次旋转与 GUI 的 y 翻转），再翻转回来，使 y 在屏幕上朝上。
-            ms.scale(1, -1, 1);
-            if (world.scene != null) {
-                PonderScene.SceneTransform transform = world.scene.getTransform();
-                ms.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-transform.yRotation.getValue(pt)));
-                ms.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-transform.xRotation.getValue(pt)));
-            }
-            ms.scale(1, -1, 1);
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.GROUND,
-                    lightCoordsFromFade(fade), OverlayTexture.DEFAULT_UV, ms, buffer, world, 0);
-            ms.pop();
         }
     }
 
@@ -2338,28 +2263,6 @@ final class SparkWitchCivilianScenes {
         @Override
         public boolean isComplete() {
             return stopped || super.isComplete();
-        }
-    }
-
-    /**
-     * A fixed illustrated outline box in {@code color} for {@code ticks}, drawn like Actors.highlight's.
-     * 固定位置的示意描边方框，颜色为 color，持续 ticks，画法与 Actors.highlight 相同。
-     */
-    private static final class Outline extends TickingInstruction {
-        private final Box box;
-        private final int color;
-        private final Object slot = new Object();
-
-        private Outline(Box box, int color, int ticks) {
-            super(false, ticks);
-            this.box = box;
-            this.color = color;
-        }
-
-        @Override
-        public void tick(PonderScene scene) {
-            super.tick(scene);
-            scene.getOutliner().chaseAABB(slot, box).lineWidth(1 / 16f).colored(color);
         }
     }
 

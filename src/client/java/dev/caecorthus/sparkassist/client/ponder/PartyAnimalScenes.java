@@ -224,8 +224,8 @@ final class PartyAnimalScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        frame(scene, NEAR_CABIN, SPAWN_PINK, 220);
-        frame(scene, FAR_CABIN, BALLOON_YELLOW, 220);
+        Actors.outline(scene, NEAR_CABIN, SPAWN_PINK, 220);
+        Actors.outline(scene, FAR_CABIN, BALLOON_YELLOW, 220);
         scene.overlay().showText(100)
                 .text("按第二技能键（默认 N）选出生房间（粉框）和终点房间（黄框）")
                 .independent()
@@ -356,21 +356,6 @@ final class PartyAnimalScenes {
                 ponder.getWorld().addParticle(ParticleTypes.POOF, feet.x + RANDOM.nextGaussian() * 0.3,
                         feet.y + 1 + RANDOM.nextGaussian() * 0.6, feet.z + RANDOM.nextGaussian() * 0.3,
                         RANDOM.nextGaussian() * 0.02, RANDOM.nextGaussian() * 0.02, RANDOM.nextGaussian() * 0.02);
-            }
-        });
-    }
-
-    /**
-     * A {@code color} box around a room for {@code ticks}: marks the rooms picked in the summon screen.
-     * 在 ticks 内用 color 色方框框住一个房间：标出召唤界面里选中的房间。
-     */
-    private static void frame(SceneBuilder scene, Box room, int color, int ticks) {
-        Object slot = new Object();
-        scene.addInstruction(new TickingInstruction(false, ticks) {
-            @Override
-            public void tick(PonderScene ponder) {
-                super.tick(ponder);
-                ponder.getOutliner().chaseAABB(slot, room).lineWidth(1 / 16f).colored(color);
             }
         });
     }

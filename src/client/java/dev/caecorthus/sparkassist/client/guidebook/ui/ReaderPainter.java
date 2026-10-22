@@ -201,13 +201,9 @@ public final class ReaderPainter {
      * Reader band content: close × (ICON_HOVER wash + COIN when hovered), source in FAINT, then either the crumb in
      * HEADING or, once the header rule has scrolled away, the running head "◆ title › section".
      * 阅读器标题带内容：关闭按钮（悬停时底色与金币色）、FAINT 来源，以及 HEADING 路径；页眉线滚出后改为页眉 “◆ 标题 › 分节”。
+     *
+     * @param trim also draw the recessed nameplate under the crumb or running head / 是否在文字下画凹铭牌
      */
-    public static void band(DrawContext c, TextRenderer f, Region reader, Band band, boolean running,
-                            @Nullable OrderedText section, boolean closeHover) {
-        band(c, f, reader, band, running, section, closeHover, false);
-    }
-
-    /** @param trim also draw the recessed nameplate under the crumb or running head / 是否在文字下画凹铭牌 */
     public static void band(DrawContext c, TextRenderer f, Region reader, Band band, boolean running,
                             @Nullable OrderedText section, boolean closeHover, boolean trim) {
         int x = reader.x();
@@ -261,13 +257,12 @@ public final class ReaderPainter {
         return (plate ? PLATE_BLOCK : 0) + RUNNING_HEAD_SCROLL;
     }
 
-    /** Total scroll content height: header + laid body. 滚动内容总高度。 */
-    public static int contentHeight(GuidebookContentRenderer.Layout body) {
-        return contentHeight(body, false);
-    }
-
-    /** @param plate the page is decorated: a chapter plate above the header and a closing seal under the body
-     *              / 页面带点缀：页眉上方有扉画，正文下方有落款火漆 */
+    /**
+     * Total scroll content height: header + laid body. 滚动内容总高度。
+     *
+     * @param plate the page is decorated: a chapter plate above the header and a closing seal under the body
+     *              / 页面带点缀：页眉上方有扉画，正文下方有落款火漆
+     */
     public static int contentHeight(GuidebookContentRenderer.Layout body, boolean plate) {
         return headerHeight(plate) + body.height() + (plate ? SEAL_BLOCK : 0);
     }
@@ -277,20 +272,12 @@ public final class ReaderPainter {
         return headerHeight(plate) + body.height();
     }
 
-    public static int maxScroll(Sheet sheet, GuidebookContentRenderer.Layout body) {
-        return maxScroll(sheet, body, false);
-    }
-
     public static int maxScroll(Sheet sheet, GuidebookContentRenderer.Layout body, boolean plate) {
         return Math.max(0, contentHeight(body, plate) - sheet.viewport().height());
     }
 
     /** Running-head section: null until the header rule has scrolled away, then the last section with its row top
      * at or above scroll + 6. 页眉的当前分节：标题线滚出前为 null，之后为行顶不低于 scroll + 6 的最后一个分节。 */
-    public static @Nullable Text currentSection(GuidebookContentRenderer.Layout body, int scroll) {
-        return currentSection(body, scroll, false);
-    }
-
     public static @Nullable Text currentSection(GuidebookContentRenderer.Layout body, int scroll, boolean plate) {
         return scroll > runningHeadScroll(plate) ? body.sectionAt(scroll + 6 - headerHeight(plate)) : null;
     }
@@ -304,14 +291,13 @@ public final class ReaderPainter {
         ExpressPaint.paper(c, s.x(), s.y(), s.width(), s.height());
     }
 
-    /** Reader frame: panel + title band + recessed sheet; the band text is drawn by the caller.
-     * 阅读器外框：面板、标题带与嵌入的纸张；标题带文字由调用方绘制。 */
-    public static void frame(DrawContext c, Region reader) {
-        frame(c, reader, false);
-    }
-
-    /** @param trim add the double-ruled frame, corner plates and two book clasps on the left rim
-     *             / 是否加双线框、角板与左沿的两枚书口扣 */
+    /**
+     * Reader frame: panel + title band + recessed sheet; the band text is drawn by the caller.
+     * 阅读器外框：面板、标题带与嵌入的纸张；标题带文字由调用方绘制。
+     *
+     * @param trim add the double-ruled frame, corner plates and two book clasps on the left rim
+     *             / 是否加双线框、角板与左沿的两枚书口扣
+     */
     public static void frame(DrawContext c, Region reader, boolean trim) {
         ExpressPaint.panel(c, reader.x(), reader.y(), reader.width(), reader.height());
         ExpressPaint.titleBand(c, reader.x(), reader.y(), reader.width());
@@ -329,20 +315,12 @@ public final class ReaderPainter {
      * Scrolled content: header + body inside the viewport scissor, then 8 px PAPER fades (z+1) and the paper
      * scrollbar (z+2, because the fades write depth) when the content overflows.
      * 滚动内容：在视口裁剪内绘制页眉与正文；内容溢出时再绘制 8 像素纸色渐隐（z+1）与纸面滚动条（z+2，因为渐隐会写入深度）。
+     *
+     * @param plate       a chapter plate occupies the first {@link #PLATE_BLOCK} content pixels (drawn by the caller
+     *                    before this), so the header and body start lower
+     *                    / 扉画占据内容最上方 PLATE_BLOCK 像素，页眉与正文下移
+     * @param hoveredDemo the demo button under the pointer, drawn lit / 指针下的演示按钮，以点亮状态绘制
      */
-    public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
-                               GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot) {
-        content(c, f, s, header, body, scroll, thumbHot, false);
-    }
-
-    /** @param plate a chapter plate occupies the first {@link #PLATE_BLOCK} content pixels (drawn by the caller
-     *              before this), so the header and body start lower / 扉画占据内容最上方 PLATE_BLOCK 像素，页眉与正文下移 */
-    public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
-                               GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot, boolean plate) {
-        content(c, f, s, header, body, scroll, thumbHot, plate, null);
-    }
-
-    /** @param hoveredDemo the demo button under the pointer, drawn lit / 指针下的演示按钮，以点亮状态绘制 */
     public static void content(DrawContext c, TextRenderer f, Sheet s, PageHeader header,
                                GuidebookContentRenderer.Layout body, int scroll, boolean thumbHot, boolean plate,
                                @Nullable GuidebookContentRenderer.Demo hoveredDemo) {
@@ -396,11 +374,6 @@ public final class ReaderPainter {
      * are skipped (the caller's scissor still clips partial rows). Text is INK without shadow; runs carry their tones.
      * 以 (tx0, bodyTop) 为正文原点绘制排版行与装饰；完全位于 [clipTop, clipBottom) 之外的行被跳过（部分可见的行由调用方裁剪）。
      */
-    public static void body(DrawContext c, TextRenderer f, GuidebookContentRenderer.Layout body, int tx0, int bodyTop,
-                            int clipTop, int clipBottom) {
-        body(c, f, body, tx0, bodyTop, clipTop, clipBottom, null);
-    }
-
     public static void body(DrawContext c, TextRenderer f, GuidebookContentRenderer.Layout body, int tx0, int bodyTop,
                             int clipTop, int clipBottom, @Nullable GuidebookContentRenderer.Demo hoveredDemo) {
         for (Ornament ornament : body.ornaments()) {
@@ -479,14 +452,10 @@ public final class ReaderPainter {
      * 独立界面未选中条目时的扉页：2 倍书本、标题（放不下时 1 倍）、双线、选择提示、按键提示与黄铜菱形。内容块从纸张 28%
      * 处开始，必要时上移，使其止于纸张内 4 像素；纸张矮到仍放不下时（强制 GUI 缩放、高度低于约 160）依次省略菱形与按键提示，
      * 其余内容裁剪在纸张内。
+     *
+     * @param plate the player's chapter plate sits at the top of the sheet, so the block starts below it
+     *              / 纸页顶部有玩家的扉画时，内容块从其下方开始
      */
-    public static void frontispiece(DrawContext c, TextRenderer f, Sheet s, OrderedText title, OrderedText selectEntry,
-                                    OrderedText keysHint) {
-        frontispiece(c, f, s, title, selectEntry, keysHint, false);
-    }
-
-    /** @param plate the player's chapter plate sits at the top of the sheet, so the block starts below it
-     *              / 纸页顶部有玩家的扉画时，内容块从其下方开始 */
     public static void frontispiece(DrawContext c, TextRenderer f, Sheet s, OrderedText title, OrderedText selectEntry,
                                     OrderedText keysHint, boolean plate) {
         int cx = (s.x() + s.right()) / 2;
