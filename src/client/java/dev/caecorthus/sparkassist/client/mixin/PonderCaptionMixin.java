@@ -11,10 +11,13 @@ import dev.caecorthus.sparkassist.ponder.PonderCaptionBounds;
 import java.util.List;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.ui.PonderUI;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextHandler;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.util.Language;
@@ -24,6 +27,7 @@ import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
@@ -39,6 +43,32 @@ public abstract class PonderCaptionMixin {
     @Shadow(remap = false)
     private int y;
 
+    // Ponder renders every frame and keeps the baked caption text between frames, so the wrapped and reordered lines
+    // are kept until something that shapes them changes. Every resource reload installs a new Language, so a font
+    // change misses too; Force Unicode Font and Japanese Glyph Variants switch glyphs in place, so they are keyed.
+    // Ponder 每帧都会渲染，且在帧之间保留烘焙好的字幕文本，因此换行与重排后的行会一直保留，直到影响它们的条件改变。
+    // 每次资源重载都会换上新的 Language，因此字体变化同样会使缓存失效；强制使用 Unicode 字体与日文字形变体会原地切换
+    // 字形，因此也计入键中。
+    @Unique
+    private String sparkassist$wrappedText;
+    @Unique
+    private TextRenderer sparkassist$wrappedFont;
+    @Unique
+    private Language sparkassist$wrappedLanguage;
+    @Unique
+    private int sparkassist$wrappedWidth;
+    @Unique
+    private int sparkassist$wrappedScreenWidth;
+    @Unique
+    private int sparkassist$wrappedScreenHeight;
+    @Unique
+    private int sparkassist$wrappedGlyphs;
+    @Unique
+    private List<StringVisitable> sparkassist$wrappedLines;
+    /** The wrapped lines reordered for drawing, rebuilt with them. 为绘制重排后的行，随换行结果一起重建。 */
+    @Unique
+    private List<OrderedText> sparkassist$orderedLines;
+
     @WrapOperation(method = "render", at = @At(value = "INVOKE", remap = true,
             target = "Lnet/minecraft/client/font/TextHandler;wrapLines(Ljava/lang/String;ILnet/minecraft/text/Style;)Ljava/util/List;"))
     private List<StringVisitable> sparkassist$captionLines(TextHandler handler, String text, int width, Style style,
@@ -47,10 +77,33 @@ public abstract class PonderCaptionMixin {
         if (!scene.getNamespace().equals("sparkassist")) {
             return original.call(handler, text, width, style);
         }
-        List<StringVisitable> wrapped = PonderCaptionText.wrap(screen.getFontRenderer(), text,
-                screen.width, screen.height, width);
-        lines.set(wrapped);
-        return wrapped;
+        TextRenderer font = screen.getFontRenderer();
+        Language language = Language.getInstance();
+        int glyphs = glyphOptions();
+        if (sparkassist$wrappedLines == null || font != sparkassist$wrappedFont
+                || language != sparkassist$wrappedLanguage || glyphs != sparkassist$wrappedGlyphs
+                || width != sparkassist$wrappedWidth
+                || screen.width != sparkassist$wrappedScreenWidth || screen.height != sparkassist$wrappedScreenHeight
+                || (text != sparkassist$wrappedText && !text.equals(sparkassist$wrappedText))) {
+            sparkassist$wrappedLines = PonderCaptionText.wrap(font, text, screen.width, screen.height, width);
+            sparkassist$orderedLines = null;
+            sparkassist$wrappedText = text;
+            sparkassist$wrappedFont = font;
+            sparkassist$wrappedLanguage = language;
+            sparkassist$wrappedGlyphs = glyphs;
+            sparkassist$wrappedWidth = width;
+            sparkassist$wrappedScreenWidth = screen.width;
+            sparkassist$wrappedScreenHeight = screen.height;
+        }
+        lines.set(sparkassist$wrappedLines);
+        return sparkassist$wrappedLines;
+    }
+
+    @Unique
+    private static int glyphOptions() {
+        GameOptions options = MinecraftClient.getInstance().options;
+        return (options.getForceUnicodeFont().getValue() ? 1 : 0)
+                | (options.getJapaneseGlyphVariants().getValue() ? 2 : 0);
     }
 
     @WrapOperation(method = "render", at = @At(value = "INVOKE", remap = true,
@@ -111,8 +164,13 @@ public abstract class PonderCaptionMixin {
     private int sparkassist$drawCaptionLine(DrawContext graphics, TextRenderer font, String text, int x, int y,
             int color, boolean shadow, Operation<Integer> original, @Local(name = "i") int lineIndex,
             @Share("captionLines") LocalRef<List<StringVisitable>> lines) {
-        return lines.get() == null ? original.call(graphics, font, text, x, y, color, shadow)
-                : graphics.drawText(font, Language.getInstance().reorder(lines.get().get(lineIndex)),
-                        x, y, color, shadow);
+        if (lines.get() == null) {
+            return original.call(graphics, font, text, x, y, color, shadow);
+        }
+        // Rebuilt once after each wrap, under the Language it was keyed on. 每次换行后重建一次，所用 Language 与换行时一致。
+        if (sparkassist$orderedLines == null) {
+            sparkassist$orderedLines = Language.getInstance().reorder(lines.get());
+        }
+        return graphics.drawText(font, sparkassist$orderedLines.get(lineIndex), x, y, color, shadow);
     }
 }
