@@ -268,7 +268,7 @@
   "sparkassist.ponder.role_detective.text_1": "有人遇害的那一刻，每个活人站在哪都会被记下来",
   "sparkassist.ponder.role_detective.text_2": "侦探开局带着【放大镜】，别的活人看不见你手里的它",
   "sparkassist.ponder.role_detective.text_3": "先用放大镜右键尸体：把这起命案记进你的文件夹",
-  "sparkassist.ponder.role_detective.text_4": "再右键身边的人：提示他当时离尸体 1 格，走开了也没用",
+  "sparkassist.ponder.role_detective.text_4": "再右键别处打开名单，点谁问谁：他当时离尸体 1 格，走开了也没用",
   "sparkassist.ponder.role_detective.text_5": "再按技能键（默认 G）查验 3 格内看得见的人……",
   "sparkassist.ponder.role_detective.text_6": "……他 2 分钟内杀过人：在你眼里亮红色 5 秒（方框示意）",
   "sparkassist.ponder.role_detective.text_7": "没杀过人就亮绿色；杀手最近没动手，也会是绿的",

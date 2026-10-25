@@ -1284,12 +1284,14 @@ final class NoellesCivilianScenes {
      * NoellesRoles Noellesroles DETECTIVE_INVESTIGATE handler, KillHistoryWorldComponent, DetectivePlayerComponent,
      * NoellesrolesClient highlight and ability key): when a body appears the server notes where every living player
      * stands. The starting magnifier (hidden in a Detective's hand from other living players; no swing) files the
-     * body's case for free, then on a living player in reach records how far they stood from the victim's death point
-     * at that moment, shown on the action bar (15 s item cooldown per clue, 3 clues per case by default). The ability
+     * body's case for free; right-clicking anything else opens a roster of every participant (no alive/dead state), and
+     * picking one records how far they stood from the victim's death point at that moment, or "not present" (15 s item
+     * cooldown per answer, 3 clues per case by default; SparkStrength feat/detective-remote-interrogation). The ability
      * key on the player in the crosshair, within 3 blocks and in sight, checks for a kill in the last 2 minutes (not
      * poison, bomb or assassination): only the Detective sees them outlined red or green for 5 s; 90 s cooldown.
      * 侦探：尸体出现时，服务端记下每名活人当时站的位置。开局的放大镜（侦探拿着时别的活人看不见；不挥手）右键尸体免费记录
-     * 命案，再右键够得着的活人，提示栏显示对方那一刻离死者倒下处多少格（每记一条线索冷却 15 秒，每起命案默认最多 3 条）。
+     * 命案；右键别处打开本局所有人的名单（看不出生死），点一个人就记下他那一刻离死者倒下处多少格，或“不在场”（每次回应
+     * 冷却 15 秒，每起命案默认最多 3 条线索）。
      * 技能键对准星对着的、3 格内看得见的玩家查验其 2 分钟内是否杀过人（毒杀、炸弹和刺客猜中不算）：只有侦探看到对方红色或
      * 绿色描边 5 秒；冷却 90 秒。
      */
@@ -1352,10 +1354,12 @@ final class NoellesCivilianScenes {
         Actors.lookPitch(scene, detective, 0);
         Actors.turn(scene, detective, facing(detectiveSpot, killerAway));
         scene.idle(8);
-        scene.overlay().showControls(killerAway.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(magnifier);
+        // Anywhere but a body opens the roster, so the click is shown over the Detective, not the killer.
+        // 右键尸体以外的地方都会打开名单，因此点击提示画在侦探头顶，而不是杀手身上。
+        scene.overlay().showControls(detectiveSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(magnifier);
         scene.idle(10);
         scene.overlay().showText(85)
-                .text("再右键身边的人：提示他当时离尸体 1 格，走开了也没用")
+                .text("再右键别处打开名单，点谁问谁：他当时离尸体 1 格，走开了也没用")
                 .independent()
                 .attachKeyFrame();
         scene.idle(95);
