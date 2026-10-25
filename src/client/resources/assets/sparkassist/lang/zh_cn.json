@@ -457,7 +457,7 @@
   "sparkassist.ponder.role_party_animal_balloon.text_5": "只要你活着，一般就能一直隔墙看到对方的黄色描边（只在你屏幕上）",
   "sparkassist.ponder.role_party_animal_balloon.text_6": "进了房间也一样：描边一直亮到本局结束或对方死亡",
   "sparkassist.ponder.role_party_animal_balloon.text_7": "被塞了气球的人，就成了派对客要抓的目标",
-  "sparkassist.ponder.role_party_animal_balloon.text_8": "杀手阵营、还没戴过面具的卧底和已经被塞过的人都塞不了，气球不会用掉",
+  "sparkassist.ponder.role_party_animal_balloon.text_8": "杀手队友和卧底也能塞，派对客照样会抓；只有已经被塞过的人塞不了，气球不会用掉",
   "sparkassist.ponder.role_party_animal_partygoer.header": "派对狂：召唤派对客",
   "sparkassist.ponder.role_party_animal_partygoer.text_1": "做完 2 个任务，派对狂就能召唤派对客",
   "sparkassist.ponder.role_party_animal_partygoer.text_2": "派对客只抓目标：正在变声、或被塞了【派对气球】的人",

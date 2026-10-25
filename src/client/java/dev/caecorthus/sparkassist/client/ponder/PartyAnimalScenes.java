@@ -98,14 +98,16 @@ final class PartyAnimalScenes {
      * hidden equipment via SparkStrength's HiddenEquipmentHelperMixin): 25 coins in the Party Animal's shop only,
      * stacks to 16, hidden from others while held. Right-click a player within 3 blocks (eye to hitbox) in sight: one
      * balloon is used and the target is marked for the round, with no message, sound or item (only the giver hears a
-     * soft pop). Refused, keeping the balloon, for the killer side, an Undercover before stage 2, or someone already
-     * marked. A living Party Animal usually sees marked players in an always-on yellow outline through walls (not an
-     * invisible player, a Survival Master hidden behind cover or a stage-2 Undercover, nor through vetoes such as a
-     * blackout); the mark lasts until the target dies or the round ends, and marked players are Partygoer prey.
+     * soft pop). Any faction can be given one, killer teammates and Undercovers included (owner 2026-10-25); only
+     * someone already marked is refused, keeping the balloon. A living Party Animal usually sees marked players in an
+     * always-on yellow outline through walls (not an invisible player, a Survival Master hidden behind cover or a
+     * stage-2 Undercover, nor through vetoes such as a blackout); the mark lasts until the target dies or the round
+     * ends, and every marked player, killers included, is Partygoer prey.
      * 派对气球：只有派对狂的商店卖，25 金币，最多叠 16 个，拿在手里别人看不见。右键 3 格内（眼睛到碰撞箱）、在视线里的玩家：
-     * 用掉一个气球，目标本局被标记，没有消息、声音或物品（只有塞气球的人听到一声轻响）。杀手一方、二阶段前的卧底或已被标记的人
-     * 会被拒绝，气球不会用掉。存活的派对狂一般能常驻隔墙看到被标记玩家的黄色描边（隐身的人、躲在掩体后的生存大师、二阶段的
-     * 卧底除外，熄灯等否决也会挡住）；标记持续到目标死亡或本局结束，被标记的人是派对客的猎物。
+     * 用掉一个气球，目标本局被标记，没有消息、声音或物品（只有塞气球的人听到一声轻响）。任何阵营都能塞，杀手队友和卧底也行
+     * （主人 2026-10-25）；只有已被标记的人会被拒绝，气球不会用掉。存活的派对狂一般能常驻隔墙看到被标记玩家的黄色描边（隐身的
+     * 人、躲在掩体后的生存大师、二阶段的卧底除外，熄灯等否决也会挡住）；标记持续到目标死亡或本局结束，所有被标记的人（包括杀手）
+     * 都是派对客的猎物。
      */
     private static void balloon(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_party_animal_balloon", "派对狂：派对气球");
@@ -172,7 +174,7 @@ final class PartyAnimalScenes {
         scene.idle(100);
         scene.overlay().showText(100)
                 .colored(PonderPalette.RED)
-                .text("杀手阵营、还没戴过面具的卧底和已经被塞过的人都塞不了，气球不会用掉")
+                .text("杀手队友和卧底也能塞，派对客照样会抓；只有已经被塞过的人塞不了，气球不会用掉")
                 .independent();
         scene.idle(110);
         scene.markAsFinished();
