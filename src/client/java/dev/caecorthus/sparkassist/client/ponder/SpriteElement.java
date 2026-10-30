@@ -21,11 +21,11 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A picture that always faces the viewer, moving from {@code from} to {@code to} over {@code ticks}, then held there
  * or gone: a thrown item as vanilla's FlyingItemEntityRenderer draws one (a Shuriken, a Shock Device, a capsule), or
- * a square of an entity's own texture (the Ninja's hook head). The path may rise in an arc and leave a client trail;
- * it is scripted, so every replay lands in the same spot.
+ * a square of an entity's own texture (the Ninja's old hook head, drawn when SparkWitch has no 3D head). The path may
+ * rise in an arc and leave a client trail; it is scripted, so every replay lands in the same spot.
  * 始终朝向观看者的图片，在 ticks 内从 from 移到 to，之后停在那里或消失：像原版 FlyingItemEntityRenderer 那样绘制的投掷物
- * （手里剑、电击装置、胶囊），或实体自己贴图的一块方形（忍者的钩头）。路径可以拱成弧线并带客户端拖尾；轨迹由脚本决定，
- * 每次重播都落在同一处。
+ * （手里剑、电击装置、胶囊），或实体自己贴图的一块方形（忍者的旧钩头，SparkWitch 没有 3D 钩头时绘制）。路径可以拱成弧线
+ * 并带客户端拖尾；轨迹由脚本决定，每次重播都落在同一处。
  */
 public final class SpriteElement extends AnimatedSceneElementBase {
     /** A trail particle shows on about 30% of ticks (ShockDeviceEntity's electric spark). 约 30% 的 tick 冒一颗拖尾粒子。 */

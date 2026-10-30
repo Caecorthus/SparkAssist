@@ -910,7 +910,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(80);
-        fireShell(scene, gunner, dk, DK_COLOR, muzzle, crowd, SCREEN_RIGHT);
+        fireShell(scene, gunner, "dk", dk, DK_COLOR, muzzle, crowd, SCREEN_RIGHT);
         footprint(scene, crowd, DK_SIZE, DK_COLOR, 200);
         Actors.highlight(scene, struck, DK_COLOR, 200);
         Actors.highlight(scene, beside, DK_COLOR, 200);
@@ -933,7 +933,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(60);
-        fireShell(scene, gunner, ac, AC_COLOR, muzzle, crowd, SCREEN_RIGHT);
+        fireShell(scene, gunner, "ac", ac, AC_COLOR, muzzle, crowd, SCREEN_RIGHT);
         footprint(scene, crowd, AC_SIZE, AC_COLOR, 200);
         Actors.highlight(scene, struck, AC_COLOR, 200);
         Actors.highlight(scene, beside, AC_COLOR, 200);
@@ -959,7 +959,7 @@ final class SparkWitchItemScenes {
         // Straight south, the shell enters the far passenger's box at z = 5.5.
         // 向正南发射，炮弹在 z = 5.5 处进入远处乘客的碰撞箱。
         Vec3d target = new Vec3d(5.6, muzzle.y, 5.5);
-        fireShell(scene, gunner, mr, MR_COLOR, muzzle, target, SOUTH);
+        fireShell(scene, gunner, "mr", mr, MR_COLOR, muzzle, target, SOUTH);
         footprint(scene, target, MR_SIZE, MR_COLOR, 160);
         Actors.highlight(scene, far, MR_COLOR, 160);
         scene.idle(20);
@@ -1079,13 +1079,13 @@ final class SparkWitchItemScenes {
     }
 
     /**
-     * One launcher shot as the Potion Gunner scene shows it: a left-click, the shell flying from {@code muzzle} to
-     * {@code impact} at 2.5 blocks a tick with its colour's dust and some smoke, the backblast behind the gunner facing
-     * {@code yaw}, and the burst. 一次炮筒射击，与药炮手场景相同：左键，炮弹以每 tick 2.5 格从 muzzle 飞到 impact，拖着
-     * 本色粉尘和少许烟，朝向 yaw 的药炮手身后喷出尾焰，然后爆炸。
+     * One launcher shot as the Potion Gunner scene shows it: a left-click, the shell of {@code type} flying from
+     * {@code muzzle} to {@code impact} at 2.5 blocks a tick with its colour's dust and some smoke, the backblast behind
+     * the gunner facing {@code yaw}, and the burst. 一次炮筒射击，与药炮手场景相同：左键，种类为 type 的炮弹以每 tick
+     * 2.5 格从 muzzle 飞到 impact，拖着本色粉尘和少许烟，朝向 yaw 的药炮手身后喷出尾焰，然后爆炸。
      */
-    private static void fireShell(SceneBuilder scene, ElementLink<ActorElement> gunner, ItemStack shell, int color,
-                                  Vec3d muzzle, Vec3d impact, float yaw) {
+    private static void fireShell(SceneBuilder scene, ElementLink<ActorElement> gunner, String type, ItemStack shell,
+                                  int color, Vec3d muzzle, Vec3d impact, float yaw) {
         Vec3d overHead = new Vec3d(muzzle.x, muzzle.y + 1.1, muzzle.z);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick().withItem(
                 stack("sparkwitch:anti_tank_launcher"));
@@ -1093,7 +1093,7 @@ final class SparkWitchItemScenes {
         int flight = Math.max(1, (int) Math.ceil(muzzle.distanceTo(impact) / 2.5));
         DustParticleEffect dust = new DustParticleEffect(
                 new Vector3f((color >> 16 & 0xFF) / 255f, (color >> 8 & 0xFF) / 255f, (color & 0xFF) / 255f), 1.0f);
-        SparkWitchKillerScenes.sprite(scene, SpriteElement.item(shell, muzzle, impact, flight, false));
+        SparkWitchKillerScenes.shellFlight(scene, type, shell, muzzle, impact, flight);
         SparkWitchKillerScenes.trail(scene, dust, muzzle, impact, flight, 0, 4, 1);
         SparkWitchKillerScenes.trail(scene, ParticleTypes.SMOKE, muzzle, impact, flight, 0, 1, 0.5f);
         SparkWitchKillerScenes.backblast(scene, new Vec3d(muzzle.x, muzzle.y + 0.1, muzzle.z), yaw);

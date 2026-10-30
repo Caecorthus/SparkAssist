@@ -90,10 +90,14 @@ final class SparkWitchKillerScenes {
             EntityEffectParticleEffect.create(ParticleTypes.ENTITY_EFFECT, 0xFF8F6B52);
     /** The grappling hook chain's dark steel link colour (NinjaGrapplingHookEntityRenderer.DARK_STEEL). 钩爪铁链的深色钢链节颜色。 */
     private static final int CHAIN_STEEL = 0x4A4C54;
-    /** The hook head's own texture, drawn as a 0.5 square (NinjaGrapplingHookEntityRenderer.renderHead). 钩头自己的贴图，画成边长 0.5 的方块。 */
+    /**
+     * The hook head's old flat texture, a 0.5 square (NinjaGrapplingHookEntityRenderer.renderHead before the 3D head),
+     * drawn only when SparkWitch has no 3D head model. 钩头旧的平面贴图，画成边长 0.5 的方块（3D 钩头之前的画法），只在
+     * SparkWitch 没有 3D 钩头模型时绘制。
+     */
     private static final Identifier HOOK_HEAD = Identifier.of("sparkwitch", "textures/entity/ninja_grappling_hook.png");
     private static final float HOOK_HEAD_SIZE = 0.5f;
-    /** Half the hook entity's 0.25 height: the head is drawn at its centre. 钩爪实体 0.25 高度的一半：钩头画在其中心。 */
+    /** Half the hook entity's 0.25 height: the old sprite is drawn at its centre. 钩爪实体 0.25 高度的一半：旧贴图画在其中心。 */
     private static final double HOOK_CENTRE = 0.125;
     /**
      * Where vanilla puts the hand holding a line in third person (FishingBobberEntityRenderer.getHandPos, which
@@ -584,13 +588,15 @@ final class SparkWitchKillerScenes {
      * player is killed amid a burst of crits; one is used per throw, 1 s cooldown. The Grappling Hook is thrown at a
      * right-click (swing) from the eyes along the aim at 2.5 blocks a tick, latches onto the first block within 24;
      * another right-click within 5 s pulls its holder there at up to 1.4 blocks a tick (a top face puts the feet on
-     * the hook point). Its head and chain draw nothing without a real owner, so the scene draws the head sprite
-     * itself and a steel line stands in for the chain.
+     * the hook point), and the hook is gone once the feet are within 0.9 of it. Its head and chain draw nothing
+     * without a real owner, so the scene draws the head itself (SparkWitch's 3D head, or the old flat sprite before
+     * it) and a steel line from the head's ring stands in for the chain.
      * 忍者：所有武器都要购买，手持都不隐藏。苦无右键立即击杀准星上 4 格内的玩家，不用蓄力、不挥手（客户端放行、服务端
      * 消耗）；杀人后冷却 30 秒，不会用掉。手里剑按住（掷矛姿势）至少 4 tick 后松手掷出：无重力、每 tick 1.3 格直线飞行，
      * 命中的玩家在暴击粒子中死亡；每次用掉一枚，冷却 1 秒。钩爪右键（挥手）从眼睛沿准星以每 tick 2.5 格抛出，钩住 24 格内
-     * 遇到的第一个方块；5 秒内再右键，把持有者以至多每 tick 1.4 格拉过去（钩在顶面时双脚落在钩点）。钩头和铁链没有真实
-     * 主人时不绘制，所以由场景自己画出钩头贴图，并用钢色线代替铁链。
+     * 遇到的第一个方块；5 秒内再右键，把持有者以至多每 tick 1.4 格拉过去（钩在顶面时双脚落在钩点），双脚离钩点不到 0.9 格
+     * 时钩爪消失。钩头和铁链没有真实主人时不绘制，所以由场景自己画出钩头（SparkWitch 的 3D 钩头，更早的版本为旧的平面
+     * 贴图），并用从钩头圆环连出的钢色线代替铁链。
      */
     private static void ninja(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_ninja", "忍者：苦无、手里剑与钩爪");
@@ -672,8 +678,8 @@ final class SparkWitchKillerScenes {
                 .withItem(stack("sparkwitch:ninja_grappling_hook"));
         scene.idle(10);
         Actors.swing(scene, ninja);
-        ElementLink<SpriteElement> hook = sprite(scene, hookHead(feet.add(0, EYES, 0), latch, 3));
-        Chain chain = chain(scene, ninja, feet.add(0, EYES, 0), latch, 3);
+        ElementLink<ProjectileModelElement> hook = projectile(scene, hookHead(feet.add(0, EYES, 0), latch, 3));
+        Chain chain = chain(scene, ninja, hook);
         scene.idle(45);
         scene.overlay().showText(90)
                 .text("钩住后 5 秒内再右键，铁链就把你拉过去（钩头和铁链为示意）")
@@ -690,9 +696,13 @@ final class SparkWitchKillerScenes {
         Actors.slide(scene, ninja, ledgeApproach.subtract(feet), 4);
         scene.idle(5);
         Actors.slide(scene, ninja, latch.subtract(ledgeApproach), 2);
-        scene.idle(3);
+        // Half-way along these last 1.7 blocks the feet are within 0.9 of the hook point and the hook is gone
+        // (NinjaRules.GRAPPLING_HOOK_ARRIVE_DISTANCE); kept longer, the head would swing round under the passing hand.
+        // 最后这 1.7 格走到一半，双脚离钩点已不到 0.9 格，钩爪消失；留得更久，钩头会在经过的手下方转过来。
+        scene.idle(1);
         unchain(scene, chain);
         unsprite(scene, hook);
+        scene.idle(2);
         Actors.lookPitch(scene, ninja, 0);
         scene.idle(45);
         scene.overlay().showText(80)
@@ -1092,7 +1102,7 @@ final class SparkWitchKillerScenes {
         Vec3d muzzle = feet.add(0, EYES - 0.1, 0);
         Vec3d impact = new Vec3d(2.9, muzzle.y, 4.1);
         ItemStack shell = stack("sparkwitch:tr_shell");
-        sprite(scene, SpriteElement.item(shell, muzzle, impact, 2, false));
+        shellFlight(scene, "tr", shell, muzzle, impact, 2);
         trail(scene, SHELL_TRAIL, muzzle, impact, 2, 0, 4, 1);
         trail(scene, ParticleTypes.SMOKE, muzzle, impact, 2, 0, 1, 0.5f);
         backblast(scene, feet.add(0, EYES, 0), SCREEN_RIGHT);
@@ -1846,13 +1856,13 @@ final class SparkWitchKillerScenes {
     }
 
     /**
-     * A steel line from {@code holder}'s hand to a grappling hook thrown from {@code from} that reaches {@code to}
-     * after {@code flight} ticks, until {@link #unchain}ed: the hook's own chain draws nothing without a real owner.
-     * 从 holder 的手连到钩爪的钢色线，钩爪从 from 抛出、flight tick 后到达 to，直到 unchain：钩爪自己的铁链没有真实主人时不绘制。
+     * A steel line from {@code holder}'s hand to the ring of the hook {@code head}, until {@link #unchain}ed: the
+     * hook's own chain draws nothing without a real owner.
+     * 从 holder 的手连到钩头 head 圆环的钢色线，直到 unchain：钩爪自己的铁链没有真实主人时不绘制。
      */
-    private static Chain chain(SceneBuilder scene, ElementLink<ActorElement> holder, Vec3d from, Vec3d to,
-                               int flight) {
-        Chain chain = new Chain(holder, from, to, flight);
+    private static Chain chain(SceneBuilder scene, ElementLink<ActorElement> holder,
+                               ElementLink<ProjectileModelElement> head) {
+        Chain chain = new Chain(holder, head);
         scene.addInstruction(chain);
         return chain;
     }
@@ -1936,25 +1946,19 @@ final class SparkWitchKillerScenes {
 
     private static final class Chain extends TickingInstruction {
         private final ElementLink<ActorElement> holder;
-        private final Vec3d from;
-        private final Vec3d to;
-        private final int flight;
+        private final ElementLink<ProjectileModelElement> head;
         private final Object slot = new Object();
-        private int age;
         private boolean stopped;
 
-        Chain(ElementLink<ActorElement> holder, Vec3d from, Vec3d to, int flight) {
+        Chain(ElementLink<ActorElement> holder, ElementLink<ProjectileModelElement> head) {
             super(false, UNTIL_STOPPED);
             this.holder = holder;
-            this.from = from;
-            this.to = to;
-            this.flight = flight;
+            this.head = head;
         }
 
         @Override
         public void reset(PonderScene scene) {
             super.reset(scene);
-            age = 0;
             stopped = false;
         }
 
@@ -1962,15 +1966,14 @@ final class SparkWitchKillerScenes {
         public void tick(PonderScene scene) {
             super.tick(scene);
             ActorElement actor = scene.resolve(holder);
-            if (stopped || actor == null) {
+            ProjectileModelElement hook = scene.resolve(head);
+            if (stopped || actor == null || hook == null) {
                 return;
             }
-            age++;
-            Vec3d hook = from.lerp(to, Math.min(1, age / (double) flight));
             Vec3d ahead = forward(actor.yaw());
             Vec3d hand = actor.position().add(0, HAND_HEIGHT, 0).add(ahead.multiply(HAND_REACH))
                     .add(new Vec3d(-ahead.z, 0, ahead.x).multiply(HAND_SIDE));
-            scene.getOutliner().showLine(slot, hand, hook).lineWidth(1 / 20f).colored(CHAIN_STEEL);
+            scene.getOutliner().showLine(slot, hand, hook.lineEnd(hand)).lineWidth(1 / 20f).colored(CHAIN_STEEL);
         }
 
         @Override
@@ -2060,9 +2063,20 @@ final class SparkWitchKillerScenes {
         return link;
     }
 
-    private static void unsprite(SceneBuilder scene, ElementLink<SpriteElement> link) {
+    /** Show {@code projectile} in the scene. 在场景中显示 projectile。 */
+    private static ElementLink<ProjectileModelElement> projectile(SceneBuilder scene,
+                                                                 ProjectileModelElement projectile) {
+        ElementLink<ProjectileModelElement> link = new ElementLinkImpl<>(ProjectileModelElement.class);
         scene.addInstruction(ponder -> {
-            SpriteElement sprite = ponder.resolve(link);
+            Actors.placeAtOnce(ponder, projectile);
+            ponder.linkElement(projectile, link);
+        });
+        return link;
+    }
+
+    private static <E extends AnimatedSceneElementBase> void unsprite(SceneBuilder scene, ElementLink<E> link) {
+        scene.addInstruction(ponder -> {
+            E sprite = ponder.resolve(link);
             if (sprite != null) {
                 sprite.setVisible(false);
             }
@@ -2070,14 +2084,25 @@ final class SparkWitchKillerScenes {
     }
 
     /**
-     * The Ninja's hook head flying from {@code from} to the latch point {@code to}, where it stays: the hook's own
-     * texture as NinjaGrapplingHookEntityRenderer.renderHead draws it, a 0.5 square around the hook's centre.
-     * 从 from 飞到钩点 to 并停在那里的忍者钩头：像 NinjaGrapplingHookEntityRenderer.renderHead 那样用钩爪自己的贴图绘制，
-     * 是以钩爪中心为中心、边长 0.5 的方块。
+     * The Ninja's hook head flying from {@code from} to the latch point {@code to}, where it stays: SparkWitch's 3D
+     * head, or before it the hook's old texture as a 0.5 square around the hook's centre.
+     * 从 from 飞到钩点 to 并停在那里的忍者钩头：SparkWitch 的 3D 钩头；更早的版本为钩爪旧贴图，是以钩爪中心为中心、
+     * 边长 0.5 的方块。
      */
-    private static SpriteElement hookHead(Vec3d from, Vec3d to, int ticks) {
-        return SpriteElement.picture(HOOK_HEAD, HOOK_HEAD_SIZE, from.add(0, HOOK_CENTRE, 0), to.add(0, HOOK_CENTRE, 0),
-                ticks, true);
+    private static ProjectileModelElement hookHead(Vec3d from, Vec3d to, int ticks) {
+        return ProjectileModelElement.hookHead(from, to, ticks, SpriteElement.picture(HOOK_HEAD, HOOK_HEAD_SIZE,
+                from.add(0, HOOK_CENTRE, 0), to.add(0, HOOK_CENTRE, 0), ticks, true));
+    }
+
+    /**
+     * A Potion Gunner shell of {@code type} (dk, ac, mr or tr) flying from {@code from} to {@code to} over
+     * {@code ticks}, gone on impact: SparkWitch's 3D shell, or before it the {@code shell} item's sprite.
+     * 种类为 type（dk、ac、mr 或 tr）的药炮手炮弹在 ticks 内从 from 飞到 to，命中即消失：SparkWitch 的 3D 炮弹；更早的版本为
+     * shell 物品的贴图。
+     */
+    static void shellFlight(SceneBuilder scene, String type, ItemStack shell, Vec3d from, Vec3d to, int ticks) {
+        projectile(scene, ProjectileModelElement.shell(type, from, to, ticks,
+                SpriteElement.item(shell, from, to, ticks, false)));
     }
 
     /**
