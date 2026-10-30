@@ -713,12 +713,14 @@ final class SparkWitchKillerScenes {
      * and lasts 10 min, at most 4 per Hunter. The first living player to touch it is rooted 3 s and usually gains a
      * fracture layer (-20% speed for 60 s, brown swirls everyone sees) amid 8 crits; the trap is used up. The placed trap renders
      * only for killer-side and a few other roles in a live game, so the item lies in for it. The shotgun (a Wathe gun,
-     * held levelled, no swing) kills the nearest player on the aim within 8 blocks; 2 shells, 0.2 s between them,
-     * 30 s once empty. The shot leaves no trace, so a short red line marks it.
+     * held levelled, no swing) kills the trapped player: a buckshot shell reaches 8 blocks (9 pellets that pass through
+     * players, up to 3 kills), a slug 15 blocks (the nearest player on the line); 2 shells, 0.2 s between them, 30 s
+     * once empty. The shot leaves no trace, so a short red line marks it.
      * 猎人：对着地面右键，在方块顶面中央放下夹子（挥手）；0.5 秒后生效，持续 10 分钟，每人最多 4 个。第一个碰到它的存活玩家
      * 被定身 3 秒，一般还叠一层骨折（减速 20%，持续 60 秒，人人可见的棕色漩涡粒子），伴随 8 颗暴击粒子；夹子随即消失。放下的夹子
-     * 只在进行中的对局里对杀手阵营等少数身份绘制，所以用物品代替。双管猎枪（Wathe 枪械，端平持握，不挥手）击杀准星上 8 格内
-     * 最近的玩家；2 发子弹，两发间隔 0.2 秒，打空后冷却 30 秒。开枪没有弹道，所以用一道短红线标出。
+     * 只在进行中的对局里对杀手阵营等少数身份绘制，所以用物品代替。双管猎枪（Wathe 枪械，端平持握，不挥手）打死被夹住的人：
+     * 霰弹射程 8 格（9 颗弹丸穿人，最多打死 3 人），独头弹射程 15 格（打死直线上最近的人）；2 发子弹，两发间隔 0.2 秒，
+     * 打空后冷却 30 秒。开枪没有弹道，所以用一道短红线标出。
      */
     private static void hunter(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_hunter", "猎人：捕兽夹与双管猎枪");
@@ -789,7 +791,7 @@ final class SparkWitchKillerScenes {
         Actors.fall(scene, victim);
         scene.idle(25);
         scene.overlay().showText(90)
-                .text("趁机开枪：射程 8 格，命中一般当场死亡（红线为示意）")
+                .text("趁机开枪：霰弹射程 8 格、独头弹 15 格，打中一般当场死亡（红线为示意）")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);

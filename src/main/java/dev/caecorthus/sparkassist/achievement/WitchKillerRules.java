@@ -61,18 +61,23 @@ final class WitchKillerRules {
     // ---- Hunter 猎人 ----
 
     /**
-     * 瓮中捉鳖: as the Hunter, a Double-Barrel Shotgun kill ({@code wathe:gun_shot} with my shotgun {@code item_use} on
-     * the victim in the same tick) of a player my trap rooted: my {@code sparkwitch:hunter_trap_triggered} on them less
-     * than 3 s before. Nothing records the root ending early; a new root starts a fresh 3 s.
-     * 以猎人身份用双管猎枪击杀（{@code wathe:gun_shot}，同一 tick 有我对死者的猎枪 {@code item_use}）一名被我的捕兽夹定住的
-     * 玩家：此前不到 3 秒内我的 {@code sparkwitch:hunter_trap_triggered} 夹中了此人。定身提前结束没有记录；再次被夹会重新定身 3 秒。
+     * 瓮中捉鳖: as the Hunter, a Double-Barrel Shotgun kill ({@code wathe:gun_shot} in the same tick as one of my
+     * shotgun {@code item_use}s with {@code action} {@code fire}) of a player my trap rooted: my
+     * {@code sparkwitch:hunter_trap_triggered} on them less than 3 s before. Nothing records the root ending early; a
+     * new root starts a fresh 3 s. A buckshot shot can kill up to three players but SparkWitch writes one fire record
+     * naming only the first victim (plus {@code hit_rays} and {@code victims}), so the record's target is not compared
+     * with the victim; reload records share the item id and are excluded by {@code action}.
+     * 以猎人身份用双管猎枪击杀（{@code wathe:gun_shot}，同一 tick 有我的一条 {@code action} 为 {@code fire} 的猎枪
+     * {@code item_use}）一名被我的捕兽夹定住的玩家：此前不到 3 秒内我的 {@code sparkwitch:hunter_trap_triggered} 夹中了此人。
+     * 定身提前结束没有记录；再次被夹会重新定身 3 秒。一发霰弹最多能打死三人，但 SparkWitch 每枪只写一条开火记录，目标只记第一个
+     * 死者（另带 {@code hit_rays} 与 {@code victims}），所以不比对记录目标与死者；装填记录与开火同一物品 id，靠 {@code action} 排除。
      */
     static boolean shotgunTrappedPrey(AchievementContext context) {
-        List<MatchEvent> shots = Rules.myItemUses(context, DOUBLE_BARREL_SHOTGUN);
+        List<MatchEvent> shots = Rules.withValue(Rules.myItemUses(context, DOUBLE_BARREL_SHOTGUN), "action", "fire");
         List<MatchEvent> traps = Rules.myGlobalEvents(context, HUNTER_TRAP_TRIGGERED);
         return context.kills().stream().anyMatch(kill -> kill.target() != null && Rules.reason(kill, GUN_SHOT)
                 && Rules.killedAs(context, kill, HUNTER)
-                && shots.stream().anyMatch(shot -> shot.tick() == kill.tick() && kill.target().equals(shot.target()))
+                && shots.stream().anyMatch(shot -> shot.tick() == kill.tick())
                 && traps.stream().anyMatch(trap -> kill.target().equals(trap.target())
                         && kill.tick() >= trap.tick() && kill.tick() - trap.tick() < TRAP_ROOT_TICKS));
     }

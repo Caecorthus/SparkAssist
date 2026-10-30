@@ -899,7 +899,7 @@
   "sparkassist.ponder.role_hunter.text_2": "0.5 秒后生效，能留 10 分钟；每人最多同时放 4 个",
   "sparkassist.ponder.role_hunter.text_3": "夹子一般只有杀手阵营等少数人看得见（演示用物品图标代替）",
   "sparkassist.ponder.role_hunter.text_4": "踩中的人被夹住：定身 3 秒，一般还叠上一层骨折",
-  "sparkassist.ponder.role_hunter.text_5": "趁机开枪：射程 8 格，命中一般当场死亡（红线为示意）",
+  "sparkassist.ponder.role_hunter.text_5": "趁机开枪：霰弹射程 8 格、独头弹 15 格，打中一般当场死亡（红线为示意）",
   "sparkassist.ponder.role_hunter.text_6": "最多装 2 发，打完一发很快能再打；打空一般冷却 30 秒",
   "sparkassist.ponder.role_hunter.text_7": "骨折每层减速两成、持续 60 秒；夹子不分敌我",
   "sparkassist.ponder.role_kidnapper.header": "绑架者：迷药、拖尸与扔尸",
