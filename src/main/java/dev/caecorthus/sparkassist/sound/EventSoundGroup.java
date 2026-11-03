@@ -29,7 +29,8 @@ public enum EventSoundGroup {
     TIME_STEALER_CHIME("time_stealer_chime", "option.sparkassist.event_sound_volume.time_stealer_chime"),
     SAINT_BELL("saint_bell", "option.sparkassist.event_sound_volume.saint_bell"),
     HOLY_FLASH_TINNITUS("holy_flash_tinnitus", "option.sparkassist.event_sound_volume.holy_flash_tinnitus"),
-    SHIELD_CLANG("shield_clang", "option.sparkassist.event_sound_volume.shield_clang");
+    SHIELD_CLANG("shield_clang", "option.sparkassist.event_sound_volume.shield_clang"),
+    LAST_STAND_FINAL_MOMENT("last_stand_final_moment", "option.sparkassist.event_sound_volume.last_stand_final_moment");
 
     private final String serializedName;
     private final String translationKey;

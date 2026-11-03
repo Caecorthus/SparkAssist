@@ -238,6 +238,14 @@ final class EventSoundCatalog {
                         resourceIds("sparktraits",
                                 "depression/player_was_seen"
                         )
+                ),
+                group(EventSoundGroup.LAST_STAND_FINAL_MOMENT,
+                        eventIds("sparktraits",
+                                "music.final_moment"
+                        ),
+                        resourceIds("sparktraits",
+                                "music/final_moment"
+                        )
                 )
         ));
     }

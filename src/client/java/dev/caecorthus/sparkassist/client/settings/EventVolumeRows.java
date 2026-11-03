@@ -120,6 +120,9 @@ final class EventVolumeRows {
                     "announcement.role.saint", "Saint", 0xEEBC78,
                     sample("sparkwitch:skill.holy_flash_tinnitus", SoundCategory.PLAYERS)),
 
+            role(EventSoundGroup.LAST_STAND_FINAL_MOMENT, Section.TRAIT_CIVILIAN, "sparktraits",
+                    "trait.sparktraits.last_stand.name", "Last Stand", 0xFFFFFF,
+                    sample("sparktraits:music.final_moment", SoundCategory.MASTER)),
             role(EventSoundGroup.DEPRESSION_PSYCHO_RANGE, Section.TRAIT_CIVILIAN, "sparktraits",
                     "trait.sparktraits.depression.name", "Depression", 0x6B7280,
                     sample("sparktraits:depression.docile_to_rage", SoundCategory.AMBIENT)),

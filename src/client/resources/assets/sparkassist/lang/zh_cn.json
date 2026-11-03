@@ -70,6 +70,8 @@
   "option.sparkassist.event_sound_volume.depression_psycho_range.description": "抑郁的怒意音效：怒意苏醒、怒意循环、挥棒击杀、怒意退去与被终结。约 80 格内的人都能听到。",
   "option.sparkassist.event_sound_volume.depression_psycho_music.description": "盲怒爆发与追逐的配乐，只有抑郁者和凶手听得到。",
   "option.sparkassist.event_sound_volume.depression_psycho_alert.description": "抑郁者看到凶手时，只有凶手听得到的提示音。",
+  "option.sparkassist.event_sound_volume.last_stand_final_moment": "终局时刻配乐",
+  "option.sparkassist.event_sound_volume.last_stand_final_moment.description": "背水一战触发终局时刻后全场都能听到的配乐，最长 3 分钟，最后一名亡命徒死亡或回合结束时停止。SparkTraits 把它放在主音量声道，其他分类滑块都压不住。",
   "option.sparkassist.event_sound_volume.train_inside.description": "不在露天处时听到的车厢循环环境音，只在对局中、列车行驶时播放。",
   "option.sparkassist.event_sound_volume.train_outside.description": "在露天处听到的车外循环环境音，只在列车行驶时播放；船图使用船的版本。",
   "option.sparkassist.event_sound_volume.train_horn.description": "有人拉响汽笛时的声音，整张地图都听得到。SparkStrength 修好被破坏的引擎时也会响一次。",

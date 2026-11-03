@@ -70,6 +70,8 @@
   "option.sparkassist.event_sound_volume.depression_psycho_range.description": "Depression's rage sounds: waking, the loop, bat kills, calming down and being killed. Anyone within about 80 blocks hears them.",
   "option.sparkassist.event_sound_volume.depression_psycho_music.description": "The blind rage burst and chase music, heard only by the depressed player and the attacker.",
   "option.sparkassist.event_sound_volume.depression_psycho_alert.description": "The alert only the attacker hears when the depressed player sees them.",
+  "option.sparkassist.event_sound_volume.last_stand_final_moment": "Final Moment Music",
+  "option.sparkassist.event_sound_volume.last_stand_final_moment.description": "The music everyone in the world hears once Last Stand starts the Final Moment, up to 3 minutes; it stops when the last Loose End dies or the round ends. SparkTraits plays it on the master channel, so no other category slider turns it down.",
   "option.sparkassist.event_sound_volume.train_inside.description": "The carriage loop you hear when you aren't under open sky. It plays during a round while the train is moving.",
   "option.sparkassist.event_sound_volume.train_outside.description": "The loop you hear under open sky while the train is moving; maps set up as a ship use the ship's version.",
   "option.sparkassist.event_sound_volume.train_horn.description": "The horn when someone sounds it, loud enough for the whole map. SparkStrength also sounds it once when a sabotaged engine is repaired.",
