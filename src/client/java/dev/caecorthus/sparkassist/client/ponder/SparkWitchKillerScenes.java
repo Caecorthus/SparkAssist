@@ -801,7 +801,7 @@ final class SparkWitchKillerScenes {
         Actors.fall(scene, victim);
         scene.idle(25);
         scene.overlay().showText(90)
-                .text("趁机开枪：霰弹射程 8 格、独头弹 15 格，打中一般当场死亡（红线为示意）")
+                .text("趁机开枪：霰弹射程 8 格、至少中 3 颗才致命，独头弹 15 格一枪致命（红线为示意）")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
