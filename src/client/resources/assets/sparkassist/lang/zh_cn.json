@@ -411,7 +411,7 @@
   "sparkassist.ponder.role_morphling_corpse.text_3": "躺着时移动变慢，但其他动作照常",
   "sparkassist.ponder.role_morphling_corpse.text_4": "有人走近查看时……",
   "sparkassist.ponder.role_morphling_corpse.text_5": "……再按一次 G 起身出刀",
-  "sparkassist.ponder.role_morphling_corpse.text_6": "注意：手里拿着东西会露馅；杀手同伴按住本能键看得到你",
+  "sparkassist.ponder.role_morphling_corpse.text_6": "移动时尸体只会平移，手里的东西不显示，本能也透视不到你",
   "sparkassist.ponder.role_morphling_corpse.text_7": "可以先变成已死的人再躺下，装得更像",
   "sparkassist.ponder.role_phantom.header": "幽灵：隐身摸到人身后",
   "sparkassist.ponder.role_phantom.text_1": "幽灵（杀手）：按技能键（默认 G）隐身 30 秒",

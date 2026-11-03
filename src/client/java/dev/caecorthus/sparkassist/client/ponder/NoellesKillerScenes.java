@@ -1137,13 +1137,13 @@ final class NoellesKillerScenes {
     }
 
     /**
-     * Corpse mode (NoellesRoles corpse toggle packet, MorphlingPlayerComponent, MorphlingCorpseRendererMixin and the
-     * collision mixins): the ability key toggles it, with no cooldown. The Morphling is drawn at once as Wathe draws a
-     * body (no fall, a block back from where it stands, face down) with no name, at Slowness III, and can still act;
-     * like a body it can be walked through. A held item still shows in its hand, and fellow killers holding the
-     * instinct key see it outlined.
-     * 尸体伪装：技能键开关，没有冷却。变形者立刻按 Wathe 尸体的样子绘制（没有倒下动画，比站立处靠后一格，脸朝下），不显示
-     * 名字，带缓慢 III，仍能行动；和尸体一样能被人穿过。手里拿着的东西仍会显示，杀手同伴按住本能键能看到他的轮廓。
+     * Corpse mode (NoellesRoles corpse toggle packet, MorphlingPlayerComponent and the collision mixins; SparkStrength's
+     * MorphlingCorpseStandIn and MorphlingCorpseInstinctClient, 2026-11-03): the ability key toggles it, with no
+     * cooldown. The Morphling is drawn as a real Wathe corpse (a block back from where it stands, face down) that keeps
+     * its facing and only slides when it moves, with no name and no held item, at Slowness III, and can still act; like
+     * a body it can be walked through. Keyed instinct does not see it.
+     * 尸体伪装：技能键开关，没有冷却。变形者被画成一具真正的 Wathe 尸体（比站立处靠后一格，脸朝下），朝向固定，移动时只会
+     * 平移，不显示名字和手持物品，带缓慢 III，仍能行动；和尸体一样能被人穿过。按键本能看不到它。
      */
     private static void corpseMode(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_morphling_corpse", "变形者：装成尸体");
@@ -1197,7 +1197,7 @@ final class NoellesKillerScenes {
                 .independent();
         scene.idle(90);
         scene.overlay().showText(90)
-                .text("注意：手里拿着东西会露馅；杀手同伴按住本能键看得到你")
+                .text("移动时尸体只会平移，手里的东西不显示，本能也透视不到你")
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
@@ -1685,11 +1685,11 @@ final class NoellesKillerScenes {
     }
 
     /**
-     * A Morphling in corpse mode as MorphlingCorpseRendererMixin draws it: Wathe's body transforms at full tilt (no
-     * fall), so face down towards {@code yaw} with the feet a block behind where it stands, and no name. Drawn by
-     * ActorElement.lying with the vanilla-baked model a fallen actor uses.
-     * 尸体伪装中的变形者，按 MorphlingCorpseRendererMixin 绘制：直接套用 Wathe 尸体的变换（没有倒下动画），朝 yaw 脸朝下，
-     * 脚在站立处后方一格，不显示名字。由 ActorElement.lying 绘制，与倒地演员共用同一个原版烘焙模型。
+     * A Morphling in corpse mode as SparkStrength's Wathe corpse stand-in draws it: Wathe's body transforms at full tilt
+     * (the scene skips the fall), so face down towards {@code yaw} with the feet a block behind where it stands, and no
+     * name. Drawn by ActorElement.lying with the vanilla-baked model a fallen actor uses.
+     * 尸体伪装中的变形者，按 SparkStrength 的 Wathe 尸体替身绘制：直接套用 Wathe 尸体的变换（场景省略倒下动画），朝 yaw
+     * 脸朝下，脚在站立处后方一格，不显示名字。由 ActorElement.lying 绘制，与倒地演员共用同一个原版烘焙模型。
      */
     private static final class Corpse extends AnimatedSceneElementBase {
         private final int color;
