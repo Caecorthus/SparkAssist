@@ -1,13 +1,12 @@
 package dev.caecorthus.sparkassist.client.achievement;
 
+import dev.caecorthus.sparkassist.achievement.Factions;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.api.WatheRoles;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Locale;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.Scoreboard;
@@ -18,12 +17,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Reads factions from SparkFactionAPI's public API when it is installed, so witch and other custom factions are
- * named correctly; without it, falls back to Wathe's four base factions ({@code wathe:civilian} and so on).
- * 安装了 SparkFactionAPI 时通过其公开 API 读取阵营，使魔女等自定义阵营得到正确的 id；
- * 未安装时回退到 Wathe 的四个基础阵营（{@code wathe:civilian} 等）。
+ * named correctly; without it, falls back to Wathe's own faction of the role, named by {@link Factions#fromWatheName}
+ * ({@code wathe:civilian}, and {@code sparkwitch:witch} / {@code sparkwitch:jiahao} for the native custom constants
+ * SparkFactionAPI appends to Wathe's enum). A failing call falls back for that call only and never switches the API
+ * off for the session.
+ * 安装了 SparkFactionAPI 时通过其公开 API 读取阵营，使魔女等自定义阵营得到正确的 id；未安装时回退到 Wathe 给该身份的
+ * 阵营，由 {@link Factions#fromWatheName} 命名（{@code wathe:civilian} 等；SparkFactionAPI 追加到 Wathe 枚举的原生自定义
+ * 常量为 {@code sparkwitch:witch} / {@code sparkwitch:jiahao}）。单次调用失败只让这一次回退，不会在本次会话中关闭该 API。
  */
 final class SparkFactionAchievementBridge {
     private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/Achievements");
+    private static final PerCallFallback CALLS = new PerCallFallback(LOGGER);
     private static boolean resolved;
     private static boolean available;
     private static Method resolveEffectiveFaction;
@@ -42,16 +46,13 @@ final class SparkFactionAchievementBridge {
         }
         resolve();
         if (available) {
-            try {
-                Object faction = resolveEffectiveFaction.invoke(null, player, game);
-                if (faction instanceof Identifier id) {
-                    return id.toString();
-                }
-            } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
-                disable("faction lookup", exception);
+            String id = CALLS.call("faction lookup",
+                    () -> idOrNull(resolveEffectiveFaction.invoke(null, player, game)));
+            if (id != null) {
+                return id;
             }
         }
-        return "wathe:" + Faction.fromRole(role).name().toLowerCase(Locale.ROOT);
+        return watheFaction(role);
     }
 
     /**
@@ -69,16 +70,12 @@ final class SparkFactionAchievementBridge {
         }
         resolve();
         if (available && resolveBaseFaction != null) {
-            try {
-                Object faction = resolveBaseFaction.invoke(null, role);
-                if (faction instanceof Identifier factionId) {
-                    return factionId.toString();
-                }
-            } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
-                disable("base faction lookup", exception);
+            String factionId = CALLS.call("base faction lookup", () -> idOrNull(resolveBaseFaction.invoke(null, role)));
+            if (factionId != null) {
+                return factionId;
             }
         }
-        return "wathe:" + Faction.fromRole(role).name().toLowerCase(Locale.ROOT);
+        return watheFaction(role);
     }
 
     /**
@@ -91,14 +88,23 @@ final class SparkFactionAchievementBridge {
         if (!available) {
             return null;
         }
-        try {
+        return CALLS.call("round-end lookup", () -> {
             Object component = roundEndKey.getNullable(scoreboard);
-            Object faction = component == null ? null : winningFaction.invoke(component);
-            return faction instanceof Identifier id ? id.toString() : null;
-        } catch (IllegalAccessException | InvocationTargetException | RuntimeException exception) {
-            disable("round-end lookup", exception);
-            return null;
-        }
+            return component == null ? null : idOrNull(winningFaction.invoke(component));
+        });
+    }
+
+    /**
+     * Wathe's own faction of {@code role}: built-ins as {@code wathe:*}, SparkFactionAPI's appended native constants
+     * by their declared ids (see {@link Factions#fromWatheName}).
+     * Wathe 给 {@code role} 的阵营：内置阵营为 {@code wathe:*}，SparkFactionAPI 追加的原生常量取其声明的 id。
+     */
+    private static String watheFaction(Role role) {
+        return Factions.fromWatheName(Faction.fromRole(role).name());
+    }
+
+    private static String idOrNull(Object faction) {
+        return faction instanceof Identifier id ? id.toString() : null;
     }
 
     private static synchronized void resolve() {
@@ -125,10 +131,5 @@ final class SparkFactionAchievementBridge {
         } catch (ReflectiveOperationException | ClassCastException exception) {
             LOGGER.warn("SparkFactionAPI is installed but its faction API is unavailable", exception);
         }
-    }
-
-    private static void disable(String what, Exception exception) {
-        LOGGER.warn("SparkFactionAPI {} failed; using Wathe factions from now on", what, exception);
-        available = false;
     }
 }

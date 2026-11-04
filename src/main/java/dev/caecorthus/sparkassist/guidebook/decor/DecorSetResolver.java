@@ -56,6 +56,7 @@ public final class DecorSetResolver {
             case "roles.witch", "skills.grand", "skills.apprentice", "skills.murderous" ->
                     set.withAccent(DecorSet.WITCH.colour(), DecorSet.WITCH.mark());
             case "roles.neutral" -> set.withAccent(DecorSet.NEUTRAL.colour(), DecorSet.NEUTRAL.mark());
+            case "roles.jiahao" -> set.withAccent(DecorSet.JIAHAO.colour(), DecorSet.JIAHAO.mark());
             default -> set.withAccent(NO_FACTION, set.mark());
         };
     }
@@ -66,6 +67,7 @@ public final class DecorSetResolver {
             case "roles.witch", "skills.grand", "skills.apprentice", "skills.murderous" -> DecorSet.WITCH;
             case "roles.killer" -> DecorSet.KILLER;
             case "roles.neutral" -> DecorSet.NEUTRAL;
+            case "roles.jiahao" -> DecorSet.JIAHAO;
             default -> group.startsWith("traits.") ? DecorSet.TRAIT : DecorSet.CIVILIAN;
         };
     }

@@ -599,9 +599,14 @@ final class GeneralRules {
         return matchEnd.tick() - STOP_FADE_TICKS;
     }
 
-    /** Two known, different real factions. 两个已知且不同的真实阵营。 */
+    /**
+     * Two known, different real factions. Team Jiahao counts as neutral here ({@link Factions#legacySide}), as it did
+     * before it became its own faction, so a Jiahao member and a neutral are still no opponents.
+     * 两个已知且不同的真实阵营。嘉豪阵营在这里按中立计（{@link Factions#legacySide}），与它独立之前一致，所以嘉豪成员与中立
+     * 之间仍不算对手。
+     */
     private static boolean rivals(String a, String b) {
-        return isFaction(a) && isFaction(b) && !a.equals(b);
+        return isFaction(a) && isFaction(b) && !Factions.legacySide(a).equals(Factions.legacySide(b));
     }
 
     private static boolean isFaction(String factionId) {

@@ -17,7 +17,8 @@ import java.util.function.Predicate;
 public final class GuidebookNavigation {
     private static final List<String> ROOTS = List.of("roles", "traits", "skills");
     private static final List<String> GROUPS = List.of(
-            "roles.basics", "roles.civilian", "roles.killer", "roles.witch", "roles.neutral", "roles.other",
+            "roles.basics", "roles.civilian", "roles.killer", "roles.witch", "roles.neutral", "roles.jiahao",
+            "roles.other",
             "traits.global", "traits.civilian", "traits.police", "traits.killer", "traits.other",
             "skills.apprentice", "skills.murderous", "skills.grand"
     );
@@ -50,9 +51,13 @@ public final class GuidebookNavigation {
         assign(ROLE_GROUPS, "roles.witch", "sparkwitch", "grand_witch", "bewitched", "accomplice",
                 "abyss_listener", "riftwalker", "potion_gunner", "curser");
         assign(ROLE_GROUPS, "roles.neutral", "wathe", "loose_end");
-        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend", "insider");
+        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend");
         assign(ROLE_GROUPS, "roles.neutral", "noellesroles",
-                "corrupt_cop", "taotie", "pathogen", "vulture", "jester", "shadow_jester");
+                "taotie", "pathogen", "vulture", "jester", "shadow_jester");
+        // Team Jiahao is its own Wathe faction since 2026-11-04; the Corrupt Cop is on it in every round.
+        // 嘉豪阵营自 2026-11-04 起是独立的 Wathe 阵营；黑警每局都属于它。
+        assign(ROLE_GROUPS, "roles.jiahao", "noellesroles", "corrupt_cop");
+        assign(ROLE_GROUPS, "roles.jiahao", "sparkwitch", "insider");
         assign(TRAIT_GROUPS, "traits.global", "sparktraits", "cautious", "task_master", "fast_hands",
                 "childish", "pig", "steady", "excellent_physique", "spirit_sleuth", "snowball", "well_supplied");
         assign(TRAIT_GROUPS, "traits.civilian", "sparktraits", "last_stand", "impostor", "extroverted",
@@ -174,6 +179,7 @@ public final class GuidebookNavigation {
                 case "sparkassist:faction/wathe/killer" -> "roles.killer";
                 case "sparkassist:faction/wathe/neutral" -> "roles.neutral";
                 case "sparkassist:faction/sparkwitch/witch" -> "roles.witch";
+                case "sparkassist:faction/sparkwitch/jiahao" -> "roles.jiahao";
                 default -> "roles.other";
             });
             case GUIDE -> List.of("roles.basics");
