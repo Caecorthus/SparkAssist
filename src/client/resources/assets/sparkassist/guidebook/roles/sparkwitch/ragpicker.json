@@ -1,0 +1,103 @@
+{
+  "entries": [
+    {
+      "id": "sparkwitch:ragpicker",
+      "tab": "ROLE",
+      "sourceModId": "sparkwitch",
+      "nameKey": "announcement.role.ragpicker",
+      "summaryKey": "guidebook.sparkassist.content.role.overview",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "好人阵营的特殊身份。你能隔着墙看见附近掉在地上的东西，还能从尸体上翻出死者没来得及用完的道具。和普通乘客一样靠做任务维持理智，冲刺体力 10 秒。"
+            },
+            {
+              "type": "section",
+              "text": "能力",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "拾荒眼光",
+                  "tone": "good"
+                },
+                {
+                  "text": "：8 格内掉在地上的物品会以拾荒者的灰褐色发光，隔着墙也看得见。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "搜刮",
+                  "tone": "good"
+                },
+                {
+                  "text": "（技能键，默认 G）：对准 3 格内、中间没有遮挡的尸体按下技能键，并一直看着它 5 秒；移开视线或走远都会中断。完成后，死者背包里随机一组物品会转移到你快捷栏的空位上，死者身上就没有这件了。快捷栏必须留一个空位。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "每具尸体只能搜一次，尸体上什么都没有时会直接提示。搜刮成功后冷却 60 秒，开局冷却 45 秒。"
+            },
+            {
+              "type": "section",
+              "text": "战利品",
+              "tone": "info"
+            },
+            {
+              "type": "bullet",
+              "text": "手里还有没用掉的战利品时，不能再次搜刮。搜来的【钥匙】、【对讲机】和【中立万能钥匙】不算在内。"
+            },
+            {
+              "type": "bullet",
+              "text": "战利品要真正用过才算用掉：开了一枪、用刀刺死了人、【开锁器】或【撬棍】确实改变了门的状态、【钥匙】打开了门、武器造成了有效命中；吃、喝、投掷的东西照常用掉即可。【对讲机】和【中立万能钥匙】永远不算用掉。"
+            },
+            {
+              "type": "bullet",
+              "text": "潜行时对着空气右键，会销毁主手里的战利品，腾出下一次搜刮的机会。"
+            },
+            {
+              "type": "section",
+              "text": "玩法建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "搜刮的 5 秒里你一直盯着尸体，很容易被偷袭。先看清周围有没有人，再动手。"
+            },
+            {
+              "type": "bullet",
+              "text": "搜到用不上的东西就潜行右键销毁，别让它挡住下一次搜刮。"
+            },
+            {
+              "type": "bullet",
+              "text": "搜到枪也要想清楚再开：用枪打死好人的代价和其他好人一样。"
+            },
+            {
+              "type": "section",
+              "text": "需要注意",
+              "tone": "danger"
+            },
+            {
+              "type": "bullet",
+              "text": "搜刮和其他身份技能一样会被封住：被大魔女的恐惧影响、被控场专家电击、被饕餮吞下、处在骑士决斗中等情况下都用不了。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [],
+      "requiredModIds": [
+        "sparkwitch"
+      ],
+      "color": "#91876E",
+      "order": 256
+    }
+  ]
+}
