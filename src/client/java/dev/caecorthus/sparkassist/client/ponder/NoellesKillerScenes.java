@@ -1963,7 +1963,7 @@ final class NoellesKillerScenes {
         Actors.hold(scene, cop, revolver);
         scene.idle(20);
         scene.overlay().showText(80)
-                .text("黑警（中立）：开局自带一把左轮手枪")
+                .text("黑警（嘉豪阵营）：开局自带一把左轮手枪")
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);

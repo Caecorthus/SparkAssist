@@ -20,9 +20,12 @@ final class LifetimeRules {
 
     /**
      * The neutral roles that can win a round of their own: Noelle's Roles' Jester, Shadow Jester, Vulture, Corrupt
-     * Cop, Pathogen and Taotie, and SparkWitch's Fiend, Insider and Murderous Witch.
+     * Cop, Pathogen and Taotie, and SparkWitch's Fiend, Insider and Murderous Witch. The Corrupt Cop and the Insider
+     * are Team Jiahao ({@link Factions#JIAHAO}) since 2026-11-04 but keep counting here, so 墙头草 and 永久中立国 mean
+     * what they meant when released.
      * 能自己赢下对局的中立身份：Noelle's Roles 的小丑、影子小丑、秃鹫、黑警、病原体、饕餮，
-     * 以及 SparkWitch 的魔人、内应、杀意魔女。
+     * 以及 SparkWitch 的魔人、内应、杀意魔女。黑警与内应自 2026-11-04 起属于嘉豪阵营（{@link Factions#JIAHAO}），但仍计入此处，
+     * 使墙头草与永久中立国保持发布时的含义。
      */
     static final Set<String> WINNING_NEUTRAL_ROLES = Set.of(
             "noellesroles:jester",

@@ -1,0 +1,137 @@
+{
+  "entries": [
+    {
+      "id": "sparkassist:faction/sparkwitch/jiahao",
+      "tab": "FACTION",
+      "sourceModId": "sparkwitch",
+      "nameKey": "guidebook.sparkassist.faction.jiahao.name",
+      "summaryKey": "guidebook.sparkassist.faction.pending",
+      "pages": [
+        {
+          "blocks": [
+            {
+              "type": "section",
+              "text": "胜利条件",
+              "tone": "money"
+            },
+            {
+              "type": "paragraph",
+              "text": "场上存活的玩家只剩嘉豪阵营成员时，嘉豪阵营共同获胜，已经阵亡的成员也算赢。被饕餮吞下的人不算存活。"
+            },
+            {
+              "type": "paragraph",
+              "text": "只要还有嘉豪阵营成员活着，好人和杀手都无法靠消灭对方提前获胜；不过列车时间耗尽时，仍然算好人阵营获胜。"
+            },
+            {
+              "type": "paragraph",
+              "text": "嘉豪阵营有自己的阵营色土豪金：获胜时结算显示金色的「嘉豪胜利！」。本局没有内应、黑警独自获胜时也一样。"
+            },
+            {
+              "type": "section",
+              "text": "阵营成员",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "黑警",
+                  "tone": "money"
+                },
+                {
+                  "text": "：每一局都属于嘉豪阵营，有没有内应都一样。杀死除自己和同伙以外的所有人；开局自带【左轮手枪】，打死谁都不受罚。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "内应",
+                  "tone": "money"
+                },
+                {
+                  "text": "：黑警的同伙，从好人中额外产生。混在乘客中做任务攒钱，买到【左轮手枪】后就能放心开火。"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "text": "阵营共同点",
+              "tone": "money"
+            },
+            {
+              "type": "bullet",
+              "runs": [
+                {
+                  "text": "认出同伙",
+                  "tone": "money"
+                },
+                {
+                  "text": "：黑警和内应看向对方时会显示金色的“嘉豪同伙”；全车停电期间，本能只看得到彼此。"
+                }
+              ]
+            },
+            {
+              "type": "bullet",
+              "text": "杀手眼里内应和普通乘客没有区别，同样会对内应下手。"
+            },
+            {
+              "type": "bullet",
+              "text": "两人开局都有【中立万能钥匙】和接入义警频道的平板电脑，能用频道里的聊天、紧急会议和嫌疑人功能。"
+            },
+            {
+              "type": "section",
+              "text": "出现方式",
+              "tone": "info"
+            },
+            {
+              "type": "paragraph",
+              "text": "以下为默认规则，服务器可能有所调整。",
+              "tone": "muted"
+            },
+            {
+              "type": "bullet",
+              "text": "黑警仍然从中立名额里抽取，出现的机会和以前一样，并占用 1 个中立名额；只是它算作嘉豪阵营。"
+            },
+            {
+              "type": "bullet",
+              "text": "内应不占中立名额：只有抽到黑警、并且至少有 4 名杀手时，才会从好人中额外产生一名内应。"
+            },
+            {
+              "type": "bullet",
+              "text": "嘉豪阵营成员死亡后不会变成冤魂。"
+            },
+            {
+              "type": "section",
+              "text": "新手建议",
+              "tone": "good"
+            },
+            {
+              "type": "bullet",
+              "text": "黑警和内应只要有一人活着就能拖住其他阵营，别一起去冒险。"
+            },
+            {
+              "type": "bullet",
+              "text": "内应在杀手眼里只是普通乘客：混在人群里，让杀手和好人先互相消耗。"
+            },
+            {
+              "type": "bullet",
+              "text": "义警频道的会议和嫌疑人情报对你们同样开放，找机会提醒同伙避开风头。"
+            }
+          ]
+        }
+      ],
+      "ownerRoleIds": [
+        "noellesroles:corrupt_cop",
+        "sparkwitch:insider"
+      ],
+      "requiredModIds": [
+        "sparkwitch",
+        "noellesroles"
+      ],
+      "color": "#FFC125",
+      "order": 50
+    }
+  ]
+}

@@ -41,6 +41,12 @@ public record DecorSet(Plate plate, Sigil sigil, Foliage foliage, int colour, in
             0xFF8A1B29, Mark.DAGGER, Charm.DAGGER, "", 0xC13838);
     public static final DecorSet NEUTRAL = new DecorSet(Plate.FAIR, Sigil.HARLEQUIN, Foliage.RIBBON, 0xDFA94F,
             0, Mark.MASK, Charm.BELL, "", 0xDFA94F);
+    /**
+     * Team Jiahao: the neutral fair, lattice and ribbons in the faction's own "土豪金" gold (no art of its own yet).
+     * 嘉豪阵营：沿用中立的集市景、菱格暗纹与丝带，换成阵营自己的土豪金（暂无专属美术）。
+     */
+    public static final DecorSet JIAHAO = new DecorSet(Plate.FAIR, Sigil.HARLEQUIN, Foliage.RIBBON, 0xFFC125,
+            0, Mark.MASK, Charm.BELL, "", 0xFFC125);
     public static final DecorSet TRAIT = new DecorSet(Plate.FIELD, Sigil.CONSTELLATION, Foliage.IVY, 0x36E51B,
             0xFF6B5A9A, Mark.STAR, Charm.KEY, "", 0x36E51B);
     public static final DecorSet SKILL = new DecorSet(Plate.ARCANE, Sigil.RUNES, Foliage.BRIAR, 0xD6B0FF,

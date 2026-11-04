@@ -26,6 +26,8 @@ final class EventVolumeRows {
         ROLE_ANY("role_any"),
         ROLE_KILLER("role_killer"),
         ROLE_NEUTRAL("role_neutral"),
+        /** Team Jiahao (Corrupt Cop, Insider), its own Wathe faction since 2026-11-04. 嘉豪阵营，自 2026-11-04 起独立。 */
+        ROLE_JIAHAO("role_jiahao"),
         ROLE_CIVILIAN("role_civilian"),
         TRAIT_CIVILIAN("trait_civilian");
 
@@ -94,12 +96,6 @@ final class EventVolumeRows {
                     "announcement.role.time_stealer", "Time Stealer", 0x2E8B7A,
                     sample("sparkwitch:ambient.time_stealer_chime", SoundCategory.PLAYERS)),
 
-            role(EventSoundGroup.CORRUPT_COP_MOMENT, Section.ROLE_NEUTRAL, "noellesroles",
-                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
-                    sample("noellesroles:music.corrupt_cop_moment_1", SoundCategory.AMBIENT)),
-            role(EventSoundGroup.ARROGANT_ASF_MUSIC, Section.ROLE_NEUTRAL, "sparkstrength",
-                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
-                    sample("sparkstrength:music.takediskrush", SoundCategory.AMBIENT)),
             role(EventSoundGroup.JESTER_MOMENT, Section.ROLE_NEUTRAL, "noellesroles",
                     "announcement.role.jester", "Jester", 0xF8C8DC,
                     sample("noellesroles:ambient.jester_laugh", SoundCategory.MASTER)),
@@ -109,6 +105,13 @@ final class EventVolumeRows {
             role(EventSoundGroup.VULTURE_CURSE, Section.ROLE_NEUTRAL, "sparkstrength",
                     "announcement.role.vulture", "Vulture", 0xB56700,
                     sample("sparkstrength:vulture.super_curse", SoundCategory.PLAYERS)),
+
+            role(EventSoundGroup.CORRUPT_COP_MOMENT, Section.ROLE_JIAHAO, "noellesroles",
+                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
+                    sample("noellesroles:music.corrupt_cop_moment_1", SoundCategory.AMBIENT)),
+            role(EventSoundGroup.ARROGANT_ASF_MUSIC, Section.ROLE_JIAHAO, "sparkstrength",
+                    "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
+                    sample("sparkstrength:music.takediskrush", SoundCategory.AMBIENT)),
 
             role(EventSoundGroup.PIG_CHASE, Section.ROLE_CIVILIAN, "sparkwitch",
                     "announcement.role.pig_god", "Pig God", 0xF2A4FC,

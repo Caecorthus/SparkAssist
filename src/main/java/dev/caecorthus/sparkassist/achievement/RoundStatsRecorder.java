@@ -142,10 +142,11 @@ public final class RoundStatsRecorder {
 
     /**
      * Kills whose victim's faction is known and differs from mine at the kill, per my role then, with the traits I
-     * held around them. {@link Factions#NONE} is not a faction here, and a Last Stand false death is not a kill (the
-     * victim comes back).
+     * held around them. {@link Factions#NONE} is not a faction here, a Last Stand false death is not a kill (the
+     * victim comes back), and Team Jiahao counts as neutral ({@link Factions#legacySide}), as it did before it became
+     * its own faction.
      * 死者阵营已知且与我击杀时的阵营不同的击杀，按我当时的身份计，并记下当时持有的词条。{@link Factions#NONE} 在这里不算阵营，
-     * 背水一战的假死也不算击杀（死者会复活）。
+     * 背水一战的假死也不算击杀（死者会复活），嘉豪阵营按中立计（{@link Factions#legacySide}），与它独立之前一致。
      */
     private static void recordRivalKills(LifetimeStats stats, RoundFacts facts, MatchTimeline timeline) {
         for (MatchEvent kill : timeline.killsBy(facts.self())) {
@@ -154,7 +155,8 @@ public final class RoundStatsRecorder {
             }
             String mine = timeline.killerFaction(kill);
             String theirs = timeline.victimFaction(kill);
-            if (isFaction(mine) && isFaction(theirs) && !mine.equals(theirs)) {
+            if (isFaction(mine) && isFaction(theirs)
+                    && !Factions.legacySide(mine).equals(Factions.legacySide(theirs))) {
                 stats.recordRivalKill(timeline.killerRole(kill), facts.traitsAround(kill.tick()));
             }
         }
