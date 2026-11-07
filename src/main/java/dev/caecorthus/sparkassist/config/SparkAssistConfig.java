@@ -21,6 +21,8 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
+    private static final String CUSTOM_SPLASH = "customSplash";
+    private static final String CUSTOM_TITLE = "customTitle";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -28,6 +30,8 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
+    private boolean customSplash = true;
+    private boolean customTitle = true;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -50,6 +54,14 @@ public final class SparkAssistConfig {
         }
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(CUSTOM_SPLASH) && json.get(CUSTOM_SPLASH).isJsonPrimitive()
+                && json.get(CUSTOM_SPLASH).getAsJsonPrimitive().isBoolean()) {
+            config.setCustomSplash(json.get(CUSTOM_SPLASH).getAsBoolean());
+        }
+        if (json.has(CUSTOM_TITLE) && json.get(CUSTOM_TITLE).isJsonPrimitive()
+                && json.get(CUSTOM_TITLE).getAsJsonPrimitive().isBoolean()) {
+            config.setCustomTitle(json.get(CUSTOM_TITLE).getAsBoolean());
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -89,6 +101,8 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        json.addProperty(CUSTOM_SPLASH, customSplash);
+        json.addProperty(CUSTOM_TITLE, customTitle);
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -269,5 +283,23 @@ public final class SparkAssistConfig {
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    /** Whether the Express splash replaces the vanilla one. 特快启动画面是否替换原版启动画面。 */
+    public boolean customSplash() {
+        return customSplash;
+    }
+
+    public void setCustomSplash(boolean customSplash) {
+        this.customSplash = customSplash;
+    }
+
+    /** Whether the Express title screen chrome is drawn. 是否绘制特快主菜单装饰。 */
+    public boolean customTitle() {
+        return customTitle;
+    }
+
+    public void setCustomTitle(boolean customTitle) {
+        this.customTitle = customTitle;
     }
 }
