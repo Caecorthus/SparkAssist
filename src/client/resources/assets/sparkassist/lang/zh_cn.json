@@ -1286,5 +1286,9 @@
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
   "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
-  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放",
+  "option.sparkassist.custom_announcement": "特快身份报幕",
+  "option.sparkassist.custom_announcement.description": "用 SparkDLC 的动画报幕替换 Wathe 原版（淡入淡出、铜线、打字动画、词条行）。关掉即恢复原版。",
+  "hud.sparkassist.announcement.traits_prefix": "你获得了 ",
+  "screen.sparkassist.settings.group.role_chrome": "身份报幕"
 }

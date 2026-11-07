@@ -21,6 +21,7 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
+    private static final String CUSTOM_ANNOUNCEMENT = "customAnnouncement";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -28,6 +29,7 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
+    private boolean customAnnouncement = true;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -50,6 +52,10 @@ public final class SparkAssistConfig {
         }
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(CUSTOM_ANNOUNCEMENT) && json.get(CUSTOM_ANNOUNCEMENT).isJsonPrimitive()
+                && json.get(CUSTOM_ANNOUNCEMENT).getAsJsonPrimitive().isBoolean()) {
+            config.setCustomAnnouncement(json.get(CUSTOM_ANNOUNCEMENT).getAsBoolean());
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -89,6 +95,7 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        json.addProperty(CUSTOM_ANNOUNCEMENT, customAnnouncement);
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -269,5 +276,14 @@ public final class SparkAssistConfig {
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    /** Whether the animated role announcement replaces Wathe's. 动画身份报幕是否替换 Wathe 原版。 */
+    public boolean customAnnouncement() {
+        return customAnnouncement;
+    }
+
+    public void setCustomAnnouncement(boolean customAnnouncement) {
+        this.customAnnouncement = customAnnouncement;
     }
 }
