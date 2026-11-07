@@ -21,7 +21,9 @@
     "PonderTimingMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin",
-    "TaskCompletePayloadMixin"
+    "SplashOverlayMixin",
+    "TaskCompletePayloadMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

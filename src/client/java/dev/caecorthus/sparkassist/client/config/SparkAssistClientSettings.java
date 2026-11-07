@@ -26,6 +26,22 @@ public final class SparkAssistClientSettings {
         SparkAssistClient.configManager().save();
     }
 
+    public static boolean customSplash() {
+        return config().customSplash();
+    }
+
+    public static void setCustomSplash(boolean enabled) {
+        config().setCustomSplash(enabled);
+    }
+
+    public static boolean customTitle() {
+        return config().customTitle();
+    }
+
+    public static void setCustomTitle(boolean enabled) {
+        config().setCustomTitle(enabled);
+    }
+
     public static InstinctKeyMode instinctKeyMode() {
         return config().instinctKeyMode();
     }
