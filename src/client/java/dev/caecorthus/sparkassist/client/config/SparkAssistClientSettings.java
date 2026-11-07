@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.SparkAssistClient;
 import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import dev.caecorthus.sparkassist.client.settings.SettingsStore;
 import dev.caecorthus.sparkassist.client.sound.EventSoundVolumeController;
+import dev.caecorthus.sparkassist.config.BloodAppearance;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.GuidebookDecor;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
@@ -24,6 +25,22 @@ public final class SparkAssistClientSettings {
 
     public static void save() {
         SparkAssistClient.configManager().save();
+    }
+
+    public static BloodAppearance bloodAppearance() {
+        return config().bloodAppearance();
+    }
+
+    public static void setBloodAppearance(BloodAppearance appearance) {
+        config().setBloodAppearance(appearance);
+    }
+
+    public static boolean suppressScavengerBlood() {
+        return config().suppressScavengerBlood();
+    }
+
+    public static void setSuppressScavengerBlood(boolean enabled) {
+        config().setSuppressScavengerBlood(enabled);
     }
 
     public static InstinctKeyMode instinctKeyMode() {

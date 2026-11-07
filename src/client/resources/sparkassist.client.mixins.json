@@ -9,19 +9,22 @@
     "ActorMuzzleMixin",
     "ActorTextureMixin",
     "AdvancementsScreenMixin",
+    "BloodParticleMixin",
     "ClientAdvancementManagerMixin",
     "GameMenuScreenMixin",
     "GameRoundEndComponentMixin",
     "GunDropPayloadMixin",
     "KeyBindingMixin",
     "LimitedInventoryScreenMixin",
+    "ParticleAccessorMixin",
     "PoisonOverlayPayloadMixin",
     "PonderCaptionMixin",
     "PonderSceneCaptionMixin",
     "PonderTimingMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin",
-    "TaskCompletePayloadMixin"
+    "TaskCompletePayloadMixin",
+    "WatheBloodClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1

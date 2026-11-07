@@ -1286,5 +1286,16 @@
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
   "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
-  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放",
+  "option.sparkassist.blood_appearance": "血液颜色",
+  "option.sparkassist.blood_appearance.description": "调整 Wathe Blood 的血迹颜色；嫌红可以换绿、灰或直接隐藏。",
+  "option.sparkassist.blood_appearance.value.default": "原色（红）",
+  "option.sparkassist.blood_appearance.value.dark": "暗红",
+  "option.sparkassist.blood_appearance.value.green": "植物绿",
+  "option.sparkassist.blood_appearance.value.blue": "冷蓝",
+  "option.sparkassist.blood_appearance.value.grey": "中性灰",
+  "option.sparkassist.blood_appearance.value.off": "隐藏",
+  "option.sparkassist.suppress_scavenger_blood": "清道夫尸体旁不喷血",
+  "option.sparkassist.suppress_scavenger_blood.description": "清道夫的尸体只是被隐藏、实体仍在，关掉这项会在看不见的尸体旁留下血迹。",
+  "screen.sparkassist.settings.group.blood": "血液"
 }

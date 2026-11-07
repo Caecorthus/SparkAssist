@@ -1286,5 +1286,16 @@
   "advancements.sparkassist.achievement.place.local_world": "Local world",
   "advancements.sparkassist.achievement.place.separator": ", ",
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
-  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
+  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom",
+  "option.sparkassist.blood_appearance": "Blood colour",
+  "option.sparkassist.blood_appearance.description": "Tint Wathe Blood's stains. Switch away from red, or hide them entirely.",
+  "option.sparkassist.blood_appearance.value.default": "Original (red)",
+  "option.sparkassist.blood_appearance.value.dark": "Dark red",
+  "option.sparkassist.blood_appearance.value.green": "Plant green",
+  "option.sparkassist.blood_appearance.value.blue": "Cool blue",
+  "option.sparkassist.blood_appearance.value.grey": "Neutral grey",
+  "option.sparkassist.blood_appearance.value.off": "Hidden",
+  "option.sparkassist.suppress_scavenger_blood": "No blood beside a hidden body",
+  "option.sparkassist.suppress_scavenger_blood.description": "A scavenger's victim keeps its body entity, hidden from view.",
+  "screen.sparkassist.settings.group.blood": "Blood"
 }

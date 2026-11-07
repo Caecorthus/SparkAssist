@@ -21,6 +21,8 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
+    private static final String BLOOD_APPEARANCE = "bloodAppearance";
+    private static final String SUPPRESS_SCAVENGER_BLOOD = "suppressScavengerBlood";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -28,6 +30,8 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
+    private BloodAppearance bloodAppearance = BloodAppearance.DEFAULT;
+    private boolean suppressScavengerBlood = true;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -50,6 +54,13 @@ public final class SparkAssistConfig {
         }
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(BLOOD_APPEARANCE) && json.get(BLOOD_APPEARANCE).isJsonPrimitive()) {
+            config.setBloodAppearance(BloodAppearance.fromId(json.get(BLOOD_APPEARANCE).getAsString()));
+        }
+        if (json.has(SUPPRESS_SCAVENGER_BLOOD) && json.get(SUPPRESS_SCAVENGER_BLOOD).isJsonPrimitive()
+                && json.get(SUPPRESS_SCAVENGER_BLOOD).getAsJsonPrimitive().isBoolean()) {
+            config.setSuppressScavengerBlood(json.get(SUPPRESS_SCAVENGER_BLOOD).getAsBoolean());
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -89,6 +100,8 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        json.addProperty(BLOOD_APPEARANCE, bloodAppearance.id());
+        json.addProperty(SUPPRESS_SCAVENGER_BLOOD, suppressScavengerBlood);
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -269,5 +282,23 @@ public final class SparkAssistConfig {
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    /** Particle tint for Wathe Blood. Wathe Blood 的粒子着色。 */
+    public BloodAppearance bloodAppearance() {
+        return bloodAppearance;
+    }
+
+    public void setBloodAppearance(BloodAppearance bloodAppearance) {
+        this.bloodAppearance = bloodAppearance;
+    }
+
+    /** Whether blood is skipped beside a corpse that NoellesRoles has hidden. 尸体被 NoellesRoles 隐藏时是否跳过喷血。 */
+    public boolean suppressScavengerBlood() {
+        return suppressScavengerBlood;
+    }
+
+    public void setSuppressScavengerBlood(boolean suppressScavengerBlood) {
+        this.suppressScavengerBlood = suppressScavengerBlood;
     }
 }
