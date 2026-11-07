@@ -19,6 +19,7 @@
     "PonderCaptionMixin",
     "PonderSceneCaptionMixin",
     "PonderTimingMixin",
+    "RoundTextRendererMixin",
     "SoundOptionsScreenMixin",
     "SoundSystemMixin",
     "TaskCompletePayloadMixin"

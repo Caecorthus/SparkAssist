@@ -223,9 +223,21 @@ public final class SparkDlcSettingsPages {
                 SparkDlcSettingsPages::percent);
         snowflakes.enabledWhen(() -> WatheClientSettings.snowMode() != SnowModeConfig.TURN_OFF,
                 () -> Text.translatable("option.sparkassist.wathe.snowflake_amount.needs_particles"));
+        ToggleOption announcement = new ToggleOption(
+                "custom_announcement",
+                Text.translatable("option.sparkassist.custom_announcement"),
+                Text.translatable("option.sparkassist.custom_announcement.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                SparkAssistClientSettings::customAnnouncement,
+                SparkAssistClientSettings::setCustomAnnouncement,
+                true);
         return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), List.of(
                 new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
-                        List.of(snowMode, snowflakes))));
+                        List.of(snowMode, snowflakes)),
+                new SettingsPage.Group("role_chrome",
+                        Text.translatable("screen.sparkassist.settings.group.role_chrome"),
+                        List.of(announcement))));
     }
 
     /** The installed mod's display name, so a volume row says whose sounds it scales. 已安装模组的显示名。 */

@@ -26,6 +26,14 @@ public final class SparkAssistClientSettings {
         SparkAssistClient.configManager().save();
     }
 
+    public static boolean customAnnouncement() {
+        return config().customAnnouncement();
+    }
+
+    public static void setCustomAnnouncement(boolean enabled) {
+        config().setCustomAnnouncement(enabled);
+    }
+
     public static InstinctKeyMode instinctKeyMode() {
         return config().instinctKeyMode();
     }

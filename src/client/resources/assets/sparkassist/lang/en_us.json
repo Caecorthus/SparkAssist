@@ -1286,5 +1286,12 @@
   "advancements.sparkassist.achievement.place.local_world": "Local world",
   "advancements.sparkassist.achievement.place.separator": ", ",
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
-  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
+  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom",
+  "option.sparkassist.custom_announcement": "Express role announcement",
+  "option.sparkassist.custom_announcement.description": "Replace Wathe's opening announcement with the animated SparkDLC one. Turn off to restore vanilla.",
+  "hud.sparkassist.announcement.traits_prefix": "You gained ",
+  "screen.sparkassist.settings.group.role_chrome": "Role announcement",
+  "announcement.sparkassist.discovery.welcome": "Exploration mode",
+  "announcement.sparkassist.discovery.premise": "What happened on this train is yours to find out.",
+  "announcement.sparkassist.discovery.goal": "Investigate freely — there are no killers aboard."
 }
