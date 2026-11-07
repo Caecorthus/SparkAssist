@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.achievement.AchievementGalaxy;
 import dev.caecorthus.sparkassist.client.achievement.AchievementAdvancements;
 import dev.caecorthus.sparkassist.client.achievement.AchievementClientState;
 import dev.caecorthus.sparkassist.client.config.SparkAssistConfigManager;
+import dev.caecorthus.sparkassist.client.creative.NoellesCreativeEntries;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookClientState;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookInventoryButton;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookResources;
@@ -34,6 +35,7 @@ public final class SparkAssistClient implements ClientModInitializer {
         galaxy.start();
         PonderSupport.init();
         GuidebookResources.register();
+        NoellesCreativeEntries.register();
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
         GuidebookInventoryButton.register();
         ClientTickEvents.END_CLIENT_TICK.register(AchievementClientState::tick);

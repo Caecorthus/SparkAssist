@@ -1286,5 +1286,8 @@
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
   "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
-  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放",
+  "option.sparkassist.noelles_creative_entries": "NoellesRoles 创造背包",
+  "option.sparkassist.noelles_creative_entries.description": "把 NoellesRoles 的物品填进原版创造标签页；NoellesRoles 本身没有注册物品组。",
+  "screen.sparkassist.settings.group.creative": "创造背包"
 }
