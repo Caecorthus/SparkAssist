@@ -26,6 +26,22 @@ public final class SparkAssistClientSettings {
         SparkAssistClient.configManager().save();
     }
 
+    public static boolean chargeBar() {
+        return config().chargeBar();
+    }
+
+    public static void setChargeBar(boolean enabled) {
+        config().setChargeBar(enabled);
+    }
+
+    public static boolean batChargeBar() {
+        return config().batChargeBar();
+    }
+
+    public static void setBatChargeBar(boolean enabled) {
+        config().setBatChargeBar(enabled);
+    }
+
     public static InstinctKeyMode instinctKeyMode() {
         return config().instinctKeyMode();
     }

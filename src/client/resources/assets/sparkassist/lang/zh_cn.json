@@ -1286,5 +1286,10 @@
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
   "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
-  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放",
+  "option.sparkassist.charge_bar": "蓄力条",
+  "option.sparkassist.charge_bar.description": "总开关：刀、剑鱼、M67、手里剑、球棒共用。关闭后全部不显示。",
+  "option.sparkassist.bat_charge_bar": "球棒蓄力条",
+  "option.sparkassist.bat_charge_bar.description": "球棒用原版攻击冷却，准星下方本来就有指示器；关掉可避免两条同时出现。",
+  "screen.sparkassist.settings.group.charge": "蓄力条"
 }
