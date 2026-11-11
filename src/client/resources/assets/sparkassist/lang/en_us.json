@@ -1288,6 +1288,6 @@
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
   "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom",
   "option.sparkassist.noelles_creative_entries": "NoellesRoles creative entries",
-  "option.sparkassist.noelles_creative_entries.description": "File NoellesRoles items into the vanilla creative tabs; the mod registers no item group of its own.",
+  "option.sparkassist.noelles_creative_entries.description": "File NoellesRoles items into the vanilla creative tabs; the mod registers no item group of its own. A change applies the next time you join a world.",
   "screen.sparkassist.settings.group.creative": "Creative inventory"
 }

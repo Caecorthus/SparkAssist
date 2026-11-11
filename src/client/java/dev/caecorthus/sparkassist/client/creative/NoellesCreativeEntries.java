@@ -1,6 +1,8 @@
 package dev.caecorthus.sparkassist.client.creative;
 
-import java.util.function.Predicate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,59 +23,84 @@ import org.slf4j.LoggerFactory;
  * 注册表，却无法从创造模式标签页中取到。
  *
  * <p>Each item is filed by kind rather than dumped into one tab: keys and tools into Tools, weapons into Combat, and
- * everything else — drinks, vials, reagents — into Ingredients. Matching is on the registry id, and every step is
- * guarded on the mod being present, so a pack without NoellesRoles simply sees no change.
+ * everything else — drinks, vials, reagents — into Ingredients. The kind is read from the whole words of the registry
+ * id, never from a substring: {@code whiskey} contains "key" and is still a drink. Shop icons and leftovers that were
+ * never meant to be held stay out altogether.
  * 每件物品按种类归档，而不是全部堆进一个标签页：钥匙与工具进「工具」，武器进「战斗」，其余——酒、药剂、试剂——进「材料」。
- * 匹配依据是注册表 id，且每一步都以该模组存在为前提，因此没有装 NoellesRoles 的整合包不会看到任何变化。</p>
+ * 种类取自注册表 id 中的完整单词，而不是子串：{@code whiskey} 里含有 "key"，但它仍然是酒。商店图标与从未打算让人拿在手里的
+ * 遗留物品则完全不收录。</p>
+ *
+ * <p>The setting is read each time a tab is built, and Minecraft rebuilds the tabs when a world is joined, so a change
+ * applies from the next world rather than needing a restart.
+ * 设置在每次构建标签页时读取，而 Minecraft 在进入世界时重建标签页，因此改动从下一次进入世界起生效，无需重启。</p>
  */
 public final class NoellesCreativeEntries {
     private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/Creative");
     private static final String MOD_ID = "noellesroles";
+    private static final Set<String> TOOL_WORDS = Set.of("key", "lockpick", "tool", "crowbar");
+    private static final Set<String> WEAPON_WORDS = Set.of("pistol", "knife", "axe", "bomb", "needle", "trap");
+    /**
+     * Registered only so a shop row has an icon ({@code scavenger_reset_knife_cd}, {@code timekeeper_reduce_time}), or
+     * left behind with no name at all ({@code role_mine}).
+     * 仅为给商店条目提供图标而注册（{@code scavenger_reset_knife_cd}、{@code timekeeper_reduce_time}），或是连名字都没有的
+     * 遗留物品（{@code role_mine}）。
+     */
+    private static final Set<String> NOT_FOR_PLAYERS =
+            Set.of("scavenger_reset_knife_cd", "timekeeper_reduce_time", "role_mine");
 
     private NoellesCreativeEntries() {
     }
 
     public static void register() {
-        if (!FabricLoader.getInstance().isModLoaded(MOD_ID) || !SparkAssistClientSettings.noellesCreativeEntries()) {
+        if (!FabricLoader.getInstance().isModLoaded(MOD_ID)) {
             return;
         }
-        long total = file(ItemGroups.TOOLS, NoellesCreativeEntries::isTool)
-                + file(ItemGroups.COMBAT, NoellesCreativeEntries::isWeapon)
-                + file(ItemGroups.INGREDIENTS, NoellesCreativeEntries::isEverythingElse);
-        LOGGER.info("Filed {} NoellesRoles item(s) into the creative tabs", total);
+        file(ItemGroups.TOOLS, Kind.TOOL);
+        file(ItemGroups.COMBAT, Kind.WEAPON);
+        file(ItemGroups.INGREDIENTS, Kind.OTHER);
+        // NoellesRoles registers its items in its main initializer, which runs before any client initializer, so the
+        // registry is complete here. The tabs themselves are filled later, each time Minecraft builds them.
+        // NoellesRoles 在主初始化器中注册物品，早于任何客户端初始化器，因此此处注册表已完整。标签页本身要等 Minecraft
+        // 每次构建时才填充。
+        long available = Registries.ITEM.getIds().stream().filter(id -> kindOf(id) != null).count();
+        LOGGER.info("{} NoellesRoles item(s) available to the creative tabs", available);
     }
 
-    /** Appends every mod item matching {@code kind} to {@code group} and returns how many were added. 把符合条件的物品追加到该组并返回数量。 */
-    private static long file(RegistryKey<ItemGroup> group, Predicate<Identifier> kind) {
-        // Count inside the callback so the log line reports what was actually filed, not what was scanned.
-        // 在回调里计数，使日志反映实际归档的数量而不是扫描的数量。
-        long[] filed = {0L};
+    /** Appends every mod item of {@code kind} to {@code group} whenever that tab is built. 每次构建该标签页时追加对应种类的物品。 */
+    private static void file(RegistryKey<ItemGroup> group, Kind kind) {
         ItemGroupEvents.modifyEntriesEvent(group).register(entries -> {
+            if (!SparkAssistClientSettings.noellesCreativeEntries()) {
+                return;
+            }
             for (Item item : Registries.ITEM) {
-                Identifier id = Registries.ITEM.getId(item);
-                if (MOD_ID.equals(id.getNamespace()) && kind.test(id)) {
+                if (kindOf(Registries.ITEM.getId(item)) == kind) {
                     entries.add(new ItemStack(item));
-                    filed[0]++;
                 }
             }
         });
-        return filed[0];
     }
 
-    private static boolean isTool(Identifier id) {
-        String path = id.getPath();
-        return path.contains("key") || path.contains("lockpick") || path.contains("tool")
-                || path.contains("crowbar") || path.contains("needle");
+    /** The one tab this id belongs to, or {@code null} when it is not a NoellesRoles item a player should take. 该 id 所属的唯一标签页；不是玩家该拿的 NoellesRoles 物品时返回 {@code null}。 */
+    static Kind kindOf(Identifier id) {
+        if (!MOD_ID.equals(id.getNamespace()) || NOT_FOR_PLAYERS.contains(id.getPath())) {
+            return null;
+        }
+        List<String> words = Arrays.asList(id.getPath().split("_"));
+        // Weapons first: a poison needle is a weapon, whatever else its name suggests.
+        // 先判武器：毒针是武器，不管名字还让人联想到什么。
+        if (words.stream().anyMatch(WEAPON_WORDS::contains)) {
+            return Kind.WEAPON;
+        }
+        if (words.stream().anyMatch(TOOL_WORDS::contains)) {
+            return Kind.TOOL;
+        }
+        return Kind.OTHER;
     }
 
-    private static boolean isWeapon(Identifier id) {
-        String path = id.getPath();
-        return path.contains("pistol") || path.contains("knife") || path.contains("axe")
-                || path.contains("bomb") || path.contains("gas") || path.contains("trap");
-    }
-
-    /** Everything left over belongs in Ingredients: drinks, vials, reagents, ingredients. 剩下的都进材料：酒、药剂、试剂、食材。 */
-    private static boolean isEverythingElse(Identifier id) {
-        return !isTool(id) && !isWeapon(id);
+    enum Kind {
+        TOOL,
+        WEAPON,
+        /** Drinks, vials, reagents, ingredients. 酒、药剂、试剂、食材。 */
+        OTHER
     }
 }
