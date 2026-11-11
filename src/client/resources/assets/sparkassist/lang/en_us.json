@@ -1289,5 +1289,10 @@
   "advancements.sparkassist.achievement.place.local_world": "Local world",
   "advancements.sparkassist.achievement.place.separator": ", ",
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
-  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
+  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom",
+  "option.sparkassist.charge_bar": "Charge bars",
+  "option.sparkassist.charge_bar.description": "Master switch shared by the knife, swordfish, M67, shuriken and bat.",
+  "option.sparkassist.bat_charge_bar": "Bat cooldown bar",
+  "option.sparkassist.bat_charge_bar.description": "The bat uses the vanilla attack cooldown, which already has an indicator under the crosshair.",
+  "screen.sparkassist.settings.group.charge": "Cooldown bars"
 }

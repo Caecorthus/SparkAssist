@@ -223,9 +223,29 @@ public final class SparkDlcSettingsPages {
                 SparkDlcSettingsPages::percent);
         snowflakes.enabledWhen(() -> WatheClientSettings.snowMode() != SnowModeConfig.TURN_OFF,
                 () -> Text.translatable("option.sparkassist.wathe.snowflake_amount.needs_particles"));
+        ToggleOption charge = new ToggleOption(
+                "charge_bar",
+                Text.translatable("option.sparkassist.charge_bar"),
+                Text.translatable("option.sparkassist.charge_bar.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                SparkAssistClientSettings::chargeBar,
+                SparkAssistClientSettings::setChargeBar,
+                true);
+        ToggleOption batBar = new ToggleOption(
+                "bat_charge_bar",
+                Text.translatable("option.sparkassist.bat_charge_bar"),
+                Text.translatable("option.sparkassist.bat_charge_bar.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                SparkAssistClientSettings::batChargeBar,
+                SparkAssistClientSettings::setBatChargeBar,
+                true);
         return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), List.of(
                 new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
-                        List.of(snowMode, snowflakes))));
+                        List.of(snowMode, snowflakes)),
+                new SettingsPage.Group("charge", Text.translatable("screen.sparkassist.settings.group.charge"),
+                        List.of(charge, batBar))));
     }
 
     /** The installed mod's display name, so a volume row says whose sounds it scales. 已安装模组的显示名。 */
