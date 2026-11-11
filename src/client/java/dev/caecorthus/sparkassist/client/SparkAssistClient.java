@@ -3,8 +3,8 @@ package dev.caecorthus.sparkassist.client;
 import dev.caecorthus.sparkassist.achievement.AchievementGalaxy;
 import dev.caecorthus.sparkassist.client.achievement.AchievementAdvancements;
 import dev.caecorthus.sparkassist.client.achievement.AchievementClientState;
+import dev.caecorthus.sparkassist.client.charge.ChargeIndicatorHud;
 import dev.caecorthus.sparkassist.client.config.SparkAssistConfigManager;
-import dev.caecorthus.sparkassist.client.knife.KnifeChargeHud;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookClientState;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookInventoryButton;
 import dev.caecorthus.sparkassist.client.guidebook.GuidebookResources;
@@ -34,7 +34,7 @@ public final class SparkAssistClient implements ClientModInitializer {
         galaxy.setDaemon(true);
         galaxy.start();
         PonderSupport.init();
-        KnifeChargeHud.register();
+        ChargeIndicatorHud.register();
         GuidebookResources.register();
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
         GuidebookInventoryButton.register();

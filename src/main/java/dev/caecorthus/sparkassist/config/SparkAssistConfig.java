@@ -21,8 +21,7 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
-    private static final String CHARGE_BAR = "chargeBar";
-    private static final String BAT_CHARGE_BAR = "batChargeBar";
+    private static final String CHARGE_INDICATOR_STYLE = "chargeIndicatorStyle";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -30,8 +29,7 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
-    private boolean chargeBar = true;
-    private boolean batChargeBar = true;
+    private ChargeIndicatorStyle chargeIndicatorStyle = ChargeIndicatorStyle.RING_OPEN;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -55,13 +53,9 @@ public final class SparkAssistConfig {
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
         }
-        if (json.has(CHARGE_BAR) && json.get(CHARGE_BAR).isJsonPrimitive()
-                && json.get(CHARGE_BAR).getAsJsonPrimitive().isBoolean()) {
-            config.setChargeBar(json.get(CHARGE_BAR).getAsBoolean());
-        }
-        if (json.has(BAT_CHARGE_BAR) && json.get(BAT_CHARGE_BAR).isJsonPrimitive()
-                && json.get(BAT_CHARGE_BAR).getAsJsonPrimitive().isBoolean()) {
-            config.setBatChargeBar(json.get(BAT_CHARGE_BAR).getAsBoolean());
+        if (json.has(CHARGE_INDICATOR_STYLE) && json.get(CHARGE_INDICATOR_STYLE).isJsonPrimitive()) {
+            config.setChargeIndicatorStyle(
+                    ChargeIndicatorStyle.fromId(json.get(CHARGE_INDICATOR_STYLE).getAsString()));
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -101,8 +95,7 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
-        json.addProperty(CHARGE_BAR, chargeBar);
-        json.addProperty(BAT_CHARGE_BAR, batChargeBar);
+        json.addProperty(CHARGE_INDICATOR_STYLE, chargeIndicatorStyle.id());
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -285,21 +278,12 @@ public final class SparkAssistConfig {
         }
     }
 
-    /** Master switch for every charge bar. 所有蓄力条的总开关。 */
-    public boolean chargeBar() {
-        return chargeBar;
+    /** Where the charge indicator is drawn, or {@link ChargeIndicatorStyle#OFF}. 蓄力指示画在哪里；或 {@link ChargeIndicatorStyle#OFF}。 */
+    public ChargeIndicatorStyle chargeIndicatorStyle() {
+        return chargeIndicatorStyle;
     }
 
-    public void setChargeBar(boolean chargeBar) {
-        this.chargeBar = chargeBar;
-    }
-
-    /** Whether the bat draws its own attack-cooldown bar. Vanilla already draws one under the crosshair. 球棒是否绘制自己的攻击冷却条。原版准星下已有指示器。 */
-    public boolean batChargeBar() {
-        return batChargeBar;
-    }
-
-    public void setBatChargeBar(boolean batChargeBar) {
-        this.batChargeBar = batChargeBar;
+    public void setChargeIndicatorStyle(ChargeIndicatorStyle chargeIndicatorStyle) {
+        this.chargeIndicatorStyle = chargeIndicatorStyle == null ? ChargeIndicatorStyle.RING_OPEN : chargeIndicatorStyle;
     }
 }

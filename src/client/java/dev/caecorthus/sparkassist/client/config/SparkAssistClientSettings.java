@@ -4,6 +4,7 @@ import dev.caecorthus.sparkassist.client.SparkAssistClient;
 import dev.caecorthus.sparkassist.client.input.InstinctKeyController;
 import dev.caecorthus.sparkassist.client.settings.SettingsStore;
 import dev.caecorthus.sparkassist.client.sound.EventSoundVolumeController;
+import dev.caecorthus.sparkassist.config.ChargeIndicatorStyle;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.GuidebookDecor;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
@@ -26,20 +27,12 @@ public final class SparkAssistClientSettings {
         SparkAssistClient.configManager().save();
     }
 
-    public static boolean chargeBar() {
-        return config().chargeBar();
+    public static ChargeIndicatorStyle chargeIndicatorStyle() {
+        return config().chargeIndicatorStyle();
     }
 
-    public static void setChargeBar(boolean enabled) {
-        config().setChargeBar(enabled);
-    }
-
-    public static boolean batChargeBar() {
-        return config().batChargeBar();
-    }
-
-    public static void setBatChargeBar(boolean enabled) {
-        config().setBatChargeBar(enabled);
+    public static void setChargeIndicatorStyle(ChargeIndicatorStyle style) {
+        config().setChargeIndicatorStyle(style);
     }
 
     public static InstinctKeyMode instinctKeyMode() {
