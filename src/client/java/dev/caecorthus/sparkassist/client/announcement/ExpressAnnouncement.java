@@ -68,7 +68,8 @@ public final class ExpressAnnouncement {
     /** Discovery: green, the one round type with no killer to warn about. 探索：绿色，唯一没有杀手需要警示的对局类型。 */
     private static final int DISCOVERY_ACCENT = 0xFF4CAF50;
     private static final int DISCOVERY_ACCENT_DIM = 0xFF1B5E20;
-    /** Fallback when a role definition carries no colour. 角色没有配色时的兜底。 */
+    /** The lowest alpha byte the text renderer honours; anything smaller is drawn opaque. 文字渲染认可的最小 alpha 字节，更小会被画成不透明。 */
+    private static final int MIN_TEXT_ALPHA = 4;
 
     private ExpressAnnouncement() {
     }
@@ -97,9 +98,9 @@ public final class ExpressAnnouncement {
         }
         int elapsed = TOTAL - welcomeTime;
         float alpha = alpha(elapsed, welcomeTime);
-        // Below this the text would be invisible anyway; skipping avoids the alpha-is-zero rewrite below.
-        // 低于此值本来也看不见；跳过还能避开下面说的「alpha 为 0 会被改写」问题。
-        if (alpha < 0.01F) {
+        // Below this the text would be invisible anyway, and drawing it would trip the rewrite described on fade().
+        // 低于此值本来也看不见，而且真去画的话会触发 fade() 上说明的改写。
+        if (Math.round(alpha * 255.0F) < MIN_TEXT_ALPHA) {
             return;
         }
         // Each round type gets its own palette. Murder keeps brass and cream with the role's own colour on the goal;
@@ -245,13 +246,15 @@ public final class ExpressAnnouncement {
     }
 
     /**
-     * Packs {@code alpha} into a colour, never zero. Minecraft rewrites a text colour whose alpha byte is zero to fully
-     * opaque, so the first fading frame would flash at full brightness; clamping to 1 keeps the fade continuous.
-     * 把 {@code alpha} 打进颜色，且永不为 0。Minecraft 会把 alpha 字节为 0 的文字颜色改写成完全不透明，导致淡入的第一帧
-     * 闪成全亮；夹到 1 才能让渐变连续。
+     * Packs {@code alpha} into a colour, never below {@link #MIN_TEXT_ALPHA}. Minecraft's text renderer treats an alpha
+     * byte under 4 as "no alpha given" and draws the text fully opaque ({@code (argb & 0xFC000000) == 0}), so the last
+     * tick of the fade-out — 1/80, alpha byte 3 — flashed the whole card at full brightness.
+     * 把 {@code alpha} 打进颜色，且不低于 {@link #MIN_TEXT_ALPHA}。Minecraft 的文字渲染把小于 4 的 alpha 字节当作「未给
+     * alpha」并按完全不透明绘制（{@code (argb & 0xFC000000) == 0}），因此渐隐的最后一 tick——1/80，alpha 字节为 3——
+     * 会让整张报幕闪成全亮。
      */
     private static int fade(int rgb, float alpha) {
-        int a = Math.max(1, Math.round(Math.max(0.0F, Math.min(1.0F, alpha)) * 255.0F));
+        int a = Math.max(MIN_TEXT_ALPHA, Math.round(Math.max(0.0F, Math.min(1.0F, alpha)) * 255.0F));
         return (a << 24) | (rgb & 0xFFFFFF);
     }
 

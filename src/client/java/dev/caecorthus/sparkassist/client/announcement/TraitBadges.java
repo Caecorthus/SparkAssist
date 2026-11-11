@@ -9,7 +9,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import org.ladysnake.cca.api.v3.component.ComponentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,7 @@ public final class TraitBadges {
     private static Object componentKey;
     private static Method maybeGet;
     private static Method getActiveTraitIds;
-    /** {@code TraitRegistry.get(Identifier)} and {@code TraitDefinition.color()}. 词条表查询与取色器。 */
+    /** {@code TraitRegistry.get(Identifier)} and {@code Trait.color()}. 词条表查询与取色器。 */
     private static Method traitGet;
     private static Method traitColor;
     /** Fallback when a trait has no resolvable colour. 词条取不到颜色时的兜底。 */
@@ -60,7 +59,7 @@ public final class TraitBadges {
             return List.of();
         }
         try {
-            Object optional = maybeGet.invoke(componentKey, (ComponentProvider) player);
+            Object optional = maybeGet.invoke(componentKey, player);
             if (!(optional instanceof Optional<?> present) || present.isEmpty()) {
                 report("no-component", 0);
                 return List.of();
@@ -81,13 +80,12 @@ public final class TraitBadges {
             report("ok", names.size());
             return names;
         } catch (ReflectiveOperationException | LinkageError | ClassCastException exception) {
-            // One warning is enough; a broken bridge would otherwise spam every frame.
-            // 警告一次即可；桥接失效时否则会每帧刷屏。
+            // One warning is enough: dropping the key makes resolve() answer false from now on, where re-arming it
+            // would repeat the lookup and this warning every frame.
+            // 警告一次即可：清掉 key 之后 resolve() 一律返回 false；若重新放开，则会每帧重复查找并重复这条警告。
             report("threw", 0);
-            if (resolved) {
-                resolved = false;
-                LOGGER.warn("Could not read SparkTraits traits for the announcement", exception);
-            }
+            componentKey = null;
+            LOGGER.warn("Could not read SparkTraits traits for the announcement", exception);
             return List.of();
         }
     }
@@ -102,12 +100,17 @@ public final class TraitBadges {
             Class<?> component = Class.forName(COMPONENT_CLASS);
             Field key = component.getField("KEY");
             componentKey = key.get(null);
-            maybeGet = componentKey.getClass().getMethod("maybeGet", ComponentProvider.class);
+            // ComponentKey declares maybeGet(Object); getMethod matches parameter types exactly.
+            // ComponentKey 声明的是 maybeGet(Object)；getMethod 按参数类型精确匹配。
+            maybeGet = componentKey.getClass().getMethod("maybeGet", Object.class);
             getActiveTraitIds = component.getMethod("getActiveTraitIds");
             Class<?> registry = Class.forName("dev.caecorthus.sparktraits.api.TraitRegistry");
             traitGet = registry.getMethod("get", net.minecraft.util.Identifier.class);
-            Class<?> definition = Class.forName("dev.caecorthus.sparktraits.api.TraitDefinition");
-            traitColor = definition.getMethod("color");
+            // TraitRegistry.get returns the Trait interface, and many traits implement it without being a
+            // TraitDefinition record, so the colour has to be read through the interface.
+            // TraitRegistry.get 返回的是 Trait 接口，许多词条直接实现该接口而不是 TraitDefinition record，因此颜色必须
+            // 通过接口读取。
+            traitColor = Class.forName("dev.caecorthus.sparktraits.api.Trait").getMethod("color");
         } catch (ReflectiveOperationException | LinkageError exception) {
             componentKey = null;
             LOGGER.warn("SparkTraits is installed but its trait component could not be reached", exception);
