@@ -1,0 +1,108 @@
+{
+  "values": [
+    {
+      "id": "wathe:revolver",
+      "required": false
+    },
+    {
+      "id": "wathe:derringer",
+      "required": false
+    },
+    {
+      "id": "wathe:grenade",
+      "required": false
+    },
+    {
+      "id": "wathe:lockpick",
+      "required": false
+    },
+    {
+      "id": "wathe:key",
+      "required": false
+    },
+    {
+      "id": "wathe:walkie_talkie",
+      "required": false
+    },
+    {
+      "id": "wathe:body_bag",
+      "required": false
+    },
+    {
+      "id": "wathe:firecracker",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:m67",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:serial_pistol",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:serial_left_pistol",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:bomb_drone",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:grenade_drone",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:impostor_lockpick",
+      "required": false
+    },
+    {
+      "id": "sparkstrength:capture_device",
+      "required": false
+    },
+    {
+      "id": "noellesroles:master_key",
+      "required": false
+    },
+    {
+      "id": "noellesroles:neutral_master_key",
+      "required": false
+    },
+    {
+      "id": "noellesroles:demon_hunter_pistol",
+      "required": false
+    },
+    {
+      "id": "noellesroles:repair_tool",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:shriek_gun",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:usec_rifle",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:double_barrel_shotgun",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:taser",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:spare_key",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:ninja_grappling_hook",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:seeker_camera",
+      "required": false
+    }
+  ]
+}
