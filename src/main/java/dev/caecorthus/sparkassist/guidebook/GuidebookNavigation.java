@@ -40,7 +40,7 @@ public final class GuidebookNavigation {
         assign(ROLE_GROUPS, "roles.civilian", "sparkwitch",
                 "orthopedist", "saint", "pig_god", "apprentice_witch", "perfumer", "tarot_reader",
                 "prophet", "wind_spirit", "guardian_angel", "vendetta", "emma", "judge", "control_expert",
-                "seeker", "usec", "black_raven", "fisher", "blind", "ragpicker", "bear");
+                "seeker", "usec", "black_raven", "fisher", "blind", "ragpicker", "bear", "hanna");
         assign(ROLE_GROUPS, "roles.killer", "wathe", "killer", "secret_killer");
         assign(ROLE_GROUPS, "roles.killer", "noellesroles",
                 "phantom", "swapper", "the_insane_damned_paranoid_killer", "morphling", "assassin",
