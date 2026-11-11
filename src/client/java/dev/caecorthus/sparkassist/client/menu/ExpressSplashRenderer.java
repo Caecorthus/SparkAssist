@@ -25,6 +25,8 @@ public final class ExpressSplashRenderer {
     private static final int MIN_SIZE = 64;
     /** Heading scale on the station sign. 站牌标题的放大倍数。 */
     private static final float HEADING_SCALE = 2.0F;
+    /** Gap the footer needs below the stage line before it is drawn. 页脚与阶段行之间至少要留出的间隙。 */
+    private static final int FOOTER_CLEARANCE = 6;
     /** Where the sign sits vertically, as a fraction of the screen height. 站牌在竖直方向的位置（屏高比例）。 */
     private static final float SIGN_ANCHOR = 0.40F;
 
@@ -69,16 +71,23 @@ public final class ExpressSplashRenderer {
                 1.5F,
                 POLISHED
         );
-        ExpressMenuPaint.centered(context, font, stage(progress, reloading), cx, barY + 32, MUTED);
+        int stageY = barY + 32;
+        ExpressMenuPaint.centered(context, font, stage(progress, reloading), cx, stageY, MUTED);
 
-        ExpressMenuPaint.centered(
-                context,
-                font,
-                MenuText.localized("screen.sparkassist.splash.footer", "SparkDLC · 哈比特快"),
-                cx,
-                height - ExpressMenuPaint.TRACK_HEIGHT - ExpressMenuPaint.FOOTER_HEIGHT - 14,
-                FAINT
-        );
+        // The footer is anchored to the track and the lines above to the sign, so on a short window — the default
+        // 854x480 one included — they meet. The footer gives way.
+        // 页脚锚定在铁轨上，而上面几行锚定在站牌上，因此在较矮的窗口里——包括默认的 854x480——两者会相撞。让页脚让位。
+        int footerY = height - ExpressMenuPaint.TRACK_HEIGHT - ExpressMenuPaint.FOOTER_HEIGHT - 14;
+        if (footerY >= stageY + font.fontHeight + FOOTER_CLEARANCE) {
+            ExpressMenuPaint.centered(
+                    context,
+                    font,
+                    MenuText.localized("screen.sparkassist.splash.footer", "SparkDLC · 哈比特快"),
+                    cx,
+                    footerY,
+                    FAINT
+            );
+        }
     }
 
     /**

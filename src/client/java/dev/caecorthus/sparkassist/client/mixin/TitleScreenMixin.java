@@ -8,6 +8,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.PressableTextWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
@@ -90,8 +91,13 @@ public abstract class TitleScreenMixin extends Screen {
         // Brass rim over each widget so the grid reads as part of the chrome; geometry comes from the widgets
         // themselves, so focus, hover and clicks are untouched.
         // 给每个控件描一道黄铜边，使按钮阵列与装饰风格一致；几何取自控件本身，焦点、悬停与点击不受影响。
+        // Only real buttons get a rim: the copyright line is a text widget, and the 20 px language and accessibility
+        // buttons are smaller than the rivets leave room for.
+        // 只给真正的按钮描边：版权行是文字控件，而 20 像素的语言与辅助功能按钮容不下铆钉。
         for (Element element : this.children()) {
-            if (element instanceof ClickableWidget widget && widget.visible) {
+            if (element instanceof ClickableWidget widget && widget.visible
+                    && !(widget instanceof PressableTextWidget)
+                    && widget.getWidth() >= ExpressTitleRenderer.MIN_OUTLINED_WIDTH) {
                 ExpressTitleRenderer.outlineButton(
                         context,
                         widget.getX(),

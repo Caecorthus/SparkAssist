@@ -14,15 +14,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Replaces the vanilla Mojang splash with SparkDLC's Express boot screen. The whole frame is taken over at
- * {@code render} HEAD and cancelled, so the Mojang mark, the red bar and the monochrome/reload variants never draw;
+ * Covers the vanilla Mojang splash with SparkDLC's Express boot screen. Vanilla's {@code render} runs to completion —
+ * it also advances the fade clock and dismisses the overlay — and the Express frame is painted over the result at TAIL;
  * {@link ExpressSplashRenderer} reads the overlay's own progress and reload flag and paints everything itself.
- * 用 SparkDLC 的特快启动画面替换原版 Mojang 启动图。整帧在 {@code render} 的 HEAD 处接管并取消，因此 Mojang 标、
- * 红条以及单色/重载变体都不会被绘制；{@link ExpressSplashRenderer} 读取叠加层自身的进度与重载标志并自行绘制全部内容。
+ * 用 SparkDLC 的特快启动画面盖住原版 Mojang 启动图。原版 {@code render} 完整执行——它同时负责推进淡出计时并移除遮罩——
+ * 特快画面在 TAIL 处覆盖其结果；{@link ExpressSplashRenderer} 读取叠加层自身的进度与重载标志并自行绘制全部内容。
  *
- * <p>The splash runs before the window is reliably sized, so a null font or a zero-sized window falls through to the
- * vanilla frame instead of cancelling it — a broken boot screen is worse than the stock one.
- * 启动画面运行时窗口尺寸未必可靠，因此字体为空或窗口尺寸为零时回落到原版帧而不取消它——坏掉的启动画面比原版更糟。</p>
+ * <p>The splash runs before the window is reliably sized, so a null font or a zero-sized window leaves the vanilla frame
+ * showing instead of painting over it — a broken boot screen is worse than the stock one.
+ * 启动画面运行时窗口尺寸未必可靠，因此字体为空或窗口尺寸为零时保留原版帧而不去覆盖——坏掉的启动画面比原版更糟。</p>
  */
 @Mixin(SplashOverlay.class)
 public abstract class SplashOverlayMixin {

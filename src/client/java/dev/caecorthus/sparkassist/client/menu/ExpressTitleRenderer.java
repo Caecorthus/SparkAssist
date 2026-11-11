@@ -28,6 +28,8 @@ public final class ExpressTitleRenderer {
     private static final float HEADING_SCALE = 2.0F;
     /** Clearance kept between the bottom of the sign and the first button row. 站牌底部与首行按钮之间保留的空隙。 */
     private static final int BUTTON_CLEARANCE = 18;
+    /** Widgets narrower than this are icon buttons and keep their vanilla look. 比这更窄的控件是图标按钮，保持原版外观。 */
+    public static final int MIN_OUTLINED_WIDTH = 40;
     /** Room reserved for the two site lines above the track. 铁轨上方留给两行官网信息的空间。 */
     private static final int SITE_BAND = 26;
     /** SparkDLC family mods, in the order they are listed. SparkDLC 系列模组，按显示顺序排列。 */
@@ -88,16 +90,11 @@ public final class ExpressTitleRenderer {
             familyList(context, font, width - 6, railTop - SITE_BAND + 4);
         }
 
-        int versionY = height - ExpressMenuPaint.FOOTER_HEIGHT + 3;
+        // Same row as vanilla's copyright line, which is a widget of the screen and is drawn with the buttons — so it is
+        // not repeated here.
+        // 与原版版权行同一行；原版版权行是界面里的一个控件，随按钮一起绘制，因此这里不再重复绘制。
+        int versionY = height - 10;
         ExpressMenuPaint.caption(context, font, MenuText.literal(gameVersion), 6, versionY, FAINT);
-        ExpressMenuPaint.rightCaption(
-                context,
-                font,
-                MenuText.localized("screen.sparkassist.title.copyright", "© Mojang AB"),
-                width - 6,
-                versionY,
-                FAINT
-        );
     }
 
     /**

@@ -1303,7 +1303,6 @@
   "screen.sparkassist.title.site.dlc": "Spark Express DLC site",
   "screen.sparkassist.title.site.main": "Spark Express site",
   "screen.sparkassist.title.family": "SparkDLC family",
-  "screen.sparkassist.title.copyright": "© Mojang AB",
   "option.sparkassist.custom_splash": "Express splash",
   "option.sparkassist.custom_splash.description": "Replace the vanilla Mojang splash with the SparkDLC boot screen. Turn off to restore vanilla.",
   "option.sparkassist.custom_title": "Express title screen",
