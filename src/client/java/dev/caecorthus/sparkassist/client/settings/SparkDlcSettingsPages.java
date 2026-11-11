@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkassist.client.settings;
 
 import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
+import dev.caecorthus.sparkassist.config.ChargeIndicatorStyle;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.GuidebookDecor;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
 import dev.caecorthus.sparkassist.sound.EventSoundGroup;
@@ -223,9 +224,23 @@ public final class SparkDlcSettingsPages {
                 SparkDlcSettingsPages::percent);
         snowflakes.enabledWhen(() -> WatheClientSettings.snowMode() != SnowModeConfig.TURN_OFF,
                 () -> Text.translatable("option.sparkassist.wathe.snowflake_amount.needs_particles"));
+        ChoiceOption<ChargeIndicatorStyle> charge = new ChoiceOption<>(
+                "charge_indicator",
+                Text.translatable("option.sparkassist.charge_indicator"),
+                Text.translatable("option.sparkassist.charge_indicator.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                List.of(ChargeIndicatorStyle.values()),
+                SparkAssistClientSettings::chargeIndicatorStyle,
+                SparkAssistClientSettings::setChargeIndicatorStyle,
+                ChargeIndicatorStyle.RING_OPEN,
+                style -> Text.translatable(style.translationKey()))
+                .describeValues(style -> Text.translatable(style.translationKey() + ".description"));
         return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), List.of(
                 new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
-                        List.of(snowMode, snowflakes))));
+                        List.of(snowMode, snowflakes)),
+                new SettingsPage.Group("combat", Text.translatable("screen.sparkassist.settings.group.combat"),
+                        List.of(charge))));
     }
 
     /** The installed mod's display name, so a volume row says whose sounds it scales. 已安装模组的显示名。 */

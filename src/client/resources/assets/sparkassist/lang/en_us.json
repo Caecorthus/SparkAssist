@@ -1289,5 +1289,18 @@
   "advancements.sparkassist.achievement.place.local_world": "Local world",
   "advancements.sparkassist.achievement.place.separator": ", ",
   "advancements.sparkassist.achievement.not_yet": "Not earned yet",
-  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom"
+  "gui.sparkassist.achievements.hint": "Drag to move · Scroll to zoom",
+  "option.sparkassist.charge_indicator": "Charge indicator",
+  "option.sparkassist.charge_indicator.description": "Shows how far a raised weapon is wound up: knife, vendetta knife, swordfish, cross sword, shuriken, M67 and throwing axe. It turns bright once letting go will count.",
+  "option.sparkassist.charge_indicator.value.ring_open": "Open ring",
+  "option.sparkassist.charge_indicator.value.ring_open.description": "A ring around the crosshair, open at the bottom so the knife mark under the crosshair stays visible.",
+  "option.sparkassist.charge_indicator.value.ring": "Small ring",
+  "option.sparkassist.charge_indicator.value.ring.description": "A full ring tight around the crosshair.",
+  "option.sparkassist.charge_indicator.value.crosshair_bar": "Bar under crosshair",
+  "option.sparkassist.charge_indicator.value.crosshair_bar.description": "A short bar just below the crosshair.",
+  "option.sparkassist.charge_indicator.value.hotbar_line": "Line above hotbar",
+  "option.sparkassist.charge_indicator.value.hotbar_line.description": "A thin line above the hotbar, out of the way of the view.",
+  "option.sparkassist.charge_indicator.value.off": "Off",
+  "option.sparkassist.charge_indicator.value.off.description": "No charge indicator.",
+  "screen.sparkassist.settings.group.combat": "Combat"
 }

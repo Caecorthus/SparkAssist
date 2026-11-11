@@ -1289,5 +1289,18 @@
   "advancements.sparkassist.achievement.place.local_world": "本地世界",
   "advancements.sparkassist.achievement.place.separator": "、",
   "advancements.sparkassist.achievement.not_yet": "尚未达成",
-  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放"
+  "gui.sparkassist.achievements.hint": "拖动平移 · 滚轮缩放",
+  "option.sparkassist.charge_indicator": "蓄力指示",
+  "option.sparkassist.charge_indicator.description": "显示举起的武器蓄力到了哪一步：刀、复仇刀、剑鱼、十字剑、手里剑、M67 和飞斧。松手开始有效时变亮。",
+  "option.sparkassist.charge_indicator.value.ring_open": "开口环",
+  "option.sparkassist.charge_indicator.value.ring_open.description": "绕准星一圈，底部留缺口，不挡准星下方的刀标记。",
+  "option.sparkassist.charge_indicator.value.ring": "小圆环",
+  "option.sparkassist.charge_indicator.value.ring.description": "紧贴准星的完整小环。",
+  "option.sparkassist.charge_indicator.value.crosshair_bar": "准星下短条",
+  "option.sparkassist.charge_indicator.value.crosshair_bar.description": "准星正下方的一小段短条。",
+  "option.sparkassist.charge_indicator.value.hotbar_line": "快捷栏上细线",
+  "option.sparkassist.charge_indicator.value.hotbar_line.description": "快捷栏上方的一条细线，不占视野中心。",
+  "option.sparkassist.charge_indicator.value.off": "关闭",
+  "option.sparkassist.charge_indicator.value.off.description": "不显示蓄力指示。",
+  "screen.sparkassist.settings.group.combat": "战斗"
 }

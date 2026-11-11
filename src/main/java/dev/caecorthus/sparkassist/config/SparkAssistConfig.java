@@ -21,6 +21,7 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
+    private static final String CHARGE_INDICATOR_STYLE = "chargeIndicatorStyle";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -28,6 +29,7 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
+    private ChargeIndicatorStyle chargeIndicatorStyle = ChargeIndicatorStyle.RING_OPEN;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -50,6 +52,10 @@ public final class SparkAssistConfig {
         }
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(CHARGE_INDICATOR_STYLE) && json.get(CHARGE_INDICATOR_STYLE).isJsonPrimitive()) {
+            config.setChargeIndicatorStyle(
+                    ChargeIndicatorStyle.fromId(json.get(CHARGE_INDICATOR_STYLE).getAsString()));
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -89,6 +95,7 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        json.addProperty(CHARGE_INDICATOR_STYLE, chargeIndicatorStyle.id());
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -269,5 +276,14 @@ public final class SparkAssistConfig {
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    /** Where the charge indicator is drawn, or {@link ChargeIndicatorStyle#OFF}. 蓄力指示画在哪里；或 {@link ChargeIndicatorStyle#OFF}。 */
+    public ChargeIndicatorStyle chargeIndicatorStyle() {
+        return chargeIndicatorStyle;
+    }
+
+    public void setChargeIndicatorStyle(ChargeIndicatorStyle chargeIndicatorStyle) {
+        this.chargeIndicatorStyle = chargeIndicatorStyle == null ? ChargeIndicatorStyle.RING_OPEN : chargeIndicatorStyle;
     }
 }
