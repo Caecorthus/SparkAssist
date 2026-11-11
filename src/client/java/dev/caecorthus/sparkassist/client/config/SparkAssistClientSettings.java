@@ -35,6 +35,14 @@ public final class SparkAssistClientSettings {
         config().setChargeIndicatorStyle(style);
     }
 
+    public static boolean noellesCreativeEntries() {
+        return config().noellesCreativeEntries();
+    }
+
+    public static void setNoellesCreativeEntries(boolean enabled) {
+        config().setNoellesCreativeEntries(enabled);
+    }
+
     public static InstinctKeyMode instinctKeyMode() {
         return config().instinctKeyMode();
     }

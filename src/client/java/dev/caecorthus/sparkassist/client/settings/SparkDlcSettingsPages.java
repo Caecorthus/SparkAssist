@@ -236,11 +236,26 @@ public final class SparkDlcSettingsPages {
                 ChargeIndicatorStyle.RING_OPEN,
                 style -> Text.translatable(style.translationKey()))
                 .describeValues(style -> Text.translatable(style.translationKey() + ".description"));
-        return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), List.of(
-                new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
-                        List.of(snowMode, snowflakes)),
-                new SettingsPage.Group("combat", Text.translatable("screen.sparkassist.settings.group.combat"),
-                        List.of(charge))));
+        ToggleOption creative = new ToggleOption(
+                "noelles_creative_entries",
+                Text.translatable("option.sparkassist.noelles_creative_entries"),
+                Text.translatable("option.sparkassist.noelles_creative_entries.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                SparkAssistClientSettings::noellesCreativeEntries,
+                SparkAssistClientSettings::setNoellesCreativeEntries,
+                true);
+        List<SettingsPage.Group> groups = new ArrayList<>();
+        groups.add(new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
+                List.of(snowMode, snowflakes)));
+        groups.add(new SettingsPage.Group("combat", Text.translatable("screen.sparkassist.settings.group.combat"),
+                List.of(charge)));
+        // The row only does something with NoellesRoles installed. 只有装了 NoellesRoles 这一行才有作用。
+        if (FabricLoader.getInstance().isModLoaded("noellesroles")) {
+            groups.add(new SettingsPage.Group("creative",
+                    Text.translatable("screen.sparkassist.settings.group.creative"), List.of(creative)));
+        }
+        return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), groups);
     }
 
     /** The installed mod's display name, so a volume row says whose sounds it scales. 已安装模组的显示名。 */

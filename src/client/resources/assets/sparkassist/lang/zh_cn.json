@@ -1302,5 +1302,8 @@
   "option.sparkassist.charge_indicator.value.hotbar_line.description": "快捷栏上方的一条细线，不占视野中心。",
   "option.sparkassist.charge_indicator.value.off": "关闭",
   "option.sparkassist.charge_indicator.value.off.description": "不显示蓄力指示。",
-  "screen.sparkassist.settings.group.combat": "战斗"
+  "screen.sparkassist.settings.group.combat": "战斗",
+  "option.sparkassist.noelles_creative_entries": "NoellesRoles 创造背包",
+  "option.sparkassist.noelles_creative_entries.description": "把 NoellesRoles 的物品填进原版创造标签页；NoellesRoles 本身没有注册物品组。改动在下次进入世界时生效。",
+  "screen.sparkassist.settings.group.creative": "创造背包"
 }

@@ -22,6 +22,7 @@ public final class SparkAssistConfig {
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
     private static final String CHARGE_INDICATOR_STYLE = "chargeIndicatorStyle";
+    private static final String NOELLES_CREATIVE_ENTRIES = "noellesCreativeEntries";
 
     private InstinctKeyMode instinctKeyMode = InstinctKeyMode.HOLD;
     private GuidebookDecor guidebookDecor = GuidebookDecor.MEDIUM;
@@ -30,6 +31,7 @@ public final class SparkAssistConfig {
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
     private ChargeIndicatorStyle chargeIndicatorStyle = ChargeIndicatorStyle.RING_OPEN;
+    private boolean noellesCreativeEntries = true;
 
     private SparkAssistConfig() {
         setAllEventSoundVolumes(1.0D);
@@ -56,6 +58,10 @@ public final class SparkAssistConfig {
         if (json.has(CHARGE_INDICATOR_STYLE) && json.get(CHARGE_INDICATOR_STYLE).isJsonPrimitive()) {
             config.setChargeIndicatorStyle(
                     ChargeIndicatorStyle.fromId(json.get(CHARGE_INDICATOR_STYLE).getAsString()));
+        }
+        if (json.has(NOELLES_CREATIVE_ENTRIES) && json.get(NOELLES_CREATIVE_ENTRIES).isJsonPrimitive()
+                && json.get(NOELLES_CREATIVE_ENTRIES).getAsJsonPrimitive().isBoolean()) {
+            config.setNoellesCreativeEntries(json.get(NOELLES_CREATIVE_ENTRIES).getAsBoolean());
         }
         if (json.has(GUIDEBOOK_FOLIAGE) && json.get(GUIDEBOOK_FOLIAGE).isJsonPrimitive()
                 && json.get(GUIDEBOOK_FOLIAGE).getAsJsonPrimitive().isBoolean()) {
@@ -96,6 +102,7 @@ public final class SparkAssistConfig {
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
         json.addProperty(CHARGE_INDICATOR_STYLE, chargeIndicatorStyle.id());
+        json.addProperty(NOELLES_CREATIVE_ENTRIES, noellesCreativeEntries);
         JsonArray collapsed = new JsonArray();
         collapsedSettingsGroups.forEach(collapsed::add);
         json.add(COLLAPSED_SETTINGS_GROUPS, collapsed);
@@ -285,5 +292,14 @@ public final class SparkAssistConfig {
 
     public void setChargeIndicatorStyle(ChargeIndicatorStyle chargeIndicatorStyle) {
         this.chargeIndicatorStyle = chargeIndicatorStyle == null ? ChargeIndicatorStyle.RING_OPEN : chargeIndicatorStyle;
+    }
+
+    /** Whether NoellesRoles items are filed into the creative tabs. 是否把 NoellesRoles 物品放进创造模式标签页。 */
+    public boolean noellesCreativeEntries() {
+        return noellesCreativeEntries;
+    }
+
+    public void setNoellesCreativeEntries(boolean noellesCreativeEntries) {
+        this.noellesCreativeEntries = noellesCreativeEntries;
     }
 }
