@@ -1585,7 +1585,7 @@ final class SparkWitchCivilianScenes {
     /**
      * Blind (BlindRules, BlindSoundRules, BlindSoundPerception, BlindSoundAttribution, BlindPulseFanout,
      * BlindCaneService, BlindKitRules, BlindAttuneService, WhiteCaneItem, ComTacItem; client BlindView, BlindEchoView,
-     * BlindEchoUniforms, BlindPerceptionClientState, BlindGateRules, BlindComTacHeadVisibility,
+     * BlindEchoUniforms, BlindPerceptionClientState, BlindGateRules, HeadsetSlots,
      * sparkwitch_blind_echo.fsh; vanilla PlayerEntity.getMoveEffect; Wathe PlayerEntityMixin; NoellesRoles
      * HiddenEquipmentHelper): the Blind's screen is black. A public sound within the Blind's range (10 blocks, x3 with a
      * worn ComTac, x5 while Attuned; a whisper counts half, the USEC rifle double or half) sends a pulse: as its front
@@ -1596,17 +1596,19 @@ final class SparkWitchCivilianScenes {
      * does a Cautious one). The White Cane's right-click (CONSUME: no swing) sweeps 15 blocks over 0.6 s, its lines
      * fading from 2 s to 5 s, and shows every player within 5 blocks for the 5 s window, sneaking or invisible (not
      * active Wraiths or swallowed players); its tap is a public sound. Attune (ability key) multiplies the range by 5 for
-     * 10 s. A bought ComTac goes straight onto an empty head and is drawn on no head during a round; the cane and the
-     * ComTac are hidden in hand from other living players, so onlookers see an empty hand. Wathe walks at about
-     * 3 blocks a second and sneaks at about 0.9. The stage is dimmed to stand for the black screen; the white boxes,
-     * block outlines and the grey ring stand in for the line art.
+     * 10 s. The ComTac is worn in the headset slot (SparkWitch HeadsetSlots, the fifth slot beside the armour slots,
+     * since 2026-11-05): a bought one goes straight into an empty headset slot, a held one goes in on right-click, and
+     * it is never drawn on a body; the cane and the ComTac are hidden in hand from other living players, so onlookers
+     * see an empty hand. Wathe walks at about 3 blocks a second and sneaks at about 0.9. The stage is dimmed to stand
+     * for the black screen; the white boxes, block outlines and the grey ring stand in for the line art.
      * 盲人：屏幕一片漆黑。盲人感知范围内（10 格，戴 ComTac ×3，凝神时 ×5；悄悄话按一半算，USEC 步枪按两倍或一半）的公开
      * 声音会发来一个脉冲：波前在 0.25 秒内扩散开，声源 4 格内盲人能看到的深度边缘随之亮成白线，从 0.6 秒淡出到 1.5 秒。发出
      * 声音的玩家被感知 1.5 秒，画成白色线稿（隔墙为人形轮廓和涟漪），没有名字、手持物和护甲；物体声（门、非玩家实体）只照亮
      * 环境。未被感知的玩家完全不画；在地面潜行的玩家没有脚步声（“小心翼翼”词条也一样）。盲杖右键（CONSUME：不挥手）在 0.6 秒
      * 内扫开 15 格，线条从 2 秒淡出到 5 秒，并在 5 秒窗口内显示 5 格内的所有玩家，潜行或隐身的也算（激活的冤魂与被吞者
-     * 除外）；敲击声是公开的。凝神（技能键）10 秒内感知距离 ×5。买到的 ComTac 在头部槽空着时直接戴上，对局中不会画在任何人
-     * 头上；盲杖和 ComTac 拿在手上时其他活着的玩家看不见，旁人只看到空手。Wathe 中步行约每秒 3 格，潜行约每秒 0.9 格。
+     * 除外）；敲击声是公开的。凝神（技能键）10 秒内感知距离 ×5。ComTac 自 2026-11-05 起戴在耳机槽（SparkWitch HeadsetSlots，
+     * 护甲栏旁的第五格）：买到时耳机槽空着就直接戴上，拿在手上右键戴上，且从不画在身上；盲杖和 ComTac 拿在手上时其他活着的
+     * 玩家看不见，旁人只看到空手。Wathe 中步行约每秒 3 格，潜行约每秒 0.9 格。
      * 舞台调暗代表黑屏；白框、方块白色轮廓线和灰色圆圈代表线稿。
      */
     private static void blind(SceneBuilder scene, SceneBuildingUtil util) {

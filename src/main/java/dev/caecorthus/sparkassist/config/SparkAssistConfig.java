@@ -21,6 +21,8 @@ public final class SparkAssistConfig {
     private static final String GUIDEBOOK_FOLIAGE = "guidebookFoliage";
     private static final String EVENT_SOUND_MASTER_VOLUME = "eventSoundMasterVolume";
     private static final String COLLAPSED_SETTINGS_GROUPS = "collapsedSettingsGroups";
+    private static final String CHARGE_INDICATOR_STYLE = "chargeIndicatorStyle";
+    private static final String NOELLES_CREATIVE_ENTRIES = "noellesCreativeEntries";
     private static final String BLOOD_APPEARANCE = "bloodAppearance";
     private static final String SUPPRESS_SCAVENGER_BLOOD = "suppressScavengerBlood";
 
@@ -30,6 +32,8 @@ public final class SparkAssistConfig {
     private final EnumMap<EventSoundGroup, Double> eventSoundVolumes = new EnumMap<>(EventSoundGroup.class);
     private double eventSoundMasterVolume = 1.0D;
     private final Set<String> collapsedSettingsGroups = new LinkedHashSet<>();
+    private ChargeIndicatorStyle chargeIndicatorStyle = ChargeIndicatorStyle.RING_OPEN;
+    private boolean noellesCreativeEntries = true;
     private BloodAppearance bloodAppearance = BloodAppearance.DEFAULT;
     private boolean suppressScavengerBlood = true;
 
@@ -54,6 +58,14 @@ public final class SparkAssistConfig {
         }
         if (json.has(GUIDEBOOK_DECOR)) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
+        }
+        if (json.has(CHARGE_INDICATOR_STYLE) && json.get(CHARGE_INDICATOR_STYLE).isJsonPrimitive()) {
+            config.setChargeIndicatorStyle(
+                    ChargeIndicatorStyle.fromId(json.get(CHARGE_INDICATOR_STYLE).getAsString()));
+        }
+        if (json.has(NOELLES_CREATIVE_ENTRIES) && json.get(NOELLES_CREATIVE_ENTRIES).isJsonPrimitive()
+                && json.get(NOELLES_CREATIVE_ENTRIES).getAsJsonPrimitive().isBoolean()) {
+            config.setNoellesCreativeEntries(json.get(NOELLES_CREATIVE_ENTRIES).getAsBoolean());
         }
         if (json.has(BLOOD_APPEARANCE) && json.get(BLOOD_APPEARANCE).isJsonPrimitive()) {
             config.setBloodAppearance(BloodAppearance.fromId(json.get(BLOOD_APPEARANCE).getAsString()));
@@ -100,6 +112,8 @@ public final class SparkAssistConfig {
         json.addProperty(EVENT_SOUND_MASTER_VOLUME, eventSoundMasterVolume);
         json.addProperty(GUIDEBOOK_DECOR, guidebookDecor.serializedName());
         json.addProperty(GUIDEBOOK_FOLIAGE, guidebookFoliage);
+        json.addProperty(CHARGE_INDICATOR_STYLE, chargeIndicatorStyle.id());
+        json.addProperty(NOELLES_CREATIVE_ENTRIES, noellesCreativeEntries);
         json.addProperty(BLOOD_APPEARANCE, bloodAppearance.id());
         json.addProperty(SUPPRESS_SCAVENGER_BLOOD, suppressScavengerBlood);
         JsonArray collapsed = new JsonArray();
@@ -282,6 +296,24 @@ public final class SparkAssistConfig {
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    /** Where the charge indicator is drawn, or {@link ChargeIndicatorStyle#OFF}. 蓄力指示画在哪里；或 {@link ChargeIndicatorStyle#OFF}。 */
+    public ChargeIndicatorStyle chargeIndicatorStyle() {
+        return chargeIndicatorStyle;
+    }
+
+    public void setChargeIndicatorStyle(ChargeIndicatorStyle chargeIndicatorStyle) {
+        this.chargeIndicatorStyle = chargeIndicatorStyle == null ? ChargeIndicatorStyle.RING_OPEN : chargeIndicatorStyle;
+    }
+
+    /** Whether NoellesRoles items are filed into the creative tabs. 是否把 NoellesRoles 物品放进创造模式标签页。 */
+    public boolean noellesCreativeEntries() {
+        return noellesCreativeEntries;
+    }
+
+    public void setNoellesCreativeEntries(boolean noellesCreativeEntries) {
+        this.noellesCreativeEntries = noellesCreativeEntries;
     }
 
     /** Particle tint for Wathe Blood. Wathe Blood 的粒子着色。 */
