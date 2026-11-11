@@ -1,8 +1,16 @@
 package dev.caecorthus.sparkassist.client.blood;
 
+import dev.doctor4t.wathe.api.Faction;
+import dev.doctor4t.wathe.api.Role;
+import dev.doctor4t.wathe.cca.GameWorldComponent;
+import dev.doctor4t.wathe.client.WatheClient;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.world.World;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,27 +26,47 @@ import org.slf4j.LoggerFactory;
  */
 public final class ScavengerBlood {
     private static final Logger LOGGER = LoggerFactory.getLogger("SparkAssist/Blood");
+    private static final String MOD_ID = "noellesroles";
     private static final String COMPONENT = "org.agmas.noellesroles.scavenger.HiddenBodiesWorldComponent";
 
     private static boolean resolved;
-    private static Object componentKey;
-    private static Method keyGet;
+    private static ComponentKey<?> componentKey;
     private static Method isHidden;
 
     private ScavengerBlood() {
     }
 
-    /** True when this body is hidden from view, meaning no blood should be sprayed beside it. 该尸体被隐藏、不应在旁边喷血时返回 true。 */
+    /**
+     * True when this body is hidden from the local player, meaning no blood should be sprayed beside it. NoellesRoles
+     * still draws a hidden body for spectators and for killer and neutral roles, so for them the blood stays too —
+     * a visible corpse with a clean floor would stand out from every other one.
+     * 该尸体对本地玩家隐藏、不应在旁边喷血时返回 true。NoellesRoles 仍会为旁观者以及杀手、中立身份绘制被隐藏的尸体，因此
+     * 对他们血迹同样保留——看得见的尸体配上干净的地板，反而会在所有尸体中显得突兀。
+     */
     public static boolean isBodyHidden(World world, UUID owner) {
         if (world == null || owner == null || !resolve()) {
             return false;
         }
         try {
-            Object component = keyGet.invoke(componentKey, world);
-            return component != null && Boolean.TRUE.equals(isHidden.invoke(component, owner));
+            Object component = componentKey.getNullable(world);
+            return component != null && Boolean.TRUE.equals(isHidden.invoke(component, owner))
+                    && !localPlayerSeesHiddenBodies(world);
         } catch (ReflectiveOperationException | RuntimeException exception) {
             return false;
         }
+    }
+
+    /** The same exemptions NoellesRoles' {@code ScavengerBodyHideMixin} applies before hiding a body. 与 NoellesRoles 的 {@code ScavengerBodyHideMixin} 隐藏尸体前所用的豁免一致。 */
+    private static boolean localPlayerSeesHiddenBodies(World world) {
+        if (WatheClient.canSeeSpectatorInformation()) {
+            return true;
+        }
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) {
+            return false;
+        }
+        Role role = GameWorldComponent.KEY.maybeGet(world).map(game -> game.getRole(player)).orElse(null);
+        return role != null && (role.getFaction() == Faction.KILLER || role.getFaction() == Faction.NEUTRAL);
     }
 
     private static boolean resolve() {
@@ -46,12 +74,20 @@ public final class ScavengerBlood {
             return componentKey != null;
         }
         resolved = true;
+        // Absence is the normal case for a pack without NoellesRoles, not something to warn about.
+        // 没装 NoellesRoles 的整合包里缺席是常态，不值得警告。
+        if (!FabricLoader.getInstance().isModLoaded(MOD_ID)) {
+            return false;
+        }
         try {
             Class<?> cls = Class.forName(COMPONENT);
-            componentKey = cls.getField("KEY").get(null);
-            keyGet = componentKey.getClass().getMethod("get", World.class);
-            isHidden = cls.getMethod("isHidden", UUID.class);
-        } catch (ReflectiveOperationException | LinkageError exception) {
+            // ComponentKey's lookups take Object, so the key is used through its type rather than a reflective
+            // get(World), which does not exist.
+            // ComponentKey 的查询方法参数是 Object，因此直接按其类型使用 key，而不是反射一个并不存在的 get(World)。
+            Method hidden = cls.getMethod("isHidden", UUID.class);
+            componentKey = (ComponentKey<?>) cls.getField("KEY").get(null);
+            isHidden = hidden;
+        } catch (ReflectiveOperationException | LinkageError | ClassCastException exception) {
             componentKey = null;
             LOGGER.warn("NoellesRoles hidden-body component unavailable; scavenger blood suppression is inert", exception);
         }

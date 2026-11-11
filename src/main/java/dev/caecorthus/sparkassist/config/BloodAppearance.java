@@ -7,22 +7,24 @@ package dev.caecorthus.sparkassist.config;
  */
 public enum BloodAppearance {
     /** Leaves the mod's own colour untouched. 保留模组原本的颜色。 */
-    DEFAULT("default"),
+    DEFAULT("default", null),
     /** Deeper, less saturated red. 更深、更不刺眼的红。 */
-    DARK("dark"),
+    DARK("dark", new float[] {0.34F, 0.02F, 0.02F}),
     /** Plant-green, for players who would rather not see red. 植物绿，给不想看红色的玩家。 */
-    GREEN("green"),
+    GREEN("green", new float[] {0.22F, 0.55F, 0.20F}),
     /** Cool blue. 冷蓝。 */
-    BLUE("blue"),
+    BLUE("blue", new float[] {0.18F, 0.38F, 0.72F}),
     /** Neutral grey. 中性灰。 */
-    GREY("grey"),
-    /** Fully transparent; the particles still spawn but are invisible. 完全透明；粒子仍生成但不可见。 */
-    OFF("off");
+    GREY("grey", new float[] {0.55F, 0.55F, 0.55F}),
+    /** Not drawn; the particles still spawn but are never built. 不绘制；粒子仍生成，但不会被构建。 */
+    OFF("off", null);
 
     private final String id;
+    private final float[] tint;
 
-    BloodAppearance(String id) {
+    BloodAppearance(String id, float[] tint) {
         this.id = id;
+        this.tint = tint;
     }
 
     public String id() {
@@ -43,15 +45,13 @@ public enum BloodAppearance {
         return DEFAULT;
     }
 
-    /** RGB in 0..1 for the particle tint, or {@code null} to leave the original colour alone. 粒子 tint 的 0..1 RGB；{@code null} 表示不改原色。 */
+    /**
+     * RGB in 0..1 for the particle tint, or {@code null} when nothing is recoloured: the original colour, and
+     * {@link #OFF}, which is not drawn at all. Read once per particle per frame, so the array is shared, not copied.
+     * 粒子 tint 的 0..1 RGB；不重新上色时为 {@code null}：即原色，以及根本不绘制的 {@link #OFF}。每个粒子每帧读取一次，
+     * 因此数组是共享的，不做拷贝。
+     */
     public float[] tint() {
-        return switch (this) {
-            case DEFAULT -> null;
-            case DARK -> new float[] {0.34F, 0.02F, 0.02F};
-            case GREEN -> new float[] {0.22F, 0.55F, 0.20F};
-            case BLUE -> new float[] {0.18F, 0.38F, 0.72F};
-            case GREY -> new float[] {0.55F, 0.55F, 0.55F};
-            case OFF -> new float[] {0.0F, 0.0F, 0.0F};
-        };
+        return tint;
     }
 }

@@ -12,6 +12,15 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Particle.class)
 public interface ParticleAccessorMixin {
     @Accessor("red")
+    float sparkassist$getRed();
+
+    @Accessor("green")
+    float sparkassist$getGreen();
+
+    @Accessor("blue")
+    float sparkassist$getBlue();
+
+    @Accessor("red")
     void sparkassist$setRed(float red);
 
     @Accessor("green")
@@ -19,7 +28,4 @@ public interface ParticleAccessorMixin {
 
     @Accessor("blue")
     void sparkassist$setBlue(float blue);
-
-    @Accessor("alpha")
-    void sparkassist$setAlpha(float alpha);
 }

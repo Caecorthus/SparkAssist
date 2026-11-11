@@ -27,8 +27,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "wathe_blood.WatheBloodClient")
 public abstract class WatheBloodClientMixin {
+    // Static on purpose: Mixin rejects an instance handler on a static target outright, whatever "require" says, and a
+    // static handler is accepted on both kinds of target.
+    // 刻意写成静态：目标是静态方法时 Mixin 会直接拒绝实例回调，与 require 无关；而静态回调对两种目标都合法。
     @Inject(method = "howDoISpawnBlood", at = @At("HEAD"), cancellable = true, require = 0)
-    private void sparkassist$skipHiddenBodyBlood(ClientWorld world, PlayerBodyEntity body, PlayerEntity killer,
+    private static void sparkassist$skipHiddenBodyBlood(ClientWorld world, PlayerBodyEntity body, PlayerEntity killer,
                                                  Item weapon, CallbackInfo ci) {
         if (!SparkAssistClientSettings.suppressScavengerBlood() || body == null) {
             return;
