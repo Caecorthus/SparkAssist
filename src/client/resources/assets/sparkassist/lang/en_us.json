@@ -1305,5 +1305,16 @@
   "screen.sparkassist.settings.group.combat": "Combat",
   "option.sparkassist.noelles_creative_entries": "NoellesRoles creative entries",
   "option.sparkassist.noelles_creative_entries.description": "File NoellesRoles items into the vanilla creative tabs; the mod registers no item group of its own. A change applies the next time you join a world.",
-  "screen.sparkassist.settings.group.creative": "Creative inventory"
+  "screen.sparkassist.settings.group.creative": "Creative inventory",
+  "option.sparkassist.blood_appearance": "Blood colour",
+  "option.sparkassist.blood_appearance.description": "Tint Wathe Blood's stains. Switch away from red, or hide them entirely.",
+  "option.sparkassist.blood_appearance.value.default": "Original (red)",
+  "option.sparkassist.blood_appearance.value.dark": "Dark red",
+  "option.sparkassist.blood_appearance.value.green": "Plant green",
+  "option.sparkassist.blood_appearance.value.blue": "Cool blue",
+  "option.sparkassist.blood_appearance.value.grey": "Neutral grey",
+  "option.sparkassist.blood_appearance.value.off": "Hidden",
+  "option.sparkassist.suppress_scavenger_blood": "No blood beside a hidden body",
+  "option.sparkassist.suppress_scavenger_blood.description": "A scavenger's victim keeps its body entity, hidden from view.",
+  "screen.sparkassist.settings.group.blood": "Blood"
 }

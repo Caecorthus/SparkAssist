@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkassist.client.settings;
 
 import dev.caecorthus.sparkassist.client.config.SparkAssistClientSettings;
+import dev.caecorthus.sparkassist.config.BloodAppearance;
 import dev.caecorthus.sparkassist.config.ChargeIndicatorStyle;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.GuidebookDecor;
 import dev.caecorthus.sparkassist.config.SparkAssistConfig.InstinctKeyMode;
@@ -245,6 +246,26 @@ public final class SparkDlcSettingsPages {
                 SparkAssistClientSettings::noellesCreativeEntries,
                 SparkAssistClientSettings::setNoellesCreativeEntries,
                 true);
+        ChoiceOption<BloodAppearance> blood = new ChoiceOption<>(
+                "blood_appearance",
+                Text.translatable("option.sparkassist.blood_appearance"),
+                Text.translatable("option.sparkassist.blood_appearance.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                List.of(BloodAppearance.values()),
+                SparkAssistClientSettings::bloodAppearance,
+                SparkAssistClientSettings::setBloodAppearance,
+                BloodAppearance.DEFAULT,
+                v -> Text.translatable(v.translationKey()));
+        ToggleOption scavenger = new ToggleOption(
+                "suppress_scavenger_blood",
+                Text.translatable("option.sparkassist.suppress_scavenger_blood"),
+                Text.translatable("option.sparkassist.suppress_scavenger_blood.description"),
+                SPARKASSIST,
+                SparkAssistClientSettings.STORE,
+                SparkAssistClientSettings::suppressScavengerBlood,
+                SparkAssistClientSettings::setSuppressScavengerBlood,
+                true);
         List<SettingsPage.Group> groups = new ArrayList<>();
         groups.add(new SettingsPage.Group("snow", Text.translatable("screen.sparkassist.settings.group.train_effects"),
                 List.of(snowMode, snowflakes)));
@@ -255,6 +276,8 @@ public final class SparkDlcSettingsPages {
             groups.add(new SettingsPage.Group("creative",
                     Text.translatable("screen.sparkassist.settings.group.creative"), List.of(creative)));
         }
+        groups.add(new SettingsPage.Group("blood", Text.translatable("screen.sparkassist.settings.group.blood"),
+                List.of(blood, scavenger)));
         return new SettingsPage(DISPLAY, Text.translatable("screen.sparkassist.settings.page.display"), groups);
     }
 
