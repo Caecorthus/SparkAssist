@@ -1,0 +1,40 @@
+{
+  "values": [
+    {
+      "id": "wathe:knife",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:ceremonial_sword",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:cross_sword",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:feather_blade",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:ninja_knife",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:swordfish",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:vendetta_knife",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:wither_gohei",
+      "required": false
+    },
+    {
+      "id": "sparkwitch:white_cane",
+      "required": false
+    }
+  ]
+}
