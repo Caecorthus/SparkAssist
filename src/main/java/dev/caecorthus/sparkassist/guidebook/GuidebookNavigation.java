@@ -51,7 +51,7 @@ public final class GuidebookNavigation {
         assign(ROLE_GROUPS, "roles.witch", "sparkwitch", "grand_witch", "bewitched", "accomplice",
                 "abyss_listener", "riftwalker", "potion_gunner", "curser");
         assign(ROLE_GROUPS, "roles.neutral", "wathe", "loose_end");
-        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend");
+        assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend", "koko");
         assign(ROLE_GROUPS, "roles.neutral", "noellesroles",
                 "taotie", "pathogen", "vulture", "jester", "shadow_jester");
         // Team Jiahao is its own Wathe faction since 2026-11-04; the Corrupt Cop is on it in every round.
