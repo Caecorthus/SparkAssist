@@ -154,6 +154,11 @@ public final class GuidebookContentRenderer {
         return new GuidebookPage(blocks);
     }
 
+    /** A run's authored colour if it has one, else its tone colour. 有自定颜色用自定颜色，否则用色调颜色。 */
+    private static int runColor(GuidebookRun run, int base) {
+        return run.color() != null ? 0xFF000000 | run.color() : toneColor(run.tone(), base);
+    }
+
     private static int toneColor(GuidebookTone tone, int base) {
         return switch (tone) {
             case DEFAULT -> base;
@@ -246,7 +251,7 @@ public final class GuidebookContentRenderer {
             if (!first) {
                 y += SECTION_GAP;
             }
-            int tone = toneColor(block.runs().get(0).tone(), INK);
+            int tone = runColor(block.runs().get(0), INK);
             List<Cell> cells = CjkLineBreaker.normalise(plainCells(block, INK), true);
             List<List<Cell>> wrapped = CjkLineBreaker.wrap(cells, width - SECTION_LABEL_X, advance);
             ornaments.add(new Ornament(Ornament.Kind.SECTION_MARK, 0, y + SECTION_MARK_OFFSET, 5, 5, tone,
@@ -334,24 +339,24 @@ public final class GuidebookContentRenderer {
             return new Layout(lines, ornaments, y, demos);
         }
 
-        /** Runs in their tone colours (DEFAULT -> base); bold and italic are ignored. 各段按色调着色，忽略粗斜体。 */
+        /** Runs in their authored colour or tone colour (DEFAULT -> base); bold and italic are ignored. 各段按自定颜色或色调着色，忽略粗斜体。 */
         private List<Cell> plainCells(GuidebookBlock block, int base) {
             List<Cell> cells = new ArrayList<>();
             for (GuidebookRun run : block.runs()) {
-                cells.addAll(CjkLineBreaker.cells(resolveText(run, resolver), ink(toneColor(run.tone(), base))));
+                cells.addAll(CjkLineBreaker.cells(resolveText(run, resolver), ink(runColor(run, base))));
             }
             return cells;
         }
 
-        /** Render-time emphasis on DEFAULT runs only: 【…】 -> ITEM, "N 金币" -> MONEY; authored tones win.
-         * 仅对 DEFAULT 片段做渲染期强调：【…】为物品色、“N 金币”为金币色；已标注的色调优先。 */
+        /** Render-time emphasis on DEFAULT runs only: 【…】 -> ITEM, "N 金币" -> MONEY; authored tones and colours win.
+         * 仅对 DEFAULT 片段做渲染期强调：【…】为物品色、“N 金币”为金币色；已标注的色调和自定颜色优先。 */
         private List<Cell> emphasised(GuidebookBlock block) {
             List<Cell> cells = new ArrayList<>();
             Style base = ink(INK);
             for (GuidebookRun run : block.runs()) {
                 String text = resolveText(run, resolver);
-                if (run.tone() != GuidebookTone.DEFAULT) {
-                    cells.addAll(CjkLineBreaker.cells(text, ink(toneColor(run.tone(), INK))));
+                if (run.tone() != GuidebookTone.DEFAULT || run.color() != null) {
+                    cells.addAll(CjkLineBreaker.cells(text, ink(runColor(run, INK))));
                     continue;
                 }
                 Matcher matcher = EMPHASIS.matcher(text);

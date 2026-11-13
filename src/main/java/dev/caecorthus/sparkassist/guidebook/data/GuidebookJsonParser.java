@@ -92,7 +92,10 @@ public final class GuidebookJsonParser {
         if (!json.has("color")) {
             return GuidebookEntry.DEFAULT_COLOR;
         }
-        String value = json.get("color").getAsString();
+        return parseHexColor(json.get("color").getAsString());
+    }
+
+    private static int parseHexColor(String value) {
         if (!value.matches("#[0-9a-fA-F]{6}")) {
             throw new IllegalArgumentException("GuideBook color must use #RRGGBB format");
         }
@@ -159,9 +162,10 @@ public final class GuidebookJsonParser {
         if (hasText == hasTextKey) {
             throw new IllegalArgumentException("GuideBook runs must contain exactly one of text or textKey");
         }
+        Integer color = json.has("color") ? parseHexColor(json.get("color").getAsString()) : null;
         return hasText
-                ? new GuidebookRun(json.get("text").getAsString(), bold, italic, tone)
-                : GuidebookRun.translated(json.get("textKey").getAsString(), bold, italic, tone);
+                ? new GuidebookRun(json.get("text").getAsString(), null, bold, italic, tone, color)
+                : new GuidebookRun(null, json.get("textKey").getAsString(), bold, italic, tone, color);
     }
 
     private static List<String> parseStringList(JsonArray values) {
