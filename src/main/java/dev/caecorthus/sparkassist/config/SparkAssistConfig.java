@@ -50,13 +50,16 @@ public final class SparkAssistConfig {
         if (json == null) {
             return config;
         }
-        if (json.has(INSTINCT_KEY_MODE)) {
+        // Each field falls back on its own: one bad value must not reset (and then overwrite) every other setting.
+        // 每个字段各自回退：一个错误的值不能把其他所有设置都重置（并随后覆盖保存）。
+        if (json.has(INSTINCT_KEY_MODE) && json.get(INSTINCT_KEY_MODE).isJsonPrimitive()) {
             config.setInstinctKeyMode(InstinctKeyMode.fromSerialized(json.get(INSTINCT_KEY_MODE).getAsString()));
         }
-        if (json.has(EVENT_SOUND_VOLUME)) {
+        if (json.has(EVENT_SOUND_VOLUME) && json.get(EVENT_SOUND_VOLUME).isJsonPrimitive()
+                && json.get(EVENT_SOUND_VOLUME).getAsJsonPrimitive().isNumber()) {
             config.setAllEventSoundVolumes(json.get(EVENT_SOUND_VOLUME).getAsDouble());
         }
-        if (json.has(GUIDEBOOK_DECOR)) {
+        if (json.has(GUIDEBOOK_DECOR) && json.get(GUIDEBOOK_DECOR).isJsonPrimitive()) {
             config.setGuidebookDecor(GuidebookDecor.fromSerialized(json.get(GUIDEBOOK_DECOR).getAsString()));
         }
         if (json.has(CHARGE_INDICATOR_STYLE) && json.get(CHARGE_INDICATOR_STYLE).isJsonPrimitive()) {
@@ -93,8 +96,9 @@ public final class SparkAssistConfig {
             JsonObject eventVolumes = json.getAsJsonObject(EVENT_SOUND_VOLUMES);
             for (String key : eventVolumes.keySet()) {
                 EventSoundGroup group = EventSoundGroup.fromSerialized(key);
-                if (group != null) {
-                    config.setEventSoundVolume(group, eventVolumes.get(key).getAsDouble());
+                JsonElement volume = eventVolumes.get(key);
+                if (group != null && volume.isJsonPrimitive() && volume.getAsJsonPrimitive().isNumber()) {
+                    config.setEventSoundVolume(group, volume.getAsDouble());
                 }
             }
         }

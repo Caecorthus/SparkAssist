@@ -49,8 +49,16 @@ public final class PlateArtLoader {
 
     private static Optional<PlateArt> load(ResourceManager resources, String namespace, String path) {
         String base = ROOT + namespace + "/" + path;
-        Optional<Resource> image = resources.getResource(Identifier.of(SparkAssist.MOD_ID, base + ".png"));
-        Optional<Resource> meta = resources.getResource(Identifier.of(SparkAssist.MOD_ID, base + ".json"));
+        // Entry ids from resource packs are not checked to be valid identifiers; such a page has no plate rather
+        // than throwing out of the render path.
+        // 资源包里的条目 id 不保证是合法的标识符；这样的页面没有扉画，而不是在渲染路径里抛出异常。
+        Identifier imageId = Identifier.tryParse(SparkAssist.MOD_ID, base + ".png");
+        Identifier metaId = Identifier.tryParse(SparkAssist.MOD_ID, base + ".json");
+        if (imageId == null || metaId == null) {
+            return Optional.empty();
+        }
+        Optional<Resource> image = resources.getResource(imageId);
+        Optional<Resource> meta = resources.getResource(metaId);
         if (image.isEmpty() || meta.isEmpty()) {
             return Optional.empty();
         }

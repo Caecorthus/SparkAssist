@@ -32,8 +32,8 @@ import java.util.UUID;
  * "Died this round" (for the streaks, win streaks and food since the last death) means a real death, by the user's
  * rule: a Last Stand false death does not count, a death undone by the T-Virus does. The record decides when it
  * has a real death of the player's or is complete; otherwise a death the client saw counts, unless the record shows
- * only a false death of theirs and they ended the round alive. A round left mid-way never settles, so it never
- * comes here and breaks no streak.
+ * only a false death of theirs and they ended the round alive. A round left mid-way never settles, not even after
+ * the player rejoins it ({@link RoundTracker}), so it never comes here and breaks no streak.
  * Without a match record only the general counts change, except that a death the client saw still ends streaks,
  * judged by the role and faction the client saw last.
  * <p>
@@ -47,7 +47,7 @@ import java.util.UUID;
  * 玩家在对局中途变成的身份及其原因，以及按死因统计的对非好人的击杀（停电期间的另计一份）。
  * （连续击杀、连胜和上次死亡以来的吃喝里的）“本局死亡”按用户定的规则指真正的死亡：背水一战的假死不算，被 T 病毒复活的
  * 死亡算。记录里有玩家的真死亡、或记录完整时以记录为准；否则客户端看到的死亡算数，除非记录里只有玩家的一次假死且玩家结算时存活。
- * 中途退出的对局不会结算，不会走到这里，也不会打断任何连续记录。
+ * 中途退出的对局不会结算（玩家重新加入同一局后也不会，见 {@link RoundTracker}），不会走到这里，也不会打断任何连续记录。
  * 没有对局记录时只更新通用计数，但客户端看到的死亡仍会按客户端最后看到的身份与阵营结束连续击杀。
  */
 public final class RoundStatsRecorder {
