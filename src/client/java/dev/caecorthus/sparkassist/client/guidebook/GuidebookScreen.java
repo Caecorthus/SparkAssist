@@ -171,6 +171,7 @@ public final class GuidebookScreen extends Screen {
     @Override
     protected void init() {
         boolean firstLayout = !initialized;
+        GuidebookCatalog previousCatalog = catalog;
         catalog = GuidebookResources.catalog(client);
         chineseTranslations = GuidebookResources.chineseTranslations(client);
         if (!initialized) {
@@ -179,6 +180,17 @@ public final class GuidebookScreen extends Screen {
             articleScroll = session.rightScroll();
             session.selectedEntryId().flatMap(catalog::find).ifPresent(entry -> selectedEntry = entry);
             initialized = true;
+        } else if (catalog != previousCatalog && selectedEntry != null) {
+            // A resource reload re-runs init on this same screen with a new catalog: show the reloaded entry, or
+            // close the article if the entry is gone. Scroll is kept and clamped by the layout below.
+            // 资源重载会在同一界面上以新目录重新执行 init：显示重载后的条目；条目已不存在时关闭正文。滚动位置保留，
+            // 由下面的排版限制在范围内。
+            selectedEntry = catalog.find(selectedEntry.id()).orElse(null);
+            if (selectedEntry == null) {
+                selectedGroup = null;
+                articleScroll = 0;
+                session.dismissEntry();
+            }
         }
         // Opening the inventory never selects a role or expands a branch automatically.
         // 打开背包时不自动选中身份，也不自动展开目录。

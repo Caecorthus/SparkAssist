@@ -140,7 +140,7 @@ _Avoid_: achievement progress, counters
 
 **Kill group**:
 Which side a kill was made from, judged by the killer's role and effective faction at that moment: police (one of
-the seven police roles while civilian), killer (effective killer faction) or Grand Witch. Police and killer keep a
+the eight police roles while civilian), killer (effective killer faction) or Grand Witch. Police and killer keep a
 streak set that lasts one life across rounds and is emptied when the player dies in that group.
 _Avoid_: faction (a kill group is narrower), kill count
 

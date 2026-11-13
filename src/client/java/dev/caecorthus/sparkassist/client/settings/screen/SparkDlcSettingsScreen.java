@@ -17,6 +17,7 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Language;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -58,6 +59,14 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
     private SettingsFlatButton undoButton;
     @Nullable
     private SettingsFlatButton resetButton;
+    // The description lines last laid out and what they came from. Wrapping CJK text measures every character, so
+    // it is redone only when the described row, width, value-dependent texts or language change, and on every init
+    // (resize, resource reload), not every frame.
+    // 上次排好的说明行及其依据。中日韩换行要逐字测宽，因此只在所说明的行、宽度、随值变化的文字或语言改变时，以及每次
+    // init（缩放窗口、资源重载）时重排，而不是每帧重排。
+    @Nullable
+    private DescriptionKey descriptionKey;
+    private List<Line> descriptionLines = List.of();
 
     public SparkDlcSettingsScreen(Screen parent) {
         this(parent, null);
@@ -97,6 +106,7 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
         listItems.clear();
         itemOffsets.clear();
         rows.clear();
+        descriptionKey = null;
 
         initTabs();
         initRows();
@@ -328,7 +338,7 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
         if (!layout.narrow()) {
             renderPanel(context, described);
         } else if (hovered != null) {
-            context.drawOrderedTooltip(this.textRenderer, describe(hovered.option(), TOOLTIP_WIDTH).stream()
+            context.drawOrderedTooltip(this.textRenderer, description(hovered.option(), TOOLTIP_WIDTH).stream()
                     .map(line -> line.text() == null ? OrderedText.EMPTY : line.text()).toList(), mouseX, mouseY);
         }
     }
@@ -372,9 +382,7 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
 
     private void renderPanel(DrawContext context, @Nullable SettingsOption option) {
         int innerWidth = layout.panelWidth() - 2 * PANEL_PAD;
-        List<Line> lines = option == null
-                ? wrap(Text.translatable("screen.sparkassist.settings.hint"), innerWidth, SettingsPalette.TEXT_MUTED)
-                : describe(option, innerWidth);
+        List<Line> lines = description(option, innerWidth);
         int maxLines = Math.max(1, (layout.listViewportHeight() - 2 * PANEL_PAD) / LINE_HEIGHT);
         if (lines.size() > maxLines) {
             lines = lines.subList(0, maxLines);
@@ -394,6 +402,31 @@ public final class SparkDlcSettingsScreen extends GameOptionsScreen implements S
 
     /** One drawn line of the description; a null text is a spacer. 说明的一行；text 为 null 时是空行。 */
     private record Line(@Nullable OrderedText text, int color) {
+    }
+
+    /**
+     * Everything {@link #describe} reads that can change while the screen stays open; the row's own title,
+     * description, preview and source are fixed when the pages are built.
+     * {@link #describe} 读取的、在界面打开期间可能变化的全部内容；行自身的标题、说明、试听与来源在构建页面时已固定。
+     */
+    private record DescriptionKey(@Nullable SettingsOption option, int width, @Nullable Text value,
+                                  @Nullable Text disabledReason, @Nullable Text defaultValue, Language language) {
+    }
+
+    /** The lines for {@code option} (the hint when null), laid out again only when their key changed.
+     * {@code option} 的说明行（为 null 时是提示），只在依据变化时重新排版。 */
+    private List<Line> description(@Nullable SettingsOption option, int width) {
+        DescriptionKey key = option == null
+                ? new DescriptionKey(null, width, null, null, null, Language.getInstance())
+                : new DescriptionKey(option, width, option.valueDescription(), option.disabledReason(),
+                        option.defaultValueText(), Language.getInstance());
+        if (!key.equals(descriptionKey)) {
+            descriptionLines = option == null
+                    ? wrap(Text.translatable("screen.sparkassist.settings.hint"), width, SettingsPalette.TEXT_MUTED)
+                    : describe(option, width);
+            descriptionKey = key;
+        }
+        return descriptionLines;
     }
 
     private List<Line> describe(SettingsOption option, int width) {
