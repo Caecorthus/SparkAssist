@@ -49,10 +49,7 @@ final class WatheRoleScenes {
                 new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, veteran, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showText(70)
-                .text("老兵开局带一把刀，这把刀能刺 2 次")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "老兵开局带一把刀，这把刀能刺 2 次");
         scene.idle(80);
         ElementLink<ActorElement> first = Actors.enter(scene, RoleColors.KILLER, killerName,
                 new Vec3d(2.2, 1, 4.8), SCREEN_RIGHT, Direction.DOWN);
@@ -65,10 +62,7 @@ final class WatheRoleScenes {
         scene.idle(8);
         Actors.swing(scene, veteran);
         Actors.fall(scene, first);
-        scene.overlay().showText(70)
-                .text("右键直接刺杀 3 格内的人：不用蓄力、没有声音，刺完也没有冷却")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "右键直接刺杀 3 格内的人：不用蓄力、没有声音，刺完也没有冷却");
         scene.idle(80);
         scene.overlay().showText(60)
                 .colored(PonderPalette.GREEN)
@@ -84,10 +78,7 @@ final class WatheRoleScenes {
         Actors.fall(scene, second);
         scene.idle(4);
         Actors.hold(scene, veteran, ItemStack.EMPTY);
-        scene.overlay().showText(70)
-                .text("第 2 次刺完，刀就消失了；商店里 300 金币能再买一把，再刺 2 次")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "第 2 次刺完，刀就消失了；商店里 300 金币能再买一把，再刺 2 次");
         scene.idle(80);
         Actors.leave(scene, second, Direction.UP);
         scene.idle(15);
@@ -97,17 +88,12 @@ final class WatheRoleScenes {
                 new Vec3d(1.2, 1, 1.4), SCREEN_LEFT, Direction.DOWN);
         scene.idle(15);
         StageLights.lights(scene, false);
-        scene.overlay().showText(80)
-                .text("停电时老兵有夜视：漆黑的车厢里也看得清周围的人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "停电时老兵有夜视：漆黑的车厢里也看得清周围的人");
         scene.idle(90);
         StageLights.lights(scene, true);
         Actors.leave(scene, lurker, Direction.UP);
         scene.overlay().showControls(new Vec3d(4.0, 3.6, 3.0), Pointing.DOWN, 30).withItem(stack("wathe:knife"));
-        scene.overlay().showText(40)
-                .text("花 300 金币再买一把刀……")
-                .independent();
+        SceneCaptions.caption(scene, 40, "花 300 金币再买一把刀……");
         scene.idle(20);
         Actors.hold(scene, veteran, stack("wathe:knife"));
         scene.idle(25);

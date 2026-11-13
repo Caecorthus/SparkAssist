@@ -1,7 +1,10 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.Actors.facing;
+import static dev.caecorthus.sparkassist.client.ponder.Actors.forward;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
+import static dev.caecorthus.sparkassist.client.ponder.StageLights.lamp;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
@@ -11,7 +14,6 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
-import dev.doctor4t.wathe.index.WatheProperties;
 import java.util.List;
 import java.util.function.Consumer;
 import net.createmod.catnip.math.Pointing;
@@ -25,7 +27,6 @@ import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.element.AnimatedSceneElementBase;
 import net.createmod.ponder.foundation.element.ElementLinkImpl;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.OverlayTexture;
@@ -42,9 +43,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ItemStackParticleEffect;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
@@ -170,32 +169,21 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         Actors.walk(scene, toxicologist, atTray.subtract(toxicologistStart), 25);
         scene.idle(28);
-        scene.overlay().showText(90)
-                .text("托盘上冒着小红骷髅：被下了毒（毒理学家、杀手等少数人看得见）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "托盘上冒着小红骷髅：被下了毒（毒理学家、杀手等少数人看得见）");
         scene.idle(100);
         scene.overlay().showControls(trayTop, Pointing.DOWN, 30).rightClick();
         scene.idle(10);
         Actors.swing(scene, toxicologist);
         Actors.hold(scene, toxicologist, drink);
         Effects.unmark(scene, skull);
-        scene.overlay().showText(80)
-                .text("空手拿走一杯（身上已带着这盘里的东西就拿不了）：毒跟着这杯走了，托盘也干净了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "空手拿走一杯（身上已带着这盘里的东西就拿不了）：毒跟着这杯走了，托盘也干净了");
         scene.idle(90);
         scene.overlay().showControls(atTray.add(0, 2.6, 0), Pointing.DOWN, 60).rightClick().withItem(drink);
-        scene.overlay().showText(90)
-                .text("【胶囊】100 金币：在背包里把食物或饮品拿在鼠标上，右键胶囊就装了进去")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "【胶囊】100 金币：在背包里把食物或饮品拿在鼠标上，右键胶囊就装了进去");
         scene.idle(45);
         Actors.hold(scene, toxicologist, capsule);
         scene.idle(55);
-        scene.overlay().showText(70)
-                .text("一颗胶囊只装一份，里面的毒也原样留着")
-                .independent();
+        SceneCaptions.caption(scene, 70, "一颗胶囊只装一份，里面的毒也原样留着");
         scene.idle(40);
         Vec3d killerStart = new Vec3d(1.0, 1, 6.0);
         Vec3d killerSpot = new Vec3d(1.4, 1, 2.0);
@@ -221,9 +209,7 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("他中了毒，在你视线里会高亮（方框示意）；不解毒的话约 40～70 秒后毒发")
-                .independent();
+        SceneCaptions.caption(scene, 70, "他中了毒，在你视线里会高亮（方框示意）；不解毒的话约 40～70 秒后毒发");
         scene.idle(80);
         Actors.walk(scene, killer, new Vec3d(-0.4, 0, 3.6), 22);
         scene.idle(6);
@@ -233,16 +219,11 @@ final class SparkStrengthCivilianItemScenes {
         Actors.hold(scene, toxicologist, ItemStack.EMPTY);
         throwSprite(scene, capsule, hand(atTray, atKiller), new Vec3d(1.8, 1.05, 2.2), 3);
         scene.idle(3);
-        scene.overlay().showText(80)
-                .text("再扔一颗却没砸中人：胶囊一碰到方块就没了，里面的东西也一起浪费掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "再扔一颗却没砸中人：胶囊一碰到方块就没了，里面的东西也一起浪费掉");
         scene.idle(30);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(60);
-        scene.overlay().showText(80)
-                .text("胶囊只有毒理学家能买（伪装成毒理学家的验尸官也能）；拿在手上别人看得见")
-                .independent();
+        SceneCaptions.caption(scene, 80, "胶囊只有毒理学家能买（伪装成毒理学家的验尸官也能）；拿在手上别人看得见");
         scene.idle(90);
         scene.overlay().showText(100)
                 .colored(PonderPalette.RED)
@@ -280,15 +261,9 @@ final class SparkStrengthCivilianItemScenes {
         ElementLink<ActorElement> walker = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), walkerStart,
                 SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("【蓝颠茄】25 金币，拿在手上别的活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "【蓝颠茄】25 金币，拿在手上别的活人看不见");
         scene.idle(90);
-        scene.overlay().showText(55)
-                .text("按住右键吃下（约 0.8 秒），进入 5 秒蓝毒状态")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 55, "按住右键吃下（约 0.8 秒），进入 5 秒蓝毒状态");
         scene.idle(45);
         scene.overlay().showControls(toxicologistStart.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
                 .withItem(fruit);
@@ -307,9 +282,7 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(105);
-        scene.overlay().showText(70)
-                .text("效果只有 5 秒，过了就没了")
-                .independent();
+        SceneCaptions.caption(scene, 70, "效果只有 5 秒，过了就没了");
         scene.idle(20);
         Actors.leave(scene, walker, Direction.UP);
         scene.idle(60);
@@ -326,10 +299,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(8);
         scene.overlay().showControls(toxicologistEnd.add(0, 2.6, 0), Pointing.DOWN, 50).rightClick()
                 .withItem(fruit);
-        scene.overlay().showText(80)
-                .text("蓝颠茄也能装进【胶囊】：在背包里把果实拿在鼠标上右键胶囊")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "蓝颠茄也能装进【胶囊】：在背包里把果实拿在鼠标上右键胶囊");
         scene.idle(45);
         Actors.hold(scene, toxicologist, capsule);
         scene.idle(45);
@@ -348,14 +318,9 @@ final class SparkStrengthCivilianItemScenes {
                 .attachKeyFrame();
         scene.idle(110);
         Actors.fall(scene, killer);
-        scene.overlay().showText(70)
-                .text("约 40～70 秒后一般会毒发身亡（演示中缩短了时间），击杀记在买下这颗蓝颠茄的人名下")
-                .independent();
+        SceneCaptions.caption(scene, 70, "约 40～70 秒后一般会毒发身亡（演示中缩短了时间），击杀记在买下这颗蓝颠茄的人名下");
         scene.idle(80);
-        scene.overlay().showText(90)
-                .text("好人被砸中或亲手吃下不会死，一般只是 3 秒内掉约 60%% 理智（带【内鬼】的好人照样会被毒死）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "好人被砸中或亲手吃下不会死，一般只是 3 秒内掉约 60%% 理智（带【内鬼】的好人照样会被毒死）");
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
@@ -399,10 +364,7 @@ final class SparkStrengthCivilianItemScenes {
         ElementLink<ActorElement> civilian = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 civilianSpot, NORTH, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("乘务员开局带着一支【手电筒】：右键打开，再右键关上；拿在手上别人看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "乘务员开局带着一支【手电筒】：右键打开，再右键关上；拿在手上别人看得见");
         scene.idle(100);
         Vec3d killerStart = new Vec3d(2.2, 1, 4.6);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"), killerStart,
@@ -411,10 +373,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 50).rightClick()
                 .withItem(stack("sparkstrength:tablet"));
-        scene.overlay().showText(80)
-                .text("杀手用平板发动灯光破坏：全车熄灯，车厢一片漆黑；没人会失明，但没有夜视就看不清")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀手用平板发动灯光破坏：全车熄灯，车厢一片漆黑；没人会失明，但没有夜视就看不清");
         scene.idle(20);
         scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
         StageLights.lights(scene, false);
@@ -433,18 +392,13 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("黄线是光束示意：游戏里手电会照亮视线前方一片锥形区域（最远约 28 格；开着 Iris 光影时不显示）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "黄线是光束示意：游戏里手电会照亮视线前方一片锥形区域（最远约 28 格；开着 Iris 光影时不显示）");
         scene.idle(20);
         Actors.turn(scene, civilian, WEST);
         Vec3d killerSpot = new Vec3d(2.2, 1, 3.4);
         Actors.walk(scene, killer, killerSpot.subtract(killerStart), 25);
         scene.idle(80);
-        scene.overlay().showText(90)
-                .text("手电照到的人也会被照亮：你看得清是谁在摸黑靠近")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "手电照到的人也会被照亮：你看得清是谁在摸黑靠近");
         scene.idle(60);
         Actors.walk(scene, killer, killerStart.subtract(killerSpot), 25);
         scene.idle(30);
@@ -461,17 +415,12 @@ final class SparkStrengthCivilianItemScenes {
         Actors.hold(scene, attendant, off);
         beamOff(scene, beam);
         Actors.lookPitch(scene, attendant, 0);
-        scene.overlay().showText(80)
-                .text("关掉手电或换成别的东西，眼前又是一片漆黑")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "关掉手电或换成别的东西，眼前又是一片漆黑");
         scene.idle(90);
         scene.world().modifyBlocks(lamps, state -> lamp(state, true), false);
         StageLights.lights(scene, true);
         Actors.turn(scene, civilian, NORTH);
-        scene.overlay().showText(70)
-                .text("停电结束，灯光恢复；不停电时开着手电也只是照亮前方")
-                .independent();
+        SceneCaptions.caption(scene, 70, "停电结束，灯光恢复；不停电时开着手电也只是照亮前方");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -509,10 +458,7 @@ final class SparkStrengthCivilianItemScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, professor, sedative);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("教授能在商店买【镇静试剂】和【吐真试剂】，拿在手上别的活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "教授能在商店买【镇静试剂】和【吐真试剂】，拿在手上别的活人看不见");
         scene.idle(100);
         Actors.walk(scene, professor, professorSpot.subtract(professorStart), 20);
         scene.idle(25);
@@ -521,10 +467,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         Actors.swing(scene, professor);
         Actors.hold(scene, professor, ItemStack.EMPTY);
-        scene.overlay().showText(80)
-                .text("准心对着身边的人右键就喂给对方；没对准人就是自己喝下")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "准心对着身边的人右键就喂给对方；没对准人就是自己喝下");
         scene.idle(90);
         Actors.highlight(scene, civilian, SEDATIVE_YELLOW, 200);
         scene.overlay().showText(100)
@@ -533,9 +476,7 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(80)
-                .text("效果期间，你能隔墙看到他的黄色描边（方框示意）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "效果期间，你能隔墙看到他的黄色描边（方框示意）");
         scene.idle(90);
         Actors.leave(scene, civilian, Direction.UP);
         scene.idle(20);
@@ -547,10 +488,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         Actors.walk(scene, professor, professorNear.subtract(professorSpot), 15);
         scene.idle(18);
-        scene.overlay().showText(40)
-                .text("怀疑一个人？给他喂一瓶【吐真试剂】")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 40, "怀疑一个人？给他喂一瓶【吐真试剂】");
         scene.idle(40);
         scene.overlay().showControls(killerSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(truth);
         scene.idle(10);
@@ -562,17 +500,13 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(130);
-        scene.overlay().showText(80)
-                .text("吐真试剂立刻生效、没有持续时间；喝下的人自己也会收到提示")
-                .independent();
+        SceneCaptions.caption(scene, 80, "吐真试剂立刻生效、没有持续时间；喝下的人自己也会收到提示");
         scene.idle(30);
         Actors.walk(scene, killer, new Vec3d(-1.2, 0, 1.2), 20);
         scene.idle(25);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(35);
-        scene.overlay().showText(100)
-                .text("两种试剂都是一次性的；也能在背包界面远程喂给任意一名存活玩家（同样用掉一瓶；成功后冷却 90 秒，失败冷却 40 秒）")
-                .independent();
+        SceneCaptions.caption(scene, 100, "两种试剂都是一次性的；也能在背包界面远程喂给任意一名存活玩家（同样用掉一瓶；成功后冷却 90 秒，失败冷却 40 秒）");
         scene.idle(110);
         scene.markAsFinished();
     }
@@ -604,10 +538,7 @@ final class SparkStrengthCivilianItemScenes {
                 Text.literal("工程师"), engineerStart, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, engineer, device);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("工程师在商店买【捕捉装置】（125 金币），拿在手上别的活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "工程师在商店买【捕捉装置】（125 金币），拿在手上别的活人看不见");
         scene.idle(90);
         Actors.walk(scene, engineer, engineerSpot.subtract(engineerStart), 12);
         scene.idle(15);
@@ -617,10 +548,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.swing(scene, engineer);
         Actors.hold(scene, engineer, ItemStack.EMPTY);
         ElementLink<Placed> placed = place(scene, device, deviceAt, facing(engineerSpot, deviceAt));
-        scene.overlay().showText(80)
-                .text("右键地面（或天花板）放下：放好的装置只有你自己（和死者、旁观者）看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "右键地面（或天花板）放下：放好的装置只有你自己（和死者、旁观者）看得见");
         scene.idle(30);
         Actors.lookPitch(scene, engineer, 0);
         Actors.walk(scene, engineer, engineerWatch.subtract(engineerSpot), 15);
@@ -630,10 +558,7 @@ final class SparkStrengthCivilianItemScenes {
         int approach = (int) Math.round(killerStep.length() / WALK);
         // The ring lasts until the device is gone. 范围线一直显示到装置消失。
         ring(scene, deviceAt.add(0, 0.05, 0), 5, 30 + 20 + 30 + approach);
-        scene.overlay().showText(88)
-                .text("以它为中心 5 格内（白线示意，隔墙、上下层也算），你以外的活人一进来就会触发")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 88, "以它为中心 5 格内（白线示意，隔墙、上下层也算），你以外的活人一进来就会触发");
         scene.idle(30);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"), killerStart,
                 SCREEN_LEFT, Direction.DOWN);
@@ -655,10 +580,7 @@ final class SparkStrengthCivilianItemScenes {
         report.set(DataComponentTypes.CUSTOM_NAME, Text.literal("捕捉检测报告").formatted(Formatting.GOLD));
         Actors.hold(scene, engineer, report);
         scene.idle(80);
-        scene.overlay().showText(90)
-                .text("你会收到一张【捕捉检测报告】，写着被定住的人的名字（放进背包，拿在手上别的活人看不见）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "你会收到一张【捕捉检测报告】，写着被定住的人的名字（放进背包，拿在手上别的活人看不见）");
         Actors.turn(scene, killer, SCREEN_RIGHT);
         scene.idle(5);
         Vec3d killerAway = new Vec3d(-2.0, 0, 2.0);
@@ -669,14 +591,9 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         Actors.hold(scene, engineer, ItemStack.EMPTY);
         scene.idle(100 - 5 - away - 10);
-        scene.overlay().showText(90)
-                .text("装置只触发一次：当时范围内你以外的活人都会被定住，好人也一样；放下时 5 格内已经有人就会立刻触发")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "装置只触发一次：当时范围内你以外的活人都会被定住，好人也一样；放下时 5 格内已经有人就会立刻触发");
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("放下后 2 分钟没人触发，它就会自己消失")
-                .independent();
+        SceneCaptions.caption(scene, 70, "放下后 2 分钟没人触发，它就会自己消失");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -719,20 +636,14 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         scene.overlay().showControls(firstSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(vial);
         scene.idle(10);
-        scene.overlay().showText(80)
-                .text("教授刚给这位平民上了护盾：铁人药剂（拿在手上别人看不见）用一次要冷却 5 分钟")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "教授刚给这位平民上了护盾：铁人药剂（拿在手上别人看不见）用一次要冷却 5 分钟");
         scene.idle(90);
         ElementLink<ActorElement> timekeeper = Actors.enter(scene,
                 RoleColors.of("noellesroles:time_keeper", 0x0026FF), Text.literal("计时员"), timekeeperSpot,
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, timekeeper, watch);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("计时员开局带着【濒毁怀表】，别的活人看不见你手里的它")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "计时员开局带着【濒毁怀表】，别的活人看不见你手里的它");
         scene.idle(90);
         scene.overlay().showControls(timekeeperSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(watch);
         scene.idle(10);
@@ -754,23 +665,13 @@ final class SparkStrengthCivilianItemScenes {
                 .attachKeyFrame();
         scene.idle(90);
         scene.overlay().showControls(timekeeperSpot.add(0, 2.6, 0), Pointing.DOWN, 40).leftClick().withItem(watch);
-        scene.overlay().showText(80)
-                .text("左键在物品模式和技能模式之间切换，不会出手打人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "左键在物品模式和技能模式之间切换，不会出手打人");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("技能模式右键花 75 金币，清空其他存活好人的大多数职业技能冷却（不含你自己）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "技能模式右键花 75 金币，清空其他存活好人的大多数职业技能冷却（不含你自己）");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("怀表自己也要冷却：物品模式 40 秒、技能模式 30 秒，分开计算；没刷到人也照样扣钱")
-                .independent();
+        SceneCaptions.caption(scene, 90, "怀表自己也要冷却：物品模式 40 秒、技能模式 30 秒，分开计算；没刷到人也照样扣钱");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("中立和魔女阵营刷不到；你自己带【内鬼】词条时，改为刷新杀手（不含【善良】）和其他内鬼")
-                .independent();
+        SceneCaptions.caption(scene, 90, "中立和魔女阵营刷不到；你自己带【内鬼】词条时，改为刷新杀手（不含【善良】）和其他内鬼");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -803,10 +704,7 @@ final class SparkStrengthCivilianItemScenes {
                 SCREEN_LEFT, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("调香师在商店买【香薰】（75 金币），拿在手上别的活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "调香师在商店买【香薰】（75 金币），拿在手上别的活人看不见");
         scene.idle(90);
         scene.overlay().showControls(perfumerSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(orb);
         scene.idle(10);
@@ -814,7 +712,7 @@ final class SparkStrengthCivilianItemScenes {
         throwSprite(scene, orb, hand(perfumerSpot, SCREEN_RIGHT), towards(killerSpot, perfumerSpot, 1.6), 3);
         scene.idle(3);
         Vec3d headTop = killerSpot.add(0, HEAD_TOP, 0);
-        spawnParticles(scene, LAVENDER_BURST, headTop, 24, new Vec3d(0.35, 0.25, 0.35), 0);
+        Effects.spawnParticles(scene, LAVENDER_BURST, headTop, 24, new Vec3d(0.35, 0.25, 0.35), 0);
         wisps(scene, headTop.add(0, 0.15, 0), 60);
         drift(scene, killer, SCREEN_LEFT, 60);
         scene.overlay().showText(100)
@@ -823,9 +721,7 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("他头顶会冒淡紫色的香气，旁人都看得到；砸中时只有你听到“叮”的一声（碎瓶声大家都听得到）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "他头顶会冒淡紫色的香气，旁人都看得到；砸中时只有你听到“叮”的一声（碎瓶声大家都听得到）");
         scene.idle(100);
         Vec3d killerAway = new Vec3d(1.4, 1, 5.6);
         Actors.lookPitch(scene, killer, 0);
@@ -838,19 +734,14 @@ final class SparkStrengthCivilianItemScenes {
         throwSprite(scene, orb, hand(perfumerSpot, SCREEN_RIGHT), floor, 3);
         scene.idle(3);
         Actors.hold(scene, perfumer, ItemStack.EMPTY);
-        spawnParticles(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, orb), floor, 6,
+        Effects.spawnParticles(scene, new ItemStackParticleEffect(ParticleTypes.ITEM, orb), floor, 6,
                 new Vec3d(0.05, 0.05, 0.05), 0.1);
-        spawnParticles(scene, LAVENDER_WISP, floor, 8, new Vec3d(0.25, 0.2, 0.25), 0);
-        scene.overlay().showText(80)
-                .text("没砸中人只会摔碎，什么效果都没有")
-                .independent()
-                .attachKeyFrame();
+        Effects.spawnParticles(scene, LAVENDER_WISP, floor, 8, new Vec3d(0.25, 0.2, 0.25), 0);
+        SceneCaptions.keyframeCaption(scene, 80, "没砸中人只会摔碎，什么效果都没有");
         scene.idle(30);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(60);
-        scene.overlay().showText(90)
-                .text("香薰没有冷却，扔一个少一个；只有调香师能用，也砸不到扔的人自己")
-                .independent();
+        SceneCaptions.caption(scene, 90, "香薰没有冷却，扔一个少一个；只有调香师能用，也砸不到扔的人自己");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -879,21 +770,15 @@ final class SparkStrengthCivilianItemScenes {
         ElementLink<ActorElement> walker = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), walkerStart,
                 SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("【晨风香水】150 金币，每局只能买 1 瓶；拿在手上别的活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "【晨风香水】150 金币，每局只能买 1 瓶；拿在手上别的活人看不见");
         scene.idle(90);
         scene.overlay().showControls(perfumerStart.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick()
                 .withItem(perfume);
         scene.idle(10);
         Actors.swing(scene, perfumer);
         Actors.hold(scene, perfumer, ItemStack.EMPTY);
-        spawnParticles(scene, ZEPHYR_MIST, perfumerStart.add(0, 1.1, 0), 10, new Vec3d(0.35, 0.45, 0.35), 0);
-        scene.overlay().showText(80)
-                .text("右键喷在自己身上：这团喷雾和声音只有你自己看得到、听得到")
-                .independent()
-                .attachKeyFrame();
+        Effects.spawnParticles(scene, ZEPHYR_MIST, perfumerStart.add(0, 1.1, 0), 10, new Vec3d(0.35, 0.45, 0.35), 0);
+        SceneCaptions.keyframeCaption(scene, 80, "右键喷在自己身上：这团喷雾和声音只有你自己看得到、听得到");
         scene.idle(90);
         Vec3d perfumerDash = perfumerEnd.subtract(perfumerStart);
         int dash = (int) Math.round(perfumerDash.length() / SPEED_II);
@@ -906,14 +791,9 @@ final class SparkStrengthCivilianItemScenes {
                 .attachKeyFrame();
         scene.idle(110);
         Actors.leave(scene, walker, Direction.UP);
-        scene.overlay().showText(90)
-                .text("任务带来的理智下降速度也减半（靠近尸体的额外下降同样减半），持续到本局结束；死了效果就没了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "任务带来的理智下降速度也减半（靠近尸体的额外下降同样减半），持续到本局结束；死了效果就没了");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("效果还在时喷不了第二瓶；它不会顶掉更强的速度效果")
-                .independent();
+        SceneCaptions.caption(scene, 80, "效果还在时喷不了第二瓶；它不会顶掉更强的速度效果");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -942,10 +822,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.title("ss_bartender_spirits", "酒保的四种烈酒：喝下去会怎样");
         WatheItemScenes.setStage(scene, util);
         Selection lamps = carriageLamps(util);
-        scene.overlay().showText(100)
-                .text("朗姆酒、金酒、伏特加、龙舌兰：调进基酒、喝下去才生效（这几杯都加了冰块，喝完立刻生效）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "朗姆酒、金酒、伏特加、龙舌兰：调进基酒、喝下去才生效（这几杯都加了冰块，喝完立刻生效）");
         scene.idle(110);
 
         Vec3d rumStart = new Vec3d(4.4, 1, 0.6);
@@ -982,10 +859,7 @@ final class SparkStrengthCivilianItemScenes {
         ElementLink<ActorElement> blocker = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 blockerSpot, SCREEN_LEFT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("开局 30 秒后，玩家之间就是实心的，会互相挡住去路")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "开局 30 秒后，玩家之间就是实心的，会互相挡住去路");
         scene.idle(90);
         drink(scene, tequilaDrinker, tequilaStart, tequila);
         scene.idle(10);
@@ -1021,10 +895,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(10);
         scene.world().modifyBlocks(lamps, state -> lamp(state, false), false);
         StageLights.lights(scene, false);
-        scene.overlay().showText(80)
-                .text("杀手发动灯光破坏：车厢一片漆黑，没有夜视的人几乎看不清")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀手发动灯光破坏：车厢一片漆黑，没有夜视的人几乎看不清");
         scene.idle(30);
         Actors.turn(scene, victim, SCREEN_LEFT);
         scene.idle(30);
@@ -1044,10 +915,7 @@ final class SparkStrengthCivilianItemScenes {
         Actors.swing(scene, killer);
         Actors.fall(scene, victim);
         scene.idle(40);
-        scene.overlay().showText(90)
-                .text("你看得清是谁摸黑下的手，没有夜视的人却几乎什么也看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "你看得清是谁摸黑下的手，没有夜视的人却几乎什么也看不见");
         scene.idle(30);
         Actors.walk(scene, killer, killerStart.subtract(killerSpot), 20);
         scene.idle(22);
@@ -1078,10 +946,7 @@ final class SparkStrengthCivilianItemScenes {
             scene.idle(leg);
         }
         scene.idle(Math.max(0, 95 - 4 * leg));
-        scene.overlay().showText(100)
-                .text("喝下的一刻，所有物品的剩余冷却打 6 折；亢奋期间新产生的物品冷却只算 8 成")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "喝下的一刻，所有物品的剩余冷却打 6 折；亢奋期间新产生的物品冷却只算 8 成");
         for (Vec3d side : lap) {
             Actors.walk(scene, vodkaDrinker, side, leg);
             scene.idle(leg);
@@ -1095,9 +960,7 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("这杯酒本身回 20%% 理智，每加一种烈酒再多回 20%%；加了特调利口酒，这些时长都翻倍")
-                .independent();
+        SceneCaptions.caption(scene, 80, "这杯酒本身回 20%% 理智，每加一种烈酒再多回 20%%；加了特调利口酒，这些时长都翻倍");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -1121,10 +984,7 @@ final class SparkStrengthCivilianItemScenes {
     private static void modifiers(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("ss_bartender_modifiers", "酒保的修饰材料：喝法和效果的变化");
         WatheItemScenes.stage(scene);
-        scene.overlay().showText(100)
-                .text("修饰材料不是烈酒：调进基酒后改变这杯酒的喝法和效果（也算在每杯最多 3 种材料里，同种不能加两次）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "修饰材料不是烈酒：调进基酒后改变这杯酒的喝法和效果（也算在每杯最多 3 种材料里，同种不能加两次）");
         scene.idle(110);
         Vec3d drinkerStart = new Vec3d(5.6, 1, 1.0);
         Vec3d diagonal = new Vec3d(-1, 0, 1).normalize();
@@ -1133,10 +993,7 @@ final class SparkStrengthCivilianItemScenes {
         ItemStack plainRum = spirit("rum");
         Actors.hold(scene, plain, plainRum);
         scene.idle(15);
-        scene.overlay().showText(60)
-                .text("这杯只加了朗姆酒，没加冰块")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "这杯只加了朗姆酒，没加冰块");
         scene.idle(30);
         drink(scene, plain, drinkerStart, plainRum);
         Actors.walk(scene, plain, diagonal.multiply(SLOWNESS_II * 24), 24);
@@ -1177,17 +1034,11 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(15);
         scene.overlay().showControls(bartenderSpot.add(0, 2.6, 0), Pointing.DOWN, 90)
                 .withItem(stack("noellesroles:special_liqueur"));
-        scene.overlay().showText(90)
-                .text("【特调利口酒】：这杯所有效果的时长翻倍，没加冰时的负面效果也翻倍（3 秒变 6 秒）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "【特调利口酒】：这杯所有效果的时长翻倍，没加冰时的负面效果也翻倍（3 秒变 6 秒）");
         scene.idle(100);
         scene.overlay().showControls(bartenderSpot.add(0, 2.6, 0), Pointing.DOWN, 90)
                 .withItem(stack("noellesroles:special_spice"));
-        scene.overlay().showText(90)
-                .text("【特调香料】：酒生效时额外回复 60%% 理智（理智条只显示在自己的界面上）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "【特调香料】：酒生效时额外回复 60%% 理智（理智条只显示在自己的界面上）");
         scene.idle(100);
         Actors.leave(scene, bartender, Direction.UP);
         scene.idle(15);
@@ -1208,19 +1059,14 @@ final class SparkStrengthCivilianItemScenes {
         WatheItemScenes.shoot(scene, vigilante, REVOLVER_MUZZLE, new Vec3d(2.9, 1.9, 4.1));
         scene.idle(12);
         Actors.turn(scene, killer, SCREEN_LEFT);
-        scene.overlay().showText(50)
-                .text("义警一枪打空：左轮要冷却一会儿才能再开")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 50, "义警一枪打空：左轮要冷却一会儿才能再开");
         scene.idle(50);
         ItemStack special = spirit("ice_cube", "ghostflame_bitters", "ember_sugar");
         Actors.hold(scene, vigilante, special);
         scene.idle(10);
         scene.overlay().showControls(vigilanteSpot.add(0, 2.6, 0), Pointing.DOWN, 40)
                 .withItem(stack("sparkstrength:ember_sugar"));
-        scene.overlay().showText(60)
-                .text("他手里这杯加了冰块、【幽焰苦精】和【火种方糖】")
-                .independent();
+        SceneCaptions.caption(scene, 60, "他手里这杯加了冰块、【幽焰苦精】和【火种方糖】");
         scene.idle(64);
         scene.overlay().showControls(vigilanteSpot.add(0, 2.6, 0), Pointing.DOWN, 20).rightClick().withItem(special);
         scene.idle(5);
@@ -1228,10 +1074,7 @@ final class SparkStrengthCivilianItemScenes {
         scene.idle(1);
         Actors.charge(scene, vigilante, false);
         Actors.hold(scene, vigilante, ItemStack.EMPTY);
-        scene.overlay().showText(55)
-                .text("【火种方糖】：点一下右键就喝完，不用按住 2 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 55, "【火种方糖】：点一下右键就喝完，不用按住 2 秒");
         scene.idle(30);
         Actors.hold(scene, vigilante, revolver);
         scene.idle(10);
@@ -1244,13 +1087,9 @@ final class SparkStrengthCivilianItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("苦精只清物品冷却：商店冷却和按键技能的冷却不受影响（职业道具的冷却算物品冷却）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "苦精只清物品冷却：商店冷却和按键技能的冷却不受影响（职业道具的冷却算物品冷却）");
         scene.idle(90);
-        scene.overlay().showText(100)
-                .text("方糖不能代替冰块。加了苦精的酒叫“冠死以冕”，加了方糖的叫“冠生以花”，两样都加叫“生死相依”")
-                .independent();
+        SceneCaptions.caption(scene, 100, "方糖不能代替冰块。加了苦精的酒叫“冠死以冕”，加了方糖的叫“冠生以花”，两样都加叫“生死相依”");
         scene.idle(110);
         scene.markAsFinished();
     }
@@ -1292,24 +1131,6 @@ final class SparkStrengthCivilianItemScenes {
                 .add(util.select().position(5, 2, 1)).add(util.select().position(5, 2, 4));
     }
 
-    /** A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。 */
-    private static BlockState lamp(BlockState state, boolean on) {
-        if (state.contains(Properties.LIT)) {
-            state = state.with(Properties.LIT, on);
-        }
-        return state.contains(WatheProperties.ACTIVE) ? state.with(WatheProperties.ACTIVE, on) : state;
-    }
-
-    /** The yaw that faces from {@code from} towards {@code to}. 从 from 面向 to 的朝向。 */
-    private static float facing(Vec3d from, Vec3d to) {
-        return (float) (MathHelper.atan2(from.x - to.x, to.z - from.z) * MathHelper.DEGREES_PER_RADIAN);
-    }
-
-    private static Vec3d forward(float yaw) {
-        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
-        return new Vec3d(-MathHelper.sin(radians), 0, MathHelper.cos(radians));
-    }
-
     /** The right-hand side of an actor facing {@code yaw}. 朝 yaw 的演员的右手一侧。 */
     private static Vec3d right(float yaw) {
         float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
@@ -1328,23 +1149,6 @@ final class SparkStrengthCivilianItemScenes {
     private static Vec3d towards(Vec3d target, Vec3d from, double height) {
         Vec3d side = from.subtract(target).multiply(1, 0, 1).normalize().multiply(0.3);
         return target.add(side).add(0, height, 0);
-    }
-
-    /**
-     * {@code count} particles as the client plays a server's spawnParticles: each at a gaussian offset of
-     * {@code spread} per axis, moving at a gaussian {@code speed} per axis.
-     * 像客户端播放服务端 spawnParticles 那样放出 count 个粒子：每轴按 spread 的高斯偏移放置，每轴以高斯 speed 运动。
-     */
-    private static void spawnParticles(SceneBuilder scene, ParticleEffect particle, Vec3d at, int count, Vec3d spread,
-                                       double speed) {
-        scene.effects().emitParticles(at, (world, x, y, z) -> {
-            for (int i = 0; i < count; i++) {
-                world.addParticle(particle, x + world.random.nextGaussian() * spread.x,
-                        y + world.random.nextGaussian() * spread.y, z + world.random.nextGaussian() * spread.z,
-                        world.random.nextGaussian() * speed, world.random.nextGaussian() * speed,
-                        world.random.nextGaussian() * speed);
-            }
-        }, 1, 1);
     }
 
     /**

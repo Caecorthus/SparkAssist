@@ -121,13 +121,4 @@ public final class Dither {
             }
         }
     }
-
-    /** Dashes along a horizontal run: {@code on} pixels painted, {@code off} skipped. 水平虚线。 */
-    public static void dashes(PixelSink sink, int x1, int x2, int y, int on, int off, int argb, int phase) {
-        for (int x = x1, k = phase; x < x2; x++, k++) {
-            if (k % (on + off) < on) {
-                sink.set(x, y, argb);
-            }
-        }
-    }
 }

@@ -10,10 +10,12 @@ import java.util.UUID;
 
 /**
  * Collects {@link RoundFacts} for one round from per-tick observations and one-off client notices. A round only
- * settles when Wathe's round-end result arrived while it was being tracked and the local player held a role:
- * {@code /stop}, a disconnect or joining as a spectator never count.
+ * settles when Wathe's round-end result arrived while it was being tracked and the local player was seen alive with
+ * a role before any death of theirs: {@code /stop}, a disconnect (including the rest of that round after rejoining
+ * it, since Wathe kills a player who leaves but keeps their role) or joining as a spectator never count.
  * 根据每 tick 的观察和零散的客户端通知，为一局收集 {@link RoundFacts}。只有在跟踪期间收到了 Wathe 的结算结果、
- * 且本地玩家担任过角色时，这一局才会结算：{@code /stop}、断线或以旁观者身份加入都不算。
+ * 且在本地玩家死亡之前见过其带着角色存活时，这一局才会结算：{@code /stop}、断线（包括断线后重新加入的同一局，
+ * 因为 Wathe 会杀死离开的玩家但保留其角色）或以旁观者身份加入都不算。
  */
 public final class RoundTracker {
     // How long after dying the client keeps looking for the player's own body. 死后继续寻找自己尸体的时长。
@@ -27,6 +29,13 @@ public final class RoundTracker {
 
     private boolean active;
     private boolean roundEndSeen;
+    // Whether the local player was seen alive with a role, and whether their death was seen before that. A client
+    // that rejoins a live round sees its player dead from the first tick (Wathe killed them on disconnect), so that
+    // round never settles.
+    // 是否见过本地玩家带着角色存活，以及是否在此之前就看到其死亡。重新加入进行中对局的客户端从第一 tick 起就看到
+    // 自己已死亡（Wathe 在断线时杀死了玩家），因此那一局永不结算。
+    private boolean seenAliveWithRole;
+    private boolean deadBeforeSeenAlive;
     private UUID self;
     private long startWorldTime;
     private long lastLiveWorldTime;
@@ -84,10 +93,12 @@ public final class RoundTracker {
             if (deathTick < 0 && !roleChain.isEmpty()) {
                 deathTick = Math.max(0, now - startWorldTime);
                 deathWorldTime = now;
+                deadBeforeSeenAlive = !seenAliveWithRole;
                 // SparkTraits clears traits on a real death. SparkTraits 在真正死亡时清空词条。
                 traits.observe(deathTick, Set.of());
             }
         } else if (roleId != null) {
+            seenAliveWithRole = true;
             int alive = observation.alivePlayers();
             fewestAliveWhileAlive = fewestAliveWhileAlive == 0 ? alive : Math.min(fewestAliveWhileAlive, alive);
             long tick = Math.max(0, now - startWorldTime);
@@ -170,7 +181,7 @@ public final class RoundTracker {
      * 在本机时间 {@code settledAt}（未知时为 null）结束跟踪。这一局算数时返回收集到的事实，否则返回空。
      */
     public Optional<RoundFacts> finish(LocalDateTime settledAt) {
-        Optional<RoundFacts> facts = active && roundEndSeen && !roleChain.isEmpty()
+        Optional<RoundFacts> facts = active && roundEndSeen && seenAliveWithRole && !deadBeforeSeenAlive
                 ? Optional.of(new RoundFacts(
                         self,
                         roleChain,
@@ -205,6 +216,8 @@ public final class RoundTracker {
         traits = new TraitTimeline.Builder();
         active = false;
         roundEndSeen = false;
+        seenAliveWithRole = false;
+        deadBeforeSeenAlive = false;
         self = null;
         started = false;
         startWorldTime = 0;

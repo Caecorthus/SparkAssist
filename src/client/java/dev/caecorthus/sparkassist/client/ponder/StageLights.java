@@ -1,11 +1,14 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import dev.doctor4t.wathe.index.WatheProperties;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.createmod.ponder.api.element.WorldSectionElement;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.foundation.PonderScene;
 import net.createmod.ponder.foundation.instruction.TickingInstruction;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -29,6 +32,18 @@ final class StageLights {
     /** Turn the stage lights off (dark) or back on over a few ticks. 在几 tick 内关掉（变暗）或重新打开舞台灯光。 */
     static void lights(SceneBuilder scene, boolean on) {
         scene.addInstruction(new Switch(on ? 1 : DARK));
+    }
+
+    /**
+     * A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. The Saboteur scene keeps its own
+     * variant, which changes neither property unless the block has both.
+     * 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。破坏者场景保留自己的版本：方块两个属性都有时才会改动。
+     */
+    static BlockState lamp(BlockState state, boolean on) {
+        if (state.contains(Properties.LIT)) {
+            state = state.with(Properties.LIT, on);
+        }
+        return state.contains(WatheProperties.ACTIVE) ? state.with(WatheProperties.ACTIVE, on) : state;
     }
 
     /** The fade an actor should be lit as in {@code scene}: 1 with the lights on. 演员在该场景中应采用的亮度淡入值：灯亮时为 1。 */

@@ -195,7 +195,7 @@ final class NoellesCivilianRules {
         }
         List<MatchEvent> events = context.timeline().events();
         for (MatchEvent recall : myRecalls(context)) {
-            for (int i = indexOf(events, recall) + 1; i < events.size(); i++) {
+            for (int i = Rules.positionOf(events, recall) + 1; i < events.size(); i++) {
                 MatchEvent event = events.get(i);
                 if (event.tick() - recall.tick() > TEN_SECONDS) {
                     break;
@@ -384,13 +384,13 @@ final class NoellesCivilianRules {
     static boolean repairedPriedDoorQuickly(AchievementContext context) {
         List<MatchEvent> events = context.timeline().events();
         for (MatchEvent repair : Rules.myItemUses(context, REPAIR_TOOL)) {
-            if (!REPAIR_ACTION.equals(repair.value("action")) || !hasPos(repair)
+            if (!REPAIR_ACTION.equals(repair.value("action")) || !Rules.hasPos(repair)
                     || !Rules.iWas(context, repair, ENGINEER)) {
                 continue;
             }
-            for (int i = indexOf(events, repair) - 1; i >= 0; i--) {
+            for (int i = Rules.positionOf(events, repair) - 1; i >= 0; i--) {
                 MatchEvent pry = events.get(i);
-                if (pry.is(MatchEvent.ITEM_USE) && CROWBAR.equals(pry.value("item")) && samePos(pry, repair)) {
+                if (pry.is(MatchEvent.ITEM_USE) && CROWBAR.equals(pry.value("item")) && Rules.samePos(pry, repair)) {
                     if (repair.tick() - pry.tick() <= REPAIR_WINDOW_TICKS) {
                         return true;
                     }
@@ -448,7 +448,7 @@ final class NoellesCivilianRules {
                     || end.isPresent() && end.get().tick() - cut.tick() <= ROUND_END_FADE_TICKS) {
                 continue;
             }
-            int position = indexOf(events, cut);
+            int position = Rules.positionOf(events, cut);
             for (int i = position - 1; i >= 0 && cut.tick() - events.get(i).tick() < TIME_THEFT_LETHAL_TICKS; i--) {
                 MatchEvent event = events.get(i);
                 if (isTimeCut(context, event)) {
@@ -544,16 +544,6 @@ final class NoellesCivilianRules {
         return death.actor() != null && !death.actor().equals(death.target());
     }
 
-    /** {@code event}'s position in {@code events}, by identity; -1 when absent. {@code event} 在列表中的位置（按同一对象），没有则为 -1。 */
-    private static int indexOf(List<MatchEvent> events, MatchEvent event) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i) == event) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     /** {@code player}'s first death after position {@code from}, or null. 位置 {@code from} 之后 {@code player} 的第一次死亡。 */
     private static MatchEvent nextDeathOf(List<MatchEvent> events, int from, UUID player) {
         for (int i = from + 1; i < events.size(); i++) {
@@ -577,16 +567,5 @@ final class NoellesCivilianRules {
             }
         }
         return false;
-    }
-
-    private static boolean hasPos(MatchEvent event) {
-        return event.has("pos.x") && event.has("pos.y") && event.has("pos.z");
-    }
-
-    private static boolean samePos(MatchEvent one, MatchEvent other) {
-        return hasPos(one) && hasPos(other)
-                && one.intValue("pos.x", 0) == other.intValue("pos.x", 0)
-                && one.intValue("pos.y", 0) == other.intValue("pos.y", 0)
-                && one.intValue("pos.z", 0) == other.intValue("pos.z", 0);
     }
 }

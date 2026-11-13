@@ -86,7 +86,7 @@ final class SparkWitchWraithScenes {
      */
     private static void wraith(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("role_wraith", "冤魂：死后继续帮阵营");
-        WatheItemScenes.cabinStage(scene, util);
+        WatheItemScenes.setStage(scene, util);
         Vec3d feet = new Vec3d(3.5, 1, 1.5);
         ElementLink<ActorElement> civilian = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), feet,
                 WEST, Direction.DOWN);
@@ -105,38 +105,24 @@ final class SparkWitchWraithScenes {
         ElementLink<ActorElement> wraith = Actors.enter(scene, RoleColors.of("sparkwitch:wraith", 0x79C7D4),
                 Text.literal("冤魂"), feet, WEST, Direction.UP);
         scene.idle(5);
-        scene.overlay().showText(74)
-                .text("好人、杀手、魔女阵营的人死后，有机会化为冤魂（默认 75%%）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 74, "好人、杀手、魔女阵营的人死后，有机会化为冤魂（默认 75%%）");
         scene.idle(85);
         Actors.turn(scene, killer, EAST);
-        scene.overlay().showText(75)
-                .text("一般就在原地化为冤魂；尸体留下，仍显示你生前的身份")
-                .independent();
+        SceneCaptions.caption(scene, 75, "一般就在原地化为冤魂；尸体留下，仍显示你生前的身份");
         scene.idle(10);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(75);
-        scene.overlay().showText(80)
-                .text("演示里看得到你，活人其实看不见你（灵界行者除外）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "演示里看得到你，活人其实看不见你（灵界行者除外）");
         scene.idle(85);
         Actors.turn(scene, wraith, SOUTH);
         scene.idle(8);
         Actors.walk(scene, wraith, new Vec3d(0, 0, 3.3), 50);
-        scene.overlay().showText(65)
-                .text("你不会和人相撞，还能直接穿过关着的门（门不会打开）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 65, "你不会和人相撞，还能直接穿过关着的门（门不会打开）");
         scene.idle(55);
         scene.rotateCameraY(180);
         scene.idle(20);
         Actors.walk(scene, wraith, new Vec3d(1.8, 0, -0.3), 25);
-        scene.overlay().showText(80)
-                .text("做任务就能晋升；晋升前只能用餐盘、饮品托盘和空床")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "做任务就能晋升；晋升前只能用餐盘、饮品托盘和空床");
         scene.idle(27);
         Actors.turn(scene, wraith, EAST);
         scene.idle(8);
@@ -153,10 +139,7 @@ final class SparkWitchWraithScenes {
         Actors.walk(scene, wraith, new Vec3d(-2.7, 0, -0.1), 35);
         scene.idle(37);
         Actors.lieDown(scene, wraith, util.grid().at(1, 1, 5), Direction.WEST);
-        scene.overlay().showText(75)
-                .text("喝饮品、吃东西、睡觉都能完成对应任务（演示省略了一个、缩短了时间）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 75, "喝饮品、吃东西、睡觉都能完成对应任务（演示省略了一个、缩短了时间）");
         scene.idle(85);
         // Promotion wakes a sleeping Wraith (WraithLifecycle.promotePlayer). 晋升会叫醒正在睡觉的冤魂。
         Actors.getUp(scene, wraith);
@@ -167,9 +150,7 @@ final class SparkWitchWraithScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(105);
-        scene.overlay().showText(80)
-                .text("杀手阵营晋升为破坏者，魔女阵营晋升为诅咒者；晋升后一般仍然隐身")
-                .independent();
+        SceneCaptions.caption(scene, 80, "杀手阵营晋升为破坏者，魔女阵营晋升为诅咒者；晋升后一般仍然隐身");
         scene.idle(85);
         scene.markAsFinished();
     }
@@ -195,29 +176,18 @@ final class SparkWitchWraithScenes {
         Vec3d feet = new Vec3d(0.7, 1, 6.3);
         Actors.enter(scene, gold, Text.literal("守护天使"), feet, SCREEN_LEFT, Direction.UP);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("好人冤魂可能晋升为守护天使，能悄悄给活人套上护盾")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "好人冤魂可能晋升为守护天使，能悄悄给活人套上护盾");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("演示里看得到你，活人其实看不见你（灵界行者除外）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "演示里看得到你，活人其实看不见你（灵界行者除外）");
         scene.idle(90);
         scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 40).showing(key(ABILITY_KEY, "G"));
-        scene.overlay().showText(65)
-                .text("对准 3 格内看得见的活人，按技能键（默认 G）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 65, "对准 3 格内看得见的活人，按技能键（默认 G）");
         scene.idle(20);
         // The shield (10 s) and its outline last until the stab below, 141 ticks on, pops them.
         // 护盾（10 秒）与轮廓一直持续到 141 tick 后的那一刀，随之消失。
         Actors.highlight(scene, civilian, gold, 141);
         scene.idle(55);
-        scene.overlay().showText(80)
-                .text("他得到 10 秒护盾，期间隔墙对你高亮（金框示意）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "他得到 10 秒护盾，期间隔墙对你高亮（金框示意）");
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
@@ -240,13 +210,9 @@ final class SparkWitchWraithScenes {
         scene.idle(20);
         Actors.leave(scene, civilian, Direction.UP);
         scene.idle(70);
-        scene.overlay().showText(80)
-                .text("护盾本身没有任何特效，他自己事先也收不到提示")
-                .independent();
+        SceneCaptions.caption(scene, 80, "护盾本身没有任何特效，他自己事先也收不到提示");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("护盾挡一次就没了；冷却 90 秒，有几种死法挡不住（见指南）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "护盾挡一次就没了；冷却 90 秒，有几种死法挡不住（见指南）");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -276,20 +242,12 @@ final class SparkWitchWraithScenes {
         ElementLink<ActorElement> spirit = Actors.enter(scene, RoleColors.of("sparkwitch:wind_spirit", 0x59D8E6),
                 Text.literal("风精灵"), feet, SCREEN_RIGHT, Direction.UP);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("好人冤魂可能晋升为风精灵：永久速度 II，体力无限")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "好人冤魂可能晋升为风精灵：永久速度 II，体力无限");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("演示里看得到你，活人其实看不见你（灵界行者除外）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "演示里看得到你，活人其实看不见你（灵界行者除外）");
         scene.idle(90);
         Actors.hold(scene, spirit, windCharge);
-        scene.overlay().showText(77)
-                .text("在商店花 50 金币买风弹，不限购")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 77, "在商店花 50 金币买风弹，不限购");
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(5.8, 1, 5.8), towardsCamera, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
@@ -325,13 +283,9 @@ final class SparkWitchWraithScenes {
         // Out of reach, he lets go without a target. 够不着了，松开也没有目标。
         Actors.charge(scene, killer, false);
         scene.idle(40);
-        scene.overlay().showText(80)
-                .text("旁人看得到风弹和气流，却一般看不出是谁扔的")
-                .independent();
+        SceneCaptions.caption(scene, 80, "旁人看得到风弹和气流，却一般看不出是谁扔的");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("趁杀手贴近队友之前出手，给队友争取逃跑的时间")
-                .independent();
+        SceneCaptions.caption(scene, 80, "趁杀手贴近队友之前出手，给队友争取逃跑的时间");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -359,33 +313,20 @@ final class SparkWitchWraithScenes {
                 Text.literal("仇杀客"), new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.UP);
         Actors.hold(scene, vendetta, knife);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("被杀的好人化为冤魂后，可能晋升为仇杀客，拿到复仇刀")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "被杀的好人化为冤魂后，可能晋升为仇杀客，拿到复仇刀");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("演示里看得到你；活人一般看不见你，但凶手看得见你和刀，也能杀死你")
-                .independent();
+        SceneCaptions.caption(scene, 90, "演示里看得到你；活人一般看不见你，但凶手看得见你和刀，也能杀死你");
         scene.idle(100);
         // Shown until the killer dies below. 一直显示到下面凶手死亡。
         Actors.highlight(scene, killer, 0xFF0000, 237);
-        scene.overlay().showText(80)
-                .text("凶手在 8 格内会隔墙显示红色描边（方框示意）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "凶手在 8 格内会隔墙显示红色描边（方框示意）");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("每隔 30 秒还会透视凶手 5 秒；离凶手越近，你眼中的世界越灰")
-                .independent();
+        SceneCaptions.caption(scene, 80, "每隔 30 秒还会透视凶手 5 秒；离凶手越近，你眼中的世界越灰");
         scene.idle(90);
         Actors.walk(scene, vendetta, new Vec3d(-1.8, 0, 1.8), 30);
         scene.idle(32);
         scene.overlay().showControls(new Vec3d(4.0, 3.6, 3.0), Pointing.DOWN, 30).rightClick().withItem(knife);
-        scene.overlay().showText(30)
-                .text("从背后靠近，按住右键至少 0.5 秒……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 30, "从背后靠近，按住右键至少 0.5 秒……");
         Actors.charge(scene, vendetta, true);
         scene.idle(25);
         Actors.charge(scene, vendetta, false);
@@ -400,9 +341,7 @@ final class SparkWitchWraithScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("复仇成功后，你就变回旁观者")
-                .independent();
+        SceneCaptions.caption(scene, 80, "复仇成功后，你就变回旁观者");
         scene.idle(90);
         scene.markAsFinished();
     }

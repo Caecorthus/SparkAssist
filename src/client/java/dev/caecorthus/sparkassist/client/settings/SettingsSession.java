@@ -45,10 +45,6 @@ public final class SettingsSession {
         stores.forEach(SettingsStore::save);
     }
 
-    public boolean hasUnsavedChanges() {
-        return !dirty.isEmpty();
-    }
-
     /** True when any value differs from what it was when the screen opened. 是否有值与打开时不同。 */
     public boolean hasChanges() {
         for (Map.Entry<SettingsOption, Object> entry : opened.entrySet()) {

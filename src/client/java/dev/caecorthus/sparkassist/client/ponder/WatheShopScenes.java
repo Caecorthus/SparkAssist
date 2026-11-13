@@ -74,7 +74,7 @@ final class WatheShopScenes {
      */
     private static void grenade(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("wathe_grenade", "手雷：撞到东西就爆炸");
-        WatheItemScenes.cabinStage(scene, util);
+        WatheItemScenes.setStage(scene, util);
         Text civilian = Text.literal("平民");
         ElementLink<ActorElement> near = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
                 new Vec3d(2.2, 1, 0.8), EAST, Direction.DOWN);
@@ -87,10 +87,7 @@ final class WatheShopScenes {
                 new Vec3d(6.4, 1, 1.5), WEST, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:grenade"));
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("手雷：右键扔出去，一碰到墙、地面或人就立刻爆炸，没有引信")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "手雷：右键扔出去，一碰到墙、地面或人就立刻爆炸，没有引信");
         scene.idle(90);
         scene.overlay().showControls(new Vec3d(6.4, 3.6, 1.5), Pointing.DOWN, 30).rightClick()
                 .withItem(stack("wathe:grenade"));
@@ -122,13 +119,9 @@ final class WatheShopScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("平着扔大约落在 5 格外；爆炸声很响，约 80 格内都听得到")
-                .independent();
+        SceneCaptions.caption(scene, 90, "平着扔大约落在 5 格外；爆炸声很响，约 80 格内都听得到");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("手雷用一次就没了，扔完默认要等 3 分钟才能再扔")
-                .independent();
+        SceneCaptions.caption(scene, 80, "手雷用一次就没了，扔完默认要等 3 分钟才能再扔");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -168,10 +161,7 @@ final class WatheShopScenes {
                 new Vec3d(5.2, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:firecracker"));
         scene.idle(15);
-        scene.overlay().showText(70)
-                .text("爆竹：对着地面（方块的顶面）右键放下")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "爆竹：对着地面（方块的顶面）右键放下");
         scene.idle(40);
         Actors.lookPitch(scene, killer, 50);
         scene.overlay().showControls(new Vec3d(4.4, 1.8, 1.6), Pointing.DOWN, 30).rightClick()
@@ -189,17 +179,12 @@ final class WatheShopScenes {
                 new Box(spot.x - 0.3, spot.y - 0.02, spot.z - 0.3, spot.x + 0.3, spot.y + 0.15, spot.z + 0.3), 70);
         scene.idle(25);
         Actors.lookPitch(scene, killer, 0);
-        scene.overlay().showText(70)
-                .text("放下后会一直冒烟，过 15 秒才炸响")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "放下后会一直冒烟，过 15 秒才炸响");
         Actors.walk(scene, killer, new Vec3d(1.3, 0, 4.4), 40);
         scene.idle(45);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(35);
-        scene.overlay().showText(35)
-                .text("……15 秒后（演示缩短了等待时间）")
-                .independent();
+        SceneCaptions.caption(scene, 35, "……15 秒后（演示缩短了等待时间）");
         scene.idle(45);
         Effects.unmark(scene, smoke);
         Actors.remove(scene, cracker);
@@ -219,17 +204,11 @@ final class WatheShopScenes {
         Actors.walk(scene, first, new Vec3d(2.0, 0, -2.6), 30);
         Actors.walk(scene, second, new Vec3d(-1.2, 0, -2.8), 30);
         scene.idle(75);
-        scene.overlay().showText(80)
-                .text("它不会伤人：用来制造假枪声，把人引过去或分散注意力")
-                .independent();
+        SceneCaptions.caption(scene, 80, "它不会伤人：用来制造假枪声，把人引过去或分散注意力");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("左轮真开枪时近处一般还有一声“咔哒”；爆竹没有，闪光和烟出现在地上")
-                .independent();
+        SceneCaptions.caption(scene, 80, "左轮真开枪时近处一般还有一声“咔哒”；爆竹没有，闪光和烟出现在地上");
         scene.idle(90);
-        scene.overlay().showText(60)
-                .text("放下就拿不回来，也没人能拆掉")
-                .independent();
+        SceneCaptions.caption(scene, 60, "放下就拿不回来，也没人能拆掉");
         scene.idle(70);
         scene.markAsFinished();
     }
@@ -248,10 +227,7 @@ final class WatheShopScenes {
         scene.title("wathe_poison_vial", "毒药瓶：给托盘下毒");
         WatheItemScenes.setStage(scene, util);
         Vec3d tray = new Vec3d(3.5, 2.1, 3.5);
-        scene.overlay().showText(70)
-                .text("车厢里的饮品托盘和餐盘，空手右键就能拿一份")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "车厢里的饮品托盘和餐盘，空手右键就能拿一份");
         scene.idle(80);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(6.0, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
@@ -265,10 +241,7 @@ final class WatheShopScenes {
         Actors.swing(scene, killer);
         Actors.hold(scene, killer, ItemStack.EMPTY);
         Effects.Marker poison = Effects.mark(scene, WatheParticles.POISON, tray, POISON_RISE, 0.2f);
-        scene.overlay().showText(80)
-                .text("杀手拿毒药瓶右键托盘（餐盘也行），药瓶就用掉了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀手拿毒药瓶右键托盘（餐盘也行），药瓶就用掉了");
         scene.idle(90);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
@@ -290,23 +263,15 @@ final class WatheShopScenes {
         Actors.swing(scene, victim);
         Actors.hold(scene, victim, stack("wathe:mojito"));
         Effects.unmark(scene, poison);
-        scene.overlay().showText(90)
-                .text("下一个空手拿的人拿到的就是毒酒，托盘随即恢复干净")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "下一个空手拿的人拿到的就是毒酒，托盘随即恢复干净");
         scene.idle(100);
-        scene.overlay().showText(60)
-                .text("喝下去才会中毒，光拿着没事；这杯看起来和别的一模一样")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "喝下去才会中毒，光拿着没事；这杯看起来和别的一模一样");
         Actors.charge(scene, victim, true);
         scene.idle(40);
         Actors.charge(scene, victim, false);
         Actors.hold(scene, victim, ItemStack.EMPTY);
         scene.idle(30);
-        scene.overlay().showText(50)
-                .text("……一般 40～70 秒后（演示缩短了时间）")
-                .independent();
+        SceneCaptions.caption(scene, 50, "……一般 40～70 秒后（演示缩短了时间）");
         Actors.walk(scene, victim, new Vec3d(1.2, 0, 0.8), 30);
         scene.idle(60);
         Actors.fall(scene, victim);
@@ -316,9 +281,7 @@ final class WatheShopScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("只有中毒的人自己听得到越来越快的心跳；毒理学家和毒师能看出谁中了毒")
-                .independent();
+        SceneCaptions.caption(scene, 80, "只有中毒的人自己听得到越来越快的心跳；毒理学家和毒师能看出谁中了毒");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -349,10 +312,7 @@ final class WatheShopScenes {
         Actors.swing(scene, killer);
         Actors.hold(scene, killer, ItemStack.EMPTY);
         Effects.Marker poison = Effects.mark(scene, WatheParticles.POISON, pillow, POISON_RISE, 0.2f);
-        scene.overlay().showText(80)
-                .text("蝎子：拿着它右键一张床，悄悄藏进去，没有任何声音")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "蝎子：拿着它右键一张床，悄悄藏进去，没有任何声音");
         scene.idle(90);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
@@ -366,10 +326,7 @@ final class WatheShopScenes {
         ElementLink<ActorElement> sleeper = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(1.2, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
         scene.idle(10);
-        scene.overlay().showText(70)
-                .text("空手右键空床就能躺下睡觉，白天黑夜都能睡")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "空手右键空床就能躺下睡觉，白天黑夜都能睡");
         Actors.walk(scene, sleeper, new Vec3d(1.8, 0, -0.9), 25);
         scene.idle(28);
         Actors.turn(scene, sleeper, NORTH);
@@ -385,14 +342,10 @@ final class WatheShopScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("要是 2 秒内就起身，就能躲过；一只蝎子只蜇一个人")
-                .independent();
+        SceneCaptions.caption(scene, 70, "要是 2 秒内就起身，就能躲过；一只蝎子只蜇一个人");
         scene.idle(80);
         Actors.getUp(scene, sleeper);
-        scene.overlay().showText(50)
-                .text("……一般 40～70 秒后（演示缩短了时间）")
-                .independent();
+        SceneCaptions.caption(scene, 50, "……一般 40～70 秒后（演示缩短了时间）");
         Actors.walk(scene, sleeper, new Vec3d(1.4, 0, 0.6), 30);
         scene.idle(60);
         Actors.fall(scene, sleeper);
@@ -419,10 +372,7 @@ final class WatheShopScenes {
         scene.idle(15);
         Actors.fall(scene, victim);
         scene.idle(25);
-        scene.overlay().showText(60)
-                .text("走廊里躺着一具尸体")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "走廊里躺着一具尸体");
         scene.idle(70);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(6.0, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
@@ -437,23 +387,14 @@ final class WatheShopScenes {
         Actors.swing(scene, killer);
         Actors.vanish(scene, victim);
         Actors.hold(scene, killer, ItemStack.EMPTY);
-        scene.overlay().showText(80)
-                .text("裹尸袋：对着尸体右键，尸体立刻消失")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "裹尸袋：对着尸体右键，尸体立刻消失");
         scene.idle(90);
         Actors.lookPitch(scene, killer, 0);
-        scene.overlay().showText(80)
-                .text("附近十几格内的人能听到一声装袋的声音，越远越轻")
-                .independent();
+        SceneCaptions.caption(scene, 80, "附近十几格内的人能听到一声装袋的声音，越远越轻");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("尸体没了，路过的人就看不到；但死者掉的左轮等东西可能还在地上")
-                .independent();
+        SceneCaptions.caption(scene, 80, "尸体没了，路过的人就看不到；但死者掉的左轮等东西可能还在地上");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("裹尸袋用一次就没了；就算再买一个，默认也要等 5 分钟才能再用")
-                .independent();
+        SceneCaptions.caption(scene, 90, "裹尸袋用一次就没了；就算再买一个，默认也要等 5 分钟才能再用");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -484,57 +425,36 @@ final class WatheShopScenes {
         scene.idle(15);
         scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 60)
                 .withItem(stack("wathe:psycho_mode"));
-        scene.overlay().showText(80)
-                .text("杀手在商店买下【疯魔模式】：立刻生效，默认持续 30 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀手在商店买下【疯魔模式】：立刻生效，默认持续 30 秒");
         scene.idle(90);
         Actors.psycho(scene, killer, true);
         Actors.hold(scene, killer, stack("wathe:bat"));
         Actors.retint(scene, killer, RoleColors.KILLER,
                 Text.literal("urscrewed").formatted(Formatting.OBFUSCATED, Formatting.DARK_RED));
-        scene.overlay().showText(90)
-                .text("换上疯魔皮肤，名字变成乱码；手里一般只能拿球棒，换不了别的")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "换上疯魔皮肤，名字变成乱码；手里一般只能拿球棒，换不了别的");
         scene.idle(100);
-        scene.overlay().showText(60)
-                .text("全车一般都会响起疯魔音乐（静语者的疯魔没有）")
-                .independent();
+        SceneCaptions.caption(scene, 60, "全车一般都会响起疯魔音乐（静语者的疯魔没有）");
         scene.idle(70);
         Actors.walk(scene, killer, new Vec3d(-1.6, 0, 1.6), 25);
         scene.idle(28);
         scene.overlay().showControls(new Vec3d(4.2, 3.6, 2.8), Pointing.DOWN, 30).leftClick()
                 .withItem(stack("wathe:bat"));
-        scene.overlay().showText(80)
-                .text("球棒蓄满力（约 1 秒）后左键，一般一击必杀")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "球棒蓄满力（约 1 秒）后左键，一般一击必杀");
         scene.idle(10);
         Actors.swing(scene, killer);
         Actors.fall(scene, victim);
         scene.idle(80);
         WatheItemScenes.shoot(scene, vigilante, new Vec3d(1.1, 2.05, 5.9), new Vec3d(4.2, 1.9, 2.8));
-        scene.overlay().showText(90)
-                .text("疯魔默认带 1 层护盾，一般能挡下第一次致命攻击（只有疯魔自己听到盔甲声）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "疯魔默认带 1 层护盾，一般能挡下第一次致命攻击（只有疯魔自己听到盔甲声）");
         scene.idle(100);
-        scene.overlay().showText(60)
-                .text("护盾没了，再挨一下一般就会死")
-                .independent();
+        SceneCaptions.caption(scene, 60, "护盾没了，再挨一下一般就会死");
         scene.idle(70);
-        scene.overlay().showText(70)
-                .text("好人听到疯魔音乐，赶紧躲进房间把门关好")
-                .independent();
+        SceneCaptions.caption(scene, 70, "好人听到疯魔音乐，赶紧躲进房间把门关好");
         scene.idle(80);
         Actors.psycho(scene, killer, false);
         Actors.hold(scene, killer, ItemStack.EMPTY);
         Actors.retint(scene, killer, RoleColors.KILLER, killerName);
-        scene.overlay().showText(80)
-                .text("疯魔结束（默认 30 秒）后球棒自动收走；买下后 5 分钟内不能再买")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "疯魔结束（默认 30 秒）后球棒自动收走；买下后 5 分钟内不能再买");
         scene.idle(90);
         scene.markAsFinished();
     }

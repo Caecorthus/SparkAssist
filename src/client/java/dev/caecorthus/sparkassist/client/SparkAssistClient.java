@@ -41,15 +41,26 @@ public final class SparkAssistClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(GuidebookClientState::tick);
         GuidebookInventoryButton.register();
         ClientTickEvents.END_CLIENT_TICK.register(AchievementClientState::tick);
-        // A server with no advancements of its own never sends the update that would restore the page.
-        // 自身没有任何进度的服务器不会发送更新包，因此加入时主动补上成就页。
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) ->
-                AchievementAdvancements.restore(handler.getAdvancementHandler()));
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            // A proxy's server switch fires no DISCONNECT, only a new JOIN, so a latched instinct toggle is dropped
+            // here too. JOIN runs on the client thread as the game-join packet finishes, before the new world is
+            // ticked or drawn, so nothing of the new session has read the key yet.
+            // 代理切换服务器不会触发 DISCONNECT，只会再次触发 JOIN，因此这里也清除锁定的本能切换。JOIN 在客户端线程上、
+            // 进入游戏数据包处理完毕时触发，此时新世界尚未 tick 或绘制，新会话还没有读取过该按键。
+            InstinctKeyController.reset();
+            // A server with no advancements of its own never sends the update that would restore the page.
+            // 自身没有任何进度的服务器不会发送更新包，因此加入时主动补上成就页。
+            AchievementAdvancements.restore(handler.getAdvancementHandler());
+        });
+        // Fabric fires DISCONNECT from the Netty thread when the channel closes, while these resets touch state the
+        // client thread reads (the guide session, the card texture, the round tracker); so they run there, in order.
+        // 通道关闭时 Fabric 在 Netty 线程上触发 DISCONNECT，而这些重置涉及客户端线程读取的状态（指南会话、信息卡纹理、
+        // 对局跟踪器），因此按原顺序放到客户端线程上执行。
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(() -> {
             InstinctKeyController.reset();
             GuidebookClientState.disconnect();
             AchievementClientState.disconnect();
-        });
+        }));
         ClientTickEvents.END_CLIENT_TICK.register(SparkAssistClient::forgetMuzzles);
     }
 

@@ -67,10 +67,6 @@ public final class RoleGroups {
         return roleId != null && POLICE_ROLES.contains(roleId);
     }
 
-    public static boolean isKillerRole(String roleId) {
-        return roleId != null && KILLER_ROLES.contains(roleId);
-    }
-
     /**
      * The kill groups a player with {@code roleId} and effective {@code factionId} is in: {@link #POLICE} for a
      * police role on the civilian side, {@link #KILLER} on the killer faction, {@link #GRAND_WITCH} as the Grand

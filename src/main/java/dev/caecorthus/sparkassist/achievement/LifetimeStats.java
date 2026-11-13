@@ -294,10 +294,6 @@ public final class LifetimeStats {
         return tasks;
     }
 
-    public int roundsAs(String roleId) {
-        return roleRounds.getOrDefault(roleId, 0);
-    }
-
     public int winsAs(String roleId) {
         return roleWins.getOrDefault(roleId, 0);
     }
@@ -316,10 +312,6 @@ public final class LifetimeStats {
         return Collections.unmodifiableMap(heldRoleWins);
     }
 
-    public int roundsFor(String factionId) {
-        return factionRounds.getOrDefault(factionId, 0);
-    }
-
     public int winsFor(String factionId) {
         return factionWins.getOrDefault(factionId, 0);
     }
@@ -335,10 +327,6 @@ public final class LifetimeStats {
 
     public Map<String, Integer> factionRounds() {
         return Collections.unmodifiableMap(factionRounds);
-    }
-
-    public Map<String, Integer> factionWins() {
-        return Collections.unmodifiableMap(factionWins);
     }
 
     /** Things consumed of {@code kind} ({@code food}, {@code drink}). {@code kind}（{@code food}、{@code drink}）的食用次数。 */
@@ -403,11 +391,6 @@ public final class LifetimeStats {
         return Collections.unmodifiableMap(consumedSinceDeath);
     }
 
-    /** Times {@code itemId} was eaten or drunk. 吃喝 {@code itemId} 的次数。 */
-    public int consumedItem(String itemId) {
-        return consumedItems.getOrDefault(itemId, 0);
-    }
-
     /** Every item ever eaten or drunk, with its count. 吃喝过的所有物品及次数。 */
     public Map<String, Integer> consumedItems() {
         return Collections.unmodifiableMap(consumedItems);
@@ -441,14 +424,6 @@ public final class LifetimeStats {
         return Collections.unmodifiableMap(rivalKills);
     }
 
-    /**
-     * Every owner-visible trait held around a kill of a player on another faction made as {@code roleId}, sorted.
-     * 以 {@code roleId} 身份击杀其他阵营玩家时持有过的所有自身可见词条，已排序。
-     */
-    public Set<String> rivalKillTraitsAs(String roleId) {
-        return view(rivalKillTraits, roleId);
-    }
-
     public Map<String, Set<String>> rivalKillTraits() {
         return views(rivalKillTraits);
     }
@@ -472,11 +447,6 @@ public final class LifetimeStats {
 
     public Map<String, Integer> blackoutNonCivilianKills() {
         return Collections.unmodifiableMap(blackoutNonCivilianKills);
-    }
-
-    /** Whether the player was ever turned into {@code roleId} mid-round. 玩家是否曾在对局中途变成 {@code roleId}。 */
-    public boolean tookRole(String roleId) {
-        return rolesTaken.containsKey(roleId);
     }
 
     /** The recorded causes of becoming {@code roleId} mid-round, sorted. 中途变成 {@code roleId} 的已记录原因，已排序。 */

@@ -272,17 +272,7 @@ final class WitchCivilianRules {
 
     /** Whether {@code later} comes after {@code earlier} in record order. 按记录顺序 {@code later} 是否在 {@code earlier} 之后。 */
     private static boolean comesAfter(AchievementContext context, MatchEvent later, MatchEvent earlier) {
-        int earlierAt = positionOf(context.timeline().events(), earlier);
-        return earlierAt >= 0 && positionOf(context.timeline().events(), later) > earlierAt;
-    }
-
-    /** The record position of this very event, -1 if absent. 这条事件本身在记录中的位置，没有则为 -1。 */
-    private static int positionOf(List<MatchEvent> events, MatchEvent event) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i) == event) {
-                return i;
-            }
-        }
-        return -1;
+        int earlierAt = Rules.positionOf(context.timeline().events(), earlier);
+        return earlierAt >= 0 && Rules.positionOf(context.timeline().events(), later) > earlierAt;
     }
 }

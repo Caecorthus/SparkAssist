@@ -74,7 +74,13 @@ public final class GuidebookDecorator implements AutoCloseable {
                                        int searchToggleX, int density, boolean foliage) {
     }
 
-    private record PlateKey(DecorSet.Plate kind, String page, boolean art, int width, int theme, long seed) {
+    /**
+     * {@code art} is the loaded plate itself (null for none), not just whether there is one: a resource reload loads
+     * a new object (its pixel array compares by identity), so the layer repaints instead of keeping the old pixels.
+     * {@code art} 是读取到的扉画本身（没有时为 null），而不只是有没有：资源重载会读出新对象（像素数组按引用比较），
+     * 因此该层会重画，而不是沿用旧像素。
+     */
+    private record PlateKey(DecorSet.Plate kind, String page, PlateArt art, int width, int theme, long seed) {
     }
 
     private record SigilKey(DecorSet.Sigil kind, int radius, long seed) {
@@ -116,7 +122,7 @@ public final class GuidebookDecorator implements AutoCloseable {
                                   long seed, int top, boolean clipToViewport) {
         int width = sheet.measure();
         Optional<PlateArt> art = PlateArtLoader.forEntry(set.page());
-        PlateKey key = new PlateKey(set.plate(), set.page(), art.isPresent(), width, set.theme(), seed);
+        PlateKey key = new PlateKey(set.plate(), set.page(), art.orElse(null), width, set.theme(), seed);
         if (!layer.isCurrent(key)) {
             PixelBuffer buffer = new PixelBuffer(width + 2 * Plates.MARGIN, Plates.HEIGHT + 2 * Plates.MARGIN);
             String[] emblem = Emblems.forEntry(set.page()).orElse(null);

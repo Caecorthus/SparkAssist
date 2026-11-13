@@ -84,13 +84,8 @@ final class TraitRules {
      * 每次都在持有内鬼时，击杀 4 名死亡时阵营已知且不是杀手阵营的玩家（好人、中立、魔女都算；{@link Factions#NONE} 不算阵营）。
      */
     static boolean impostorKilledFourNonKillers(AchievementContext context) {
-        return Rules.myKills(context, kill -> victimNonKiller(context, kill)
+        return Rules.myKills(context, kill -> Rules.victimNonKiller(context, kill)
                 && context.hadTraitAround(IMPOSTOR, kill.tick())).size() >= TURNCOAT_KILLS;
-    }
-
-    private static boolean victimNonKiller(AchievementContext context, MatchEvent kill) {
-        String faction = context.timeline().victimFaction(kill);
-        return (Factions.isCivilian(faction) || Factions.isNonCivilian(faction)) && !Factions.KILLER.equals(faction);
     }
 
     /**

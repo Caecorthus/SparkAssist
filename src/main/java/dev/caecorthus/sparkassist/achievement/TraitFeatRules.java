@@ -201,13 +201,13 @@ final class TraitFeatRules {
      */
     static boolean thrustPushOff(AchievementContext context) {
         return context.kills().stream().anyMatch(kill -> Rules.reason(kill, FELL_OUT_OF_TRAIN)
-                && victimNonKiller(context, kill) && context.hadTraitAround(THRUST, kill.tick()));
+                && Rules.victimNonKiller(context, kill) && context.hadTraitAround(THRUST, kill.tick()));
     }
 
     /**
      * 十八般武艺: across rounds, as one of the 21 killer roles, killed a player of another faction while holding each of
-     * the 18 killer traits ({@link LifetimeStats#rivalKillTraitsAs}).
-     * 累计以 21 个杀手身份之一，分别在持有 18 个杀手词条中的每一个时击杀过其他阵营的玩家（{@link LifetimeStats#rivalKillTraitsAs}）。
+     * the 18 killer traits ({@link LifetimeStats#rivalKillTraits}).
+     * 累计以 21 个杀手身份之一，分别在持有 18 个杀手词条中的每一个时击杀过其他阵营的玩家（{@link LifetimeStats#rivalKillTraits}）。
      */
     static boolean everyKillerTrait(AchievementContext context) {
         return heldAtRivalKills(context, RoleGroups.KILLER_ROLES).containsAll(KILLER_TRAITS);
@@ -239,11 +239,6 @@ final class TraitFeatRules {
     static boolean isShieldBlock(MatchEvent event) {
         return event.is(MatchEvent.SHIELD_BLOCKED)
                 || event.is(DEATH_BLOCKED) && SHIELD_BLOCK_REASONS.contains(event.value("block_reason", ""));
-    }
-
-    private static boolean victimNonKiller(AchievementContext context, MatchEvent kill) {
-        String faction = context.timeline().victimFaction(kill);
-        return (Factions.isCivilian(faction) || Factions.isNonCivilian(faction)) && !Factions.KILLER.equals(faction);
     }
 
     /**

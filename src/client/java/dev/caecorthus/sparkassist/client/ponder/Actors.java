@@ -189,6 +189,29 @@ public final class Actors {
         scene.addElement(element);
     }
 
+    /** The level direction a player facing {@code yaw} looks along (0 = south, 90 = west). 朝向 yaw 时的水平前方（0 为南，90 为西）。 */
+    static Vec3d forward(float yaw) {
+        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
+        return new Vec3d(-MathHelper.sin(radians), 0, MathHelper.cos(radians));
+    }
+
+    /** The yaw that faces from {@code from} towards {@code to}. 从 from 面向 to 的朝向。 */
+    static float facing(Vec3d from, Vec3d to) {
+        return (float) (MathHelper.atan2(from.x - to.x, to.z - from.z) * MathHelper.DEGREES_PER_RADIAN);
+    }
+
+    /**
+     * The yaw that faces from {@code from} towards {@code to}, as the Witch killer and Party Animal scenes compute it.
+     * Kept apart from {@link #facing}: it negates the x offset instead of subtracting the other way round, so a zero
+     * offset is -0.0 rather than +0.0.
+     * 从 from 看向 to 的朝向角，即魔女杀手与派对狂场景的算法。与 facing 分开保留：它对 x 差取负，而不是反过来相减，
+     * 所以 x 差为零时得到 -0.0 而不是 +0.0。
+     */
+    static float yawTowards(Vec3d from, Vec3d to) {
+        Vec3d delta = to.subtract(from);
+        return (float) (MathHelper.atan2(-delta.x, delta.z) * MathHelper.DEGREES_PER_RADIAN);
+    }
+
     private static void apply(SceneBuilder scene, ElementLink<ActorElement> actor, Consumer<ActorElement> change) {
         scene.addInstruction(ponder -> {
             ActorElement element = ponder.resolve(actor);
