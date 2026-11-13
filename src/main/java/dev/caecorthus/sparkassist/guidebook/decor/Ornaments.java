@@ -97,9 +97,6 @@ public final class Ornaments {
 
     // ================================================================ paper ornaments / 纸面小件
 
-    /** Ribbon width. 丝带宽度。 */
-    public static final int RIBBON_WIDTH = 4;
-
     /**
      * Silk bookmark ribbon hanging down from y1 to y2 at x: lit left edge, shaded right edge, a 1 px drop shadow
      * to the right and a forked tail. 从 y1 垂到 y2 的丝带书签：左缘受光、右缘背光、右侧 1 像素投影、燕尾收尾。

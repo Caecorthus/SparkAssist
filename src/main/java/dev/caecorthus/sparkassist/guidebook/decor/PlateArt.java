@@ -19,13 +19,8 @@ public record PlateArt(int width, byte[] tones, int focus, int emblemX, int embl
     public static final int WIDTH = 256;
 
     public static final int PAPER = 0;
-    public static final int LIGHT = 1;
-    public static final int MID = 2;
     public static final int DARK = 3;
-    public static final int GLOW = 4;
-    public static final int ACCENT = 5;
     public static final int THEME = 6;
-    public static final int DEEP = 7;
 
     /** The authoring colour of each tone; the theme tones are magenta placeholders. 各色阶的作画颜色；主题色阶为洋红占位。 */
     private static final int[] AUTHORING = {0xF3E6CC, 0x9C8667, 0x6B5641, 0x2F1B1B, 0xFFE0FF, 0xFF9CFF, 0xFF00FF,

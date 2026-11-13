@@ -182,7 +182,7 @@ final class GeneralRules {
      * 在 20 名及以上玩家的对局中存活并获胜（客户端同时看到的有角色玩家数的最大值，或记录的开局快照人数，取较大者）。
      */
     static boolean wonCrowdedRound(AchievementContext context) {
-        return context.won() && survived(context) && roundSize(context) >= CROWDED_ROUND;
+        return context.won() && survived(context) && Rules.roundSize(context) >= CROWDED_ROUND;
     }
 
     /**
@@ -249,7 +249,7 @@ final class GeneralRules {
     static boolean wonFinalDuel(AchievementContext context) {
         UUID self = context.self();
         MatchTimeline timeline = context.timeline();
-        if (self == null || !context.won() || roundSize(context) < DUEL_ROUND) {
+        if (self == null || !context.won() || Rules.roundSize(context) < DUEL_ROUND) {
             return false;
         }
         return context.kills().stream().anyMatch(kill -> kill.target() != null && !timeline.isFakeDeath(kill)
@@ -584,14 +584,6 @@ final class GeneralRules {
     private static String winningFaction(AchievementContext context) {
         String custom = context.outcome().winningFactionId();
         return custom != null ? custom : RoundOutcome.defaultWinningFaction(context.outcome().winStatus());
-    }
-
-    /**
-     * How many players the round had: the most with a role the client saw at once, or the record's opening snapshot.
-     * 本局人数：客户端同时看到的有角色玩家数的最大值，或记录的开局快照人数。
-     */
-    private static int roundSize(AchievementContext context) {
-        return Math.max(context.facts().players(), context.timeline().startingPlayers().size());
     }
 
     /** The record tick the round was decided at. 胜负判定时的记录 tick。 */

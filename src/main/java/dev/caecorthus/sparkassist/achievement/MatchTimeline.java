@@ -454,17 +454,6 @@ public final class MatchTimeline {
         return psychoWindows(player).stream().anyMatch(window -> window.contains(tick));
     }
 
-    /** Everyone in psycho mode at record tick {@code tick}. 记录 tick {@code tick} 时处于疯魔模式的所有玩家。 */
-    public Set<UUID> inPsychoAt(int tick) {
-        Set<UUID> players = new LinkedHashSet<>();
-        psychoWindows.forEach((player, windows) -> {
-            if (windows.stream().anyMatch(window -> window.contains(tick))) {
-                players.add(player);
-            }
-        });
-        return Collections.unmodifiableSet(players);
-    }
-
     /**
      * The longest spans in which at least {@code atLeast} players other than {@code excluded} (null excludes nobody)
      * were in psycho mode at once, in tick order, built from every player's {@link #psychoWindows} (every psycho

@@ -2,6 +2,7 @@ package dev.caecorthus.sparkassist.client.ponder;
 
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
+import static dev.caecorthus.sparkassist.client.ponder.StageLights.lamp;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.NORTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_LEFT;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SCREEN_RIGHT;
@@ -10,7 +11,6 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
 import dev.doctor4t.wathe.index.WatheParticles;
-import dev.doctor4t.wathe.index.WatheProperties;
 import java.util.Comparator;
 import java.util.List;
 import net.createmod.catnip.math.Pointing;
@@ -145,14 +145,9 @@ final class SparkStrengthKillerItemScenes {
                 Direction.DOWN);
         Actors.hold(scene, morphling, reagent);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("变形者可在商店买【变形试剂】（默认 10 金币），开局还自带一个【变形遥控器】")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "变形者可在商店买【变形试剂】（默认 10 金币），开局还自带一个【变形遥控器】");
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("这两样拿在手里时，其他活人一般看不见")
-                .independent();
+        SceneCaptions.caption(scene, 70, "这两样拿在手里时，其他活人一般看不见");
         Vec3d nearMing = new Vec3d(2.6, 1, 3.0);
         Actors.walk(scene, morphling, nearMing.subtract(start), 40);
         scene.idle(42);
@@ -160,10 +155,7 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(38);
         scene.overlay().showControls(nearMing.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(reagent);
         scene.idle(10);
-        scene.overlay().showText(90)
-                .text("第一次右键：对准身边（约 3 格内）的活人或尸体采样（没对准人就采你自己）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "第一次右键：对准身边（约 3 格内）的活人或尸体采样（没对准人就采你自己）");
         scene.idle(100);
         Vec3d nearJie = new Vec3d(5.6, 1, 5.0);
         Actors.walk(scene, morphling, nearJie.subtract(nearMing), 36);
@@ -178,14 +170,9 @@ final class SparkStrengthKillerItemScenes {
         Actors.hold(scene, morphling, ItemStack.EMPTY);
         // The mark's outline lasts until the disguise ends. 标记轮廓持续到伪装结束。
         Actors.highlight(scene, marked, color, 800);
-        scene.overlay().showText(90)
-                .text("松开后再右键：对准身边另一个活人标记（没对准人就标记你自己；不能是采样对象），试剂随即用掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "松开后再右键：对准身边另一个活人标记（没对准人就标记你自己；不能是采样对象），试剂随即用掉");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("被你标记的人会带着你颜色的轮廓，直到伪装结束（只在你屏幕上；按住本能键时显示普通本能颜色）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "被你标记的人会带着你颜色的轮廓，直到伪装结束（只在你屏幕上；按住本能键时显示普通本能颜色）");
         Vec3d hideout = new Vec3d(6.2, 1, 1.4);
         Actors.walk(scene, morphling, hideout.subtract(nearJie), 36);
         scene.idle(38);
@@ -196,39 +183,24 @@ final class SparkStrengthKillerItemScenes {
         scene.idle(10);
         Actors.swing(scene, morphling);
         Actors.retint(scene, marked, RoleColors.CIVILIAN, ming);
-        scene.overlay().showText(90)
-                .text("在哪都行，右键遥控器：你标记的人同时开始伪装，持续 60 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "在哪都行，右键遥控器：你标记的人同时开始伪装，持续 60 秒");
         scene.idle(100);
         Actors.walk(scene, marked, new Vec3d(-1.2, 0, -0.8), 24);
-        scene.overlay().showText(90)
-                .text("其他人眼里，小杰现在一般就是“阿明”：样子和准星下的名字都变了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "其他人眼里，小杰现在一般就是“阿明”：样子和准星下的名字都变了");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("开着语音时：伪装期间他说不出话；阿明若还活着，说话声也会从他身上传出来")
-                .independent();
+        SceneCaptions.caption(scene, 90, "开着语音时：伪装期间他说不出话；阿明若还活着，说话声也会从他身上传出来");
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
                 .text("伪装期间他每杀一个人、或者他死了，只要你还活着，都能得 50 金币")
                 .independent();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("伪装中的好人中枪时，开枪的人一般不受误杀惩罚")
-                .independent();
+        SceneCaptions.caption(scene, 90, "伪装中的好人中枪时，开枪的人一般不受误杀惩罚");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("死在伪装期间，尸体一般也是伪装后的样子（杀手按住本能键能看到原样，验尸官查看尸体也能看到真名）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "死在伪装期间，尸体一般也是伪装后的样子（杀手按住本能键能看到原样，验尸官查看尸体也能看到真名）");
         scene.idle(100);
         Actors.retint(scene, marked, RoleColors.VIGILANTE, jie);
-        scene.overlay().showText(80)
-                .text("60 秒后（演示缩短了时间）变回原样；遥控器不会用掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "60 秒后（演示缩短了时间）变回原样；遥控器不会用掉");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -267,24 +239,16 @@ final class SparkStrengthKillerItemScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, killer, m67);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("能买【手雷】的商店都会多卖【M67 手雷】：一般 25 金币，炸弹客 10 金币")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "能买【手雷】的商店都会多卖【M67 手雷】：一般 25 金币，炸弹客 10 金币");
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("开局 90 秒后才能扔；拿在手里别人看得见")
-                .independent();
+        SceneCaptions.caption(scene, 70, "开局 90 秒后才能扔；拿在手里别人看得见");
         scene.idle(80);
         scene.overlay().showControls(killerSpot.add(0, 2.6, 0), Pointing.DOWN, 40).rightClick().withItem(m67);
         // Aimed steeply down: thrown level it would first land about 13 blocks out (M67Physics, 2.25 a tick).
         // 朝脚下猛扔：平着扔要飞出约 13 格才第一次落地（M67Physics，每 tick 2.25 格）。
         Actors.lookPitch(scene, killer, 77);
         Actors.charge(scene, killer, true);
-        scene.overlay().showText(58)
-                .text("按住右键拉环，一般约 1 秒拉满再松手；没拉满就松手算取消，冷却约 2 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 58, "按住右键拉环，一般约 1 秒拉满再松手；没拉满就松手算取消，冷却约 2 秒");
         scene.idle(40);
         Actors.charge(scene, killer, false);
         Actors.hold(scene, killer, ItemStack.EMPTY);
@@ -311,10 +275,7 @@ final class SparkStrengthKillerItemScenes {
         // The outline lasts the rest of the fuse. 描边持续到引信结束。
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, grenade,
                 new Box(rest.x - 0.2, rest.y, rest.z - 0.2, rest.x + 0.2, rest.y + 0.3, rest.z + 0.2), 42);
-        scene.overlay().showText(60)
-                .text("出手很猛：落地后还会弹起、滚动，碰到墙也会弹开；扔出 3.5 秒后爆炸")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "出手很猛：落地后还会弹起、滚动，碰到墙也会弹开；扔出 3.5 秒后爆炸");
         scene.idle(6);
         Actors.lookPitch(scene, killer, 0);
         Actors.walk(scene, runs, new Vec3d(4.8, 0, 1.2), 24);
@@ -340,9 +301,7 @@ final class SparkStrengthKillerItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("扔的人自己离得太近一般也会被炸死，范围内的无人机也会被炸坏；扔出后一般冷却 10 秒")
-                .independent();
+        SceneCaptions.caption(scene, 90, "扔的人自己离得太近一般也会被炸死，范围内的无人机也会被炸坏；扔出后一般冷却 10 秒");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -382,10 +341,7 @@ final class SparkStrengthKillerItemScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, bomber, bombDrone);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("炸弹客可在商店买【炸弹无人机】（一般 400 金币，善良炸弹客 200），开局 90 秒后才能放下和操控")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "炸弹客可在商店买【炸弹无人机】（一般 400 金币，善良炸弹客 200），开局 90 秒后才能放下和操控");
         scene.idle(100);
         Actors.lookPitch(scene, bomber, 55);
         scene.overlay().showControls(new Vec3d(7.3, 1.3, 1.9), Pointing.DOWN, 30).rightClick().withItem(bombDrone);
@@ -396,23 +352,14 @@ final class SparkStrengthKillerItemScenes {
                 new Vec3d(7.3, 1, 1.9), SCREEN_RIGHT);
         scene.idle(15);
         Actors.lookPitch(scene, bomber, 0);
-        scene.overlay().showText(90)
-                .text("右键地面放下（拿在手里时其他活人看不见）；一次性，场上同时只能有一架没炸掉的")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键地面放下（拿在手里时其他活人看不见）；一次性，场上同时只能有一架没炸掉的");
         scene.idle(100);
         Actors.hold(scene, bomber, stack("sparkstrength:tablet"));
-        scene.overlay().showText(90)
-                .text("和投弹无人机一样：主手拿【平板电脑】连接，以无人机视角操控（平板拿在手里其他活人看不见）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "和投弹无人机一样：主手拿【平板电脑】连接，以无人机视角操控（平板拿在手里其他活人看不见）");
         scene.idle(30);
         NoellesKillerScenes.flyDrone(scene, drone, new Vec3d(0, 1.0, 0), 3);
         scene.idle(70);
-        scene.overlay().showText(90)
-                .text("它横向飞得更快，耗电也更快：飞行每秒 5%%，悬停每秒 2%%")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "它横向飞得更快，耗电也更快：飞行每秒 5%%，悬停每秒 2%%");
         NoellesKillerScenes.flyDrone(scene, drone, new Vec3d(-4.3, 0, 4.3), 9);
         scene.idle(100);
         Vec3d hover = new Vec3d(3.0, 2.0, 6.2);
@@ -437,13 +384,9 @@ final class SparkStrengthKillerItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("被打坏或电量耗尽时也会立刻爆炸；你的本体在 4 格内一般也会被炸死")
-                .independent();
+        SceneCaptions.caption(scene, 90, "被打坏或电量耗尽时也会立刻爆炸；你的本体在 4 格内一般也会被炸死");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("你死亡或掉线后，无人机一般冒一阵烟就失效，不会爆炸")
-                .independent();
+        SceneCaptions.caption(scene, 80, "你死亡或掉线后，无人机一般冒一阵烟就失效，不会爆炸");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -472,40 +415,26 @@ final class SparkStrengthKillerItemScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, vulture, board);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("秃鹫开局自带一块【滑板】，拿在手里别人一般看不见；开局 60 秒后才能用")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "秃鹫开局自带一块【滑板】，拿在手里别人一般看不见；开局 60 秒后才能用");
         scene.idle(100);
         scene.overlay().showControls(vultureSpot.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(board);
         scene.idle(10);
         Actors.swing(scene, vulture);
         Actors.hold(scene, vulture, ItemStack.EMPTY);
         Actors.ride(scene, vulture, board);
-        scene.overlay().showText(80)
-                .text("右键踩上滑板：10 秒内移动速度变成 3 倍（走路和疾跑都算）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "右键踩上滑板：10 秒内移动速度变成 3 倍（走路和疾跑都算）");
         scene.idle(30);
         // Same 30 ticks, three times the distance. 同样 30 tick，距离是三倍。
         Actors.walk(scene, walker, new Vec3d(-5 / 3.0, 0, 5 / 3.0), 30);
         Actors.walk(scene, vulture, new Vec3d(-5.0, 0, 5.0), 30);
         scene.idle(60);
-        scene.overlay().showText(90)
-                .text("脚下的滑板一般人人都看得见；滑行时没有脚步声，移动时只有轮子滚动的声音")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "脚下的滑板一般人人都看得见；滑行时没有脚步声，移动时只有轮子滚动的声音");
         // The ride ends 200 ticks (10 s) after getting on. 上板 200 tick（10 秒）后结束。
         scene.idle(110);
         Actors.ride(scene, vulture, ItemStack.EMPTY);
-        scene.overlay().showText(90)
-                .text("10 秒后自动下板，中途不能自己下来；一般从上板算起 20 秒后才能再用，滑板不会用掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "10 秒后自动下板，中途不能自己下来；一般从上板算起 20 秒后才能再用，滑板不会用掉");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("被定身（比如工程师的捕捉装置）、被饕餮吞下或死亡时会立刻停下")
-                .independent();
+        SceneCaptions.caption(scene, 90, "被定身（比如工程师的捕捉装置）、被饕餮吞下或死亡时会立刻停下");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -541,10 +470,7 @@ final class SparkStrengthKillerItemScenes {
                 Direction.DOWN);
         Actors.hold(scene, pathogen, virus);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("病原体可在商店买【病毒】（默认 50 金币，能叠加），拿在手里别人一般看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "病原体可在商店买【病毒】（默认 50 金币，能叠加），拿在手里别人一般看不见");
         Vec3d near = new Vec3d(4.2, 1, 2.2);
         Actors.walk(scene, pathogen, near.subtract(start), 26);
         scene.idle(28);
@@ -560,22 +486,15 @@ final class SparkStrengthKillerItemScenes {
                 .text("阿嚏！")
                 .pointAt(carrierSpot.add(0, 1.9, 0))
                 .placeNearTarget();
-        scene.overlay().showText(90)
-                .text("右键 3 格内视线可及的活人：他一般会立刻打个喷嚏（附近都听得到），成为带毒者")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键 3 格内视线可及的活人：他一般会立刻打个喷嚏（附近都听得到），成为带毒者");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("你一般能在视线内看到带毒者的深绿色轮廓（只在你屏幕上，隔墙不显示，方框为示意）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "你一般能在视线内看到带毒者的深绿色轮廓（只在你屏幕上，隔墙不显示，方框为示意）");
         Vec3d back = new Vec3d(5.6, 1, 1.0);
         Actors.walk(scene, pathogen, back.subtract(near), 20);
         scene.idle(22);
         Actors.turn(scene, pathogen, facing(back, carrierSpot));
         scene.idle(78);
-        scene.overlay().showText(80)
-                .text("对病原体或已经带毒的人无效，这时病毒不会用掉")
-                .independent();
+        SceneCaptions.caption(scene, 80, "对病原体或已经带毒的人无效，这时病毒不会用掉");
         Vec3d closer = new Vec3d(1.8, 1, 5.0);
         Actors.walk(scene, bystander, closer.subtract(bystanderStart), 20);
         scene.idle(22);
@@ -587,18 +506,11 @@ final class SparkStrengthKillerItemScenes {
                 .pointAt(carrierSpot.add(0, 1.9, 0))
                 .placeNearTarget();
         Actors.highlight(scene, bystander, color, 410);
-        scene.overlay().showText(100)
-                .text("带毒者每 30 秒传染一次：身边 3 格内、视线可及、最近的一名未感染者（演示缩短了时间）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "带毒者每 30 秒传染一次：身边 3 格内、视线可及、最近的一名未感染者（演示缩短了时间）");
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("传染时他又打一个喷嚏；被传染的人在你眼里是亮绿色轮廓，只算感染，一般不会再往外传")
-                .independent();
+        SceneCaptions.caption(scene, 90, "传染时他又打一个喷嚏；被传染的人在你眼里是亮绿色轮廓，只算感染，一般不会再往外传");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("毒理学家也能看见视线内的带毒者，还能用【解毒剂】把他治好")
-                .independent();
+        SceneCaptions.caption(scene, 90, "毒理学家也能看见视线内的带毒者，还能用【解毒剂】把他治好");
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
@@ -640,10 +552,7 @@ final class SparkStrengthKillerItemScenes {
                 Direction.DOWN);
         Actors.hold(scene, pathogen, tVirus);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("【T病毒】：默认 150 金币，每局限购 1 支，拿在手里别人一般看不见；被 T病毒复活的病原体买不到")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "【T病毒】：默认 150 金币，每局限购 1 支，拿在手里别人一般看不见；被 T病毒复活的病原体买不到");
         Vec3d near = new Vec3d(4.2, 1, 2.0);
         Actors.walk(scene, pathogen, near.subtract(start), 26);
         scene.idle(28);
@@ -661,32 +570,20 @@ final class SparkStrengthKillerItemScenes {
         // 复活把玩家放到尸体的位置与朝向。
         ElementLink<ActorElement> revived = Actors.enter(scene, color, Text.literal("病原体（复活）"),
                 along(bodySpot, SCREEN_RIGHT, 1), SCREEN_RIGHT, Direction.DOWN);
-        scene.overlay().showText(100)
-                .text("右键死者的尸体：他在尸体处、按尸体的朝向复活，成为你的病原体同伴（附近都听得到僵尸村民的转化声）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "右键死者的尸体：他在尸体处、按尸体的朝向复活，成为你的病原体同伴（附近都听得到僵尸村民的转化声）");
         scene.idle(20);
         Actors.lookPitch(scene, pathogen, 0);
         // Pathogens see each other through walls at any distance. 病原体之间不论多远都能隔墙看到彼此。
         Actors.highlight(scene, revived, PATHOGEN_TEAMMATE, 490);
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("活着的病原体之间一般不论多远都能隔墙看到彼此（方框为示意）；病原体获胜时，所有在线的病原体一起算赢")
-                .independent();
+        SceneCaptions.caption(scene, 90, "活着的病原体之间一般不论多远都能隔墙看到彼此（方框为示意）；病原体获胜时，所有在线的病原体一起算赢");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("他的背包清空、金币归零，拿到中立万能钥匙和感染技能；他的商店只卖【病毒】")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "他的背包清空、金币归零，拿到中立万能钥匙和感染技能；他的商店只卖【病毒】");
         Actors.walk(scene, revived, new Vec3d(-1.2, 0, 1.2), 24);
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("复活的同伴活着时说不了话；在他眼里，除病原体以外的人都是灰色的史蒂夫")
-                .independent();
+        SceneCaptions.caption(scene, 90, "复活的同伴活着时说不了话；在他眼里，除病原体以外的人都是灰色的史蒂夫");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("每名死者只有最新的那具尸体有效；假尸体、被藏起来的尸体、冤魂等都不行；没复活成功不会用掉")
-                .independent();
+        SceneCaptions.caption(scene, 90, "每名死者只有最新的那具尸体有效；假尸体、被藏起来的尸体、冤魂等都不行；没复活成功不会用掉");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -725,29 +622,20 @@ final class SparkStrengthKillerItemScenes {
                 Direction.DOWN);
         scene.idle(15);
         scene.overlay().showControls(spot.add(0, 2.6, 0), Pointing.DOWN, 60).withItem(stack("wathe:psycho_mode"));
-        scene.overlay().showText(90)
-                .text("装了 SparkStrength 时，连环杀手开疯魔模式不拿球棒，改拿两把手枪")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "装了 SparkStrength 时，连环杀手开疯魔模式不拿球棒，改拿两把手枪");
         scene.idle(100);
         Actors.psycho(scene, killer, true);
         Actors.hold(scene, killer, pistol);
         Actors.holdOffHand(scene, killer, leftPistol);
         Actors.retint(scene, killer, color,
                 Text.literal("urscrewed").formatted(Formatting.OBFUSCATED, Formatting.DARK_RED));
-        scene.overlay().showText(90)
-                .text("主手【连环手枪】、副手【连环左持手枪】；疯魔皮肤、乱码名字和护盾照旧")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "主手【连环手枪】、副手【连环左持手枪】；疯魔皮肤、乱码名字和护盾照旧");
         scene.idle(100);
         scene.overlay().showControls(spot.add(0, 2.6, 0), Pointing.DOWN, 20).rightClick().withItem(pistol);
         scene.idle(5);
         WatheItemScenes.shoot(scene, killer, muzzle(spot, SCREEN_RIGHT, -0.12), firstSpot.add(0, 0.9, 0));
         Actors.fall(scene, first);
-        scene.overlay().showText(73)
-                .text("右键开枪，射程 30 格，打中一般当场死亡；隔墙打不到人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 73, "右键开枪，射程 30 格，打中一般当场死亡；隔墙打不到人");
         scene.idle(10);
         float towardSecond = facing(spot, secondSpot);
         Actors.turn(scene, killer, towardSecond);
@@ -757,27 +645,17 @@ final class SparkStrengthKillerItemScenes {
         WatheItemScenes.shoot(scene, killer, muzzle(spot, towardSecond, 0.12), secondSpot.add(0, 0.9, 0));
         Actors.fall(scene, second);
         scene.idle(60);
-        scene.overlay().showText(90)
-                .text("主手枪冷却时再按右键，自动改用副手枪开火；两把枪各自冷却，一般 2 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "主手枪冷却时再按右键，自动改用副手枪开火；两把枪各自冷却，一般 2 秒");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("疯魔期间两把枪锁在槽位里：丢不掉、移不走，也切换不了别的物品")
-                .independent();
+        SceneCaptions.caption(scene, 90, "疯魔期间两把枪锁在槽位里：丢不掉、移不走，也切换不了别的物品");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("开疯魔时副手必须空着、快捷栏要留一个空位，否则开不了（不扣金币）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "开疯魔时副手必须空着、快捷栏要留一个空位，否则开不了（不扣金币）");
         scene.idle(100);
         Actors.psycho(scene, killer, false);
         Actors.hold(scene, killer, ItemStack.EMPTY);
         Actors.holdOffHand(scene, killer, ItemStack.EMPTY);
         Actors.retint(scene, killer, color, serialName);
-        scene.overlay().showText(80)
-                .text("疯魔结束（默认 30 秒）时两把枪被收走")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "疯魔结束（默认 30 秒）时两把枪被收走");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -810,10 +688,7 @@ final class SparkStrengthKillerItemScenes {
                 Direction.DOWN);
         Actors.hold(scene, bomber, bomb);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("装了 SparkStrength 时，定时炸弹还能藏进餐盘、饮品托盘或床里当陷阱")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "装了 SparkStrength 时，定时炸弹还能藏进餐盘、饮品托盘或床里当陷阱");
         Vec3d atTray = new Vec3d(4.4, 1, 2.6);
         Actors.walk(scene, bomber, atTray.subtract(start), 25);
         scene.idle(27);
@@ -828,14 +703,9 @@ final class SparkStrengthKillerItemScenes {
         // 托盘方块中心冒烟、向上飘，约每 21 tick 中有 4 tick 冒出。
         Effects.Marker smoke = Effects.mark(scene, ParticleTypes.SMOKE, new Vec3d(3.5, 2.5, 3.5),
                 new Vec3d(0, 0.04, 0), 4 / 21f);
-        scene.overlay().showText(90)
-                .text("拿着炸弹右键放着东西、没下毒的托盘：炸弹藏了进去，你手里这颗用掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "拿着炸弹右键放着东西、没下毒的托盘：炸弹藏了进去，你手里这颗用掉");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("藏了炸弹的托盘会冒烟，一般只有杀手阵营看得见")
-                .independent();
+        SceneCaptions.caption(scene, 80, "藏了炸弹的托盘会冒烟，一般只有杀手阵营看得见");
         Actors.walk(scene, bomber, start.subtract(atTray), 25);
         scene.idle(27);
         Actors.turn(scene, bomber, SCREEN_RIGHT);
@@ -854,31 +724,17 @@ final class SparkStrengthKillerItemScenes {
         Effects.unmark(scene, smoke);
         // The Bomber sees bomb carriers through walls. 炸弹客能隔墙看到带炸弹的人。
         Actors.highlight(scene, passenger, color, 590);
-        scene.overlay().showText(90)
-                .text("下一个空手来拿东西的人照常拿到，同时悄悄带上了炸弹")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "下一个空手来拿东西的人照常拿到，同时悄悄带上了炸弹");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("带着炸弹的人你一般能隔墙看到（只在你屏幕上）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "带着炸弹的人你一般能隔墙看到（只在你屏幕上）");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("之后照常计时：先安静 10 秒，再滴滴响 15 秒后爆炸；滴滴响时也能传给别人")
-                .independent();
+        SceneCaptions.caption(scene, 90, "之后照常计时：先安静 10 秒，再滴滴响 15 秒后爆炸；滴滴响时也能传给别人");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("床也一样：下一个右键这张床（或与它相连的床）想躺下的人会带上炸弹")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "床也一样：下一个右键这张床（或与它相连的床）想躺下的人会带上炸弹");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("已经带着炸弹的人不会触发，陷阱会留给下一个人；陷阱不分敌我，杀手也会中招")
-                .independent();
+        SceneCaptions.caption(scene, 90, "已经带着炸弹的人不会触发，陷阱会留给下一个人；陷阱不分敌我，杀手也会中招");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("下了毒的托盘、藏着蝎子的床、已藏有炸弹的地方都放不了；你身上带着炸弹、或炸弹还在冷却（一般开局 45 秒）时也放不了")
-                .independent();
+        SceneCaptions.caption(scene, 90, "下了毒的托盘、藏着蝎子的床、已藏有炸弹的地方都放不了；你身上带着炸弹、或炸弹还在冷却（一般开局 45 秒）时也放不了");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -928,14 +784,9 @@ final class SparkStrengthKillerItemScenes {
         Actors.hold(scene, killer, tablet);
         scene.idle(15);
         scene.overlay().showControls(killerStart.add(0, 2.6, 0), Pointing.DOWN, 60).rightClick().withItem(tablet);
-        scene.overlay().showText(90)
-                .text("杀手右键【平板电脑】，在「破坏」页免费发动灯光破坏（商店的【停电器】已下架）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "杀手右键【平板电脑】，在「破坏」页免费发动灯光破坏（商店的【停电器】已下架）");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("灯光破坏一般要先解锁：用【开锁器】撬开灯光接线箱，再拿平板入侵它（演示略过这一步）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "灯光破坏一般要先解锁：用【开锁器】撬开灯光接线箱，再拿平板入侵它（演示略过这一步）");
         scene.idle(100);
 
         for (BlockPos pos : CARRIAGE_LAMPS) {
@@ -958,10 +809,7 @@ final class SparkStrengthKillerItemScenes {
                 .independent()
                 .attachKeyFrame();
         outlined(scene, 100);
-        scene.overlay().showText(90)
-                .text("没人会失明，照常能疾跑；杀手、老兵等少数身份有夜视")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "没人会失明，照常能疾跑；杀手、老兵等少数身份有夜视");
         outlined(scene, 6);
         Vec3d run = atBreaker.subtract(fixerStart);
         int runTicks = (int) Math.round(run.length() / SPRINT);
@@ -973,23 +821,16 @@ final class SparkStrengthKillerItemScenes {
         outlined(scene, 30 - runTicks);
         Actors.turn(scene, killer, facing(killerSpot, atBreaker));
         outlined(scene, 64);
-        scene.overlay().showText(80)
-                .text("一般任何活着的玩家都能去修，杀手也可以")
-                .independent();
+        SceneCaptions.caption(scene, 80, "一般任何活着的玩家都能去修，杀手也可以");
         outlined(scene, 90);
 
         scene.overlay().showControls(new Vec3d(2.5, 3.3, 5.7), Pointing.DOWN, 30).rightClick();
         outlined(scene, 10);
         // Using a block swings the arm on the client. 对方块使用时客户端会挥手。
         Actors.swing(scene, fixer);
-        scene.overlay().showText(90)
-                .text("右键电闸打开维修面板：把跳闸的空开（一般 3～5 个）逐个拨回")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键电闸打开维修面板：把跳闸的空开（一般 3～5 个）逐个拨回");
         outlined(scene, 100);
-        scene.overlay().showText(80)
-                .text("再按住主闸，直到电压表进入绿区（一般约 2 秒；实际几秒就能修好，演示放慢了）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "再按住主闸，直到电压表进入绿区（一般约 2 秒；实际几秒就能修好，演示放慢了）");
         outlined(scene, 90);
 
         scene.world().modifyBlock(BREAKER, state -> tripped(state, false), false);
@@ -1002,14 +843,9 @@ final class SparkStrengthKillerItemScenes {
         StageLights.lights(scene, true);
         scene.idle(Math.max(0, 100 - relit));
         Actors.leave(scene, killer, Direction.UP);
-        scene.overlay().showText(100)
-                .text("修好后杀手一般要等 2.5 分钟才能再破坏（工程师远程修好时只要 90 秒）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "修好后杀手一般要等 2.5 分钟才能再破坏（工程师远程修好时只要 90 秒）");
         scene.idle(110);
-        scene.overlay().showText(100)
-                .text("同一时间只能有一个破坏；没有电闸的旧地图不用修，一般 30～40 秒后自动来电")
-                .independent();
+        SceneCaptions.caption(scene, 100, "同一时间只能有一个破坏；没有电闸的旧地图不用修，一般 30～40 秒后自动来电");
         scene.idle(110);
         scene.markAsFinished();
     }
@@ -1050,14 +886,6 @@ final class SparkStrengthKillerItemScenes {
             scene.world().modifyBlock(pos, state -> lamp(state, true), false);
         }
         return elapsed;
-    }
-
-    /** A Wathe lamp powered or cut, as WorldBlackoutComponent sets lit and active. 像 WorldBlackoutComponent 那样设置灯的 lit 与 active。 */
-    private static BlockState lamp(BlockState state, boolean on) {
-        if (state.contains(Properties.LIT)) {
-            state = state.with(Properties.LIT, on);
-        }
-        return state.contains(WatheProperties.ACTIVE) ? state.with(WatheProperties.ACTIVE, on) : state;
     }
 
     /**

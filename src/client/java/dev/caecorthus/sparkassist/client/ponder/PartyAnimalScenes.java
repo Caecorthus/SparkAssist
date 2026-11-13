@@ -1,5 +1,7 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.Actors.forward;
+import static dev.caecorthus.sparkassist.client.ponder.Actors.yawTowards;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.role;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
@@ -122,32 +124,21 @@ final class PartyAnimalScenes {
                 new Vec3d(7.6, 1, 1.2), WEST, Direction.DOWN);
         Actors.hold(scene, host, balloon);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("【派对气球】只有派对狂的商店卖，25 金币一个，可以多次购买")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "【派对气球】只有派对狂的商店卖，25 金币一个，可以多次购买");
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("气球拿在手里，其他人看不见（演示里画了出来）")
-                .independent();
+        SceneCaptions.caption(scene, 70, "气球拿在手里，其他人看不见（演示里画了出来）");
         Actors.walk(scene, host, new Vec3d(-2.6, 0, 0.2), 30);
         scene.idle(32);
         Actors.turn(scene, host, yawTowards(new Vec3d(5.0, 1, 1.4), guestFeet));
         scene.idle(48);
         scene.overlay().showControls(guestFeet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(balloon);
-        scene.overlay().showText(80)
-                .text("右键 3 格内、在你视线里的玩家，把气球偷偷塞给对方")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "右键 3 格内、在你视线里的玩家，把气球偷偷塞给对方");
         scene.idle(10);
         Actors.swing(scene, host);
         // The outline stays for the rest of the scene. 描边一直持续到场景结束。
         Actors.highlight(scene, guest, BALLOON_YELLOW, 600);
         scene.idle(80);
-        scene.overlay().showText(90)
-                .text("对方收不到任何提示，也听不到声音；塞成功才会用掉一个")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "对方收不到任何提示，也听不到声音；塞成功才会用掉一个");
         scene.idle(100);
         scene.overlay().showText(100)
                 .colored(PonderPalette.GREEN)
@@ -160,17 +151,11 @@ final class PartyAnimalScenes {
         scene.idle(5);
         Actors.walk(scene, guest, new Vec3d(0, 0, 3.6), 36);
         scene.idle(65);
-        scene.overlay().showText(90)
-                .text("进了房间也一样：描边一直亮到本局结束或对方死亡")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "进了房间也一样：描边一直亮到本局结束或对方死亡");
         scene.idle(30);
         WatheItemScenes.openDoor(scene, NEAR_DOOR, false);
         scene.idle(70);
-        scene.overlay().showText(90)
-                .text("被塞了气球的人，就成了派对客要抓的目标")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "被塞了气球的人，就成了派对客要抓的目标");
         scene.idle(100);
         scene.overlay().showText(100)
                 .colored(PonderPalette.RED)
@@ -216,26 +201,15 @@ final class PartyAnimalScenes {
         ElementLink<Partygoer> goer = new ElementLinkImpl<>(Partygoer.class);
         // 1289 ticks: to the end of the scene. 1289 tick：直到场景结束。
         scene.addInstruction(new MarkOutline(prey, goer, BALLOON_YELLOW, 1289));
-        scene.overlay().showText(90)
-                .text("做完 2 个任务，派对狂就能召唤派对客")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "做完 2 个任务，派对狂就能召唤派对客");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("派对客只抓目标：正在变声、或被塞了【派对气球】的人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "派对客只抓目标：正在变声、或被塞了【派对气球】的人");
         scene.idle(100);
         Actors.outline(scene, NEAR_CABIN, SPAWN_PINK, 220);
         Actors.outline(scene, FAR_CABIN, BALLOON_YELLOW, 220);
-        scene.overlay().showText(100)
-                .text("按第二技能键（默认 N）选出生房间（粉框）和终点房间（黄框）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "按第二技能键（默认 N）选出生房间（粉框）和终点房间（黄框）");
         scene.idle(110);
-        scene.overlay().showText(100)
-                .text("召唤花 50 金币，不打折；目标不用你选，它去追离出生房间最近的那个")
-                .independent();
+        SceneCaptions.caption(scene, 100, "召唤花 50 金币，不打折；目标不用你选，它去追离出生房间最近的那个");
         scene.idle(110);
 
         // S: the summon. Hunting is slowed to 0.05 blocks a tick (Speed II is about 0.3).
@@ -246,10 +220,7 @@ final class PartyAnimalScenes {
         // The door is within its three-cell lookahead from the start, so it opens at once.
         // 门从一开始就在它前方三格的探查范围内，所以立刻被推开。
         WatheItemScenes.openDoor(scene, NEAR_DOOR, true);
-        scene.overlay().showText(46)
-                .text("点“召唤”：派对客在出生房间登场，声音很响")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 46, "点“召唤”：派对客在出生房间登场，声音很响");
         scene.idle(8);
         walk(scene, goer, new Vec3d(0, 0, -1.0), 20);
         scene.idle(7);
@@ -257,10 +228,7 @@ final class PartyAnimalScenes {
         scene.idle(13);
         walk(scene, goer, new Vec3d(0, 0, -2.0), 40);
         scene.idle(28);
-        scene.overlay().showText(40)
-                .text("挡路的房门它直接推开（演示放慢）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 40, "挡路的房门它直接推开（演示放慢）");
         scene.idle(12);
         walk(scene, goer, new Vec3d(-0.6, 0, -1.8), 38);
         scene.idle(38);
@@ -307,10 +275,7 @@ final class PartyAnimalScenes {
         scene.idle(87);
         WatheItemScenes.openDoor(scene, FAR_DOOR, false);
         scene.idle(13);
-        scene.overlay().showText(80)
-                .text("它抱着的人被放了下来，毫发无伤")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "它抱着的人被放了下来，毫发无伤");
         scene.idle(20);
         Actors.walk(scene, prey, new Vec3d(-0.4, 0, -1.4), 30);
         scene.idle(70);
@@ -320,23 +285,16 @@ final class PartyAnimalScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("打死它不算杀人：开枪打它不会掉枪，也不算误杀")
-                .independent();
+        SceneCaptions.caption(scene, 90, "打死它不算杀人：开枪打它不会掉枪，也不算误杀");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("被抱住的人能转头、说话，但动不了也挣不脱，只能喊人来救")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "被抱住的人能转头、说话，但动不了也挣不脱，只能喊人来救");
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
                 .text("没人拦的话，它会抱进终点房间吃掉：5 秒起，每层护盾多 5 秒")
                 .independent();
         scene.idle(100);
-        scene.overlay().showText(100)
-                .text("它留下一具派对客尸体；召唤花的 50 金币不退，60 秒后才能再召唤")
-                .independent();
+        SceneCaptions.caption(scene, 100, "它留下一具派对客尸体；召唤花的 50 金币不退，60 秒后才能再召唤");
         scene.idle(110);
         scene.markAsFinished();
     }
@@ -412,18 +370,6 @@ final class PartyAnimalScenes {
                 change.accept(element);
             }
         });
-    }
-
-    /** The level direction a player facing {@code yaw} looks along (0 = south, 90 = west). 朝向 yaw 时的水平前方。 */
-    private static Vec3d forward(float yaw) {
-        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
-        return new Vec3d(-MathHelper.sin(radians), 0, MathHelper.cos(radians));
-    }
-
-    /** The yaw that faces from {@code from} towards {@code to}. 从 from 看向 to 的朝向角。 */
-    private static float yawTowards(Vec3d from, Vec3d to) {
-        Vec3d delta = to.subtract(from);
-        return (float) (MathHelper.atan2(-delta.x, delta.z) * MathHelper.DEGREES_PER_RADIAN);
     }
 
     /**

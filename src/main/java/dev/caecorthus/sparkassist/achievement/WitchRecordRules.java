@@ -273,7 +273,7 @@ final class WitchRecordRules {
     private static boolean diesOfMyFoodPoisonAfter(MatchTimeline timeline, UUID player, MatchEvent take, UUID poisoner) {
         List<MatchEvent> events = timeline.events();
         MatchEvent poisoning = null;
-        for (int i = StrengthRecordRules.positionOf(events, take) + 1; i > 0 && i < events.size(); i++) {
+        for (int i = Rules.positionOf(events, take) + 1; i > 0 && i < events.size(); i++) {
             MatchEvent event = events.get(i);
             if (event.is(MatchEvent.PLAYER_POISONED) && player.equals(event.target())) {
                 poisoning = event;
@@ -297,7 +297,7 @@ final class WitchRecordRules {
      */
     private static boolean nextKillWhileMarked(AchievementContext context, UUID marked, MatchEvent mark) {
         List<MatchEvent> events = context.timeline().events();
-        for (int i = StrengthRecordRules.positionOf(events, mark) + 1; i > 0 && i < events.size(); i++) {
+        for (int i = Rules.positionOf(events, mark) + 1; i > 0 && i < events.size(); i++) {
             MatchEvent event = events.get(i);
             if (!event.is(MatchEvent.DEATH)) {
                 continue;

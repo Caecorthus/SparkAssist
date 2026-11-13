@@ -3,6 +3,7 @@ package dev.caecorthus.sparkassist.client.guidebook.ui;
 import static dev.caecorthus.sparkassist.client.guidebook.ui.ExpressPalette.*;
 
 import dev.caecorthus.sparkassist.SparkAssist;
+import dev.caecorthus.sparkassist.guidebook.decor.DecorPalette;
 import java.util.List;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -306,8 +307,8 @@ public final class ExpressPaint {
     public static void gem(DrawContext c, int x, int y, int rgb, boolean bright) {
         int identity = 0xFF000000 | rgb;
         int bezel = bright ? BRASS_HI : BRASS_LO;
-        int glint = mix(identity, 0xFFFFFFFF, 0.45);
-        int shade = mix(identity, 0xFF000000, 0.35);
+        int glint = DecorPalette.mix(identity, 0xFFFFFFFF, 0.45);
+        int shade = DecorPalette.mix(identity, 0xFF000000, 0.35);
         for (int row = 0; row < GEM.length; row++) {
             String line = GEM[row];
             int start = 0;
@@ -429,15 +430,5 @@ public final class ExpressPaint {
             }
         }
         return ellipsize(f, candidates[candidates.length - 1], maxWidth);
-    }
-
-    /** Per-channel ARGB lerp rounded to nearest, matching the mockup renderer (not MathHelper's floor).
-     * 按通道线性插值并四舍五入，与样稿渲染器一致。 */
-    public static int mix(int a, int b, double t) {
-        int alpha = (int) Math.round((a >>> 24) * (1 - t) + (b >>> 24) * t);
-        int red = (int) Math.round(((a >> 16) & 0xFF) * (1 - t) + ((b >> 16) & 0xFF) * t);
-        int green = (int) Math.round(((a >> 8) & 0xFF) * (1 - t) + ((b >> 8) & 0xFF) * t);
-        int blue = (int) Math.round((a & 0xFF) * (1 - t) + (b & 0xFF) * t);
-        return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
 }

@@ -14,7 +14,6 @@ public final class GuidebookSessionState {
 
     private boolean roundActive;
     private String currentRoleId;
-    private String pendingRoleAutoSelection;
     private GuidebookTab selectedTab;
     private String selectedEntryId;
     private int selectedPage;
@@ -64,10 +63,7 @@ public final class GuidebookSessionState {
             if (observedRoleIds.add(roleId)) {
                 observationRevision++;
             }
-            if (!roleId.equals(currentRoleId)) {
-                currentRoleId = roleId;
-                pendingRoleAutoSelection = roleId;
-            }
+            currentRoleId = roleId;
         }
         if (ownerVisibleOrRevealedTraitIds != null) {
             for (String traitId : ownerVisibleOrRevealedTraitIds) {
@@ -96,12 +92,6 @@ public final class GuidebookSessionState {
 
     public Optional<String> currentRoleId() {
         return Optional.ofNullable(currentRoleId);
-    }
-
-    public Optional<String> consumeRoleAutoSelection() {
-        String roleId = pendingRoleAutoSelection;
-        pendingRoleAutoSelection = null;
-        return Optional.ofNullable(roleId);
     }
 
     public void rememberSelection(GuidebookTab tab, String entryId) {
@@ -175,7 +165,6 @@ public final class GuidebookSessionState {
         observedTraitIds.clear();
         expandedNodeIds.clear();
         currentRoleId = null;
-        pendingRoleAutoSelection = null;
         selectedTab = null;
         selectedEntryId = null;
         selectedPage = 0;

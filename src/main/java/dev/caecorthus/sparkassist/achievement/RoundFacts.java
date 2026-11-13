@@ -80,11 +80,6 @@ public record RoundFacts(
         return traits.everHeld(traitId);
     }
 
-    /** The owner-visible traits held at round tick {@code tick}. 对局 tick {@code tick} 时持有的自身可见词条。 */
-    public Set<String> traitsAt(long tick) {
-        return traits.at(tick);
-    }
-
     /**
      * Every owner-visible trait held at some moment within {@link #RECORD_TICK_TOLERANCE} of record tick
      * {@code recordTick}, e.g. at a kill or a meal from the match record.
@@ -103,30 +98,12 @@ public record RoundFacts(
         return Set.copyOf(held);
     }
 
-    public String openingRoleId() {
-        return roleChain.isEmpty() ? null : roleChain.getFirst();
-    }
-
     public String finalRoleId() {
         return roleChain.isEmpty() ? null : roleChain.getLast();
     }
 
     public boolean died() {
         return deathTick >= 0;
-    }
-
-    /** Ticks the player stayed alive: until death, or the whole round. 存活 tick 数：到死亡为止，或整局。 */
-    public long survivedTicks() {
-        return died() ? deathTick : durationTicks;
-    }
-
-    /**
-     * Whether an explosive was near the player at some round tick from {@code fromTick} to {@code toTick}, both
-     * included.
-     * 从对局 tick {@code fromTick} 到 {@code toTick}（含两端）之间是否有某一刻爆炸物在玩家附近。
-     */
-    public boolean explosiveNearbyBetween(long fromTick, long toTick) {
-        return explosiveNearby.stream().anyMatch(span -> span.fromTick() <= toTick && span.toTick() >= fromTick);
     }
 
     /**

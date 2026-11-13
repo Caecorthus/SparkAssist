@@ -62,12 +62,6 @@ public record DecorSet(Plate plate, Sigil sigil, Foliage foliage, int colour, in
         return new DecorSet(plate, sigil, foliage, accentRgb & 0xFFFFFF, berry, sealMark, charm, page, theme);
     }
 
-    /** Same faction look, whatever the plate: used for "is this my own faction's page". 不论扉画，阵营外观相同。 */
-    public boolean sameFaction(DecorSet other) {
-        return other != null && sigil == other.sigil && foliage == other.foliage && colour == other.colour
-                && berry == other.berry && mark == other.mark && charm == other.charm;
-    }
-
     /** The entry's own choices replace single members; unknown names are ignored. 条目自定义覆盖单项，未知名称忽略。 */
     public DecorSet withOverrides(GuidebookEntryDecor decor) {
         if (decor == null || decor.isEmpty()) {

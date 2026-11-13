@@ -74,19 +74,13 @@ final class WatheItemScenes {
                 new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
         scene.idle(20);
-        scene.overlay().showText(70)
-                .text("刀只能刺中正前方 3 格以内的人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "刀只能刺中正前方 3 格以内的人");
         scene.idle(80);
         Actors.walk(scene, killer, new Vec3d(-2.2, 0, 2.2), 26);
         scene.idle(30);
         scene.overlay().showControls(new Vec3d(3.6, 3.6, 3.4), Pointing.DOWN, 30).rightClick()
                 .withItem(stack("wathe:knife"));
-        scene.overlay().showText(30)
-                .text("按住右键约半秒蓄力，附近的人一般都能听到举刀声")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 30, "按住右键约半秒蓄力，附近的人一般都能听到举刀声");
         Actors.charge(scene, killer, true);
         scene.idle(30);
         Actors.charge(scene, killer, false);
@@ -99,9 +93,7 @@ final class WatheItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(80);
-        scene.overlay().showText(70)
-                .text("杀人后刀要冷却一段时间；左键只会把人推开，不会伤人")
-                .independent();
+        SceneCaptions.caption(scene, 70, "杀人后刀要冷却一段时间；左键只会把人推开，不会伤人");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -120,10 +112,7 @@ final class WatheItemScenes {
                 new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, shooter, stack("wathe:revolver"));
         scene.idle(20);
-        scene.overlay().showText(70)
-                .text("义警开局就带着一把左轮手枪，射程约 30 格")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "义警开局就带着一把左轮手枪，射程约 30 格");
         scene.idle(80);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(1.2, 1, 5.8), SCREEN_LEFT, Direction.DOWN);
@@ -133,10 +122,7 @@ final class WatheItemScenes {
         scene.idle(25);
         scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick()
                 .withItem(stack("wathe:revolver"));
-        scene.overlay().showText(33)
-                .text("点一下右键就开枪，不用蓄力")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 33, "点一下右键就开枪，不用蓄力");
         scene.idle(15);
         shoot(scene, shooter, REVOLVER_MUZZLE, new Vec3d(2.0, 1.9, 5.0));
         Actors.fall(scene, killer);
@@ -146,9 +132,7 @@ final class WatheItemScenes {
                 .text("打死杀手阵营的人没有惩罚")
                 .independent();
         scene.idle(80);
-        scene.overlay().showText(70)
-                .text("每开一枪都要冷却一会儿，没打中也算一枪")
-                .independent();
+        SceneCaptions.caption(scene, 70, "每开一枪都要冷却一会儿，没打中也算一枪");
         scene.idle(80);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(20);
@@ -156,10 +140,7 @@ final class WatheItemScenes {
                 new Vec3d(1.2, 1, 5.8), SCREEN_LEFT, Direction.DOWN);
         scene.idle(10);
         Actors.walk(scene, passenger, new Vec3d(0.8, 0, -0.8), 20);
-        scene.overlay().showText(40)
-                .text("可如果打中的是好人……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 40, "可如果打中的是好人……");
         scene.idle(40);
         shoot(scene, shooter, REVOLVER_MUZZLE, new Vec3d(2.0, 1.9, 5.0));
         Actors.fall(scene, passenger);
@@ -174,9 +155,7 @@ final class WatheItemScenes {
                 .text("对方照样死亡；你当场掉枪、本局不能再捡枪，默认自己也会跟着死")
                 .independent();
         scene.idle(90);
-        scene.overlay().showText(60)
-                .text("（服务器可以改成只掉枪、不赔命）")
-                .independent();
+        SceneCaptions.caption(scene, 60, "（服务器可以改成只掉枪、不赔命）");
         scene.idle(70);
         scene.markAsFinished();
     }
@@ -191,16 +170,13 @@ final class WatheItemScenes {
      */
     private static void lockpick(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("wathe_lockpick", "开锁器：打开锁着的门");
-        cabinStage(scene, util);
+        setStage(scene, util);
         BlockPos door = util.grid().at(3, 1, 3);
         ElementLink<ActorElement> owner = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(3.5, 1, 5.2), NORTH, Direction.DOWN);
         scene.idle(15);
         scene.overlay().showOutline(PonderPalette.WHITE, "door", util.select().fromTo(3, 1, 3, 3, 2, 3), 70);
-        scene.overlay().showText(70)
-                .text("包厢门平时是锁着的：一般只有拿着这间房钥匙的人能开")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "包厢门平时是锁着的：一般只有拿着这间房钥匙的人能开");
         scene.idle(80);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(0.5, 1, 1.5), EAST, Direction.DOWN);
@@ -215,14 +191,9 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, killer);
         openDoor(scene, door, true);
-        scene.overlay().showText(70)
-                .text("杀手用开锁器右键锁着的门，门会立刻打开")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "杀手用开锁器右键锁着的门，门会立刻打开");
         scene.idle(80);
-        scene.overlay().showText(60)
-                .text("开锁器用不坏，开门也没有冷却；门开着几秒后会自己关上")
-                .independent();
+        SceneCaptions.caption(scene, 60, "开锁器用不坏，开门也没有冷却；门开着几秒后会自己关上");
         scene.idle(40);
         openDoor(scene, door, false);
         scene.idle(40);
@@ -252,16 +223,13 @@ final class WatheItemScenes {
      */
     private static void key(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("wathe_key", "房间钥匙：只开自己的房间");
-        cabinStage(scene, util);
+        setStage(scene, util);
         BlockPos door = util.grid().at(3, 1, 3);
         ElementLink<ActorElement> owner = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(0.8, 1, 1.5), EAST, Direction.DOWN);
         Actors.hold(scene, owner, stack("wathe:key"));
         scene.idle(15);
-        scene.overlay().showText(70)
-                .text("开局每人发一把房间钥匙，钥匙的说明里写着是哪一间")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "开局每人发一把房间钥匙，钥匙的说明里写着是哪一间");
         scene.idle(80);
         Actors.walk(scene, owner, new Vec3d(2.7, 0, 0.3), 30);
         scene.idle(32);
@@ -272,17 +240,12 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, owner);
         openDoor(scene, door, true);
-        scene.overlay().showText(60)
-                .text("拿着这间房的钥匙右键房门，门就会滑开")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "拿着这间房的钥匙右键房门，门就会滑开");
         scene.idle(20);
         Actors.walk(scene, owner, new Vec3d(0, 0, 3.2), 30);
         scene.idle(80);
         openDoor(scene, door, false);
-        scene.overlay().showText(70)
-                .text("门开着 5 秒后会自己关上，关上后仍然是锁着的")
-                .independent();
+        SceneCaptions.caption(scene, 70, "门开着 5 秒后会自己关上，关上后仍然是锁着的");
         scene.idle(80);
         ElementLink<ActorElement> stranger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("乘客"),
                 new Vec3d(6.2, 1, 1.5), WEST, Direction.DOWN);
@@ -312,10 +275,7 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, owner);
         openDoor(scene, door, true);
-        scene.overlay().showText(70)
-                .text("从房间里出门也要用钥匙；关门不需要钥匙")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "从房间里出门也要用钥匙；关门不需要钥匙");
         scene.idle(60);
         Actors.walk(scene, owner, new Vec3d(0, 0, -3.2), 30);
         scene.idle(40);
@@ -343,17 +303,11 @@ final class WatheItemScenes {
                 new Vec3d(1.6, 1, 5.4), SCREEN_LEFT, Direction.DOWN);
         Actors.hold(scene, first, stack("wathe:knife"));
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("生还模式里人人都是亡命徒：每人一把德林加、一把刀和一根撬棍，最后活下来的人获胜")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "生还模式里人人都是亡命徒：每人一把德林加、一把刀和一根撬棍，最后活下来的人获胜");
         scene.idle(90);
         scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick()
                 .withItem(stack("wathe:derringer"));
-        scene.overlay().showText(50)
-                .text("右键开枪，但一般只能打中 7 格以内的人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 50, "右键开枪，但一般只能打中 7 格以内的人");
         scene.idle(15);
         shoot(scene, shooter, REVOLVER_MUZZLE, new Vec3d(2.2, 1.9, 4.8));
         Actors.fall(scene, first);
@@ -381,9 +335,7 @@ final class WatheItemScenes {
         Actors.charge(scene, shooter, false);
         Actors.swing(scene, shooter);
         Actors.fall(scene, second);
-        scene.overlay().showText(45)
-                .text("换成刀蓄力出手，再干掉一个……")
-                .independent();
+        SceneCaptions.caption(scene, 45, "换成刀蓄力出手，再干掉一个……");
         scene.idle(55);
         Actors.hold(scene, shooter, stack("wathe:derringer"));
         scene.overlay().showText(70)
@@ -392,9 +344,7 @@ final class WatheItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(80);
-        scene.overlay().showText(70)
-                .text("上弹声只有自己听得到；德林加死后也不会掉落")
-                .independent();
+        SceneCaptions.caption(scene, 70, "上弹声只有自己听得到；德林加死后也不会掉落");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -410,17 +360,14 @@ final class WatheItemScenes {
      */
     private static void crowbar(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("wathe_crowbar", "撬棍：强行撬开房门");
-        cabinStage(scene, util);
+        setStage(scene, util);
         BlockPos door = util.grid().at(3, 1, 3);
         BlockPos vent = util.grid().at(5, 1, 1);
         Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"), new Vec3d(3.5, 1, 5.2), NORTH,
                 Direction.DOWN);
         scene.idle(10);
         scene.overlay().showOutline(PonderPalette.WHITE, "door", util.select().fromTo(3, 1, 3, 3, 2, 3), 70);
-        scene.overlay().showText(70)
-                .text("包厢门锁着，平常没有钥匙进不去")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "包厢门锁着，平常没有钥匙进不去");
         scene.idle(80);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(0.5, 1, 1.5), EAST, Direction.DOWN);
@@ -435,10 +382,7 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, killer);
         openDoor(scene, door, true);
-        scene.overlay().showText(80)
-                .text("杀手用撬棍右键锁着的门（被卡住的门也行），门被撬开")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀手用撬棍右键锁着的门（被卡住的门也行），门被撬开");
         scene.idle(90);
         scene.overlay().showOutline(PonderPalette.RED, "door", util.select().fromTo(3, 1, 3, 3, 2, 3), 110);
         scene.overlay().showText(110)
@@ -447,9 +391,7 @@ final class WatheItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(120);
-        scene.overlay().showText(70)
-                .text("撬门声很响，约 40 格内都听得到")
-                .independent();
+        SceneCaptions.caption(scene, 70, "撬门声很响，约 40 格内都听得到");
         scene.idle(80);
         Actors.turn(scene, killer, EAST);
         scene.idle(5);
@@ -461,15 +403,10 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, killer);
         scene.world().modifyBlock(vent, state -> state.with(Properties.OPEN, true), false);
-        scene.overlay().showText(80)
-                .text("地上的通风口盖板也能撬开，之后 30 秒内别人徒手开关不了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "地上的通风口盖板也能撬开，之后 30 秒内别人徒手开关不了");
         scene.idle(90);
         Actors.lookPitch(scene, killer, 0);
-        scene.overlay().showText(70)
-                .text("撬棍用不坏，默认冷却 10 秒；商店每局只能买 1 根")
-                .independent();
+        SceneCaptions.caption(scene, 70, "撬棍用不坏，默认冷却 10 秒；商店每局只能买 1 根");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -486,10 +423,7 @@ final class WatheItemScenes {
         scene.title("wathe_drinks", "托盘与饮品：喝点东西");
         setStage(scene, util);
         Vec3d tray = new Vec3d(3.5, 3.0, 3.5);
-        scene.overlay().showText(70)
-                .text("车厢里摆着饮品托盘和餐盘，盘里原有的东西拿不完")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "车厢里摆着饮品托盘和餐盘，盘里原有的东西拿不完");
         scene.idle(60);
         ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(1.0, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
@@ -500,26 +434,18 @@ final class WatheItemScenes {
         scene.idle(10);
         Actors.swing(scene, passenger);
         Actors.hold(scene, passenger, stack("wathe:mojito"));
-        scene.overlay().showText(80)
-                .text("空手右键：随机拿到一份，直接放在手上")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "空手右键：随机拿到一份，直接放在手上");
         scene.idle(90);
         Actors.hold(scene, passenger, ItemStack.EMPTY);
         scene.idle(10);
         scene.overlay().showControls(tray, Pointing.DOWN, 30).rightClick();
         scene.idle(10);
         Actors.swing(scene, passenger);
-        scene.overlay().showText(80)
-                .text("收进背包也没用：身上有这盘里的东西就拿不了第二份（服务员能拿两份）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "收进背包也没用：身上有这盘里的东西就拿不了第二份（服务员能拿两份）");
         scene.idle(90);
         Actors.hold(scene, passenger, stack("wathe:mojito"));
         scene.idle(10);
-        scene.overlay().showText(35)
-                .text("按住右键 2 秒喝完")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 35, "按住右键 2 秒喝完");
         Actors.charge(scene, passenger, true);
         scene.idle(40);
         Actors.charge(scene, passenger, false);
@@ -531,9 +457,7 @@ final class WatheItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("只有任务栏里正好出现这项任务时，吃喝才算完成任务")
-                .independent();
+        SceneCaptions.caption(scene, 80, "只有任务栏里正好出现这项任务时，吃喝才算完成任务");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -546,12 +470,11 @@ final class WatheItemScenes {
         scene.idle(10);
     }
 
-    /** The corridor plate, then the cabin wall and door dropping in. 先显示走廊底板，再落下包厢墙与门。 */
-    static void cabinStage(SceneBuilder scene, SceneBuildingUtil util) {
-        setStage(scene, util);
-    }
-
-    /** The plate, then everything standing on it (walls, tables, beds, lamps) dropping in. 先显示底板，再落下其上的一切（墙、桌、床、灯）。 */
+    /**
+     * The plate, then everything standing on it (walls, tables, beds, lamps) dropping in; on a cabin stage, the
+     * corridor plate, then the cabin wall and door.
+     * 先显示底板，再落下其上的一切（墙、桌、床、灯）；在包厢舞台上即先显示走廊底板，再落下包厢墙与门。
+     */
     static void setStage(SceneBuilder scene, SceneBuildingUtil util) {
         stage(scene);
         scene.world().showSection(util.select().layersFrom(1), Direction.DOWN);

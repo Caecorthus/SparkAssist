@@ -250,10 +250,6 @@ final class EventSoundCatalog {
         ));
     }
 
-    boolean contains(Identifier id) {
-        return groupFor(id) != null;
-    }
-
     EventSoundGroup groupFor(Identifier id) {
         if (id == null) {
             return null;

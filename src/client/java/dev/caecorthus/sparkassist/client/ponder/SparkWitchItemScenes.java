@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkassist.client.ponder;
 
+import static dev.caecorthus.sparkassist.client.ponder.Actors.forward;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.item;
 import static dev.caecorthus.sparkassist.client.ponder.SparkPonderDemos.scene;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.EAST;
@@ -10,7 +11,6 @@ import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.SOUTH;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.WEST;
 import static dev.caecorthus.sparkassist.client.ponder.WatheItemScenes.stack;
 
-import dev.doctor4t.wathe.index.WatheParticles;
 import java.util.List;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
@@ -26,7 +26,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.particle.DustParticleEffect;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -66,9 +65,6 @@ final class SparkWitchItemScenes {
     private static final int UNAFFECTED_GREEN = 0x7AE04F;
     /** Marks where an invisible player is: an illustration only. 标出隐身玩家位置的方框：仅为示意。 */
     private static final int WHERE_WHITE = 0xFFFFFF;
-    /** Gold dust for an illustrated area edge. 用于示意范围边界的金色粉尘。 */
-    private static final DustParticleEffect EDGE_DUST = new DustParticleEffect(new Vector3f(1.0f, 0.8f, 0.15f), 1.5f);
-    private static final int EDGE_POINTS = 240;
     /** The Fire Poker's push, blocks a tick (FirePokerRules). 烧火棍的推力（每 tick 格数）。 */
     private static final double POKER_PUSH = 10.0;
     private static final double POKER_LIFT = 0.35;
@@ -140,34 +136,21 @@ final class SparkWitchItemScenes {
                 Text.literal("杀意魔女"), feet, SOUTH, Direction.DOWN);
         Actors.hold(scene, witch, poker);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("杀意魔女能在商店花 50 金币买烧火棍（每局限 1 根），拿在手上别人看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "杀意魔女能在商店花 50 金币买烧火棍（每局限 1 根），拿在手上别人看得见");
         scene.idle(90);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick().withItem(poker);
         scene.idle(10);
         Actors.swing(scene, witch);
         shove(scene, victim, pokerLaunch(feet, victimFeet), room, 20);
         scene.idle(25);
-        scene.overlay().showText(80)
-                .text("左键打中人不会伤到他，而是把他猛地推飞出去；在车厢里会直接撞到墙上")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "左键打中人不会伤到他，而是把他猛地推飞出去；在车厢里会直接撞到墙上");
         scene.idle(90);
-        scene.overlay().showText(70)
-                .text("推中后冷却 10 秒；挥空不进冷却")
-                .independent();
+        SceneCaptions.caption(scene, 70, "推中后冷却 10 秒；挥空不进冷却");
         scene.idle(80);
-        scene.overlay().showText(35)
-                .text("……10 秒后（演示缩短了时间）")
-                .independent();
+        SceneCaptions.caption(scene, 35, "……10 秒后（演示缩短了时间）");
         Actors.walk(scene, victim, new Vec3d(0, 0, victimFeet.z - room.maxZ), 40);
         scene.idle(45);
-        scene.overlay().showText(55)
-                .text("魔力不少于 20 时，推中还会自动扣 20 魔力……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 55, "魔力不少于 20 时，推中还会自动扣 20 魔力……");
         scene.idle(30);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick().withItem(poker);
         scene.idle(10);
@@ -178,10 +161,7 @@ final class SparkWitchItemScenes {
         // 缓慢 III 让他步速降低 45%，速度 III 让她步速提高 60%。
         Actors.walk(scene, victim, new Vec3d(-1.2, 0, 0), 24);
         Actors.walk(scene, witch, new Vec3d(0, 0, 3.0), 20);
-        scene.overlay().showText(90)
-                .text("……让他失明并获得缓慢 III，你获得速度 III，各 3 秒（都不显示粒子）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "……让他失明并获得缓慢 III，你获得速度 III，各 3 秒（都不显示粒子）");
         scene.idle(100);
         scene.overlay().showText(90)
                 .colored(PonderPalette.RED)
@@ -189,9 +169,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(70)
-                .text("所以最适合在火车边缘把人推下去")
-                .independent();
+        SceneCaptions.caption(scene, 70, "所以最适合在火车边缘把人推下去");
         scene.idle(80);
         scene.markAsFinished();
     }
@@ -220,27 +198,19 @@ final class SparkWitchItemScenes {
                 Text.literal("巫女"), new Vec3d(2.0, 1, 5.0), SCREEN_LEFT, Direction.DOWN);
         Actors.hold(scene, maiden, elixir);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("巫女能在商店花 200 金币买托法娜仙液，每局限 1 瓶")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "巫女能在商店花 200 金币买托法娜仙液，每局限 1 瓶");
         scene.idle(90);
-        scene.overlay().showText(70)
-                .text("放在背包里就会生效，不用拿在手上")
-                .independent();
+        SceneCaptions.caption(scene, 70, "放在背包里就会生效，不用拿在手上");
         scene.idle(80);
         ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
                 new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, vigilante, revolver);
         scene.idle(20);
-        scene.overlay().showText(45)
-                .text("有人要杀她，比如义警开枪……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 45, "有人要杀她，比如义警开枪……");
         scene.idle(20);
         scene.overlay().showControls(new Vec3d(5.8, 3.6, 1.2), Pointing.DOWN, 30).rightClick().withItem(revolver);
         scene.idle(10);
-        gunshotFlash(scene, REVOLVER_MUZZLE);
+        Effects.gunshotFlash(scene, REVOLVER_MUZZLE);
         WatheItemScenes.shoot(scene, vigilante, REVOLVER_MUZZLE, new Vec3d(2.2, 1.9, 4.8));
         Actors.hold(scene, maiden, ItemStack.EMPTY);
         scene.idle(1);
@@ -260,13 +230,9 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("护盾等其他保护会先生效；只挡其他活着的玩家下的手，强制死亡挡不住")
-                .independent();
+        SceneCaptions.caption(scene, 90, "护盾等其他保护会先生效；只挡其他活着的玩家下的手，强制死亡挡不住");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("大魔女的仪礼剑例外：仙液照样用掉、大魔女照样被反杀，但巫女自己也还是会死")
-                .independent();
+        SceneCaptions.caption(scene, 90, "大魔女的仪礼剑例外：仙液照样用掉、大魔女照样被反杀，但巫女自己也还是会死");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -297,39 +263,23 @@ final class SparkWitchItemScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, stealer, watch);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("只有带【善良】词条（SparkTraits）的窃时者，才会在时间怀表之外多一块赠时怀表")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "只有带【善良】词条（SparkTraits）的窃时者，才会在时间怀表之外多一块赠时怀表");
         scene.idle(100);
         scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(watch);
-        scene.overlay().showText(90)
-                .text("其他活人看不见它；对准 7 格内看得见的人右键，把时间送给他，没有挥手动作")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "其他活人看不见它；对准 7 格内看得见的人右键，把时间送给他，没有挥手动作");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("不分阵营，不能给自己用；赠出后冷却 45 秒，开局也要等 45 秒")
-                .independent();
+        SceneCaptions.caption(scene, 80, "不分阵营，不能给自己用；赠出后冷却 45 秒，开局也要等 45 秒");
         scene.idle(30);
         Actors.walk(scene, civilian, new Vec3d(1.5, 0, 0), 30);
         scene.idle(60);
-        scene.overlay().showText(45)
-                .text("前 15 秒对方毫无变化……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 45, "前 15 秒对方毫无变化……");
         scene.idle(55);
-        scene.overlay().showText(35)
-                .text("……15 秒后（演示缩短了时间）")
-                .independent();
+        SceneCaptions.caption(scene, 35, "……15 秒后（演示缩短了时间）");
         scene.idle(45);
         // Each chime starts the next, faster leg of 30 ticks: Speed I-IV add 20, 40, 60 and 80% to the pace.
         // 每声钟响开始下一段 30 tick 的更快路程：速度 I～IV 分别让步速提高 20%、40%、60%、80%。
         chime(scene, new Vec3d(3.3, 3.2, 5.2), 1);
-        scene.overlay().showText(110)
-                .text("之后每 5 秒响一次钟（音符示意，只有他自己听得见），一次比一次走得快，没有粒子")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 110, "之后每 5 秒响一次钟（音符示意，只有他自己听得见），一次比一次走得快，没有粒子");
         Actors.walk(scene, civilian, new Vec3d(0, 0, -1.8), 30);
         scene.idle(30);
         chime(scene, new Vec3d(3.3, 3.2, 3.4), 2);
@@ -349,9 +299,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("计时员解除不了赠时；正在受赠的人不能再被赠，35 秒结束后才行")
-                .independent();
+        SceneCaptions.caption(scene, 80, "计时员解除不了赠时；正在受赠的人不能再被赠，35 秒结束后才行");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -379,10 +327,7 @@ final class SparkWitchItemScenes {
                 Text.literal("调香师"), new Vec3d(5.6, 1, 1.4), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, perfumer, cologne);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("调香师能在商店花 50 金币买古龙水，不限购；拿在手上其他活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "调香师能在商店花 50 金币买古龙水，不限购；拿在手上其他活人看不见");
         scene.idle(100);
         Actors.walk(scene, perfumer, new Vec3d(-0.8, 0, 0.8), 14);
         scene.idle(16);
@@ -391,10 +336,7 @@ final class SparkWitchItemScenes {
         scene.idle(10);
         Actors.swing(scene, perfumer);
         Actors.hold(scene, perfumer, ItemStack.EMPTY);
-        scene.overlay().showText(80)
-                .text("对 3 格内看得见的人右键（会挥手），用掉一瓶")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "对 3 格内看得见的人右键（会挥手），用掉一瓶");
         scene.idle(90);
         scene.overlay().showText(90)
                 .colored(PonderPalette.GREEN)
@@ -402,9 +344,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("你和他屏幕上各会出现一行提示；旁人只看得到挥手，看不出效果：没有粒子，也没有声音")
-                .independent();
+        SceneCaptions.caption(scene, 80, "你和他屏幕上各会出现一行提示；旁人只看得到挥手，看不出效果：没有粒子，也没有声音");
         scene.idle(90);
         Actors.hold(scene, perfumer, cologne);
         Actors.turn(scene, perfumer, NORTH);
@@ -414,15 +354,10 @@ final class SparkWitchItemScenes {
         scene.idle(10);
         Actors.swing(scene, perfumer);
         Actors.hold(scene, perfumer, ItemStack.EMPTY);
-        scene.overlay().showText(70)
-                .text("没对准 3 格内的人（比如对着空气）右键，就是给自己用，同样用掉一瓶")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "没对准 3 格内的人（比如对着空气）右键，就是给自己用，同样用掉一瓶");
         scene.idle(80);
         Actors.lookPitch(scene, perfumer, 0);
-        scene.overlay().showText(80)
-                .text("再用一次只会把 10 秒重新计时，不会叠加；只有调香师能用")
-                .independent();
+        SceneCaptions.caption(scene, 80, "再用一次只会把 10 秒重新计时，不会叠加；只有调香师能用");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -446,7 +381,7 @@ final class SparkWitchItemScenes {
      */
     private static void disruptor(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("sparkwitch_disruptor", "干扰器：关掉附近的本能");
-        WatheItemScenes.cabinStage(scene, util);
+        WatheItemScenes.setStage(scene, util);
         ItemStack disruptor = stack("sparkwitch:disruptor");
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(4.6, 1, 5.0), NORTH, Direction.DOWN);
@@ -459,34 +394,21 @@ final class SparkWitchItemScenes {
                 Text.literal("控场专家"), feet, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, expert, disruptor);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("控场专家能在商店花 100 金币买干扰器（限购 1 个），开局要等 30 秒才能用")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "控场专家能在商店花 100 金币买干扰器（限购 1 个），开局要等 30 秒才能用");
         scene.idle(100);
         // What the killer's screen shows while he holds the instinct key. 杀手按住本能键时他屏幕上的样子。
         Actors.highlight(scene, expert, INSTINCT_GREEN, 110);
         Actors.highlight(scene, civilian, INSTINCT_GREEN, 110);
-        scene.overlay().showText(90)
-                .text("墙后的杀手按住本能键，能隔墙看到附近的人（绿框示意，只在他的屏幕上）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "墙后的杀手按住本能键，能隔墙看到附近的人（绿框示意，只在他的屏幕上）");
         scene.idle(100);
         scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(disruptor);
         scene.idle(10);
-        edge(scene, feet.add(0, 0.05, 0), 6, 100);
-        scene.overlay().showText(90)
-                .text("右键使用，不挥手：6 格内除你以外的参赛者一般 10 秒内都用不了按键本能（金色示意范围）")
-                .independent()
-                .attachKeyFrame();
+        Effects.edge(scene, feet.add(0, 0.05, 0), 6, 100);
+        SceneCaptions.keyframeCaption(scene, 90, "右键使用，不挥手：6 格内除你以外的参赛者一般 10 秒内都用不了按键本能（金色示意范围）");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("隔着墙也算：杀手的本能透视和本能夜视都失效，绿框就看不到了")
-                .independent();
+        SceneCaptions.caption(scene, 90, "隔着墙也算：杀手的本能透视和本能夜视都失效，绿框就看不到了");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("被干扰的人会听到一声音效，屏幕上显示本能受干扰的倒计时；使用声只有你自己听得到")
-                .independent();
+        SceneCaptions.caption(scene, 80, "被干扰的人会听到一声音效，屏幕上显示本能受干扰的倒计时；使用声只有你自己听得到");
         scene.idle(90);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
@@ -494,9 +416,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("干扰器不会用掉，默认冷却 90 秒；只有控场专家能用，也丢不出去")
-                .independent();
+        SceneCaptions.caption(scene, 80, "干扰器不会用掉，默认冷却 90 秒；只有控场专家能用，也丢不出去");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -531,10 +451,7 @@ final class SparkWitchItemScenes {
                 Text.literal("钓鱼佬"), new Vec3d(2.9, 1, 1.5), WEST, Direction.DOWN);
         Actors.hold(scene, fisher, bait);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("鱼饵在钓鱼佬的商店 25 金币一个；拿在手上其他活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "鱼饵在钓鱼佬的商店 25 金币一个；拿在手上其他活人看不见");
         scene.idle(90);
         Actors.hold(scene, fisher, rod);
         Actors.walk(scene, fisher, new Vec3d(-1.4, 0, 0), 20);
@@ -542,16 +459,10 @@ final class SparkWitchItemScenes {
         scene.overlay().showControls(tray, Pointing.DOWN, 30).rightClick().withItem(rod);
         scene.idle(10);
         Actors.swing(scene, fisher);
-        scene.overlay().showText(90)
-                .text("拿鱼竿右键饮料托盘，每钓一次用掉 1 个鱼饵（放在背包哪里都行），快捷栏一般要留个空位")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "拿鱼竿右键饮料托盘，每钓一次用掉 1 个鱼饵（放在背包哪里都行），快捷栏一般要留个空位");
         scene.idle(100);
         Actors.hold(scene, fisher, cod);
-        scene.overlay().showText(80)
-                .text("钓到什么全凭运气，这次是鳕鱼：右键立刻吃掉，不挥手，理智回复 20%%")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "钓到什么全凭运气，这次是鳕鱼：右键立刻吃掉，不挥手，理智回复 20%%");
         scene.idle(40);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(cod);
         scene.idle(10);
@@ -564,10 +475,7 @@ final class SparkWitchItemScenes {
         Actors.swing(scene, fisher);
         scene.idle(10);
         Actors.hold(scene, fisher, goldfish);
-        scene.overlay().showText(80)
-                .text("再钓一次，钓到金鱼：理智回复 20%%，另得 50 金币")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "再钓一次，钓到金鱼：理智回复 20%%，另得 50 金币");
         scene.idle(40);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(goldfish);
         scene.idle(10);
@@ -580,10 +488,7 @@ final class SparkWitchItemScenes {
         Actors.swing(scene, fisher);
         scene.idle(10);
         Actors.hold(scene, fisher, clownfish);
-        scene.overlay().showText(90)
-                .text("小丑鱼：理智回复 30%%，还能获得 10 秒速度（没有粒子）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "小丑鱼：理智回复 30%%，还能获得 10 秒速度（没有粒子）");
         scene.idle(40);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(clownfish);
         scene.idle(10);
@@ -599,18 +504,11 @@ final class SparkWitchItemScenes {
         // 速度 I 让步速提高 20%：同样 4.5 格，他用 38 tick，乘客用 46 tick。
         Actors.walk(scene, fisher, new Vec3d(4.5, 0, 0), 38);
         Actors.walk(scene, civilian, new Vec3d(4.5, 0, 0), 46);
-        scene.overlay().showText(80)
-                .text("同样一段路，吃了小丑鱼的他先走到")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "同样一段路，吃了小丑鱼的他先走到");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("理智和金币只显示在自己的界面上；所有鱼共用 1 秒冷却")
-                .independent();
+        SceneCaptions.caption(scene, 90, "理智和金币只显示在自己的界面上；所有鱼共用 1 秒冷却");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("这些鱼拿在手上其他活人看不见；不是钓鱼佬也能吃，但吃鱼不算完成进食任务")
-                .independent();
+        SceneCaptions.caption(scene, 90, "这些鱼拿在手上其他活人看不见；不是钓鱼佬也能吃，但吃鱼不算完成进食任务");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -634,7 +532,7 @@ final class SparkWitchItemScenes {
      */
     private static void glimmerfish(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("sparkwitch_glimmerfish", "灵光鱼：隐身穿门");
-        WatheItemScenes.cabinStage(scene, util);
+        WatheItemScenes.setStage(scene, util);
         ItemStack glimmerfish = stack("sparkwitch:glimmerfish");
         int anglerColor = RoleColors.of("sparkwitch:fisher", 0x2A9D8F);
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
@@ -648,49 +546,31 @@ final class SparkWitchItemScenes {
                 Direction.DOWN);
         Actors.hold(scene, fisher, glimmerfish);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("灵光鱼是钓鱼佬偶尔钓到的鱼；拿在手上其他活人看不见，任何活着的玩家都能吃")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "灵光鱼是钓鱼佬偶尔钓到的鱼；拿在手上其他活人看不见，任何活着的玩家都能吃");
         scene.idle(90);
         scene.overlay().showControls(feet.add(0, 2.6, 0), Pointing.DOWN, 30).rightClick().withItem(glimmerfish);
         scene.idle(10);
         Actors.hold(scene, fisher, ItemStack.EMPTY);
         Actors.invisible(scene, fisher, true);
         Actors.highlight(scene, fisher, WHERE_WHITE, 310);
-        scene.overlay().showText(90)
-                .text("右键吃下：理智回满，约 7.8 秒内隐身（没有粒子），手里的东西别人也看不见（白框只是示意位置）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键吃下：理智回满，约 7.8 秒内隐身（没有粒子），手里的东西别人也看不见（白框只是示意位置）");
         scene.idle(100);
         Actors.highlight(scene, killer, anglerColor, 210);
         Actors.highlight(scene, civilian, anglerColor, 210);
-        scene.overlay().showText(80)
-                .text("他一般不用按键就能隔墙看到其他活人（青框示意，只有他看得到）；其他活人的本能一般也看不到他")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "他一般不用按键就能隔墙看到其他活人（青框示意，只有他看得到）；其他活人的本能一般也看不到他");
         scene.idle(60);
         Actors.walk(scene, fisher, new Vec3d(2.5, 0, 0), 25);
         scene.idle(30);
         Actors.walk(scene, fisher, new Vec3d(0, 0, 3.0), 30);
-        scene.overlay().showText(90)
-                .text("关着的门也能直接穿过去（活板门、栅栏门不行），也不会和其他玩家相撞")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "关着的门也能直接穿过去（活板门、栅栏门不行），也不会和其他玩家相撞");
         scene.idle(100);
-        scene.overlay().showText(50)
-                .text("……约 7.8 秒后现身（演示拉长了时间）")
-                .independent();
+        SceneCaptions.caption(scene, 50, "……约 7.8 秒后现身（演示拉长了时间）");
         scene.idle(20);
         Actors.invisible(scene, fisher, false);
         scene.idle(40);
-        scene.overlay().showText(80)
-                .text("结束时如果人还卡在门里，一般会被挪到门外安全的地方")
-                .independent();
+        SceneCaptions.caption(scene, 80, "结束时如果人还卡在门里，一般会被挪到门外安全的地方");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("再吃一条会重新计时；它和别的鱼共用 1 秒冷却")
-                .independent();
+        SceneCaptions.caption(scene, 80, "再吃一条会重新计时；它和别的鱼共用 1 秒冷却");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -720,10 +600,7 @@ final class SparkWitchItemScenes {
                 Text.literal("钓鱼佬"), new Vec3d(5.8, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, fisher, swordfish);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("剑鱼是钓鱼佬偶尔钓到的鱼；一般任何活着的玩家都能用（冤魂等除外），拿在手上别人看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "剑鱼是钓鱼佬偶尔钓到的鱼；一般任何活着的玩家都能用（冤魂等除外），拿在手上别人看得见");
         scene.idle(100);
         Actors.walk(scene, killer, new Vec3d(0.8, 0, -0.8), 20);
         Actors.walk(scene, fisher, new Vec3d(-0.8, 0, 0.8), 20);
@@ -731,10 +608,7 @@ final class SparkWitchItemScenes {
         Vec3d overHead = new Vec3d(5.0, 3.6, 2.0);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).rightClick().withItem(swordfish);
         Actors.charge(scene, fisher, true);
-        scene.overlay().showText(45)
-                .text("像刀一样按住右键蓄力约半秒，附近的人听得到举刀声")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 45, "像刀一样按住右键蓄力约半秒，附近的人听得到举刀声");
         scene.idle(30);
         Actors.charge(scene, fisher, false);
         Actors.swing(scene, fisher);
@@ -747,9 +621,7 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("只能用一次：刺中就用掉（没刺中不算），哪怕被护盾挡下或被对方的托法娜反杀")
-                .independent();
+        SceneCaptions.caption(scene, 80, "只能用一次：刺中就用掉（没刺中不算），哪怕被护盾挡下或被对方的托法娜反杀");
         scene.idle(90);
         Actors.leave(scene, killer, Direction.UP);
         scene.idle(15);
@@ -757,10 +629,7 @@ final class SparkWitchItemScenes {
                 new Vec3d(3.0, 1, 4.0), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, fisher, swordfish);
         scene.idle(15);
-        scene.overlay().showText(40)
-                .text("可如果刺中的是好人……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 40, "可如果刺中的是好人……");
         Actors.charge(scene, fisher, true);
         scene.idle(30);
         Actors.charge(scene, fisher, false);
@@ -806,10 +675,7 @@ final class SparkWitchItemScenes {
                 Text.literal("USEC"), feet, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, usec, loud);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("USEC 能在商店花 50 金币买消音器，每局限 1 个")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "USEC 能在商店花 50 金币买消音器，每局限 1 个");
         scene.idle(90);
         scene.overlay().showControls(overHead, Pointing.DOWN, 30).leftClick().withItem(loud);
         scene.idle(10);
@@ -822,10 +688,7 @@ final class SparkWitchItemScenes {
                 .attachKeyFrame();
         scene.idle(100);
         scene.overlay().showControls(overHead, Pointing.DOWN, 60).withItem(stack("sparkwitch:usec_suppressor"));
-        scene.overlay().showText(90)
-                .text("在背包里右键步枪打开配件界面，就能装上或拆下消音器")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "在背包里右键步枪打开配件界面，就能装上或拆下消音器");
         scene.idle(60);
         Actors.hold(scene, usec, quiet);
         scene.idle(40);
@@ -839,13 +702,9 @@ final class SparkWitchItemScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("盲人对没装消音器的枪声感知范围是平时的 2 倍；装了消音器只有平时的一半")
-                .independent();
+        SceneCaptions.caption(scene, 80, "盲人对没装消音器的枪声感知范围是平时的 2 倍；装了消音器只有平时的一半");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("消音器只改变枪声、枪口烟火和枪的样子，子弹本身不受影响")
-                .independent();
+        SceneCaptions.caption(scene, 80, "消音器只改变枪声、枪口烟火和枪的样子，子弹本身不受影响");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -894,10 +753,7 @@ final class SparkWitchItemScenes {
                 Text.literal("药炮手"), feet, SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, gunner, launcher);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("药炮手的另外三种炮弹本身不会炸死人，只影响魔女阵营以外的人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "药炮手的另外三种炮弹本身不会炸死人，只影响魔女阵营以外的人");
         scene.idle(100);
         // Level aim along the diagonal: the shell bursts where its path enters the killer's box.
         // 沿对角线水平瞄准：炮弹在路径进入杀手碰撞箱处爆炸。
@@ -905,20 +761,14 @@ final class SparkWitchItemScenes {
         Vec3d crowd = new Vec3d(2.9, muzzle.y, 4.1);
         ItemStack dk = stack("sparkwitch:gw_dk_shell");
         scene.overlay().showControls(overHead, Pointing.DOWN, 50).withItem(dk);
-        scene.overlay().showText(70)
-                .text("GW-DK 弹 50 金币：先在背包里装进炮筒，一次一发")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "GW-DK 弹 50 金币：先在背包里装进炮筒，一次一发");
         scene.idle(80);
         fireShell(scene, gunner, "dk", dk, DK_COLOR, muzzle, crowd, SCREEN_RIGHT);
         footprint(scene, crowd, DK_SIZE, DK_COLOR, 200);
         Actors.highlight(scene, struck, DK_COLOR, 200);
         Actors.highlight(scene, beside, DK_COLOR, 200);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("5×5 范围内的敌人失明并获得缓慢 II：爆心 7 秒，往外约 4.7 秒、2.3 秒，没有粒子（框为示意）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "5×5 范围内的敌人失明并获得缓慢 II：爆心 7 秒，往外约 4.7 秒、2.3 秒，没有粒子（框为示意）");
         scene.idle(100);
         Actors.highlight(scene, ally, UNAFFECTED_GREEN, 80);
         scene.overlay().showText(80)
@@ -928,10 +778,7 @@ final class SparkWitchItemScenes {
         scene.idle(90);
         ItemStack ac = stack("sparkwitch:gw_ac_shell");
         scene.overlay().showControls(overHead, Pointing.DOWN, 40).withItem(ac);
-        scene.overlay().showText(50)
-                .text("GW-AC 弹 100 金币，范围 7×7")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 50, "GW-AC 弹 100 金币，范围 7×7");
         scene.idle(60);
         fireShell(scene, gunner, "ac", ac, AC_COLOR, muzzle, crowd, SCREEN_RIGHT);
         footprint(scene, crowd, AC_SIZE, AC_COLOR, 200);
@@ -939,22 +786,14 @@ final class SparkWitchItemScenes {
         Actors.highlight(scene, beside, AC_COLOR, 200);
         Actors.highlight(scene, far, AC_COLOR, 200);
         scene.idle(20);
-        scene.overlay().showText(100)
-                .text("范围内敌人的技能和道具冷却被拉长：爆心加正常冷却时长的 20%%，往外依次 15%%、10%%、5%%；没在冷却的也会进入这段冷却")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "范围内敌人的技能和道具冷却被拉长：爆心加正常冷却时长的 20%%，往外依次 15%%、10%%、5%%；没在冷却的也会进入这段冷却");
         scene.idle(110);
-        scene.overlay().showText(70)
-                .text("冷却只在他们自己的界面上看得出来")
-                .independent();
+        SceneCaptions.caption(scene, 70, "冷却只在他们自己的界面上看得出来");
         scene.idle(80);
         ItemStack mr = stack("sparkwitch:gw_mr_shell");
         Actors.turn(scene, gunner, SOUTH);
         scene.overlay().showControls(overHead, Pointing.DOWN, 40).withItem(mr);
-        scene.overlay().showText(50)
-                .text("GW-MR 弹 125 金币，范围只有 3×3")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 50, "GW-MR 弹 125 金币，范围只有 3×3");
         scene.idle(60);
         // Straight south, the shell enters the far passenger's box at z = 5.5.
         // 向正南发射，炮弹在 z = 5.5 处进入远处乘客的碰撞箱。
@@ -963,14 +802,9 @@ final class SparkWitchItemScenes {
         footprint(scene, target, MR_SIZE, MR_COLOR, 160);
         Actors.highlight(scene, far, MR_COLOR, 160);
         scene.idle(20);
-        scene.overlay().showText(100)
-                .text("范围内的敌人被扣金币：爆心最多 150，外圈 75，不会扣成负数；钱直接消失，只有他们自己看得到")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "范围内的敌人被扣金币：爆心最多 150，外圈 75，不会扣成负数；钱直接消失，只有他们自己看得到");
         scene.idle(110);
-        scene.overlay().showText(90)
-                .text("每波及一名敌人，你得 15 金币；但开火时身后 4 格内最近的人一般会被尾焰烧死，队友也一样")
-                .independent();
+        SceneCaptions.caption(scene, 90, "每波及一名敌人，你得 15 金币；但开火时身后 4 格内最近的人一般会被尾焰烧死，队友也一样");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -997,12 +831,6 @@ final class SparkWitchItemScenes {
         scene.addInstruction(new Shove(actor, launch, room, ticks));
     }
 
-    /** Wathe's gunshot flash at the muzzle (ShootMuzzleS2CPayload). Wathe 的枪口火光。 */
-    private static void gunshotFlash(SceneBuilder scene, Vec3d muzzle) {
-        scene.effects().emitParticles(muzzle,
-                (world, x, y, z) -> world.addParticle(WatheParticles.GUNSHOT, x, y, z, 0, 0, 0), 1, 1);
-    }
-
     /**
      * Notes over the target's head standing in for a private gift chime (the game shows nothing); a note particle's x
      * motion picks its colour. 用目标头顶的音符示意只有他听得到的赠时钟声（游戏里没有画面）；音符粒子的 x 速度决定颜色。
@@ -1012,48 +840,14 @@ final class SparkWitchItemScenes {
     }
 
     /**
-     * An illustrated edge: an arc of gold dust on the floor {@code radius} blocks around {@code centre}, drawn only
-     * over
-     * the plate, for {@code ticks}. 示意边界：以 centre 为圆心、半径 radius 格的金色粉尘弧线，只画在底板范围内，持续 ticks。
-     */
-    private static void edge(SceneBuilder scene, Vec3d centre, double radius, int ticks) {
-        scene.effects().emitParticles(centre, (world, x, y, z) -> {
-            for (int i = 0; i < EDGE_POINTS; i++) {
-                double angle = i * MathHelper.TAU / EDGE_POINTS;
-                double px = x + Math.cos(angle) * radius;
-                double pz = z + Math.sin(angle) * radius;
-                if (px >= 0 && px <= PLATE && pz >= 0 && pz <= PLATE && world.random.nextInt(3) == 0) {
-                    world.addParticle(EDGE_DUST, px, y, pz, 0, 0, 0);
-                }
-            }
-        }, 1, ticks);
-    }
-
-    /**
-     * {@code count} particles as the client plays a server's spawnParticles: a gaussian offset of {@code spread} per
-     * axis, a gaussian {@code speed} per axis. 像客户端播放服务端 spawnParticles 那样放出 count 个粒子。
-     */
-    private static void spawnParticles(SceneBuilder scene, ParticleEffect particle, Vec3d at, int count, double spread,
-                                       double speed) {
-        scene.effects().emitParticles(at, (world, x, y, z) -> {
-            for (int i = 0; i < count; i++) {
-                world.addParticle(particle, x + world.random.nextGaussian() * spread,
-                        y + world.random.nextGaussian() * spread, z + world.random.nextGaussian() * spread,
-                        world.random.nextGaussian() * speed, world.random.nextGaussian() * speed,
-                        world.random.nextGaussian() * speed);
-            }
-        }, 1, 1);
-    }
-
-    /**
      * The AXMC's muzzle as UsecRifleFireService.spawnMuzzle shows it to everyone: 5 smoke puffs and 3 small flames, or
      * 2
      * puffs and no flame with a suppressor. 人人看得到的 AXMC 枪口效果：5 团烟和 3 朵小火焰；装消音器时 2 团烟、没有火焰。
      */
     private static void muzzle(SceneBuilder scene, Vec3d at, boolean suppressed) {
-        spawnParticles(scene, ParticleTypes.SMOKE, at, suppressed ? 2 : 5, 0.04, 0.01);
+        Effects.spawnParticles(scene, ParticleTypes.SMOKE, at, suppressed ? 2 : 5, new Vec3d(0.04, 0.04, 0.04), 0.01);
         if (!suppressed) {
-            spawnParticles(scene, ParticleTypes.SMALL_FLAME, at, 3, 0.03, 0.02);
+            Effects.spawnParticles(scene, ParticleTypes.SMALL_FLAME, at, 3, new Vec3d(0.03, 0.03, 0.03), 0.02);
         }
     }
 
@@ -1110,12 +904,6 @@ final class SparkWitchItemScenes {
         Box box = new Box(Math.max(0, centre.x - half), 1.0, Math.max(0, centre.z - half),
                 Math.min(PLATE, centre.x + half), 1.05, Math.min(PLATE, centre.z + half));
         Actors.outline(scene, box, color, ticks);
-    }
-
-    /** The horizontal look of {@code yaw}. yaw 的水平朝向。 */
-    private static Vec3d forward(float yaw) {
-        float radians = yaw * MathHelper.RADIANS_PER_DEGREE;
-        return new Vec3d(-MathHelper.sin(radians), 0, MathHelper.cos(radians));
     }
 
     /**

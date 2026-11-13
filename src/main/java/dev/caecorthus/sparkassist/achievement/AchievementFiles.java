@@ -3,16 +3,12 @@ package dev.caecorthus.sparkassist.achievement;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
+import dev.caecorthus.sparkassist.DurableFiles;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 
 /**
  * Reads and writes one {@link AchievementLedger} file. A save goes to a temporary sibling first, is forced to disk and
@@ -58,23 +54,7 @@ public final class AchievementFiles {
     }
 
     public static void save(Path file, AchievementLedger ledger) throws IOException {
-        Files.createDirectories(file.getParent());
-        Path temporary = file.resolveSibling(file.getFileName() + ".tmp");
-        // Forced to disk before the move: after a power cut some file systems keep the rename but not the data.
-        // 移动前先刷到磁盘：断电后有些文件系统会保留改名，却丢失内容。
-        try (FileChannel channel = FileChannel.open(temporary,
-                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-            ByteBuffer bytes = ByteBuffer.wrap(GSON.toJson(ledger.toJson()).getBytes(StandardCharsets.UTF_8));
-            while (bytes.hasRemaining()) {
-                channel.write(bytes);
-            }
-            channel.force(true);
-        }
-        try {
-            Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (AtomicMoveNotSupportedException exception) {
-            Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
-        }
+        DurableFiles.write(file, () -> GSON.toJson(ledger.toJson()));
     }
 
     /**

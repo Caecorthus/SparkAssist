@@ -66,6 +66,16 @@ final class Rules {
         return Factions.isNonCivilian(context.timeline().victimFaction(death));
     }
 
+    /**
+     * Victim not on the killer side: their effective faction at death is a real faction other than killer; a victim
+     * of no real faction ({@code NONE} or unknown) does not count.
+     * 死者不在杀手一方：死亡时的实际阵营是杀手以外的真实阵营；不属于任何真实阵营（NONE 或未知）的死者不算。
+     */
+    static boolean victimNonKiller(AchievementContext context, MatchEvent kill) {
+        String faction = context.timeline().victimFaction(kill);
+        return (Factions.isCivilian(faction) || Factions.isNonCivilian(faction)) && !Factions.KILLER.equals(faction);
+    }
+
     /** The most of {@code events} that share one record tick. {@code events} 中同一记录 tick 的最多数量。 */
     static int mostAtOneTick(List<MatchEvent> events) {
         return MatchTimeline.groupByTick(events).stream().mapToInt(List::size).max().orElse(0);
@@ -112,6 +122,49 @@ final class Rules {
             windows.add(new TickWindow(openSince, Math.max(openSince, context.timeline().endTick())));
         }
         return List.copyOf(windows);
+    }
+
+    // ---- Round and record order 对局与记录顺序 ----
+
+    /**
+     * How many players the round had: the most with a role the client saw at once, or the record's opening snapshot
+     * when that is larger.
+     * 本局的人数：客户端同时看到有身份的最多人数；对局记录的开局快照更多时取后者。
+     */
+    static int roundSize(AchievementContext context) {
+        return Math.max(context.facts().players(), context.timeline().startingPlayers().size());
+    }
+
+    /**
+     * The record position of this very event, -1 if absent. By identity, not equality: two equal-valued events can sit
+     * at different positions, so {@code List.indexOf} would find the wrong one.
+     * 这条事件本身在记录中的位置，没有则为 -1。按同一对象而不是按相等比较：两条值相同的事件可能处于不同位置，
+     * {@code List.indexOf} 会找错。
+     */
+    static int positionOf(List<MatchEvent> events, MatchEvent event) {
+        for (int i = 0; i < events.size(); i++) {
+            if (events.get(i) == event) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** Whether {@code event} carries all three block coordinates. 事件是否带有完整的三个方块坐标。 */
+    static boolean hasPos(MatchEvent event) {
+        return event.has("pos.x") && event.has("pos.y") && event.has("pos.z");
+    }
+
+    /**
+     * Whether both events carry a full position and it is the same block; a missing coordinate never matches, rather
+     * than reading as 0.
+     * 两条事件是否都带有完整坐标且是同一方块；缺少坐标时一律不匹配，而不是按 0 计算。
+     */
+    static boolean samePos(MatchEvent one, MatchEvent other) {
+        return hasPos(one) && hasPos(other)
+                && one.intValue("pos.x", 0) == other.intValue("pos.x", 0)
+                && one.intValue("pos.y", 0) == other.intValue("pos.y", 0)
+                && one.intValue("pos.z", 0) == other.intValue("pos.z", 0);
     }
 
     // ---- Traits 词条 ----

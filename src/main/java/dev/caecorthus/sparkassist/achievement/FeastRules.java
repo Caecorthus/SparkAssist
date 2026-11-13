@@ -121,16 +121,16 @@ final class FeastRules {
             MatchEvent vitriol = events.get(i);
             if (!vitriol.is(MatchEvent.ITEM_USE) || !self.equals(vitriol.actor())
                     || !BLUE_VITRIOL.equals(vitriol.value("item")) || !PLATE_ACTION.equals(vitriol.value("action"))
-                    || !hasPos(vitriol) || !Rules.iWas(context, vitriol, TOXICOLOGIST)) {
+                    || !Rules.hasPos(vitriol) || !Rules.iWas(context, vitriol, TOXICOLOGIST)) {
                 continue;
             }
             MatchEvent vial = latestBefore(events, i, event -> event.is(MatchEvent.ITEM_USE)
-                    && POISON_VIAL.equals(event.value("item")) && samePos(event, vitriol));
+                    && POISON_VIAL.equals(event.value("item")) && Rules.samePos(event, vitriol));
             if (vial == null || vial.actor() == null || vial.actor().equals(self)
                     || !Factions.KILLER.equals(timeline.factionAfter(vial.actor(), vial))) {
                 continue;
             }
-            int take = firstAfter(events, i, event -> event.is(MatchEvent.PLATTER_TAKE) && samePos(event, vitriol));
+            int take = firstAfter(events, i, event -> event.is(MatchEvent.PLATTER_TAKE) && Rules.samePos(event, vitriol));
             if (take >= 0 && vial.actor().equals(events.get(take).actor())
                     && ateThenDiedOfMyPoison(events, take, self)) {
                 return true;
@@ -259,16 +259,5 @@ final class FeastRules {
             }
         }
         return -1;
-    }
-
-    private static boolean hasPos(MatchEvent event) {
-        return event.has("pos.x") && event.has("pos.y") && event.has("pos.z");
-    }
-
-    private static boolean samePos(MatchEvent one, MatchEvent other) {
-        return hasPos(one) && hasPos(other)
-                && one.intValue("pos.x", 0) == other.intValue("pos.x", 0)
-                && one.intValue("pos.y", 0) == other.intValue("pos.y", 0)
-                && one.intValue("pos.z", 0) == other.intValue("pos.z", 0);
     }
 }

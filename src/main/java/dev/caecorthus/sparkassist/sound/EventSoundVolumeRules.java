@@ -12,10 +12,6 @@ public final class EventSoundVolumeRules {
     private EventSoundVolumeRules() {
     }
 
-    public static boolean isEventSound(Identifier id) {
-        return CATALOG.contains(id);
-    }
-
     public static EventSoundGroup groupFor(Identifier eventId, Identifier selectedSoundId) {
         EventSoundGroup eventGroup = groupFor(eventId);
         if (eventGroup != null) {

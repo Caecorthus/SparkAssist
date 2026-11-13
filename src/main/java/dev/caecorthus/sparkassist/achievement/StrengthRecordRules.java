@@ -306,7 +306,7 @@ final class StrengthRecordRules {
      */
     static String factionAround(MatchTimeline timeline, UUID player, MatchEvent event) {
         List<MatchEvent> events = timeline.events();
-        for (int i = positionOf(events, event) + 1; i > 0 && i < events.size(); i++) {
+        for (int i = Rules.positionOf(events, event) + 1; i > 0 && i < events.size(); i++) {
             MatchEvent later = events.get(i);
             if (later.is(MatchEvent.ROLE_CHANGED) && player.equals(later.uuid("player"))) {
                 break;
@@ -325,17 +325,7 @@ final class StrengthRecordRules {
 
     /** Whether {@code later} comes after {@code earlier} in record order. 按记录顺序 {@code later} 是否在 {@code earlier} 之后。 */
     static boolean comesAfter(MatchTimeline timeline, MatchEvent later, MatchEvent earlier) {
-        int earlierAt = positionOf(timeline.events(), earlier);
-        return earlierAt >= 0 && positionOf(timeline.events(), later) > earlierAt;
-    }
-
-    /** The record position of this very event, -1 if absent. 这条事件本身在记录中的位置，没有则为 -1。 */
-    static int positionOf(List<MatchEvent> events, MatchEvent event) {
-        for (int i = 0; i < events.size(); i++) {
-            if (events.get(i) == event) {
-                return i;
-            }
-        }
-        return -1;
+        int earlierAt = Rules.positionOf(timeline.events(), earlier);
+        return earlierAt >= 0 && Rules.positionOf(timeline.events(), later) > earlierAt;
     }
 }

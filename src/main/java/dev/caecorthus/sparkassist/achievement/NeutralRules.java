@@ -73,7 +73,7 @@ final class NeutralRules {
      */
     static boolean lastLooseEnd(AchievementContext context) {
         return LOOSE_END.equals(context.outcome().winStatus()) && context.won()
-                && matchPlayers(context) >= LOOSE_ENDS_PLAYERS;
+                && Rules.roundSize(context) >= LOOSE_ENDS_PLAYERS;
     }
 
     /**
@@ -83,14 +83,5 @@ final class NeutralRules {
     static boolean lastLooseEndWithOneKill(AchievementContext context) {
         return lastLooseEnd(context) && context.timeline().isComplete()
                 && context.kills().stream().map(MatchEvent::target).distinct().count() == 1;
-    }
-
-    /**
-     * How many players the round had: the most with a role the client saw at once, or the record's opening snapshot
-     * when that is larger.
-     * 本局的人数：客户端同时看到有身份的最多人数；对局记录的开局快照更多时取后者。
-     */
-    private static int matchPlayers(AchievementContext context) {
-        return Math.max(context.facts().players(), context.timeline().startingPlayers().size());
     }
 }

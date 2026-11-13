@@ -159,37 +159,21 @@ final class NoellesKillerScenes {
         ElementLink<ActorElement> target = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(1.6, 1, 5.2), SCREEN_LEFT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("交换者能让两名存活玩家瞬间互换位置")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "交换者能让两名存活玩家瞬间互换位置");
         scene.idle(90);
-        scene.overlay().showText(70)
-                .text("你先站到杀手同伴身前，目标还在远处")
-                .independent();
+        SceneCaptions.caption(scene, 70, "你先站到杀手同伴身前，目标还在远处");
         scene.idle(80);
-        scene.overlay().showText(80)
-                .text("按 E 打开背包，里面列着存活玩家的头像")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "按 E 打开背包，里面列着存活玩家的头像");
         scene.idle(90);
         scene.overlay().showControls(new Vec3d(4.4, 3.6, 2.2), Pointing.DOWN, 40).leftClick().withItem(head);
-        scene.overlay().showText(45)
-                .text("先点一个人的头像（可以选你自己）……")
-                .independent();
+        SceneCaptions.caption(scene, 45, "先点一个人的头像（可以选你自己）……");
         scene.idle(55);
         scene.overlay().showControls(new Vec3d(1.6, 3.6, 5.2), Pointing.DOWN, 30).leftClick().withItem(head);
-        scene.overlay().showText(70)
-                .text("……再点第二个人：选中的一瞬间，两人一般就互换了位置")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "……再点第二个人：选中的一瞬间，两人一般就互换了位置");
         scene.idle(15);
         swap(scene, swapper, target);
         scene.idle(65);
-        scene.overlay().showText(90)
-                .text("两人连朝向一起互换；两处都会冒出传送粒子、响起传送声")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "两人连朝向一起互换；两处都会冒出传送粒子、响起传送声");
         scene.idle(60);
         Actors.charge(scene, partner, true);
         scene.idle(20);
@@ -203,13 +187,9 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(70)
-                .text("你自己则站到了目标原来的位置，离现场远远的")
-                .independent();
+        SceneCaptions.caption(scene, 70, "你自己则站到了目标原来的位置，离现场远远的");
         scene.idle(80);
-        scene.overlay().showText(80)
-                .text("每次交换冷却 60 秒；被换走的两个人自己会立刻发现")
-                .independent();
+        SceneCaptions.caption(scene, 80, "每次交换冷却 60 秒；被换走的两个人自己会立刻发现");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -241,26 +221,17 @@ final class NoellesKillerScenes {
         ElementLink<ActorElement> vulture = Actors.enter(scene, color, Text.literal("秃鹫"),
                 new Vec3d(6.2, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("秃鹫是中立阵营：吃够尸体就能直接获胜")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "秃鹫是中立阵营：吃够尸体就能直接获胜");
         scene.idle(90);
         outlineBody(scene, feet, SCREEN_RIGHT, color, 90);
-        scene.overlay().showText(90)
-                .text("按住本能透视键能隔墙看到尸体（轮廓只在你屏幕上）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "按住本能透视键能隔墙看到尸体（轮廓只在你屏幕上）");
         scene.idle(100);
         Actors.walk(scene, vulture, new Vec3d(-2.6, 0, 1.4), 28);
         scene.idle(30);
         Actors.turn(scene, vulture, SCREEN_RIGHT);
         scene.idle(6);
         Actors.lookPitch(scene, vulture, 45);
-        scene.overlay().showText(65)
-                .text("走到 2 格内，准星对准尸体，按技能键（默认 G）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 65, "走到 2 格内，准星对准尸体，按技能键（默认 G）");
         scene.idle(65);
         Vec3d smoke = feet.add(0, 0.5, 0);
         spray(scene, ParticleTypes.SMOKE, smoke, 30, 0.3, 0.02);
@@ -270,10 +241,7 @@ final class NoellesKillerScenes {
         // 速度 III 与活人轮廓都从吃完起持续 10 秒。
         Actors.highlight(scene, passenger, color, 200);
         scene.idle(10);
-        scene.overlay().showText(75)
-                .text("尸体当场被吃掉，原地冒出烟雾和灵魂粒子，旁人也看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 75, "尸体当场被吃掉，原地冒出烟雾和灵魂粒子，旁人也看得见");
         scene.idle(85);
         Actors.lookPitch(scene, vulture, 0);
         scene.overlay().showText(95)
@@ -284,13 +252,9 @@ final class NoellesKillerScenes {
         scene.idle(10);
         Actors.walk(scene, vulture, new Vec3d(2.4, 0, 2.4), 11);
         scene.idle(95);
-        scene.overlay().showText(80)
-                .text("吃够开局人数一半的尸体就赢；每吃一具冷却 5 秒")
-                .independent();
+        SceneCaptions.caption(scene, 80, "吃够开局人数一半的尸体就赢；每吃一具冷却 5 秒");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("吃尸体等于帮杀手毁掉证据，被人撞见容易被当成帮凶")
-                .independent();
+        SceneCaptions.caption(scene, 80, "吃尸体等于帮杀手毁掉证据，被人撞见容易被当成帮凶");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -319,10 +283,7 @@ final class NoellesKillerScenes {
                 new Vec3d(6.0, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, poisoner, stack("noellesroles:poison_needle"));
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("毒师的商店不卖刀和枪，靠毒针、毒气和下毒杀人")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "毒师的商店不卖刀和枪，靠毒针、毒气和下毒杀人");
         scene.idle(90);
         Actors.walk(scene, poisoner, new Vec3d(-2.4, 0, 2.4), 30);
         scene.idle(32);
@@ -333,19 +294,14 @@ final class NoellesKillerScenes {
         // The outline lasts until the victim drops: dead players are spectators and lose it.
         // 轮廓一直持续到被害者倒下：死者成为旁观者，轮廓随之消失。
         Actors.highlight(scene, victim, color, 400);
-        scene.overlay().showText(80)
-                .text("毒针：右键身边的人注射毒素，对方 40 秒后毒发")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "毒针：右键身边的人注射毒素，对方 40 秒后毒发");
         scene.idle(90);
         scene.overlay().showText(80)
                 .colored(PonderPalette.GREEN)
                 .text("每让一个没中毒的人中毒，你就得到 75 金币")
                 .independent();
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("中了毒的人你一般不用按键就能隔墙看到（轮廓只在你屏幕上）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "中了毒的人你一般不用按键就能隔墙看到（轮廓只在你屏幕上）");
         scene.idle(100);
         Actors.hold(scene, poisoner, stack("noellesroles:catalyst"));
         scene.idle(10);
@@ -354,10 +310,7 @@ final class NoellesKillerScenes {
         scene.idle(10);
         Actors.swing(scene, poisoner);
         Actors.hold(scene, poisoner, ItemStack.EMPTY);
-        scene.overlay().showText(90)
-                .text("想快点：用催化剂右键中毒的人，对方 5 秒后毒发")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "想快点：用催化剂右键中毒的人，对方 5 秒后毒发");
         scene.idle(100);
         Actors.fall(scene, victim);
         scene.overlay().showText(80)
@@ -366,13 +319,9 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("催化剂用一次就没了，但会立刻刷新毒针的冷却")
-                .independent();
+        SceneCaptions.caption(scene, 80, "催化剂用一次就没了，但会立刻刷新毒针的冷却");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("毒针能反复用：开局冷却 60 秒，之后每扎一次冷却 45 秒")
-                .independent();
+        SceneCaptions.caption(scene, 80, "毒针能反复用：开局冷却 60 秒，之后每扎一次冷却 45 秒");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -393,7 +342,7 @@ final class NoellesKillerScenes {
      */
     private static void poisonGasBomb(SceneBuilder scene, SceneBuildingUtil util) {
         scene.title("noelles_poison_gas_bomb", "毒气弹：把毒气放进人堆");
-        WatheItemScenes.cabinStage(scene, util);
+        WatheItemScenes.setStage(scene, util);
         int color = RoleColors.of("noellesroles:poisoner", 0x1E5014);
         Text civilian = Text.literal("平民");
         ElementLink<ActorElement> first = Actors.enter(scene, RoleColors.CIVILIAN, civilian,
@@ -407,10 +356,7 @@ final class NoellesKillerScenes {
                 new Vec3d(6.3, 1, 1.5), WEST, Direction.DOWN);
         Actors.hold(scene, poisoner, stack("noellesroles:poison_gas_bomb"));
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("毒气弹：右键扔出，碰到方块或人就会放出毒气")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "毒气弹：右键扔出，碰到方块或人就会放出毒气");
         scene.idle(90);
         Actors.lookPitch(scene, poisoner, 25);
         scene.overlay().showControls(new Vec3d(6.3, 3.6, 1.5), Pointing.DOWN, 30).rightClick()
@@ -425,10 +371,7 @@ final class NoellesKillerScenes {
         scene.idle(3);
         GasCloud gas = gas(scene, util.grid().at(3, 1, 1), corridorAir());
         Actors.lookPitch(scene, poisoner, 0);
-        scene.overlay().showText(97)
-                .text("毒气会一格一格往外扩散，漫进附近能去的地方")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 97, "毒气会一格一格往外扩散，漫进附近能去的地方");
         // Both passengers stand in gas from the cloud's first spread (8 ticks) and are poisoned once 100 ticks of
         // exposure add up; the second dose 100 ticks later leaves 1 tick of their 20 s poison.
         // 两名乘客从毒气第一次扩散（第 8 tick）起就身处其中，累计 100 tick 后中毒；100 tick 后的第二次中毒只给 20 秒的毒
@@ -458,18 +401,14 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("身处毒气中一般不能疾跑，想逃也跑不快")
-                .independent();
+        SceneCaptions.caption(scene, 80, "身处毒气中一般不能疾跑，想逃也跑不快");
         scene.idle(90);
         scene.overlay().showText(80)
                 .colored(PonderPalette.GREEN)
                 .text("毒师自己不会被毒气毒倒；杀手同伴待在里面一样会中毒")
                 .independent();
         scene.idle(90);
-        scene.overlay().showText(70)
-                .text("毒气放出 30 秒后散去")
-                .independent();
+        SceneCaptions.caption(scene, 70, "毒气放出 30 秒后散去");
         scene.idle(22);
         stopGas(scene, gas);
         scene.idle(58);
@@ -504,15 +443,9 @@ final class NoellesKillerScenes {
                 new Vec3d(6.4, 1, 0.5), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, bandit, stack("noellesroles:throwing_axe"));
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("强盗能在商店花 200 金币买【飞斧】（装了 SparkWitch 时杀意魔女也能买），用一次就没了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "强盗能在商店花 200 金币买【飞斧】（装了 SparkWitch 时杀意魔女也能买），用一次就没了");
         scene.idle(90);
-        scene.overlay().showText(65)
-                .text("按住右键蓄力：约 1 秒蓄满，蓄得越久飞得越快越远")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 65, "按住右键蓄力：约 1 秒蓄满，蓄得越久飞得越快越远");
         scene.idle(30);
         scene.overlay().showControls(new Vec3d(6.4, 3.6, 0.5), Pointing.DOWN, 40).rightClick()
                 .withItem(stack("noellesroles:throwing_axe"));
@@ -523,10 +456,7 @@ final class NoellesKillerScenes {
         // From the eyes (feet + 1.62 - 0.1) along the facing, sagging under gravity until the back wall's north face.
         // 从眼睛高度（脚 + 1.62 - 0.1）沿朝向飞出，受重力略微下沉，直到后墙的北面。
         throwAxe(scene, new Vec3d(6.4, 2.52, 0.5), new Vec3d(0.9, 2.27, 6.0), 16, 3.3f);
-        scene.overlay().showText(65)
-                .text("松开右键扔出：飞斧穿过一个人还会接着飞（演示放慢了）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 65, "松开右键扔出：飞斧穿过一个人还会接着飞（演示放慢了）");
         scene.idle(3);
         Actors.fall(scene, first);
         scene.idle(4);
@@ -542,18 +472,11 @@ final class NoellesKillerScenes {
         scene.idle(90);
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.WHITE, "axe",
                 new Box(0.5, 1.8, 5.3, 1.3, 2.7, 6.0), 70);
-        scene.overlay().showText(70)
-                .text("撞上方块就插在上面，捡不回来")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "撞上方块就插在上面，捡不回来");
         scene.idle(80);
-        scene.overlay().showText(70)
-                .text("蓄力太短（0.3 秒以内）扔不出去")
-                .independent();
+        SceneCaptions.caption(scene, 70, "蓄力太短（0.3 秒以内）扔不出去");
         scene.idle(80);
-        scene.overlay().showText(80)
-                .text("扔出、命中和插墙都有声响；飞斧不分敌我，杀手同伴也会被杀")
-                .independent();
+        SceneCaptions.caption(scene, 80, "扔出、命中和插墙都有声响；飞斧不分敌我，杀手同伴也会被杀");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -591,14 +514,9 @@ final class NoellesKillerScenes {
                 new Vec3d(6.2, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, bomber, bomb);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("炸弹客：把【定时炸弹】悄悄放到别人身上")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "炸弹客：把【定时炸弹】悄悄放到别人身上");
         scene.idle(90);
-        scene.overlay().showText(55)
-                .text("商店一般 100 金币一颗；拿在手里时别的活人一般看不见")
-                .independent();
+        SceneCaptions.caption(scene, 55, "商店一般 100 金币一颗；拿在手里时别的活人一般看不见");
         scene.idle(20);
         Actors.walk(scene, bomber, new Vec3d(-2.3, 0, 1.9), 30);
         scene.idle(32);
@@ -610,23 +528,15 @@ final class NoellesKillerScenes {
         Actors.hold(scene, bomber, ItemStack.EMPTY);
         // The outline lasts until the bomb is passed on. 轮廓持续到炸弹被传走。
         Actors.highlight(scene, first, color, 296);
-        scene.overlay().showText(90)
-                .text("右键身边的人：炸弹悄悄放到他身上，你手里这颗用掉")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键身边的人：炸弹悄悄放到他身上，你手里这颗用掉");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("带着炸弹的人你一般能隔墙看到（只在你屏幕上）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "带着炸弹的人你一般能隔墙看到（只在你屏幕上）");
         Actors.walk(scene, bomber, new Vec3d(2.6, 0, -1.9), 30);
         scene.idle(32);
         Actors.turn(scene, bomber, SCREEN_RIGHT);
         scene.idle(68);
         // 10 s after the plant, in real time. 放置 10 秒后（真实时间）。
-        scene.overlay().showText(86)
-                .text("10 秒后开始滴滴作响，炸弹出现在他背包里：15 秒后爆炸")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 86, "10 秒后开始滴滴作响，炸弹出现在他背包里：15 秒后爆炸");
         scene.idle(50);
         // The bomb lands in a free slot; he picks it before passing it. 炸弹进到空槽位；他先选中再传。
         Actors.hold(scene, first, bomb);
@@ -637,14 +547,9 @@ final class NoellesKillerScenes {
         scene.idle(10);
         Actors.hold(scene, first, ItemStack.EMPTY);
         Actors.highlight(scene, second, color, 204);
-        scene.overlay().showText(90)
-                .text("滴滴声附近都听得到；持有者右键别人就能把炸弹传过去")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "滴滴声附近都听得到；持有者右键别人就能把炸弹传过去");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("刚接到的人一般 3 秒内传不出去；带着炸弹的人接不了")
-                .independent();
+        SceneCaptions.caption(scene, 80, "刚接到的人一般 3 秒内传不出去；带着炸弹的人接不了");
         Actors.walk(scene, first, new Vec3d(2.0, 0, -2.0), 30);
         scene.idle(30);
         Actors.walk(scene, second, new Vec3d(0.6, 0, -0.6), 12);
@@ -662,9 +567,7 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("炸死谁都算你的，传回你身上也会炸死你；开局 45 秒内放不了")
-                .independent();
+        SceneCaptions.caption(scene, 90, "炸死谁都算你的，传回你身上也会炸死你；开局 45 秒内放不了");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -702,10 +605,7 @@ final class NoellesKillerScenes {
                 new Vec3d(8.0, 1, 1.2), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, bomber, stack("sparkstrength:grenade_drone"));
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("炸弹客开局自带【投弹无人机】，开局 90 秒后才能用")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "炸弹客开局自带【投弹无人机】，开局 90 秒后才能用");
         scene.idle(100);
         Actors.lookPitch(scene, bomber, 55);
         scene.overlay().showControls(new Vec3d(7.3, 1.3, 1.9), Pointing.DOWN, 30).rightClick()
@@ -716,23 +616,14 @@ final class NoellesKillerScenes {
         ElementLink<EntityElement> drone = placeDrone(scene, "grenade_drone", new Vec3d(7.3, 1, 1.9), SCREEN_RIGHT);
         scene.idle(15);
         Actors.lookPitch(scene, bomber, 0);
-        scene.overlay().showText(80)
-                .text("背包里给它挂一颗 M67，右键地面放下（手里的其他活人看不见）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "背包里给它挂一颗 M67，右键地面放下（手里的其他活人看不见）");
         scene.idle(90);
         Actors.hold(scene, bomber, stack("sparkstrength:tablet"));
-        scene.overlay().showText(90)
-                .text("主手拿【平板电脑】，在“无人机”分区里连接")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "主手拿【平板电脑】，在“无人机”分区里连接");
         scene.idle(30);
         flyDrone(scene, drone, new Vec3d(0, 1.6, 0), 4);
         scene.idle(70);
-        scene.overlay().showText(90)
-                .text("画面切到无人机；本体站着不动，手里的平板其他活人看不见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "画面切到无人机；本体站着不动，手里的平板其他活人看不见");
         flyDrone(scene, drone, new Vec3d(-4.3, 0, 4.3), 12);
         scene.idle(100);
         Vec3d drop = new Vec3d(3.0, 1.0, 6.2);
@@ -743,10 +634,7 @@ final class NoellesKillerScenes {
         scene.world().modifyEntity(drone, entity -> droneData(entity, "PAYLOAD", false));
         ElementLink<ThrownElement> grenade = Actors.toss(scene, armedM67(), new Vec3d(3.0, 2.33, 6.2), drop, 7, 0,
                 true, ThrownElement.Flight.UPRIGHT);
-        scene.overlay().showText(35)
-                .text("左键投下 M67：3.5 秒后爆炸")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 35, "左键投下 M67：3.5 秒后爆炸");
         scene.idle(7);
         // The warning outline lasts the whole fuse. 警示描边持续整个引信时间。
         scene.overlay().chaseBoundingBoxOutline(PonderPalette.RED, grenade,
@@ -754,10 +642,7 @@ final class NoellesKillerScenes {
         scene.idle(5);
         flyDrone(scene, drone, new Vec3d(4.0, 0, -4.0), 12);
         scene.idle(28);
-        scene.overlay().showText(60)
-                .text("附近的人看得到它的描边：5 格内红色，7 格内黄色")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 60, "附近的人看得到它的描边：5 格内红色，7 格内黄色");
         Actors.walk(scene, runs, new Vec3d(4.4, 0, 1.6), 24);
         Actors.walk(scene, flees, new Vec3d(4.6, 0, -5.8), 28);
         scene.idle(30);
@@ -777,10 +662,7 @@ final class NoellesKillerScenes {
                 .attachKeyFrame();
         scene.idle(110);
         scene.overlay().showControls(new Vec3d(8.0, 3.4, 1.2), Pointing.DOWN, 25).rightClick();
-        scene.overlay().showText(90)
-                .text("右键断开连接，无人机原地悬停；右键它就能收回")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "右键断开连接，无人机原地悬停；右键它就能收回");
         scene.idle(45);
         scene.overlay().showControls(new Vec3d(7.0, 3.2, 2.2), Pointing.DOWN, 25).rightClick();
         scene.idle(10);
@@ -788,9 +670,7 @@ final class NoellesKillerScenes {
         // Back into a free hotbar slot; the tablet stays in hand. 回到快捷栏空位；平板仍在手上。
         scene.world().modifyEntity(drone, Entity::discard);
         scene.idle(45);
-        scene.overlay().showText(80)
-                .text("飞行每秒耗电 2%%，悬停 1%%；收回后会慢慢充电")
-                .independent();
+        SceneCaptions.caption(scene, 80, "飞行每秒耗电 2%%，悬停 1%%；收回后会慢慢充电");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -830,10 +710,7 @@ final class NoellesKillerScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.vanish(scene, revived);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("小丑是中立阵营：想办法让好人开枪打你")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "小丑是中立阵营：想办法让好人开枪打你");
         scene.idle(40);
         Actors.walk(scene, jester, new Vec3d(0.6, 0, -0.6), 14);
         scene.idle(50);
@@ -863,26 +740,15 @@ final class NoellesKillerScenes {
         Actors.leave(scene, vigilante, Direction.WEST);
         Actors.walk(scene, first, new Vec3d(-1.6, 0, 0.6), 20);
         Actors.walk(scene, second, new Vec3d(-1.2, 0, 1.6), 20);
-        scene.overlay().showText(90)
-                .text("5 秒后你复活：活人（被吞的除外）被随机换到别人的位置")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "5 秒后你复活：活人（被吞的除外）被随机换到别人的位置");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("你在新位置定住 3 秒、冒着光（演示放慢）；全车都听到笑声")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "你在新位置定住 3 秒、冒着光（演示放慢）；全车都听到笑声");
         scene.idle(100);
         Actors.hold(scene, revived, stack("wathe:bat"));
-        scene.overlay().showText(100)
-                .text("此后在其他活人眼里，人人都是你的疯魔模样、拿着球棒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 100, "此后在其他活人眼里，人人都是你的疯魔模样、拿着球棒");
         scene.idle(110);
         Actors.highlight(scene, revived, color, 190);
-        scene.overlay().showText(90)
-                .text("名字也都成了乱码；方框标出的才是真小丑（仅为示意）")
-                .independent();
+        SceneCaptions.caption(scene, 90, "名字也都成了乱码；方框标出的才是真小丑（仅为示意）");
         scene.idle(100);
         scene.overlay().showText(80)
                 .colored(PonderPalette.RED)
@@ -922,10 +788,7 @@ final class NoellesKillerScenes {
         }
         Actors.highlight(scene, jester, color, 640);
         scene.idle(20);
-        scene.overlay().showText(90)
-                .text("小丑时刻：你拿着球棒追杀所有人（方框为示意）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "小丑时刻：你拿着球棒追杀所有人（方框为示意）");
         scene.idle(60);
         Actors.walk(scene, jester, new Vec3d(-1.2, 0, 1.0), 16);
         scene.idle(30);
@@ -942,18 +805,11 @@ final class NoellesKillerScenes {
         Actors.walk(scene, first, new Vec3d(-0.4, 0, 1.0), 18);
         Actors.walk(scene, second, new Vec3d(1.6, 0, 0.6), 18);
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("疯魔限时 60 秒：体力无限，没被堵住的门都能打开")
-                .independent();
+        SceneCaptions.caption(scene, 90, "疯魔限时 60 秒：体力无限，没被堵住的门都能打开");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("杀光其他所有人就赢；倒计时耗尽你就会死")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "杀光其他所有人就赢；倒计时耗尽你就会死");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("每杀一人画面变灰 10%%（最多 50%%），也听不到任何人说话")
-                .independent();
+        SceneCaptions.caption(scene, 90, "每杀一人画面变灰 10%%（最多 50%%），也听不到任何人说话");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -981,17 +837,11 @@ final class NoellesKillerScenes {
         ElementLink<ActorElement> taotie = Actors.enter(scene, color, Text.literal("饕餮"),
                 new Vec3d(5.8, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("饕餮是中立阵营：把人一个个吞进肚子")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "饕餮是中立阵营：把人一个个吞进肚子");
         scene.idle(30);
         Actors.walk(scene, taotie, new Vec3d(-1.0, 0, 1.0), 16);
         scene.idle(60);
-        scene.overlay().showText(70)
-                .text("准星对准 3 格内看得见的人，按技能键（默认 G）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "准星对准 3 格内看得见的人，按技能键（默认 G）");
         scene.idle(50);
         Actors.vanish(scene, meal);
         scene.idle(30);
@@ -1001,28 +851,18 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("他没死，只能透过你的眼睛看；说话只有你和肚子里的人听得到")
-                .independent();
+        SceneCaptions.caption(scene, 90, "他没死，只能透过你的眼睛看；说话只有你和肚子里的人听得到");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("吞完要冷却 20～50 秒（开局人越多越短）；演示省略了等待")
-                .independent();
+        SceneCaptions.caption(scene, 80, "吞完要冷却 20～50 秒（开局人越多越短）；演示省略了等待");
         ElementLink<ActorElement> vigilante = Actors.enter(scene, RoleColors.VIGILANTE, Text.literal("义警"),
                 new Vec3d(0.8, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
         Actors.hold(scene, vigilante, stack("wathe:revolver"));
         scene.idle(40);
         Actors.walk(scene, vigilante, new Vec3d(1.2, 0, -1.2), 24);
         scene.idle(60);
-        scene.overlay().showText(90)
-                .text("第二技能键（默认 N）吐出头颅：肚子里每个活人一颗")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "第二技能键（默认 N）吐出头颅：肚子里每个活人一颗");
         scene.idle(100);
-        scene.overlay().showText(85)
-                .text("头颅长着被吞者的脸，追向前方 8 格内的人（演示放慢）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 85, "头颅长着被吞者的脸，追向前方 8 格内的人（演示放慢）");
         scene.idle(40);
         // From 0.6 ahead of the eyes to the vigilante's face: about 3 game ticks, slowed down here.
         // 从眼前 0.6 格飞到义警脸上：游戏中约 3 tick，这里放慢了。
@@ -1042,13 +882,9 @@ final class NoellesKillerScenes {
         scene.idle(11);
         Actors.vanish(scene, vigilante);
         scene.idle(89);
-        scene.overlay().showText(80)
-                .text("趁他还不了手，上前把他也吞掉")
-                .independent();
+        SceneCaptions.caption(scene, 80, "趁他还不了手，上前把他也吞掉");
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("头颅砸不死人，还会亮出你吞了谁；你一死，肚子里的人全放出来")
-                .independent();
+        SceneCaptions.caption(scene, 90, "头颅砸不死人，还会亮出你吞了谁；你一死，肚子里的人全放出来");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -1081,23 +917,14 @@ final class NoellesKillerScenes {
                 new Vec3d(5.8, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, morphling, knife);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("变形者（杀手）：能变成本局其他玩家的样子")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "变形者（杀手）：能变成本局其他玩家的样子");
         scene.idle(90);
         scene.overlay().showControls(new Vec3d(1.4, 3.6, 6.2), Pointing.DOWN, 40).leftClick().withItem(head);
-        scene.overlay().showText(80)
-                .text("按 E 打开背包，点一名玩家的头像（死人也能选）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "按 E 打开背包，点一名玩家的头像（死人也能选）");
         scene.idle(50);
         Actors.retint(scene, morphling, RoleColors.CIVILIAN, ming);
         scene.idle(40);
-        scene.overlay().showText(90)
-                .text("35 秒内，别人看到的你就是阿明：样子和名字，没有任何特效")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "35 秒内，别人看到的你就是阿明：样子和名字，没有任何特效");
         scene.idle(100);
         Actors.walk(scene, morphling, new Vec3d(-2.4, 0, 1.8), 30);
         scene.idle(32);
@@ -1114,24 +941,15 @@ final class NoellesKillerScenes {
                 .attachKeyFrame();
         scene.idle(100);
         Actors.highlight(scene, real, 0xFFFFFF, 100);
-        scene.overlay().showText(90)
-                .text("破绽：真阿明还在别处（方框为示意）；声音也还是你的")
-                .independent();
+        SceneCaptions.caption(scene, 90, "破绽：真阿明还在别处（方框为示意）；声音也还是你的");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("杀手同伴开本能时，仍能认出你是自己人")
-                .independent();
+        SceneCaptions.caption(scene, 80, "杀手同伴开本能时，仍能认出你是自己人");
         Actors.walk(scene, morphling, new Vec3d(2.4, 0, -1.8), 30);
         scene.idle(90);
         Actors.retint(scene, morphling, color, Text.literal("变形者"));
-        scene.overlay().showText(70)
-                .text("35 秒后（演示缩短了）变回原样")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "35 秒后（演示缩短了）变回原样");
         scene.idle(80);
-        scene.overlay().showText(80)
-                .text("之后冷却 20 秒；开局默认 30 秒内不能变形")
-                .independent();
+        SceneCaptions.caption(scene, 80, "之后冷却 20 秒；开局默认 30 秒内不能变形");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -1155,32 +973,21 @@ final class NoellesKillerScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, morphling, knife);
         scene.idle(15);
-        scene.overlay().showText(90)
-                .text("技能键（默认 G）开关尸体伪装，没有冷却")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "技能键（默认 G）开关尸体伪装，没有冷却");
         scene.idle(60);
         Actors.hold(scene, morphling, ItemStack.EMPTY);
         scene.idle(10);
         ElementLink<Corpse> corpse = playDead(scene, morphling, color, spot, SCREEN_RIGHT);
         scene.idle(30);
-        scene.overlay().showText(90)
-                .text("你立刻躺倒、不显示名字，看起来就像一具尸体")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "你立刻躺倒、不显示名字，看起来就像一具尸体");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("躺着时移动变慢，但其他动作照常")
-                .independent();
+        SceneCaptions.caption(scene, 80, "躺着时移动变慢，但其他动作照常");
         ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(0.4, 1, 6.0), SCREEN_LEFT, Direction.DOWN);
         scene.idle(30);
         Actors.walk(scene, passenger, new Vec3d(1.0, 0, -1.2), 30);
         scene.idle(60);
-        scene.overlay().showText(70)
-                .text("有人走近查看时……")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "有人走近查看时……");
         scene.idle(30);
         getUp(scene, morphling, corpse);
         Actors.hold(scene, morphling, knife);
@@ -1196,14 +1003,9 @@ final class NoellesKillerScenes {
                 .text("……再按一次 G 起身出刀")
                 .independent();
         scene.idle(90);
-        scene.overlay().showText(90)
-                .text("移动时尸体只会平移，手里的东西不显示，本能也透视不到你")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "移动时尸体只会平移，手里的东西不显示，本能也透视不到你");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("可以先变成已死的人再躺下，装得更像")
-                .independent();
+        SceneCaptions.caption(scene, 90, "可以先变成已死的人再躺下，装得更像");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -1813,24 +1615,15 @@ final class NoellesKillerScenes {
                 new Vec3d(6.4, 1, 0.6), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, phantom, knife);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("幽灵（杀手）：按技能键（默认 G）隐身 30 秒")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "幽灵（杀手）：按技能键（默认 G）隐身 30 秒");
         scene.idle(50);
         Actors.invisible(scene, phantom, true);
         scene.idle(40);
-        scene.overlay().showText(90)
-                .text("别人看不见你的身体和名字，手里的刀却照样看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "别人看不见你的身体和名字，手里的刀却照样看得见");
         scene.idle(100);
         Actors.walk(scene, phantom, new Vec3d(-2.2, 0, 2.2), 13);
         sprintDust(scene, phantom, 13);
-        scene.overlay().showText(80)
-                .text("疾跑照样会踢起脚下的粒子；靠近目标时最好慢慢走")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "疾跑照样会踢起脚下的粒子；靠近目标时最好慢慢走");
         scene.idle(15);
         Actors.walk(scene, phantom, new Vec3d(-0.8, 0, 0.8), 20);
         scene.idle(75);
@@ -1850,22 +1643,15 @@ final class NoellesKillerScenes {
         scene.idle(32);
         Actors.turn(scene, phantom, SCREEN_RIGHT);
         scene.idle(58);
-        scene.overlay().showText(80)
-                .text("身体还在：照样会被人撞到、被刀刺中、被枪打中")
-                .independent();
+        SceneCaptions.caption(scene, 80, "身体还在：照样会被人撞到、被刀刺中、被枪打中");
         scene.idle(90);
         // A killer holding the instinct key sees fellow killers in hsvToRgb(0, 1, 0.6) (WatheClient).
         // 杀手按住本能键时，杀手同伴显示为 hsvToRgb(0, 1, 0.6) 的颜色。
         Actors.highlight(scene, phantom, 0x990000, 80);
-        scene.overlay().showText(80)
-                .text("杀手同伴按住本能键一般仍看得到你（方框为示意）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "杀手同伴按住本能键一般仍看得到你（方框为示意）");
         scene.idle(90);
         Actors.invisible(scene, phantom, false);
-        scene.overlay().showText(80)
-                .text("30 秒后现形（演示缩短了）；冷却 90 秒从隐身时算起")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "30 秒后现形（演示缩短了）；冷却 90 秒从隐身时算起");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -1894,10 +1680,7 @@ final class NoellesKillerScenes {
                 new Vec3d(5.8, 1, 1.0), SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, scavenger, knife);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("清道夫（杀手）：拿着刀右键点一下就出刀")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "清道夫（杀手）：拿着刀右键点一下就出刀");
         scene.idle(40);
         Actors.walk(scene, scavenger, new Vec3d(-2.2, 0, 2.2), 26);
         scene.idle(50);
@@ -1912,10 +1695,7 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("刀杀的人，尸体一般只有杀手、中立和死者看得见")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "刀杀的人，尸体一般只有杀手、中立和死者看得见");
         Actors.walk(scene, scavenger, new Vec3d(2.0, 0, -2.0), 28);
         scene.idle(30);
         Actors.turn(scene, scavenger, SCREEN_RIGHT);
@@ -1924,20 +1704,13 @@ final class NoellesKillerScenes {
         Actors.vanish(scene, victim);
         ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(0.4, 1, 6.4), SCREEN_LEFT, Direction.DOWN);
-        scene.overlay().showText(90)
-                .text("而在好人眼里（示意），这里什么都没有")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "而在好人眼里（示意），这里什么都没有");
         scene.idle(20);
         Actors.walk(scene, passenger, new Vec3d(2.4, 0, -2.4), 40);
         scene.idle(80);
-        scene.overlay().showText(80)
-                .text("大嗓门的尸体藏不住；不是用刀杀的也照常留尸体")
-                .independent();
+        SceneCaptions.caption(scene, 80, "大嗓门的尸体藏不住；不是用刀杀的也照常留尸体");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("商店默认 150 金币就能立刻清空刀的冷却")
-                .independent();
+        SceneCaptions.caption(scene, 80, "商店默认 150 金币就能立刻清空刀的冷却");
         scene.idle(90);
         scene.markAsFinished();
     }
@@ -1962,10 +1735,7 @@ final class NoellesKillerScenes {
                 SCREEN_RIGHT, Direction.DOWN);
         Actors.hold(scene, cop, revolver);
         scene.idle(20);
-        scene.overlay().showText(80)
-                .text("黑警（嘉豪阵营）：开局自带一把左轮手枪")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "黑警（嘉豪阵营）：开局自带一把左轮手枪");
         scene.idle(90);
         ElementLink<ActorElement> passenger = Actors.enter(scene, RoleColors.CIVILIAN, Text.literal("平民"),
                 new Vec3d(1.2, 1, 5.8), SCREEN_LEFT, Direction.DOWN);
@@ -1986,9 +1756,7 @@ final class NoellesKillerScenes {
         ElementLink<ActorElement> killer = Actors.enter(scene, RoleColors.KILLER, Text.literal("杀手"),
                 new Vec3d(4.6, 1, 6.4), NORTH, Direction.DOWN);
         Actors.hold(scene, killer, stack("wathe:knife"));
-        scene.overlay().showText(80)
-                .text("每开一枪冷却 10 秒（处决时刻 2 秒，演示缩短了）")
-                .independent();
+        SceneCaptions.caption(scene, 80, "每开一枪冷却 10 秒（处决时刻 2 秒，演示缩短了）");
         scene.idle(30);
         Actors.walk(scene, killer, new Vec3d(0.4, 0, -1.8), 30);
         // Facing the killer's stop at (5.0, 1, 4.6). 面向杀手停下的位置 (5.0, 1, 4.6)。
@@ -2005,9 +1773,7 @@ final class NoellesKillerScenes {
                 .independent()
                 .attachKeyFrame();
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("一般要杀到车上只剩你一人才赢，所以两边都会来找你")
-                .independent();
+        SceneCaptions.caption(scene, 90, "一般要杀到车上只剩你一人才赢，所以两边都会来找你");
         scene.idle(100);
         scene.markAsFinished();
     }
@@ -2041,31 +1807,19 @@ final class NoellesKillerScenes {
         scene.idle(15);
         Actors.highlight(scene, partner, color, 80);
         Actors.highlight(scene, proposer, color, 80);
-        scene.overlay().showText(75)
-                .text("影子小丑两人一对，能隔墙看见彼此（只在你们屏幕上）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 75, "影子小丑两人一对，能隔墙看见彼此（只在你们屏幕上）");
         scene.idle(85);
         Actors.hold(scene, partner, knife);
         Actors.hold(scene, proposer, knife);
-        scene.overlay().showText(75)
-                .text("各自做满 4 个任务得到一把刀：这把刀只能杀搭档")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 75, "各自做满 4 个任务得到一把刀：这把刀只能杀搭档");
         scene.idle(80);
         Actors.walk(scene, proposer, new Vec3d(-2.0, 0, 2.0), 26);
         scene.idle(28);
-        scene.overlay().showText(70)
-                .text("准星对准 3 格内的搭档按技能键（默认 G），发起影誓")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "准星对准 3 格内的搭档按技能键（默认 G），发起影誓");
         scene.idle(55);
         Actors.turn(scene, partner, SCREEN_LEFT);
         scene.idle(25);
-        scene.overlay().showText(50)
-                .text("搭档也对你按一次技能键，同盟就结成了")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 50, "搭档也对你按一次技能键，同盟就结成了");
         scene.idle(45);
         // The pact lands: the proposer's knife is taken and the accepter's turns real.
         // 结盟生效：发起者的刀被收走，同意者的刀变成真刀。
@@ -2073,22 +1827,14 @@ final class NoellesKillerScenes {
         Actors.retint(scene, proposer, color, Text.literal("影瞳"));
         Actors.retint(scene, partner, color, Text.literal("影刃"));
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("发起的你成为影瞳：刀被收走，背包里多了把开锁器")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "发起的你成为影瞳：刀被收走，背包里多了把开锁器");
         scene.idle(45);
         // He takes out the lockpick, which landed in a free slot. 他拿出放进空槽位的开锁器。
         Actors.hold(scene, proposer, stack("wathe:lockpick"));
         scene.idle(45);
-        scene.overlay().showText(80)
-                .text("同意的搭档成为影刃：刀能杀任何人，背包里多一把德林加")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "同意的搭档成为影刃：刀能杀任何人，背包里多一把德林加");
         scene.idle(90);
-        scene.overlay().showText(80)
-                .text("两人都能按住本能键隔墙看见活人；此后一人死，另一人也会死")
-                .independent();
+        SceneCaptions.caption(scene, 80, "两人都能按住本能键隔墙看见活人；此后一人死，另一人也会死");
         scene.idle(90);
         scene.overlay().showText(85)
                 .colored(PonderPalette.RED)
@@ -2123,29 +1869,18 @@ final class NoellesKillerScenes {
         ElementLink<ActorElement> pathogen = Actors.enter(scene, color, Text.literal("病原体"),
                 new Vec3d(6.2, 1, 0.8), SCREEN_RIGHT, Direction.DOWN);
         scene.idle(15);
-        scene.overlay().showText(80)
-                .text("病原体（中立）：一般把其他活人全部感染就能获胜")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 80, "病原体（中立）：一般把其他活人全部感染就能获胜");
         scene.idle(40);
         Actors.walk(scene, pathogen, new Vec3d(-1.8, 0, 0.8), 26);
         scene.idle(50);
-        scene.overlay().showText(70)
-                .text("走到 3 格内按技能键（默认 G），自动感染最近的未感染者")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 70, "走到 3 格内按技能键（默认 G），自动感染最近的未感染者");
         scene.idle(50);
         // The outline lasts as long as the Pathogen has the vigilante in sight. 只要病原体看得见义警，轮廓就一直在。
         Actors.highlight(scene, vigilante, color, 480);
         scene.idle(30);
-        scene.overlay().showText(90)
-                .text("不用瞄准，对方毫无察觉；你看得到他的绿色轮廓（隔墙不显示）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "不用瞄准，对方毫无察觉；你看得到他的绿色轮廓（隔墙不显示）");
         scene.idle(100);
-        scene.overlay().showText(80)
-                .text("冷却 7～20 秒（开局人越多越短，演示缩短了）；杀手也得感染")
-                .independent();
+        SceneCaptions.caption(scene, 80, "冷却 7～20 秒（开局人越多越短，演示缩短了）；杀手也得感染");
         Actors.walk(scene, pathogen, new Vec3d(-1.8, 0, 2.0), 30);
         scene.idle(60);
         Actors.highlight(scene, killer, color, 250);
@@ -2154,14 +1889,9 @@ final class NoellesKillerScenes {
                 .text("阿嚏！")
                 .pointAt(new Vec3d(3.0, 2.9, 2.0))
                 .placeNearTarget();
-        scene.overlay().showText(90)
-                .text("10～30 秒后他会打个喷嚏，附近都听得到（演示缩短了）")
-                .independent()
-                .attachKeyFrame();
+        SceneCaptions.keyframeCaption(scene, 90, "10～30 秒后他会打个喷嚏，附近都听得到（演示缩短了）");
         scene.idle(100);
-        scene.overlay().showText(90)
-                .text("喷嚏只有声音；他还会收到“身体不太舒服”的提示")
-                .independent();
+        SceneCaptions.caption(scene, 90, "喷嚏只有声音；他还会收到“身体不太舒服”的提示");
         scene.idle(100);
         scene.markAsFinished();
     }
