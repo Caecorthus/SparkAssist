@@ -218,7 +218,16 @@ tasks.register("verifyModJarVersion") {
 }
 
 tasks.register("verifyArchitecture") {
-    def requiredFiles = [
+    // docs/ and src/test/ are gitignored and local-only (the two tracked Ponder tests aside), so the contract files
+    // under them are required only in a checkout that has the local docs/ tree; a fresh clone (CI) skips them.
+    // docs/ 与 src/test/ 已被 gitignore 且仅存于本地（两个已入库的 Ponder 测试除外），因此只在拥有本地 docs/ 树的检出中
+    // 要求其下的契约文件；全新克隆（CI）会跳过。
+    def localDocsTree = file("docs")
+    def isLocalOnlyContractFile = { File contractFile ->
+        def path = project.relativePath(contractFile).replace(File.separatorChar, '/' as char)
+        path.startsWith("docs/") || path.startsWith("src/test/")
+    }
+    def contractFiles = [
             file("CONTEXT.md"),
             file("THIRD_PARTY_NOTICES.md"),
             file("docs/adr/0001-risk-based-tests.md"),
@@ -234,11 +243,16 @@ tasks.register("verifyArchitecture") {
             file("src/test/java/dev/caecorthus/sparkassist/sound/EventSoundRefreshCategoriesTest.java"),
             file("src/test/java/dev/caecorthus/sparkassist/sound/EventSoundVolumeRulesTest.java")
     ]
+    def requiredFiles = contractFiles.findAll { localDocsTree.isDirectory() || !isLocalOnlyContractFile(it) }
     inputs.files(requiredFiles)
     inputs.file("src/main/resources/fabric.mod.json")
     inputs.property("wathe_version", project.wathe_version)
 
     doLast {
+        if (requiredFiles.size() < contractFiles.size()) {
+            logger.lifecycle("No local docs/ tree: skipped "
+                    + "${contractFiles.size() - requiredFiles.size()} local-only architecture contract files.")
+        }
         requiredFiles.each { requiredFile ->
             if (!requiredFile.isFile()) {
                 throw new GradleException("Missing architecture contract file: ${requiredFile}")
