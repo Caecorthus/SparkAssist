@@ -37,19 +37,6 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      # The Wathe development jar is not tracked in this repository (libs/README.md). Fetch the copy that
-      # SparkFactionAPI tracks, at a pinned commit; verifyWatheDependency then checks its SHA-256.
-      # Wathe 开发 jar 不进本仓库（见 libs/README.md）。从 SparkFactionAPI 的固定提交取其已入库的副本，
-      # 再由 verifyWatheDependency 校验 SHA-256。
-      - name: Fetch the Wathe development jar
-        env:
-          FACTION_API_COMMIT: 72c34f3708cd4260f4baf29ac66b3450c8d05923
-        run: |
-          wathe_version="$(sed -n 's/^wathe_version=//p' gradle.properties)"
-          curl --fail --silent --show-error --location \
-            --output "libs/wathe-${wathe_version}.jar" \
-            "https://raw.githubusercontent.com/Caecorthus/SparkFactionAPI/${FACTION_API_COMMIT}/libs/wathe-${wathe_version}.jar"
-
       - name: Build and verify
         run: ./gradlew --no-daemon --console=plain build test verifyWatheDependency verifyModJarVersion verifyArchitecture verifyDistributionMetadata
 
