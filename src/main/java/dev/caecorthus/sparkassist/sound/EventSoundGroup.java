@@ -30,7 +30,9 @@ public enum EventSoundGroup {
     SAINT_BELL("saint_bell", "option.sparkassist.event_sound_volume.saint_bell"),
     HOLY_FLASH_TINNITUS("holy_flash_tinnitus", "option.sparkassist.event_sound_volume.holy_flash_tinnitus"),
     SHIELD_CLANG("shield_clang", "option.sparkassist.event_sound_volume.shield_clang"),
-    LAST_STAND_FINAL_MOMENT("last_stand_final_moment", "option.sparkassist.event_sound_volume.last_stand_final_moment");
+    LAST_STAND_FINAL_MOMENT("last_stand_final_moment", "option.sparkassist.event_sound_volume.last_stand_final_moment"),
+    /** SparkWitch Sphinx Hao's 《Fade》 during 豪气冲天 (2026-11-17). SparkWitch 狮身豪「豪气冲天」期间的《Fade》。 */
+    SPHINX_HAO_FADE("sphinx_hao_fade", "option.sparkassist.event_sound_volume.sphinx_hao_fade");
 
     private final String serializedName;
     private final String translationKey;

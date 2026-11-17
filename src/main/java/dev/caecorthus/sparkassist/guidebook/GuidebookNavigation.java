@@ -55,10 +55,11 @@ public final class GuidebookNavigation {
         assign(ROLE_GROUPS, "roles.neutral", "sparkwitch", "murderous_witch", "fiend", "koko");
         assign(ROLE_GROUPS, "roles.neutral", "noellesroles",
                 "taotie", "pathogen", "vulture", "jester", "shadow_jester");
-        // Team Jiahao is its own Wathe faction since 2026-11-04; the Corrupt Cop is on it in every round.
-        // 嘉豪阵营自 2026-11-04 起是独立的 Wathe 阵营；黑警每局都属于它。
+        // Team Jiahao is its own Wathe faction since 2026-11-04; the Corrupt Cop is on it in every round, with the
+        // Insider or (since 2026-11-17) the Sphinx Hao as the optional second seat.
+        // 嘉豪阵营自 2026-11-04 起是独立的 Wathe 阵营；黑警每局都属于它，第二个名额是内应或（自 2026-11-17 起）狮身豪。
         assign(ROLE_GROUPS, "roles.jiahao", "noellesroles", "corrupt_cop");
-        assign(ROLE_GROUPS, "roles.jiahao", "sparkwitch", "insider");
+        assign(ROLE_GROUPS, "roles.jiahao", "sparkwitch", "insider", "sphinx_hao");
         assign(TRAIT_GROUPS, "traits.global", "sparktraits", "cautious", "task_master", "fast_hands",
                 "childish", "pig", "steady", "excellent_physique", "spirit_sleuth", "snowball", "well_supplied");
         assign(TRAIT_GROUPS, "traits.civilian", "sparktraits", "last_stand", "impostor", "extroverted",

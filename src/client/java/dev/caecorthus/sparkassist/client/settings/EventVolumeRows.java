@@ -26,7 +26,10 @@ final class EventVolumeRows {
         ROLE_ANY("role_any"),
         ROLE_KILLER("role_killer"),
         ROLE_NEUTRAL("role_neutral"),
-        /** Team Jiahao (Corrupt Cop, Insider), its own Wathe faction since 2026-11-04. 嘉豪阵营，自 2026-11-04 起独立。 */
+        /**
+         * Team Jiahao (Corrupt Cop, Insider, Sphinx Hao), its own Wathe faction since 2026-11-04.
+         * 嘉豪阵营（黑警、内应、狮身豪），自 2026-11-04 起独立。
+         */
         ROLE_JIAHAO("role_jiahao"),
         ROLE_CIVILIAN("role_civilian"),
         TRAIT_CIVILIAN("trait_civilian");
@@ -112,6 +115,9 @@ final class EventVolumeRows {
             role(EventSoundGroup.ARROGANT_ASF_MUSIC, Section.ROLE_JIAHAO, "sparkstrength",
                     "announcement.role.corrupt_cop", "Corrupt Cop", 0x193264,
                     sample("sparkstrength:music.takediskrush", SoundCategory.AMBIENT)),
+            role(EventSoundGroup.SPHINX_HAO_FADE, Section.ROLE_JIAHAO, "sparkwitch",
+                    "announcement.role.sphinx_hao", "Sphinx Hao", 0xFF7F50,
+                    sample("sparkwitch:music.sphinx_hao_fade", SoundCategory.AMBIENT)),
 
             role(EventSoundGroup.PIG_CHASE, Section.ROLE_CIVILIAN, "sparkwitch",
                     "announcement.role.pig_god", "Pig God", 0xF2A4FC,
