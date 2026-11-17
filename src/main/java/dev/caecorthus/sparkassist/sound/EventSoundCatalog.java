@@ -246,6 +246,18 @@ final class EventSoundCatalog {
                         resourceIds("sparktraits",
                                 "music/final_moment"
                         )
+                ),
+                // SparkWitch plays this 10 s clip for every client during the Sphinx Hao's 豪气冲天 (AMBIENT, not
+                // attenuated); only this id is cataloged, so other SparkWitch music keeps its volume.
+                // SparkWitch 在狮身豪「豪气冲天」期间为所有客户端播放这段 10 秒片段（AMBIENT、无距离衰减）；只登记这个 id，
+                // 其他 SparkWitch 音乐的音量不受影响。
+                group(EventSoundGroup.SPHINX_HAO_FADE,
+                        eventIds("sparkwitch",
+                                "music.sphinx_hao_fade"
+                        ),
+                        resourceIds("sparkwitch",
+                                "music/sphinx_hao_fade"
+                        )
                 )
         ));
     }
